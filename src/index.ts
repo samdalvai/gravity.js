@@ -1,9 +1,19 @@
-const canvas = document.getElementById('gamePhysicsCanvas') as HTMLCanvasElement;
-const ctx = canvas.getContext('2d');
+import Application from './Application';
 
-if (!ctx) {
-    throw new Error('Failed to get 2D context for the canvas.');
-}
+const app = new Application();
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+const run = async () => {
+    app.setup();
+    const loop = async () => {
+        while (app.isRunning()) {
+            app.input();
+            await app.update();
+            app.render();
+        }
+    };
+    loop();
+};
+
+run();
+
+app.destroy();
