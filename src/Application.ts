@@ -1,14 +1,16 @@
 import Graphics from './Graphics';
 import { MILLISECS_PER_FRAME } from './physics/Constants';
+import Force from './physics/Force';
 import Particle from './physics/Particle';
+import Vec2 from './physics/Vec2';
 
 export default class Application {
     private running: boolean;
     private timePreviousFrame: number = 0;
     private particles: Particle[] = [];
-    // Vec2 pushForce = Vec2(0, 0);
-    // Vec2 mouseCursor = Vec2(0, 0);
-    // bool leftMouseButtonDown = false;
+    private pushForce = new Vec2(0, 0);
+    private mouseCursor = new Vec2(0, 0);
+    private leftMouseButtonDown = false;
 
     constructor() {
         this.running = false;
@@ -53,6 +55,51 @@ export default class Application {
         this.timePreviousFrame = performance.now();
 
         // TODO: implement update of entities
+
+        for (const particle of this.particles) {
+            particle.addForce(this.pushForce);
+
+            // Apply a friction force
+            // const friction = Force.generateFrictionForce(particle, 20);
+            // particle.addForce(friction);
+        }
+
+        // Applying a gravitational force to our two particles/planets
+        for (let i = 0; i < this.particles.length - 1; i++) {
+            for (let j = 1; j < this.particles.length; j++) {
+                const attraction = Force.generateGravitationalForce(
+                    this.particles[i],
+                    this.particles[j],
+                    1000.0,
+                    5,
+                    100,
+                );
+                this.particles[i].addForce(attraction);
+                this.particles[j].addForce(attraction.negate());
+            }
+        }
+
+        for (const particle of this.particles) {
+            particle.integrate(deltaTime);
+        }
+
+        for (const particle of this.particles) {
+            // Nasty hardcoded flip in velocity if it touches the limits of the screen window
+            if (particle.position.x - particle.radius <= 0) {
+                particle.position.x = particle.radius;
+                particle.velocity.x *= -0.9;
+            } else if (particle.position.x + particle.radius >= Graphics.width()) {
+                particle.position.x = Graphics.width() - particle.radius;
+                particle.velocity.x *= -0.9;
+            }
+            if (particle.position.y - particle.radius <= 0) {
+                particle.position.y = particle.radius;
+                particle.velocity.y *= -0.9;
+            } else if (particle.position.y + particle.radius >= Graphics.height()) {
+                particle.position.y = Graphics.height() - particle.radius;
+                particle.velocity.y *= -0.9;
+            }
+        }
     };
 
     render = (): void => {
@@ -82,7 +129,7 @@ export default class Application {
     };
 
     destroy = (): void => {
-        // TODO: do we need this method
+        // TODO: do we need this method ?
     };
 
     sleep = (milliseconds: number) => {
