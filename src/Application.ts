@@ -49,8 +49,12 @@ export default class Application {
 
         Graphics.drawLine(250, 250, 500, 600, 'red');
 
-        Graphics.drawLine(300, 300, 400, 900, 'green');
+        Graphics.drawLine(300, 300, 550, 650, 'green');
         Graphics.drawLine(100, 100, 100, 500, 'blue');
+
+        Graphics.drawFillCircle(500, 500, 50, 'orange');
+        Graphics.drawFillCircle(800, 800, 15, 'white');
+        Graphics.drawFillCircle(1000, 1000, 20, 'green');
     };
 
     destroy = (): void => {
