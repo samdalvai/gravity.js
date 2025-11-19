@@ -77,8 +77,7 @@ export default class Graphics {
         this.ctx.fill();
     };
 
-    // static void DrawCircle(int x, int y, int radius, float angle, Uint32 color);
-    // static void DrawFillCircle(int x, int y, int radius, Uint32 color);
+    // TODO: implement draw methods
     // static void DrawRect(int x, int y, int width, int height, Uint32 color);
     // static void DrawFillRect(int x, int y, int width, int height, Uint32 color);
     // static void DrawPolygon(int x, int y, const std::vector<Vec2>& vertices, Uint32 color);
