@@ -1,4 +1,5 @@
 import Graphics from './Graphics';
+import InputManager from './InputManager';
 import { MILLISECS_PER_FRAME } from './physics/Constants';
 import Force from './physics/Force';
 import Particle from './physics/Particle';
@@ -33,10 +34,46 @@ export default class Application {
 
         const bigPlanet = new Particle(Graphics.width() / 2, Graphics.height() / 2, 20, 20);
         this.particles.push(bigPlanet);
+
+        InputManager.initialize();
     };
 
     input = (): void => {
         // TODO: implement input from user
+        while (InputManager.keyboardInputBuffer.length > 0) {
+            const inputEvent = InputManager.keyboardInputBuffer.shift();
+
+            if (!inputEvent) {
+                return;
+            }
+
+            switch (inputEvent.type) {
+                case 'keydown':
+                    console.log('Keydown: ', inputEvent.code);
+                    break;
+                case 'keyup':
+                    console.log('Keyup: ', inputEvent.code);
+                    break;
+            }
+        }
+
+        // Handle mouse events
+        while (InputManager.mouseInputBuffer.length > 0) {
+            const inputEvent = InputManager.mouseInputBuffer.shift();
+
+            if (!inputEvent) {
+                return;
+            }
+
+            switch (inputEvent.type) {
+                case 'mousedown':
+                    console.log('Mouse down: ', inputEvent.x, inputEvent.y);
+                    break;
+                case 'mouseup':
+                    console.log('Mouse up: ', inputEvent.x, inputEvent.y);
+                    break;
+            }
+        }
     };
 
     update = async (): Promise<void> => {
