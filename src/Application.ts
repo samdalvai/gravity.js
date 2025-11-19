@@ -25,16 +25,20 @@ export default class Application {
     setup = (): void => {
         this.running = Graphics.openWindow();
 
-        const smallPlanet1 = new Particle(Graphics.width() / 2, 300, 6, Utils.randomColor(), 1);
-        smallPlanet1.velocity.x = 200;
-        this.particles.push(smallPlanet1);
-
-        const smallPlanet2 = new Particle(Graphics.width() / 2, Graphics.height() / 2 + 400, 8, Utils.randomColor(), 5);
-        smallPlanet2.velocity.x = -220;
-        this.particles.push(smallPlanet2);
-
         const bigPlanet = new Particle(Graphics.width() / 2, Graphics.height() / 2, 20, Utils.randomColor(), 20);
         this.particles.push(bigPlanet);
+
+        for (let i = 0; i < 1000; i++) {
+            const randomRadius = Utils.randomNumber(1, 5);
+            const smallPlanet = new Particle(
+                Utils.randomNumber(20, Graphics.width() - 20),
+                Utils.randomNumber(20, Graphics.height() - 20),
+                randomRadius,
+                Utils.randomColor(),
+                randomRadius,
+            );
+            this.particles.push(smallPlanet);
+        }
 
         InputManager.initialize();
     };
@@ -155,26 +159,9 @@ export default class Application {
         // TODO: implement rendering pipeline
         Graphics.clearScreen();
 
-        Graphics.drawFillCircle(
-            this.particles[0].position.x,
-            this.particles[0].position.y,
-            this.particles[0].radius,
-            this.particles[0].color,
-        );
-
-        Graphics.drawFillCircle(
-            this.particles[1].position.x,
-            this.particles[1].position.y,
-            this.particles[1].radius,
-            this.particles[1].color,
-        );
-
-        Graphics.drawFillCircle(
-            this.particles[2].position.x,
-            this.particles[2].position.y,
-            this.particles[2].radius,
-            this.particles[2].color,
-        );
+        for (const particle of this.particles) {
+            Graphics.drawFillCircle(particle.position.x, particle.position.y, particle.radius, particle.color);
+        }
     };
 
     destroy = (): void => {
