@@ -68,24 +68,24 @@ export default class Vec2 {
         return this.x * v.y - this.y * v.x;
     }
 
-    // operator =
+    /** operator = */
     assign(v: Vec2): this {
         this.x = v.x;
         this.y = v.y;
         return this;
     }
 
-    // operator ==
+    /** operator == */
     equals(v: Vec2): boolean {
         return this.x === v.x && this.y === v.y;
     }
 
-    // operator !=
+    /** operator != */
     notEquals(v: Vec2): boolean {
         return !this.equals(v);
     }
 
-    // operator +
+    /** operator + */
     addNew(v: Vec2): Vec2 {
         const result = new Vec2();
         result.x = this.x + v.x;
@@ -93,7 +93,7 @@ export default class Vec2 {
         return result;
     }
 
-    // operator -
+    /** operator - */
     subNew(v: Vec2): Vec2 {
         const result = new Vec2();
         result.x = this.x - v.x;
@@ -101,7 +101,7 @@ export default class Vec2 {
         return result;
     }
 
-    // operator * (scalar)
+    /** operator * (scalar) */
     scaleNew(n: number): Vec2 {
         const result = new Vec2();
         result.x = this.x * n;
@@ -109,7 +109,7 @@ export default class Vec2 {
         return result;
     }
 
-    // operator / (scalar)
+    /** operator / (scalar) */
     divNew(n: number): Vec2 {
         const result = new Vec2();
         result.x = this.x / n;
@@ -117,35 +117,35 @@ export default class Vec2 {
         return result;
     }
 
-    // operator +=
+    /** operator += */
     addAssign(v: Vec2): this {
         this.x += v.x;
         this.y += v.y;
         return this;
     }
 
-    // operator -=
+    /** operator -= */
     subAssign(v: Vec2): this {
         this.x -= v.x;
         this.y -= v.y;
         return this;
     }
 
-    // operator *=
+    /** operator *= */
     scaleAssign(n: number): this {
         this.x *= n;
         this.y *= n;
         return this;
     }
 
-    // operator /=
+    /** operator /= */
     divAssign(n: number): this {
         this.x /= n;
         this.y /= n;
         return this;
     }
 
-    // operator - (unary negation)
+    /** operator - (unary negation) */
     negate(): Vec2 {
         const result = new Vec2();
         result.x = -this.x;
