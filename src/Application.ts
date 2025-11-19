@@ -1,5 +1,5 @@
 import Graphics from './Graphics';
-import InputManager from './InputManager';
+import InputManager, { MouseButton } from './InputManager';
 import { MILLISECS_PER_FRAME } from './physics/Constants';
 import Force from './physics/Force';
 import Particle from './physics/Particle';
@@ -39,7 +39,7 @@ export default class Application {
     };
 
     input = (): void => {
-        // TODO: implement input from user
+        // Handle keyboard events
         while (InputManager.keyboardInputBuffer.length > 0) {
             const inputEvent = InputManager.keyboardInputBuffer.shift();
 
@@ -67,10 +67,21 @@ export default class Application {
 
             switch (inputEvent.type) {
                 case 'mousedown':
-                    console.log('Mouse down: ', inputEvent.x, inputEvent.y);
+                    if (!this.leftMouseButtonDown && inputEvent.button === MouseButton.LEFT) {
+                        this.leftMouseButtonDown = true;
+                        this.mouseCursor.x = inputEvent.x;
+                        this.mouseCursor.y = inputEvent.y;
+                        console.log('Mouse down: ', inputEvent.x, inputEvent.y, inputEvent.button);
+                    }
                     break;
                 case 'mouseup':
-                    console.log('Mouse up: ', inputEvent.x, inputEvent.y);
+                    if (this.leftMouseButtonDown && inputEvent.button === MouseButton.LEFT) {
+                        this.leftMouseButtonDown = false;
+                        const impulseDirection = this.particles[0].position.subNew(this.mouseCursor).unitVector();
+                        const impulseMagnitude = this.particles[0].position.subNew(this.mouseCursor).magnitude() * 2;
+                        this.particles[0].velocity.assign(impulseDirection.scaleNew(impulseMagnitude));
+                        console.log('Mouse up: ', inputEvent.x, inputEvent.y);
+                    }
                     break;
             }
         }
