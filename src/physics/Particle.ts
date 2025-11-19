@@ -12,7 +12,9 @@ export default class Particle {
     mass: number;
     invMass: number;
 
-    constructor(x: number, y: number, radius: number, mass: number) {
+    color: string;
+
+    constructor(x: number, y: number, radius: number, color: string, mass: number) {
         this.radius = radius;
         this.position = new Vec2(x, y);
 
@@ -27,6 +29,8 @@ export default class Particle {
         } else {
             this.invMass = 0.0;
         }
+
+        this.color = color;
     }
 
     addForce = (force: Vec2): void => {

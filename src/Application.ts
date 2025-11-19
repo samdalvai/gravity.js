@@ -1,5 +1,6 @@
 import Graphics from './Graphics';
 import InputManager, { MouseButton } from './InputManager';
+import Utils from './Utils';
 import { MILLISECS_PER_FRAME } from './physics/Constants';
 import Force from './physics/Force';
 import Particle from './physics/Particle';
@@ -24,15 +25,15 @@ export default class Application {
     setup = (): void => {
         this.running = Graphics.openWindow();
 
-        const smallPlanet1 = new Particle(Graphics.width() / 2, 300, 6, 1);
+        const smallPlanet1 = new Particle(Graphics.width() / 2, 300, 6, Utils.randomColor(), 1);
         smallPlanet1.velocity.x = 200;
         this.particles.push(smallPlanet1);
 
-        const smallPlanet2 = new Particle(Graphics.width() / 2, Graphics.height() / 2 + 400, 8, 5);
+        const smallPlanet2 = new Particle(Graphics.width() / 2, Graphics.height() / 2 + 400, 8, Utils.randomColor(), 5);
         smallPlanet2.velocity.x = -220;
         this.particles.push(smallPlanet2);
 
-        const bigPlanet = new Particle(Graphics.width() / 2, Graphics.height() / 2, 20, 20);
+        const bigPlanet = new Particle(Graphics.width() / 2, Graphics.height() / 2, 20, Utils.randomColor(), 20);
         this.particles.push(bigPlanet);
 
         InputManager.initialize();
@@ -158,21 +159,21 @@ export default class Application {
             this.particles[0].position.x,
             this.particles[0].position.y,
             this.particles[0].radius,
-            'blue',
+            this.particles[0].color,
         );
 
         Graphics.drawFillCircle(
             this.particles[1].position.x,
             this.particles[1].position.y,
             this.particles[1].radius,
-            'green',
+            this.particles[1].color,
         );
 
         Graphics.drawFillCircle(
             this.particles[2].position.x,
             this.particles[2].position.y,
             this.particles[2].radius,
-            'yellow',
+            this.particles[2].color,
         );
     };
 
