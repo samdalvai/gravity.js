@@ -1,3 +1,9 @@
+export enum MouseButton {
+    LEFT = 0,
+    MIDDLE = 1,
+    RIGHT = 2,
+}
+
 export default class InputManager {
     static keyboardInputBuffer: KeyboardEvent[];
     static mouseInputBuffer: MouseEvent[];
