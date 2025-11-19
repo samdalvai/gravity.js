@@ -2,144 +2,154 @@ export default class Vec2 {
     x: number;
     y: number;
 
-    constructor(x = 0, y = 0) {
+    constructor(x = 0.0, y = 0.0) {
         this.x = x;
         this.y = y;
     }
 
-    add = (v: Vec2): void => {
+    add(v: Vec2): void {
         this.x += v.x;
         this.y += v.y;
-    };
+    }
 
-    sub = (v: Vec2): void => {
+    sub(v: Vec2): void {
         this.x -= v.x;
         this.y -= v.y;
-    };
+    }
 
-    scale = (n: number): void => {
+    scale(n: number): void {
         this.x *= n;
         this.y *= n;
-    };
+    }
 
-    rotate = (angle: number): Vec2 => {
+    rotate(angle: number): Vec2 {
         const result = new Vec2();
         result.x = this.x * Math.cos(angle) - this.y * Math.sin(angle);
         result.y = this.x * Math.sin(angle) + this.y * Math.cos(angle);
         return result;
-    };
+    }
 
-    magnitude = (): number => {
+    magnitude(): number {
         return Math.sqrt(this.x * this.x + this.y * this.y);
-    };
+    }
 
-    magnitudeSquared = (): number => {
+    magnitudeSquared(): number {
         return this.x * this.x + this.y * this.y;
-    };
+    }
 
-    normalize = (): Vec2 => {
+    normalize(): this {
         const length = this.magnitude();
-        if (length != 0) {
+        if (length !== 0.0) {
             this.x /= length;
             this.y /= length;
         }
-
         return this;
-    };
+    }
 
-    unitVector = (): Vec2 => {
-        const result = new Vec2();
+    unitVector(): Vec2 {
+        const result = new Vec2(0, 0);
         const length = this.magnitude();
-        if (length != 0.0) {
+        if (length !== 0.0) {
             result.x = this.x / length;
             result.y = this.y / length;
         }
         return result;
-    };
+    }
 
-    normal = (): Vec2 => {
+    normal(): Vec2 {
         return new Vec2(this.y, -this.x).normalize();
-    };
+    }
 
-    dot = (v: Vec2): number => {
+    dot(v: Vec2): number {
         return this.x * v.x + this.y * v.y;
-    };
+    }
 
-    cross = (v: Vec2): number => {
+    cross(v: Vec2): number {
         return this.x * v.y - this.y * v.x;
-    };
+    }
 
-    // TODO: add other operators
-    // Vec2& Vec2::operator = (const Vec2& v) {
-    //     x = v.x;
-    //     y = v.y;
-    //     return *this;
-    // }
+    // operator =
+    assign(v: Vec2): this {
+        this.x = v.x;
+        this.y = v.y;
+        return this;
+    }
 
-    // bool Vec2::operator == (const Vec2& v) const {
-    //     return x == v.x && y == v.y;
-    // }
+    // operator ==
+    equals(v: Vec2): boolean {
+        return this.x === v.x && this.y === v.y;
+    }
 
-    // bool Vec2::operator != (const Vec2& v) const {
-    //     return !(*this == v);
-    // }
+    // operator !=
+    notEquals(v: Vec2): boolean {
+        return !this.equals(v);
+    }
 
-    // Vec2 Vec2::operator + (const Vec2& v) const {
-    //     Vec2 result;
-    //     result.x = x + v.x;
-    //     result.y = y + v.y;
-    //     return result;
-    // }
+    // operator +
+    addNew(v: Vec2): Vec2 {
+        const result = new Vec2();
+        result.x = this.x + v.x;
+        result.y = this.y + v.y;
+        return result;
+    }
 
-    // Vec2 Vec2::operator - (const Vec2& v) const {
-    //     Vec2 result;
-    //     result.x = x - v.x;
-    //     result.y = y - v.y;
-    //     return result;
-    // }
+    // operator -
+    subNew(v: Vec2): Vec2 {
+        const result = new Vec2();
+        result.x = this.x - v.x;
+        result.y = this.y - v.y;
+        return result;
+    }
 
-    // Vec2 Vec2::operator * (const float n) const {
-    //     Vec2 result;
-    //     result.x = x * n;
-    //     result.y = y * n;
-    //     return result;
-    // }
+    // operator * (scalar)
+    scaleNew(n: number): Vec2 {
+        const result = new Vec2();
+        result.x = this.x * n;
+        result.y = this.y * n;
+        return result;
+    }
 
-    // Vec2 Vec2::operator / (const float n) const {
-    //     Vec2 result;
-    //     result.x = x / n;
-    //     result.y = y / n;
-    //     return result;
-    // }
+    // operator / (scalar)
+    divNew(n: number): Vec2 {
+        const result = new Vec2();
+        result.x = this.x / n;
+        result.y = this.y / n;
+        return result;
+    }
 
-    // Vec2& Vec2::operator += (const Vec2& v) {
-    //     x += v.x;
-    //     y += v.y;
-    //     return *this;
-    // }
+    // operator +=
+    addAssign(v: Vec2): this {
+        this.x += v.x;
+        this.y += v.y;
+        return this;
+    }
 
-    // Vec2& Vec2::operator -= (const Vec2& v) {
-    //     x -= v.x;
-    //     y -= v.y;
-    //     return *this;
-    // }
+    // operator -=
+    subAssign(v: Vec2): this {
+        this.x -= v.x;
+        this.y -= v.y;
+        return this;
+    }
 
-    // Vec2& Vec2::operator *= (const float n) {
-    //     x *= n;
-    //     y *= n;
-    //     return *this;
-    // }
+    // operator *=
+    scaleAssign(n: number): this {
+        this.x *= n;
+        this.y *= n;
+        return this;
+    }
 
-    // Vec2& Vec2::operator /= (const float n) {
-    //     x /= n;
-    //     y /= n;
-    //     return *this;
-    // }
+    // operator /=
+    divAssign(n: number): this {
+        this.x /= n;
+        this.y /= n;
+        return this;
+    }
 
-    // Vec2 Vec2::operator - () {
-    //     Vec2 result;
-    //     result.x = x * -1;
-    //     result.y = y * -1;
-    //     return result;
-    // }
+    // operator - (unary negation)
+    negate(): Vec2 {
+        const result = new Vec2();
+        result.x = -this.x;
+        result.y = -this.y;
+        return result;
+    }
 }
