@@ -1,0 +1,62 @@
+export default class Graphics {
+    static windowWidth: number;
+    static windowHeight: number;
+    static canvas: HTMLCanvasElement;
+    static ctx: CanvasRenderingContext2D;
+
+    static width = (): number => {
+        return this.windowWidth;
+    };
+
+    static height = (): number => {
+        return this.windowHeight;
+    };
+
+    static openWindow = (): boolean => {
+        const canvas = document.getElementById('gamePhysicsCanvas') as HTMLCanvasElement;
+        const ctx = canvas.getContext('2d');
+
+        if (!ctx) {
+            console.error('Failed to get 2D context for the canvas.');
+            return false;
+        }
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        this.canvas = canvas;
+        this.ctx = ctx;
+        this.windowWidth = window.innerWidth;
+        this.windowHeight = window.innerHeight;
+
+        return true;
+    };
+
+    static closeWindow = (): void => {
+        // TODO: is this method needed?
+    };
+
+    static clearScreen = (): void => {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    };
+
+    static renderFrame = (): void => {
+        // TODO: is this method needed?
+    };
+
+    static drawLine = (x0: number, y0: number, x1: number, y1: number, color: string): void => {
+        this.ctx.strokeStyle = color;
+        this.ctx.beginPath();
+        this.ctx.moveTo(x0, y0);
+        this.ctx.lineTo(x1, y1); 
+        this.ctx.stroke();
+    };
+
+    // static void DrawCircle(int x, int y, int radius, float angle, Uint32 color);
+    // static void DrawFillCircle(int x, int y, int radius, Uint32 color);
+    // static void DrawRect(int x, int y, int width, int height, Uint32 color);
+    // static void DrawFillRect(int x, int y, int width, int height, Uint32 color);
+    // static void DrawPolygon(int x, int y, const std::vector<Vec2>& vertices, Uint32 color);
+    // static void DrawFillPolygon(int x, int y, const std::vector<Vec2>& vertices, Uint32 color);
+    // static void DrawTexture(int x, int y, int width, int height, float rotation, SDL_Texture* texture);
+}
