@@ -1,10 +1,11 @@
 import Graphics from './Graphics';
 import { MILLISECS_PER_FRAME } from './physics/Constants';
+import Particle from './physics/Particle';
 
 export default class Application {
     private running: boolean;
     private timePreviousFrame: number = 0;
-    // std::vector<Particle*> particles;
+    private particles: Particle[] = [];
     // Vec2 pushForce = Vec2(0, 0);
     // Vec2 mouseCursor = Vec2(0, 0);
     // bool leftMouseButtonDown = false;
@@ -19,6 +20,17 @@ export default class Application {
 
     setup = (): void => {
         this.running = Graphics.openWindow();
+
+        const smallPlanet1 = new Particle(Graphics.width() / 2, 300, 6, 1);
+        smallPlanet1.velocity.x = 200;
+        this.particles.push(smallPlanet1);
+
+        const smallPlanet2 = new Particle(Graphics.width() / 2, Graphics.height() / 2 + 400, 8, 5);
+        smallPlanet2.velocity.x = -220;
+        this.particles.push(smallPlanet2);
+
+        const bigPlanet = new Particle(Graphics.width() / 2, Graphics.height() / 2, 20, 20);
+        this.particles.push(bigPlanet);
     };
 
     input = (): void => {
@@ -47,16 +59,26 @@ export default class Application {
         // TODO: implement rendering pipeline
         Graphics.clearScreen();
 
-        Graphics.drawLine(250, 250, 500, 600, 'red');
+        Graphics.drawFillCircle(
+            this.particles[0].position.x,
+            this.particles[0].position.y,
+            this.particles[0].radius,
+            'blue',
+        );
 
-        Graphics.drawLine(300, 300, 550, 650, 'green');
-        Graphics.drawLine(100, 100, 100, 500, 'blue');
+        Graphics.drawFillCircle(
+            this.particles[1].position.x,
+            this.particles[1].position.y,
+            this.particles[1].radius,
+            'green',
+        );
 
-        Graphics.drawCircle(700, 700, 50, 4, 'blue');
-
-        Graphics.drawFillCircle(500, 500, 50, 'orange');
-        Graphics.drawFillCircle(800, 800, 15, 'white');
-        Graphics.drawFillCircle(1000, 1000, 20, 'green');
+        Graphics.drawFillCircle(
+            this.particles[2].position.x,
+            this.particles[2].position.y,
+            this.particles[2].radius,
+            'yellow',
+        );
     };
 
     destroy = (): void => {
