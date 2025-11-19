@@ -1,5 +1,5 @@
 export default class Utils {
-    static randomFloat = (min: number = 1.0, max: number = 10.0): number => {
+    static randomNumber = (min: number = 1.0, max: number = 10.0): number => {
         return Math.random() * (max - min) + min;
     };
 
