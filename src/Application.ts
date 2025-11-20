@@ -71,7 +71,19 @@ export default class Application {
             }
         }
 
-        // Handle mouse events
+        // Handle mouse move events
+        while (InputManager.mouseMoveBuffer.length > 0) {
+            const inputEvent = InputManager.mouseMoveBuffer.shift();
+
+            if (!inputEvent) {
+                return;
+            }
+
+            this.mouseCursor.x = inputEvent.x;
+            this.mouseCursor.y = inputEvent.y;
+        }
+
+        // Handle mouse click events
         while (InputManager.mouseInputBuffer.length > 0) {
             const inputEvent = InputManager.mouseInputBuffer.shift();
 
@@ -85,7 +97,6 @@ export default class Application {
                         this.leftMouseButtonDown = true;
                         this.mouseCursor.x = inputEvent.x;
                         this.mouseCursor.y = inputEvent.y;
-                        console.log('Mouse down: ', inputEvent.x, inputEvent.y, inputEvent.button);
                     }
                     break;
                 case 'mouseup':
@@ -94,7 +105,6 @@ export default class Application {
                         const impulseDirection = this.particles[0].position.subNew(this.mouseCursor).unitVector();
                         const impulseMagnitude = this.particles[0].position.subNew(this.mouseCursor).magnitude() * 2;
                         this.particles[0].velocity.assign(impulseDirection.scaleNew(impulseMagnitude));
-                        console.log('Mouse up: ', inputEvent.x, inputEvent.y);
                     }
                     break;
             }
@@ -168,6 +178,16 @@ export default class Application {
 
     render = (): void => {
         Graphics.clearScreen();
+
+        if (this.leftMouseButtonDown) {
+            Graphics.drawLine(
+                this.particles[0].position.x,
+                this.particles[0].position.y,
+                this.mouseCursor.x,
+                this.mouseCursor.y,
+                'red',
+            );
+        }
 
         for (const particle of this.particles) {
             Graphics.drawFillCircle(particle.position.x, particle.position.y, particle.radius, particle.color);
