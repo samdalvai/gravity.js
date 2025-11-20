@@ -1,7 +1,7 @@
 import Graphics from './Graphics';
 import InputManager, { MouseButton } from './InputManager';
 import Utils from './Utils';
-import { MILLISECS_PER_FRAME } from './physics/Constants';
+import { MILLISECS_PER_FRAME, PIXELS_PER_METER } from './physics/Constants';
 import Force from './physics/Force';
 import Particle from './physics/Particle';
 import Vec2 from './physics/Vec2';
@@ -63,10 +63,36 @@ export default class Application {
 
             switch (inputEvent.type) {
                 case 'keydown':
-                    console.log('Keydown: ', inputEvent.code);
+                    switch (inputEvent.code) {
+                        case 'ArrowUp':
+                            this.pushForce.y = -50 * PIXELS_PER_METER;
+                            break;
+                        case 'ArrowRight':
+                            this.pushForce.x = 50 * PIXELS_PER_METER;
+                            break;
+                        case 'ArrowDown':
+                            this.pushForce.y = 50 * PIXELS_PER_METER;
+                            break;
+                        case 'ArrowLeft':
+                            this.pushForce.x = -50 * PIXELS_PER_METER;
+                            break;
+                    }
                     break;
                 case 'keyup':
-                    console.log('Keyup: ', inputEvent.code);
+                    switch (inputEvent.code) {
+                        case 'ArrowUp':
+                            this.pushForce.y = 0;
+                            break;
+                        case 'ArrowRight':
+                            this.pushForce.x = 0;
+                            break;
+                        case 'ArrowDown':
+                            this.pushForce.y = 0;
+                            break;
+                        case 'ArrowLeft':
+                            this.pushForce.x = 0;
+                            break;
+                    }
                     break;
             }
         }
