@@ -15,5 +15,3 @@ const run = async () => {
 };
 
 run();
-
-app.destroy();

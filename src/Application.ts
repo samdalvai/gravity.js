@@ -107,7 +107,9 @@ export default class Application {
 
         this.timePreviousFrame = performance.now();
 
-        // TODO: implement update of entities
+        /////////////////////////////////////////////////////////////////////
+        ///// Updating all the entities                                 /////
+        /////////////////////////////////////////////////////////////////////
 
         for (const particle of this.particles) {
             particle.addForce(this.pushForce);
@@ -137,7 +139,7 @@ export default class Application {
         }
 
         for (const particle of this.particles) {
-            // Nasty hardcoded flip in velocity if it touches the limits of the screen window
+            // Hardcoded flip in velocity if it touches the limits of the screen window
             if (particle.position.x - particle.radius <= 0) {
                 particle.position.x = particle.radius;
                 particle.velocity.x *= -0.9;
@@ -156,16 +158,11 @@ export default class Application {
     };
 
     render = (): void => {
-        // TODO: implement rendering pipeline
         Graphics.clearScreen();
 
         for (const particle of this.particles) {
             Graphics.drawFillCircle(particle.position.x, particle.position.y, particle.radius, particle.color);
         }
-    };
-
-    destroy = (): void => {
-        // TODO: do we need this method ?
     };
 
     sleep = (milliseconds: number) => {

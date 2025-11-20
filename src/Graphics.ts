@@ -32,16 +32,8 @@ export default class Graphics {
         return true;
     };
 
-    static closeWindow = (): void => {
-        // TODO: is this method needed?
-    };
-
     static clearScreen = (): void => {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    };
-
-    static renderFrame = (): void => {
-        // TODO: is this method needed?
     };
 
     static drawLine = (x0: number, y0: number, x1: number, y1: number, color: string): void => {
@@ -77,7 +69,7 @@ export default class Graphics {
         this.ctx.fill();
     };
 
-    // TODO: implement draw methods
+    // TODO: implement these draw methods
     // static void DrawRect(int x, int y, int width, int height, Uint32 color);
     // static void DrawFillRect(int x, int y, int width, int height, Uint32 color);
     // static void DrawPolygon(int x, int y, const std::vector<Vec2>& vertices, Uint32 color);
