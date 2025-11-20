@@ -5,7 +5,7 @@ export default class Utils {
 
     // Returns a random color as a hex string, e.g. "#A3F4C2"
     static randomColor = (): string => {
-        const r = Math.floor(Math.random() * 256); // 0-255
+        const r = Math.floor(Math.random() * 256);
         const g = Math.floor(Math.random() * 256);
         const b = Math.floor(Math.random() * 256);
 
