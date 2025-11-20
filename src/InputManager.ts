@@ -7,12 +7,12 @@ export enum MouseButton {
 export default class InputManager {
     static keyboardInputBuffer: KeyboardEvent[];
     static mouseInputBuffer: MouseEvent[];
-    static mousePosition: { x: number; y: number };
+    static mouseMoveBuffer: MouseEvent[];
 
     static initialize = () => {
         this.keyboardInputBuffer = [];
         this.mouseInputBuffer = [];
-        this.mousePosition = { x: 0, y: 0 };
+        this.mouseMoveBuffer = [];
 
         window.addEventListener('keydown', this.handleKeyboardEvent);
         window.addEventListener('keyup', this.handleKeyboardEvent);
@@ -26,7 +26,7 @@ export default class InputManager {
     };
 
     static handleMouseMove = (event: MouseEvent) => {
-        this.mousePosition = { x: event.clientX, y: event.clientY };
+        this.mouseMoveBuffer.push(event);
     };
 
     static handleMouseClick = (event: MouseEvent) => {
