@@ -227,8 +227,6 @@ export default class Application {
         // Particle chain with spring force
         ///////////////////////////////////////////////////////////////////////////////
         // Attach the head to the anchor with a spring
-        // Vec2 springForce = Force::GenerateSpringForce(*particles[0], anchor, restLength, k);
-        // particles[0]->AddForce(springForce);
         const springForce = Force.generateSpringForceParticleAnchor(
             this.particles[0],
             this.anchor,
@@ -308,11 +306,17 @@ export default class Application {
         // Particle chain with spring force
         ///////////////////////////////////////////////////////////////////////////////
         // Draw all the springs from one particle to the next
-        // for (int i = 0; i < NUM_PARTICLES - 1; i++) {
-        //     int currParticle = i;
-        //     int nextParticle = i + 1;
-        //     Graphics::DrawLine(particles[currParticle]->position.x, particles[currParticle]->position.y, particles[nextParticle]->position.x, particles[nextParticle]->position.y, 0xFF313131);
-        // }
+        for (let i = 0; i < this.NUM_PARTICLES - 1; i++) {
+            const currParticle = i;
+            const nextParticle = i + 1;
+            Graphics.drawLine(
+                this.particles[currParticle].position.x,
+                this.particles[currParticle].position.y,
+                this.particles[nextParticle].position.x,
+                this.particles[nextParticle].position.y,
+                'blue'
+            );
+        }
 
         for (const particle of this.particles) {
             Graphics.drawFillCircle(particle.position.x, particle.position.y, particle.radius, particle.color);
