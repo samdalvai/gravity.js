@@ -13,6 +13,16 @@ export default class Application {
     private mouseCursor = new Vec2(0, 0);
     private leftMouseButtonDown = false;
 
+    ///////////////////////////////////////////////////////////////////////////////
+    // Soft body with spring force
+    ///////////////////////////////////////////////////////////////////////////////
+    // private k = 1500;
+    // private restLength = 200;
+    // private NUM_PARTICLES = 4;
+
+    ///////////////////////////////////////////////////////////////////////////////
+    // Particle chain with spring force
+    ///////////////////////////////////////////////////////////////////////////////
     private anchor = new Vec2(0, 0);
     private k = 300;
     private restLength = 15;
@@ -151,27 +161,56 @@ export default class Application {
         /////////////////////////////////////////////////////////////////////
 
         for (const particle of this.particles) {
+            // Apply push force
             particle.addForce(this.pushForce);
 
             // Apply a friction force
             // const friction = Force.generateFrictionForce(particle, 20);
             // particle.addForce(friction);
+
+            // Apply a drag force
+            const drag = Force.generateDragForce(particle, 0.003);
+            particle.addForce(drag);
+
+            // Apply weight force
+            const weight = new Vec2(0.0, particle.mass * 9.8 * PIXELS_PER_METER);
+            particle.addForce(weight);
         }
 
-        // Applying a gravitational force to our two particles/planets
-        for (let i = 0; i < this.particles.length - 1; i++) {
-            for (let j = 1; j < this.particles.length; j++) {
-                const attraction = Force.generateGravitationalForce(
-                    this.particles[i],
-                    this.particles[j],
-                    1000.0,
-                    5,
-                    100,
-                );
-                this.particles[i].addForce(attraction);
-                this.particles[j].addForce(attraction.negate());
-            }
-        }
+        ///////////////////////////////////////////////////////////////////////////////
+        // Soft body with spring force
+        ///////////////////////////////////////////////////////////////////////////////
+        // Attach particles with springs
+        // Vec2 ab = Force::GenerateSpringForce(*particles[0], *particles[1], restLength, k); // a <-> b
+        // particles[0]->AddForce(ab);
+        // particles[1]->AddForce(-ab);
+
+        // Vec2 bc = Force::GenerateSpringForce(*particles[1], *particles[2], restLength, k); // b <-> c
+        // particles[1]->AddForce(bc);
+        // particles[2]->AddForce(-bc);
+
+        // Vec2 cd = Force::GenerateSpringForce(*particles[2], *particles[3], restLength, k); // c <-> d
+        // particles[2]->AddForce(cd);
+        // particles[3]->AddForce(-cd);
+
+        // Vec2 da = Force::GenerateSpringForce(*particles[3], *particles[0], restLength, k); // d <-> a
+        // particles[3]->AddForce(da);
+        // particles[0]->AddForce(-da);
+
+        // Vec2 ac = Force::GenerateSpringForce(*particles[0], *particles[2], restLength, k); // a <-> c
+        // particles[0]->AddForce(ac);
+        // particles[2]->AddForce(-ac);
+
+        // Vec2 bd = Force::GenerateSpringForce(*particles[1], *particles[3], restLength, k); // b <-> d
+        // particles[1]->AddForce(bd);
+        // particles[3]->AddForce(-bd);
+
+        ///////////////////////////////////////////////////////////////////////////////
+        // Particle chain with spring force
+        ///////////////////////////////////////////////////////////////////////////////
+        // Attach the head to the anchor with a spring
+        // Vec2 springForce = Force::GenerateSpringForce(*particles[0], anchor, restLength, k);
+        // particles[0]->AddForce(springForce);
 
         for (const particle of this.particles) {
             particle.integrate(deltaTime);
