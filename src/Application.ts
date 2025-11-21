@@ -8,11 +8,15 @@ import Vec2 from './physics/Vec2';
 
 export default class Application {
     private running: boolean;
-    private timePreviousFrame: number = 0;
     private particles: Particle[] = [];
     private pushForce = new Vec2(0, 0);
     private mouseCursor = new Vec2(0, 0);
     private leftMouseButtonDown = false;
+
+    private anchor = new Vec2(0, 0);
+    private k = 300;
+    private restLength = 15;
+    private NUM_PARTICLES = 15;
 
     constructor() {
         this.running = false;
@@ -24,31 +28,34 @@ export default class Application {
 
     setup = (): void => {
         this.running = Graphics.openWindow();
-        
-        const bigPlanet = new Particle(Graphics.width() / 2, Graphics.height() / 2, 20, 'yellow', 20);
-        this.particles.push(bigPlanet);
 
-        const smallPlanet1 = new Particle(Graphics.width() / 2, 300, 6, 'blue', 1);
-        smallPlanet1.velocity.x = 200;
-        this.particles.push(smallPlanet1);
+        ///////////////////////////////////////////////////////////////////////////////
+        // Soft body with spring force
+        ///////////////////////////////////////////////////////////////////////////////
+        // Particle* a = new Particle(100, 100, 1.0);
+        // Particle* b = new Particle(300, 100, 1.0);
+        // Particle* c = new Particle(300, 300, 1.0);
+        // Particle* d = new Particle(100, 300, 1.0);
 
-        const smallPlanet2 = new Particle(Graphics.width() / 2, Graphics.height() / 2 + 400, 8, 'green', 5);
-        smallPlanet2.velocity.x = -220;
-        this.particles.push(smallPlanet2);
+        // a->radius = 6;
+        // b->radius = 6;
+        // c->radius = 6;
+        // d->radius = 6;
 
-        // Generate random particles
-        // for (let i = 0; i < 1000; i++) {
-        //     const randomRadius = Utils.randomNumber(1, 5);
-        //     const smallPlanet = new Particle(
-        //         Utils.randomNumber(20, Graphics.width() - 20),
-        //         Utils.randomNumber(20, Graphics.height() - 20),
-        //         randomRadius,
-        //         Utils.randomColor(),
-        //         randomRadius,
-        //     );
-        //     smallPlanet.velocity.x = Utils.randomNumber(-200, 200);
-        //     this.particles.push(smallPlanet);
-        // }
+        // particles.push_back(a);
+        // particles.push_back(b);
+        // particles.push_back(c);
+        // particles.push_back(d);
+
+        ///////////////////////////////////////////////////////////////////////////////
+        // Particle chain with spring force
+        ///////////////////////////////////////////////////////////////////////////////
+        this.anchor = new Vec2(Graphics.width() / 2.0, 30);
+
+        for (let i = 0; i < this.NUM_PARTICLES; i++) {
+            const bob = new Particle(this.anchor.x, this.anchor.y + i * this.restLength, 6, 'blue', 2.0);
+            this.particles.push(bob);
+        }
 
         InputManager.initialize();
     };
