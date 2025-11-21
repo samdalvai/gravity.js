@@ -11,7 +11,6 @@ export default class Force {
 
             // Calculate the drag magnitude, k * |v|^2
             const dragMagnitude = k * particle.velocity.magnitudeSquared();
-            // float dragMagnitude = k * particle.velocity.MagnitudeSquared();
 
             // Generate the final drag force with direction and magnitude
             dragForce = dragDirection.scaleNew(dragMagnitude);
