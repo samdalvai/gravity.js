@@ -16,17 +16,17 @@ export default class Application {
     ///////////////////////////////////////////////////////////////////////////////
     // Soft body with spring force
     ///////////////////////////////////////////////////////////////////////////////
-    // private k = 1500;
-    // private restLength = 200;
-    // private NUM_PARTICLES = 4;
+    private k = 1500;
+    private restLength = 200;
+    private NUM_PARTICLES = 4;
 
     ///////////////////////////////////////////////////////////////////////////////
     // Particle chain with spring force
     ///////////////////////////////////////////////////////////////////////////////
-    private anchor = new Vec2(0, 0);
-    private k = 300;
-    private restLength = 15;
-    private NUM_PARTICLES = 15;
+    // private anchor = new Vec2(0, 0);
+    // private k = 300;
+    // private restLength = 15;
+    // private NUM_PARTICLES = 15;
 
     private nearestParticle: Particle | null = null;
 
@@ -44,30 +44,25 @@ export default class Application {
         ///////////////////////////////////////////////////////////////////////////////
         // Soft body with spring force
         ///////////////////////////////////////////////////////////////////////////////
-        // Particle* a = new Particle(100, 100, 1.0);
-        // Particle* b = new Particle(300, 100, 1.0);
-        // Particle* c = new Particle(300, 300, 1.0);
-        // Particle* d = new Particle(100, 300, 1.0);
+        const a = new Particle(400, 100, 6, 'blue', 1);
+        const b = new Particle(600, 100, 6, 'blue', 1);
+        const c = new Particle(600, 300, 6, 'blue', 1);
+        const d = new Particle(400, 300, 6, 'blue', 1);
 
-        // a->radius = 6;
-        // b->radius = 6;
-        // c->radius = 6;
-        // d->radius = 6;
-
-        // particles.push_back(a);
-        // particles.push_back(b);
-        // particles.push_back(c);
-        // particles.push_back(d);
+        this.particles.push(a);
+        this.particles.push(b);
+        this.particles.push(c);
+        this.particles.push(d);
 
         ///////////////////////////////////////////////////////////////////////////////
         // Particle chain with spring force
         ///////////////////////////////////////////////////////////////////////////////
-        this.anchor = new Vec2(Graphics.width() / 2.0, 30);
+        // this.anchor = new Vec2(Graphics.width() / 2.0, 30);
 
-        for (let i = 0; i < this.NUM_PARTICLES; i++) {
-            const bob = new Particle(this.anchor.x, this.anchor.y + i * this.restLength, 6, 'blue', 2.0);
-            this.particles.push(bob);
-        }
+        // for (let i = 0; i < this.NUM_PARTICLES; i++) {
+        //     const bob = new Particle(this.anchor.x, this.anchor.y + i * this.restLength, 6, 'blue', 2.0);
+        //     this.particles.push(bob);
+        // }
 
         InputManager.initialize();
     };
@@ -199,55 +194,85 @@ export default class Application {
         // Soft body with spring force
         ///////////////////////////////////////////////////////////////////////////////
         // Attach particles with springs
-        // Vec2 ab = Force::GenerateSpringForce(*particles[0], *particles[1], restLength, k); // a <-> b
-        // particles[0]->AddForce(ab);
-        // particles[1]->AddForce(-ab);
+        const ab = Force.generateSpringForceParticleParticle(
+            this.particles[0],
+            this.particles[1],
+            this.restLength,
+            this.k,
+        );
+        this.particles[0].addForce(ab);
+        this.particles[1].addForce(ab.negate());
 
-        // Vec2 bc = Force::GenerateSpringForce(*particles[1], *particles[2], restLength, k); // b <-> c
-        // particles[1]->AddForce(bc);
-        // particles[2]->AddForce(-bc);
+        const bc = Force.generateSpringForceParticleParticle(
+            this.particles[1],
+            this.particles[2],
+            this.restLength,
+            this.k,
+        );
+        this.particles[1].addForce(bc);
+        this.particles[2].addForce(bc.negate());
 
-        // Vec2 cd = Force::GenerateSpringForce(*particles[2], *particles[3], restLength, k); // c <-> d
-        // particles[2]->AddForce(cd);
-        // particles[3]->AddForce(-cd);
+        const cd = Force.generateSpringForceParticleParticle(
+            this.particles[2],
+            this.particles[3],
+            this.restLength,
+            this.k,
+        );
+        this.particles[2].addForce(cd);
+        this.particles[3].addForce(cd.negate());
 
-        // Vec2 da = Force::GenerateSpringForce(*particles[3], *particles[0], restLength, k); // d <-> a
-        // particles[3]->AddForce(da);
-        // particles[0]->AddForce(-da);
+        const da = Force.generateSpringForceParticleParticle(
+            this.particles[3],
+            this.particles[0],
+            this.restLength,
+            this.k,
+        );
+        this.particles[3].addForce(da);
+        this.particles[0].addForce(da.negate());
 
-        // Vec2 ac = Force::GenerateSpringForce(*particles[0], *particles[2], restLength, k); // a <-> c
-        // particles[0]->AddForce(ac);
-        // particles[2]->AddForce(-ac);
+        const ac = Force.generateSpringForceParticleParticle(
+            this.particles[0],
+            this.particles[2],
+            this.restLength,
+            this.k,
+        );
+        this.particles[0].addForce(ac);
+        this.particles[2].addForce(ac.negate());
 
-        // Vec2 bd = Force::GenerateSpringForce(*particles[1], *particles[3], restLength, k); // b <-> d
-        // particles[1]->AddForce(bd);
-        // particles[3]->AddForce(-bd);
+        const bd = Force.generateSpringForceParticleParticle(
+            this.particles[1],
+            this.particles[3],
+            this.restLength,
+            this.k,
+        );
+        this.particles[1].addForce(bd);
+        this.particles[3].addForce(bd.negate());
 
         ///////////////////////////////////////////////////////////////////////////////
         // Particle chain with spring force
         ///////////////////////////////////////////////////////////////////////////////
         // Attach the head to the anchor with a spring
-        const springForce = Force.generateSpringForceParticleAnchor(
-            this.particles[0],
-            this.anchor,
-            this.restLength,
-            this.k,
-        );
-        this.particles[0].addForce(springForce);
+        // const springForce = Force.generateSpringForceParticleAnchor(
+        //     this.particles[0],
+        //     this.anchor,
+        //     this.restLength,
+        //     this.k,
+        // );
+        // this.particles[0].addForce(springForce);
 
         // Connect the particles with the one before in a chain of springs
-        for (let i = 1; i < this.NUM_PARTICLES; i++) {
-            const currParticle = i;
-            const prevParticle = i - 1;
-            const springForce = Force.generateSpringForceParticleParticle(
-                this.particles[currParticle],
-                this.particles[prevParticle],
-                this.restLength,
-                this.k,
-            );
-            this.particles[currParticle].addForce(springForce);
-            this.particles[prevParticle].addForce(springForce.negate());
-        }
+        // for (let i = 1; i < this.NUM_PARTICLES; i++) {
+        //     const currParticle = i;
+        //     const prevParticle = i - 1;
+        //     const springForce = Force.generateSpringForceParticleParticle(
+        //         this.particles[currParticle],
+        //         this.particles[prevParticle],
+        //         this.restLength,
+        //         this.k,
+        //     );
+        //     this.particles[currParticle].addForce(springForce);
+        //     this.particles[prevParticle].addForce(springForce.negate());
+        // }
 
         for (const particle of this.particles) {
             particle.integrate(deltaTime);
@@ -289,34 +314,64 @@ export default class Application {
         // Soft body with spring force
         ///////////////////////////////////////////////////////////////////////////////
         // Draw all springs
-        // Graphics::DrawLine(particles[0]->position.x, particles[0]->position.y, particles[1]->position.x, particles[1]->position.y, 0xFF313131);
-        // Graphics::DrawLine(particles[1]->position.x, particles[1]->position.y, particles[2]->position.x, particles[2]->position.y, 0xFF313131);
-        // Graphics::DrawLine(particles[2]->position.x, particles[2]->position.y, particles[3]->position.x, particles[3]->position.y, 0xFF313131);
-        // Graphics::DrawLine(particles[3]->position.x, particles[3]->position.y, particles[0]->position.x, particles[0]->position.y, 0xFF313131);
-        // Graphics::DrawLine(particles[0]->position.x, particles[0]->position.y, particles[2]->position.x, particles[2]->position.y, 0xFF313131);
-        // Graphics::DrawLine(particles[1]->position.x, particles[1]->position.y, particles[3]->position.x, particles[3]->position.y, 0xFF313131);
-
-        // // Draw all particles
-        // Graphics::DrawFillCircle(particles[0]->position.x, particles[0]->position.y, particles[0]->radius, 0xFFEEBB00);
-        // Graphics::DrawFillCircle(particles[1]->position.x, particles[1]->position.y, particles[1]->radius, 0xFFEEBB00);
-        // Graphics::DrawFillCircle(particles[2]->position.x, particles[2]->position.y, particles[2]->radius, 0xFFEEBB00);
-        // Graphics::DrawFillCircle(particles[3]->position.x, particles[3]->position.y, particles[3]->radius, 0xFFEEBB00);
+        Graphics.drawLine(
+            this.particles[0].position.x,
+            this.particles[0].position.y,
+            this.particles[1].position.x,
+            this.particles[1].position.y,
+            'lightblue',
+        );
+        Graphics.drawLine(
+            this.particles[1].position.x,
+            this.particles[1].position.y,
+            this.particles[2].position.x,
+            this.particles[2].position.y,
+            'lightblue',
+        );
+        Graphics.drawLine(
+            this.particles[2].position.x,
+            this.particles[2].position.y,
+            this.particles[3].position.x,
+            this.particles[3].position.y,
+            'lightblue',
+        );
+        Graphics.drawLine(
+            this.particles[3].position.x,
+            this.particles[3].position.y,
+            this.particles[0].position.x,
+            this.particles[0].position.y,
+            'lightblue',
+        );
+        Graphics.drawLine(
+            this.particles[0].position.x,
+            this.particles[0].position.y,
+            this.particles[2].position.x,
+            this.particles[2].position.y,
+            'white',
+        );
+        Graphics.drawLine(
+            this.particles[1].position.x,
+            this.particles[1].position.y,
+            this.particles[3].position.x,
+            this.particles[3].position.y,
+            'lightblue',
+        );
 
         ///////////////////////////////////////////////////////////////////////////////
         // Particle chain with spring force
         ///////////////////////////////////////////////////////////////////////////////
         // Draw all the springs from one particle to the next
-        for (let i = 0; i < this.NUM_PARTICLES - 1; i++) {
-            const currParticle = i;
-            const nextParticle = i + 1;
-            Graphics.drawLine(
-                this.particles[currParticle].position.x,
-                this.particles[currParticle].position.y,
-                this.particles[nextParticle].position.x,
-                this.particles[nextParticle].position.y,
-                'blue'
-            );
-        }
+        // for (let i = 0; i < this.NUM_PARTICLES - 1; i++) {
+        //     const currParticle = i;
+        //     const nextParticle = i + 1;
+        //     Graphics.drawLine(
+        //         this.particles[currParticle].position.x,
+        //         this.particles[currParticle].position.y,
+        //         this.particles[nextParticle].position.x,
+        //         this.particles[nextParticle].position.y,
+        //         'blue',
+        //     );
+        // }
 
         for (const particle of this.particles) {
             Graphics.drawFillCircle(particle.position.x, particle.position.y, particle.radius, particle.color);
