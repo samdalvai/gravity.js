@@ -6,7 +6,8 @@ app.setup();
 let timePreviousFrame = performance.now();
 
 const loop = (now: number) => {
-    const deltaTime = Math.min((now - timePreviousFrame) / 1000, 0.016);
+    const deltaTime = (now - timePreviousFrame) / 1000;
+    console.log(deltaTime);
     timePreviousFrame = now;
 
     app.input();
