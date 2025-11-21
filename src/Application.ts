@@ -1,7 +1,7 @@
 import Graphics from './Graphics';
 import InputManager, { MouseButton } from './InputManager';
 import Utils from './Utils';
-import { MILLISECS_PER_FRAME, PIXELS_PER_METER } from './physics/Constants';
+import { PIXELS_PER_METER } from './physics/Constants';
 import Force from './physics/Force';
 import Particle from './physics/Particle';
 import Vec2 from './physics/Vec2';
@@ -24,31 +24,31 @@ export default class Application {
 
     setup = (): void => {
         this.running = Graphics.openWindow();
-
+        
         const bigPlanet = new Particle(Graphics.width() / 2, Graphics.height() / 2, 20, 'yellow', 20);
         this.particles.push(bigPlanet);
 
-        const smallPlanet1 = new Particle(Graphics.width() / 2, 300, 6, 'blue', 1);
-        smallPlanet1.velocity.x = 200;
-        this.particles.push(smallPlanet1);
+        // const smallPlanet1 = new Particle(Graphics.width() / 2, 300, 6, 'blue', 1);
+        // smallPlanet1.velocity.x = 200;
+        // this.particles.push(smallPlanet1);
 
-        const smallPlanet2 = new Particle(Graphics.width() / 2, Graphics.height() / 2 + 400, 8, 'green', 5);
-        smallPlanet2.velocity.x = -220;
-        this.particles.push(smallPlanet2);
+        // const smallPlanet2 = new Particle(Graphics.width() / 2, Graphics.height() / 2 + 400, 8, 'green', 5);
+        // smallPlanet2.velocity.x = -220;
+        // this.particles.push(smallPlanet2);
 
         // Generate random particles
-        // for (let i = 0; i < 1000; i++) {
-        //     const randomRadius = Utils.randomNumber(1, 5);
-        //     const smallPlanet = new Particle(
-        //         Utils.randomNumber(20, Graphics.width() - 20),
-        //         Utils.randomNumber(20, Graphics.height() - 20),
-        //         randomRadius,
-        //         Utils.randomColor(),
-        //         randomRadius,
-        //     );
-        //     smallPlanet.velocity.x = Utils.randomNumber(-200, 200);
-        //     this.particles.push(smallPlanet);
-        // }
+        for (let i = 0; i < 1000; i++) {
+            const randomRadius = Utils.randomNumber(1, 5);
+            const smallPlanet = new Particle(
+                Utils.randomNumber(20, Graphics.width() - 20),
+                Utils.randomNumber(20, Graphics.height() - 20),
+                randomRadius,
+                Utils.randomColor(),
+                randomRadius,
+            );
+            smallPlanet.velocity.x = Utils.randomNumber(-200, 200);
+            this.particles.push(smallPlanet);
+        }
 
         InputManager.initialize();
     };
@@ -138,17 +138,7 @@ export default class Application {
         }
     };
 
-    update = async (): Promise<void> => {
-        const timeToWait = MILLISECS_PER_FRAME - (performance.now() - this.timePreviousFrame);
-
-        if (timeToWait > 0) {
-            await this.sleep(timeToWait);
-        }
-
-        const deltaTime = (performance.now() - this.timePreviousFrame) / 1000;
-
-        this.timePreviousFrame = performance.now();
-
+    update = (deltaTime: number): void => {
         /////////////////////////////////////////////////////////////////////
         ///// Updating all the entities                                 /////
         /////////////////////////////////////////////////////////////////////
