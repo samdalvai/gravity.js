@@ -54,4 +54,43 @@ export default class Force {
         // Calculate the final resulting attraction force vector
         return attractionDirection.scaleNew(attractionMagnitude);
     };
+
+    static generateSpringForceParticleAnchor = (
+        particle: Particle,
+        anchor: Vec2,
+        restLength: number,
+        k: number,
+    ): Vec2 => {
+        // Calculate the distance between the anchor and the object
+        const d = particle.position.subNew(anchor);
+
+        // Find the spring displacement considering the rest length
+        const displacement = d.magnitude() - restLength;
+
+        // Calculate the direction of the spring force
+        const springDirection = d.unitVector();
+
+        // Calculate the magnitude of the spring force
+        const sprintMagnitude = -k * displacement;
+
+        // Calculate the final resulting spring force vector
+        return springDirection.scaleNew(sprintMagnitude);
+    };
+
+    static generateSpringForceParticleParticle = (a: Particle, b: Particle, restLength: number, k: number): Vec2 => {
+        // Calculate the distance between the two particles
+        const d = a.position.subNew(b.position);
+
+        // Find the spring displacement considering the rest length
+        const displacement = d.magnitude() - restLength;
+
+        // Calculate the direction of the spring force
+        const springDirection = d.unitVector();
+
+        // Calculate the magnitude of the spring force
+        const sprintMagnitude = -k * displacement;
+
+        // Calculate the final resulting spring force vector
+        return springDirection.scaleNew(sprintMagnitude);
+    };
 }
