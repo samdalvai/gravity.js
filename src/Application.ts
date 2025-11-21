@@ -28,6 +28,8 @@ export default class Application {
     private restLength = 15;
     private NUM_PARTICLES = 15;
 
+    private nearestParticle: Particle | null = null;
+
     constructor() {
         this.running = false;
     }
@@ -141,14 +143,30 @@ export default class Application {
                         this.leftMouseButtonDown = true;
                         this.mouseCursor.x = inputEvent.x;
                         this.mouseCursor.y = inputEvent.y;
+
+                        this.nearestParticle = this.particles[0];
+                        let minDistance = Number.MAX_SAFE_INTEGER;
+
+                        for (const particle of this.particles) {
+                            const dx = this.mouseCursor.x - particle.position.x;
+                            const dy = this.mouseCursor.y - particle.position.y;
+                            const distance = Math.sqrt(dx * dx + dy * dy);
+                            if (distance < minDistance) {
+                                minDistance = distance;
+                                this.nearestParticle = particle;
+                            }
+                        }
                     }
                     break;
                 case 'mouseup':
                     if (this.leftMouseButtonDown && inputEvent.button === MouseButton.LEFT) {
                         this.leftMouseButtonDown = false;
                         const impulseDirection = this.particles[0].position.subNew(this.mouseCursor).unitVector();
-                        const impulseMagnitude = this.particles[0].position.subNew(this.mouseCursor).magnitude() * 2;
-                        this.particles[0].velocity.assign(impulseDirection.scaleNew(impulseMagnitude));
+                        const impulseMagnitude = this.particles[0].position.subNew(this.mouseCursor).magnitude() * 5.0;
+
+                        if (this.nearestParticle) {
+                            this.nearestParticle.velocity.assign(impulseDirection.scaleNew(impulseMagnitude));
+                        }
                     }
                     break;
             }
@@ -259,15 +277,42 @@ export default class Application {
     render = (): void => {
         Graphics.clearScreen();
 
-        if (this.leftMouseButtonDown) {
+        if (this.leftMouseButtonDown && this.nearestParticle) {
             Graphics.drawLine(
-                this.particles[0].position.x,
-                this.particles[0].position.y,
+                this.nearestParticle.position.x,
+                this.nearestParticle.position.y,
                 this.mouseCursor.x,
                 this.mouseCursor.y,
                 'red',
             );
         }
+
+        ///////////////////////////////////////////////////////////////////////////////
+        // Soft body with spring force
+        ///////////////////////////////////////////////////////////////////////////////
+        // Draw all springs
+        // Graphics::DrawLine(particles[0]->position.x, particles[0]->position.y, particles[1]->position.x, particles[1]->position.y, 0xFF313131);
+        // Graphics::DrawLine(particles[1]->position.x, particles[1]->position.y, particles[2]->position.x, particles[2]->position.y, 0xFF313131);
+        // Graphics::DrawLine(particles[2]->position.x, particles[2]->position.y, particles[3]->position.x, particles[3]->position.y, 0xFF313131);
+        // Graphics::DrawLine(particles[3]->position.x, particles[3]->position.y, particles[0]->position.x, particles[0]->position.y, 0xFF313131);
+        // Graphics::DrawLine(particles[0]->position.x, particles[0]->position.y, particles[2]->position.x, particles[2]->position.y, 0xFF313131);
+        // Graphics::DrawLine(particles[1]->position.x, particles[1]->position.y, particles[3]->position.x, particles[3]->position.y, 0xFF313131);
+
+        // // Draw all particles
+        // Graphics::DrawFillCircle(particles[0]->position.x, particles[0]->position.y, particles[0]->radius, 0xFFEEBB00);
+        // Graphics::DrawFillCircle(particles[1]->position.x, particles[1]->position.y, particles[1]->radius, 0xFFEEBB00);
+        // Graphics::DrawFillCircle(particles[2]->position.x, particles[2]->position.y, particles[2]->radius, 0xFFEEBB00);
+        // Graphics::DrawFillCircle(particles[3]->position.x, particles[3]->position.y, particles[3]->radius, 0xFFEEBB00);
+
+        ///////////////////////////////////////////////////////////////////////////////
+        // Particle chain with spring force
+        ///////////////////////////////////////////////////////////////////////////////
+        // Draw all the springs from one particle to the next
+        // for (int i = 0; i < NUM_PARTICLES - 1; i++) {
+        //     int currParticle = i;
+        //     int nextParticle = i + 1;
+        //     Graphics::DrawLine(particles[currParticle]->position.x, particles[currParticle]->position.y, particles[nextParticle]->position.x, particles[nextParticle]->position.y, 0xFF313131);
+        // }
 
         for (const particle of this.particles) {
             Graphics.drawFillCircle(particle.position.x, particle.position.y, particle.radius, particle.color);
