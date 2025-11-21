@@ -211,6 +211,27 @@ export default class Application {
         // Attach the head to the anchor with a spring
         // Vec2 springForce = Force::GenerateSpringForce(*particles[0], anchor, restLength, k);
         // particles[0]->AddForce(springForce);
+        const springForce = Force.generateSpringForceParticleAnchor(
+            this.particles[0],
+            this.anchor,
+            this.restLength,
+            this.k,
+        );
+        this.particles[0].addForce(springForce);
+
+        // Connect the particles with the one before in a chain of springs
+        for (let i = 1; i < this.NUM_PARTICLES; i++) {
+            const currParticle = i;
+            const prevParticle = i - 1;
+            const springForce = Force.generateSpringForceParticleParticle(
+                this.particles[currParticle],
+                this.particles[prevParticle],
+                this.restLength,
+                this.k,
+            );
+            this.particles[currParticle].addForce(springForce);
+            this.particles[prevParticle].addForce(springForce.negate());
+        }
 
         for (const particle of this.particles) {
             particle.integrate(deltaTime);
