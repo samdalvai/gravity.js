@@ -47,7 +47,7 @@ export default class Application {
 
         // Add a static box so other boxes can collide
         const bigBox = new Body(new BoxShape(200, 200), Graphics.width() / 2.0, Graphics.height() / 2.0, 0.0);
-        bigBox.restitution = 0.1;
+        bigBox.restitution = 0.7;
         bigBox.rotation = 1.4;
         this.bodies.push(bigBox);
 
@@ -91,9 +91,14 @@ export default class Application {
             switch (inputEvent.type) {
                 case 'mousedown':
                     {
-                        const box = new Body(new BoxShape(50, 50), inputEvent.x, inputEvent.y, 1.0);
-                        box.restitution = 0.2;
-                        this.bodies.push(box);
+                        // const box = new Body(new BoxShape(50, 50), inputEvent.x, inputEvent.y, 1.0);
+                        // box.restitution = 0.2;
+                        // this.bodies.push(box);
+
+                        const ball = new Body(new CircleShape(30), inputEvent.x, inputEvent.y, 1.0);
+                        ball.restitution = 0.5;
+                        ball.friction = 0.4;
+                        this.bodies.push(ball);
                     }
                     break;
                 case 'mouseup':
@@ -165,16 +170,16 @@ export default class Application {
     render = (): void => {
         // Draw all bodies
         for (const body of this.bodies) {
-            // const color = body.isColliding ? 'red' : 'white';
+            const color = body.isColliding ? 'red' : 'white';
 
             if (body.shape.getType() === ShapeType.CIRCLE) {
                 const circleShape = body.shape as CircleShape;
-                Graphics.drawFillCircle(body.position.x, body.position.y, circleShape.radius, 'white');
+                Graphics.drawCircle(body.position.x, body.position.y, circleShape.radius, body.rotation, color);
             }
 
             if (body.shape.getType() === ShapeType.BOX) {
                 const boxShape = body.shape as BoxShape;
-                Graphics.drawPolygon(body.position.x, body.position.y, boxShape.worldVertices, 'white');
+                Graphics.drawPolygon(body.position.x, body.position.y, boxShape.worldVertices, color);
             }
         }
     };
