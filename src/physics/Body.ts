@@ -26,6 +26,7 @@ export default class Body {
 
     // Coefficient of restitution (elasticity)
     restitution: number;
+    friction: number;
 
     // Pointer to the shape/geometry of this rigid body
     shape: Shape;
@@ -42,6 +43,7 @@ export default class Body {
         this.sumForces = new Vec2(0, 0);
         this.sumTorque = 0.0;
         this.restitution = 1.0;
+        this.friction = 0.7;
         this.mass = mass;
         if (mass != 0.0) {
             this.invMass = 1.0 / mass;
@@ -77,12 +79,21 @@ export default class Body {
         this.sumTorque = 0.0;
     };
 
-    applyImpulse = (j: Vec2): void => {
+    applyLinearImpulse = (j: Vec2): void => {
         if (this.isStatic()) {
             return;
         }
         this.velocity.addAssign(j.scaleNew(this.invMass));
     };
+
+    applyAngularImpulse(j: Vec2, r: Vec2) {
+        if (this.isStatic()) {
+            return;
+        }
+
+        this.velocity.addAssign(j.scaleNew(this.invMass));
+        this.angularVelocity += r.cross(j) * this.invI;
+    }
 
     integrateLinear = (dt: number): void => {
         if (this.isStatic()) {
@@ -123,7 +134,7 @@ export default class Body {
     update = (dt: number): void => {
         this.integrateLinear(dt);
         this.integrateAngular(dt);
-        
+
         const isPolygon = this.shape.getType() === ShapeType.POLYGON || this.shape.getType() === ShapeType.BOX;
         if (isPolygon) {
             (this.shape as PolygonShape).updateVertices(this.rotation, this.position);
