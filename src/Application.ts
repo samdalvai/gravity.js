@@ -116,6 +116,8 @@ export default class Application {
                         throw new Error('Could not determine Contact information');
                     }
 
+                    // TODO: this debug rendering is wrong, screen is cleared afterwards,
+                    // we are mixing rendering with update
                     // Draw debug contact information
                     Graphics.drawFillCircle(contact.start.x, contact.start.y, 3, 'red');
                     Graphics.drawFillCircle(contact.end.x, contact.end.y, 3, 'red');
