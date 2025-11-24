@@ -112,7 +112,8 @@ export default class Application {
                     contact.resolveCollision();
 
                     if (!contact.start || !contact.end || !contact.normal) {
-                        throw new Error('Could not define Contact information: ' + contact);
+                        console.error('Could not determine Contact information: ', contact);
+                        throw new Error('Could not determine Contact information');
                     }
 
                     // Draw debug contact information
