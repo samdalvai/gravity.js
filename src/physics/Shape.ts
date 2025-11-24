@@ -80,7 +80,7 @@ export class BoxShape extends PolygonShape {
     getType = (): ShapeType => {
         return ShapeType.BOX;
     };
-    
+
     getMomentOfInertia = (): number => {
         // For a rectangle, the moment of inertia is 1/12 * (w^2 + h^2)
         // But this still needs to be multiplied by the rigidbody's mass
