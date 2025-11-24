@@ -1,16 +1,16 @@
-import Particle from './Particle';
+import Body from './Body';
 import Vec2 from './Vec2';
 
 export default class Force {
-    static generateDragForce = (particle: Particle, k: number): Vec2 => {
+    static generateDragForce = (body: Body, k: number): Vec2 => {
         let dragForce = new Vec2(0, 0);
 
-        if (particle.velocity.magnitudeSquared() > 0) {
+        if (body.velocity.magnitudeSquared() > 0) {
             // Calculate the drag direction (inverse of velocity unit vector)
-            const dragDirection = particle.velocity.unitVector().scaleNew(-1);
+            const dragDirection = body.velocity.unitVector().scaleNew(-1);
 
             // Calculate the drag magnitude, k * |v|^2
-            const dragMagnitude = k * particle.velocity.magnitudeSquared();
+            const dragMagnitude = k * body.velocity.magnitudeSquared();
 
             // Generate the final drag force with direction and magnitude
             dragForce = dragDirection.scaleNew(dragMagnitude);
@@ -18,9 +18,9 @@ export default class Force {
 
         return dragForce;
     };
-    static generateFrictionForce = (particle: Particle, k: number): Vec2 => {
+    static generateFrictionForce = (body: Body, k: number): Vec2 => {
         // Calculate the friction direction (inverse of velocity unit vector)
-        const frictionDirection = particle.velocity.unitVector().scaleNew(-1);
+        const frictionDirection = body.velocity.unitVector().scaleNew(-1);
 
         // Calculate the friction magnitude (just k, for now)
         const frictionMagnitude = k;
@@ -30,8 +30,8 @@ export default class Force {
     };
 
     static generateGravitationalForce = (
-        a: Particle,
-        b: Particle,
+        a: Body,
+        b: Body,
         G: number,
         minDistance: number,
         maxDistance: number,
@@ -54,14 +54,9 @@ export default class Force {
         return attractionDirection.scaleNew(attractionMagnitude);
     };
 
-    static generateSpringForceParticleAnchor = (
-        particle: Particle,
-        anchor: Vec2,
-        restLength: number,
-        k: number,
-    ): Vec2 => {
+    static generateSpringForceBodyAnchor = (body: Body, anchor: Vec2, restLength: number, k: number): Vec2 => {
         // Calculate the distance between the anchor and the object
-        const d = particle.position.subNew(anchor);
+        const d = body.position.subNew(anchor);
 
         // Find the spring displacement considering the rest length
         const displacement = d.magnitude() - restLength;
@@ -76,8 +71,8 @@ export default class Force {
         return springDirection.scaleNew(sprintMagnitude);
     };
 
-    static generateSpringForceParticleParticle = (a: Particle, b: Particle, restLength: number, k: number): Vec2 => {
-        // Calculate the distance between the two particles
+    static generateSpringForceBodyBody = (a: Body, b: Body, restLength: number, k: number): Vec2 => {
+        // Calculate the distance between the two bodys
         const d = a.position.subNew(b.position);
 
         // Find the spring displacement considering the rest length
