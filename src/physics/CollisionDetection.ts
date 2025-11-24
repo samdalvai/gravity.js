@@ -51,6 +51,7 @@ export default class CollisionDetection {
     static isCollidingPolygonPolygon = (a: Body, b: Body, contact: Contact): boolean => {
         const aPolygonShape = a.shape as PolygonShape;
         const bPolygonShape = b.shape as PolygonShape;
+        
         const aAxis = new Vec2();
         const bAxis = new Vec2();
         const aPoint = new Vec2();
