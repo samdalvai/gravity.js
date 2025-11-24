@@ -1,37 +1,15 @@
 import Graphics from './Graphics';
-import InputManager, { MouseButton } from './InputManager';
-import Utils from './Utils';
-import { PIXELS_PER_METER } from './physics/Constants';
-import Force from './physics/Force';
-import Particle from './physics/Particle';
-import Vec2 from './physics/Vec2';
+import InputManager from './InputManager';
+import Body from './physics/Body';
+import { CircleShape } from './physics/Shape';
 
 export default class Application {
     private running: boolean;
-    private particles: Particle[] = [];
-    private pushForce = new Vec2(0, 0);
-    private mouseCursor = new Vec2(0, 0);
-    private leftMouseButtonDown = false;
-
-    ///////////////////////////////////////////////////////////////////////////////
-    // Soft body with spring force
-    ///////////////////////////////////////////////////////////////////////////////
-    private k = 1500;
-    private restLength = 200;
-    private NUM_PARTICLES = 4;
-
-    ///////////////////////////////////////////////////////////////////////////////
-    // Particle chain with spring force
-    ///////////////////////////////////////////////////////////////////////////////
-    // private anchor = new Vec2(0, 0);
-    // private k = 300;
-    // private restLength = 15;
-    // private NUM_PARTICLES = 15;
-
-    private nearestParticle: Particle | null = null;
+    private bodies: Body[];
 
     constructor() {
         this.running = false;
+        this.bodies = [];
     }
 
     isRunning = (): boolean => {
@@ -41,28 +19,8 @@ export default class Application {
     setup = (): void => {
         this.running = Graphics.openWindow();
 
-        ///////////////////////////////////////////////////////////////////////////////
-        // Soft body with spring force
-        ///////////////////////////////////////////////////////////////////////////////
-        const a = new Particle(400, 100, 6, 'blue', 1);
-        const b = new Particle(600, 100, 6, 'blue', 1);
-        const c = new Particle(600, 300, 6, 'blue', 1);
-        const d = new Particle(400, 300, 6, 'blue', 1);
-
-        this.particles.push(a);
-        this.particles.push(b);
-        this.particles.push(c);
-        this.particles.push(d);
-
-        ///////////////////////////////////////////////////////////////////////////////
-        // Particle chain with spring force
-        ///////////////////////////////////////////////////////////////////////////////
-        // this.anchor = new Vec2(Graphics.width() / 2.0, 30);
-
-        // for (let i = 0; i < this.NUM_PARTICLES; i++) {
-        //     const bob = new Particle(this.anchor.x, this.anchor.y + i * this.restLength, 6, 'blue', 2.0);
-        //     this.particles.push(bob);
-        // }
+        const bigBall = new Body(new CircleShape(200), Graphics.width() / 2, Graphics.height() / 2, 0);
+        this.bodies.push(bigBall);
 
         InputManager.initialize();
     };
@@ -78,36 +36,8 @@ export default class Application {
 
             switch (inputEvent.type) {
                 case 'keydown':
-                    switch (inputEvent.code) {
-                        case 'ArrowUp':
-                            this.pushForce.y = -50 * PIXELS_PER_METER;
-                            break;
-                        case 'ArrowRight':
-                            this.pushForce.x = 50 * PIXELS_PER_METER;
-                            break;
-                        case 'ArrowDown':
-                            this.pushForce.y = 50 * PIXELS_PER_METER;
-                            break;
-                        case 'ArrowLeft':
-                            this.pushForce.x = -50 * PIXELS_PER_METER;
-                            break;
-                    }
                     break;
                 case 'keyup':
-                    switch (inputEvent.code) {
-                        case 'ArrowUp':
-                            this.pushForce.y = 0;
-                            break;
-                        case 'ArrowRight':
-                            this.pushForce.x = 0;
-                            break;
-                        case 'ArrowDown':
-                            this.pushForce.y = 0;
-                            break;
-                        case 'ArrowLeft':
-                            this.pushForce.x = 0;
-                            break;
-                    }
                     break;
             }
         }
@@ -119,9 +49,6 @@ export default class Application {
             if (!inputEvent) {
                 return;
             }
-
-            this.mouseCursor.x = inputEvent.x;
-            this.mouseCursor.y = inputEvent.y;
         }
 
         // Handle mouse click events
@@ -134,248 +61,101 @@ export default class Application {
 
             switch (inputEvent.type) {
                 case 'mousedown':
-                    if (!this.leftMouseButtonDown && inputEvent.button === MouseButton.LEFT) {
-                        this.leftMouseButtonDown = true;
-                        this.mouseCursor.x = inputEvent.x;
-                        this.mouseCursor.y = inputEvent.y;
-
-                        this.nearestParticle = this.particles[0];
-                        let minDistance = Number.MAX_SAFE_INTEGER;
-
-                        for (const particle of this.particles) {
-                            const dx = this.mouseCursor.x - particle.position.x;
-                            const dy = this.mouseCursor.y - particle.position.y;
-                            const distance = Math.sqrt(dx * dx + dy * dy);
-                            if (distance < minDistance) {
-                                minDistance = distance;
-                                this.nearestParticle = particle;
-                            }
-                        }
-                    }
+                    // int x, y;
+                    // SDL_GetMouseState(&x, &y);
+                    // Body* smallBall = new Body(CircleShape(40), x, y, 1.0);
+                    // smallBall->restitution = 0.2;
+                    // bodies.push_back(smallBall);
                     break;
                 case 'mouseup':
-                    if (this.leftMouseButtonDown && inputEvent.button === MouseButton.LEFT) {
-                        this.leftMouseButtonDown = false;
-                        const impulseDirection = this.particles[0].position.subNew(this.mouseCursor).unitVector();
-                        const impulseMagnitude = this.particles[0].position.subNew(this.mouseCursor).magnitude() * 5.0;
-
-                        if (this.nearestParticle) {
-                            this.nearestParticle.velocity.assign(impulseDirection.scaleNew(impulseMagnitude));
-                        }
-                    }
                     break;
             }
         }
     };
 
     update = (deltaTime: number): void => {
-        /////////////////////////////////////////////////////////////////////
-        ///// Updating all the entities                                 /////
-        /////////////////////////////////////////////////////////////////////
+        // Apply forces to the bodies
+        // for (auto body: bodies) {
+        // Apply a drag force
+        // const drag = Force.generateDragForce(particle, 0.003);
+        // particle.addForce(drag);
+        
+        //     // Apply the weight force
+        //     Vec2 weight = Vec2(0.0, body->mass * 9.8 * PIXELS_PER_METER);
+        //     body->AddForce(weight);
 
-        for (const particle of this.particles) {
-            // Apply push force
-            particle.addForce(this.pushForce);
-
-            // Apply a friction force
-            // const friction = Force.generateFrictionForce(particle, 20);
-            // particle.addForce(friction);
-
-            // Apply a drag force
-            const drag = Force.generateDragForce(particle, 0.003);
-            particle.addForce(drag);
-
-            // Apply weight force
-            const weight = new Vec2(0.0, particle.mass * 9.8 * PIXELS_PER_METER);
-            particle.addForce(weight);
-        }
-
-        ///////////////////////////////////////////////////////////////////////////////
-        // Soft body with spring force
-        ///////////////////////////////////////////////////////////////////////////////
-        // Attach particles with springs
-        const ab = Force.generateSpringForceParticleParticle(
-            this.particles[0],
-            this.particles[1],
-            this.restLength,
-            this.k,
-        );
-        this.particles[0].addForce(ab);
-        this.particles[1].addForce(ab.negate());
-
-        const bc = Force.generateSpringForceParticleParticle(
-            this.particles[1],
-            this.particles[2],
-            this.restLength,
-            this.k,
-        );
-        this.particles[1].addForce(bc);
-        this.particles[2].addForce(bc.negate());
-
-        const cd = Force.generateSpringForceParticleParticle(
-            this.particles[2],
-            this.particles[3],
-            this.restLength,
-            this.k,
-        );
-        this.particles[2].addForce(cd);
-        this.particles[3].addForce(cd.negate());
-
-        const da = Force.generateSpringForceParticleParticle(
-            this.particles[3],
-            this.particles[0],
-            this.restLength,
-            this.k,
-        );
-        this.particles[3].addForce(da);
-        this.particles[0].addForce(da.negate());
-
-        const ac = Force.generateSpringForceParticleParticle(
-            this.particles[0],
-            this.particles[2],
-            this.restLength,
-            this.k,
-        );
-        this.particles[0].addForce(ac);
-        this.particles[2].addForce(ac.negate());
-
-        const bd = Force.generateSpringForceParticleParticle(
-            this.particles[1],
-            this.particles[3],
-            this.restLength,
-            this.k,
-        );
-        this.particles[1].addForce(bd);
-        this.particles[3].addForce(bd.negate());
-
-        ///////////////////////////////////////////////////////////////////////////////
-        // Particle chain with spring force
-        ///////////////////////////////////////////////////////////////////////////////
-        // Attach the head to the anchor with a spring
-        // const springForce = Force.generateSpringForceParticleAnchor(
-        //     this.particles[0],
-        //     this.anchor,
-        //     this.restLength,
-        //     this.k,
-        // );
-        // this.particles[0].addForce(springForce);
-
-        // Connect the particles with the one before in a chain of springs
-        // for (let i = 1; i < this.NUM_PARTICLES; i++) {
-        //     const currParticle = i;
-        //     const prevParticle = i - 1;
-        //     const springForce = Force.generateSpringForceParticleParticle(
-        //         this.particles[currParticle],
-        //         this.particles[prevParticle],
-        //         this.restLength,
-        //         this.k,
-        //     );
-        //     this.particles[currParticle].addForce(springForce);
-        //     this.particles[prevParticle].addForce(springForce.negate());
+        //     // Apply the wind force
+        //     Vec2 wind = Vec2(2.0 * PIXELS_PER_METER, 0.0);
+        //     body->AddForce(wind);
         // }
 
-        for (const particle of this.particles) {
-            particle.integrate(deltaTime);
-        }
+        // // Integrate the acceleration and velocity to estimate the new position
+        // for (auto body: bodies) {
+        //     body->Update(deltaTime);
+        // }
 
-        for (const particle of this.particles) {
-            // Hardcoded flip in velocity if it touches the limits of the screen window
-            if (particle.position.x - particle.radius <= 0) {
-                particle.position.x = particle.radius;
-                particle.velocity.x *= -0.9;
-            } else if (particle.position.x + particle.radius >= Graphics.width()) {
-                particle.position.x = Graphics.width() - particle.radius;
-                particle.velocity.x *= -0.9;
-            }
-            if (particle.position.y - particle.radius <= 0) {
-                particle.position.y = particle.radius;
-                particle.velocity.y *= -0.9;
-            } else if (particle.position.y + particle.radius >= Graphics.height()) {
-                particle.position.y = Graphics.height() - particle.radius;
-                particle.velocity.y *= -0.9;
-            }
-        }
+        // // Check all the rigidbodies with the other rigidbodies for collision
+        // for (int i = 0; i <= bodies.size() - 1; i++) {
+        //     for (int j = i + 1; j < bodies.size(); j++) {
+        //         Body* a = bodies[i];
+        //         Body* b = bodies[j];
+        //         a->isColliding = false;
+        //         b->isColliding = false;
+                
+        //         Contact contact;
+
+        //         if (CollisionDetection::IsColliding(a, b, contact)) {
+        //             // Resolve the collision using the impulse method
+        //             contact.ResolveCollision();
+
+        //             // Draw debug contact information
+        //             Graphics::DrawFillCircle(contact.start.x, contact.start.y, 3, 0xFFFF00FF);
+        //             Graphics::DrawFillCircle(contact.end.x, contact.end.y, 3, 0xFFFF00FF);
+        //             Graphics::DrawLine(contact.start.x, contact.start.y, contact.start.x + contact.normal.x * 15, contact.start.y + contact.normal.y * 15, 0xFFFF00FF);
+        //             a->isColliding = true;
+        //             b->isColliding = true;
+        //         }
+        //     }
+        // }
+
+        // // Check the boundaries of the window applying a hardcoded bounce flip in velocity
+        // for (auto body: bodies) {
+        //     if (body->shape->GetType() == CIRCLE) {
+        //         CircleShape* circleShape = (CircleShape*) body->shape;
+        //         if (body->position.x - circleShape->radius <= 0) {
+        //             body->position.x = circleShape->radius;
+        //             body->velocity.x *= -0.9;
+        //         } else if (body->position.x + circleShape->radius >= Graphics::Width()) {
+        //             body->position.x = Graphics::Width() - circleShape->radius;
+        //             body->velocity.x *= -0.9;
+        //         }
+        //         if (body->position.y - circleShape->radius <= 0) {
+        //             body->position.y = circleShape->radius;
+        //             body->velocity.y *= -0.9;
+        //         } else if (body->position.y + circleShape->radius >= Graphics::Height()) {
+        //             body->position.y = Graphics::Height() - circleShape->radius;
+        //             body->velocity.y *= -0.9;
+        //         }
+        //     }
+        // }
     };
 
     render = (): void => {
-        Graphics.clearScreen();
+        // Draw all bodies
+        // for (auto body: bodies) {
+        //     Uint32 color = body->isColliding ? 0xFF0000FF : 0xFFFFFFFF;
 
-        if (this.leftMouseButtonDown && this.nearestParticle) {
-            Graphics.drawLine(
-                this.nearestParticle.position.x,
-                this.nearestParticle.position.y,
-                this.mouseCursor.x,
-                this.mouseCursor.y,
-                'red',
-            );
-        }
-
-        ///////////////////////////////////////////////////////////////////////////////
-        // Soft body with spring force
-        ///////////////////////////////////////////////////////////////////////////////
-        // Draw all springs
-        Graphics.drawLine(
-            this.particles[0].position.x,
-            this.particles[0].position.y,
-            this.particles[1].position.x,
-            this.particles[1].position.y,
-            'lightblue',
-        );
-        Graphics.drawLine(
-            this.particles[1].position.x,
-            this.particles[1].position.y,
-            this.particles[2].position.x,
-            this.particles[2].position.y,
-            'lightblue',
-        );
-        Graphics.drawLine(
-            this.particles[2].position.x,
-            this.particles[2].position.y,
-            this.particles[3].position.x,
-            this.particles[3].position.y,
-            'lightblue',
-        );
-        Graphics.drawLine(
-            this.particles[3].position.x,
-            this.particles[3].position.y,
-            this.particles[0].position.x,
-            this.particles[0].position.y,
-            'lightblue',
-        );
-        Graphics.drawLine(
-            this.particles[0].position.x,
-            this.particles[0].position.y,
-            this.particles[2].position.x,
-            this.particles[2].position.y,
-            'white',
-        );
-        Graphics.drawLine(
-            this.particles[1].position.x,
-            this.particles[1].position.y,
-            this.particles[3].position.x,
-            this.particles[3].position.y,
-            'lightblue',
-        );
-
-        ///////////////////////////////////////////////////////////////////////////////
-        // Particle chain with spring force
-        ///////////////////////////////////////////////////////////////////////////////
-        // Draw all the springs from one particle to the next
-        // for (let i = 0; i < this.NUM_PARTICLES - 1; i++) {
-        //     const currParticle = i;
-        //     const nextParticle = i + 1;
-        //     Graphics.drawLine(
-        //         this.particles[currParticle].position.x,
-        //         this.particles[currParticle].position.y,
-        //         this.particles[nextParticle].position.x,
-        //         this.particles[nextParticle].position.y,
-        //         'blue',
-        //     );
+        //     if (body->shape->GetType() == CIRCLE) {
+        //         CircleShape* circleShape = (CircleShape*) body->shape;
+        //         Graphics::DrawFillCircle(body->position.x, body->position.y, circleShape->radius, 0xFFFFFFFF);
+        //     }
+        //     if (body->shape->GetType() == BOX) {
+        //         BoxShape* boxShape = (BoxShape*) body->shape;
+        //         Graphics::DrawPolygon(body->position.x, body->position.y, boxShape->worldVertices, 0xFFFFFFFF);
+        //     }
         // }
 
-        for (const particle of this.particles) {
-            Graphics.drawFillCircle(particle.position.x, particle.position.y, particle.radius, particle.color);
-        }
+        Graphics.clearScreen();
     };
 
     sleep = (milliseconds: number) => {
