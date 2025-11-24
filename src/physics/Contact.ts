@@ -33,26 +33,31 @@ export default class Contact {
 
     // Resolves the collision using the impulse method
     resolveCollision = (): void => {
-        //     // Apply positional correction using the projection method
-        //     ResolvePenetration();
+        if (!this.a || !this.b || !this.depth || !this.normal) {
+            throw new Error('Some Contact variables are not initialized');
+        }
 
-        //     // Define elasticity (coefficient of restitution e)
-        //     float e = std::min(a->restitution, b->restitution);
+        // Apply positional correction using the projection method
+        this.resolvePenetration();
 
-        //     // Calculate the relative velocity between the two objects
-        //     const Vec2 vrel = (a->velocity - b->velocity);
+        // Define elasticity (coefficient of restitution e)
+        const e = Math.min(this.a.restitution, this.b.restitution);
 
-        //     // Calculate the relative velocity along the normal collision vector
-        //     float vrelDotNormal = vrel.Dot(normal);
+        // Calculate the relative velocity between the two objects
+        const vrel = this.a.velocity.subNew(this.b.velocity);
 
-        //     // Now we proceed to calculate the collision impulse
-        //     const Vec2 impulseDirection = normal;
-        //     const float impulseMagnitude = -(1 + e) * vrelDotNormal / (a->invMass + b->invMass);
+        // Calculate the relative velocity along the normal collision vector
+        const vrelDotNormal = vrel.dot(this.normal);
 
-        //     Vec2 jn = impulseDirection * impulseMagnitude;
+        // Now we proceed to calculate the collision impulse
+        // TODO: why we assign normal to impulseDirection? Is this needed?
+        const impulseDirection = this.normal;
+        const impulseMagnitude = (-(1 + e) * vrelDotNormal) / (this.a.invMass + this.b.invMass);
 
-        //     // Apply the impulse vector to both objects in opposite direction
-        //     a->ApplyImpulse(jn);
-        //     b->ApplyImpulse(-jn);
+        const jn = impulseDirection.scaleNew(impulseMagnitude);
+
+        // Apply the impulse vector to both objects in opposite direction
+        this.a.applyImpulse(jn);
+        this.b.applyImpulse(jn.negate());
     };
 }
