@@ -1,4 +1,4 @@
-import { Shape } from './Shape';
+import { PolygonShape, Shape, ShapeType } from './Shape';
 import Vec2 from './Vec2';
 
 export default class Body {
@@ -56,18 +56,77 @@ export default class Body {
         }
     }
 
-    // TODO: fill this methods
-    // bool IsStatic() const;
+    isStatic = (): boolean => {
+        const epsilon = 0.005;
+        return Math.abs(this.invMass - 0.0) < epsilon;
+    };
 
-    // void AddForce(const Vec2& force);
-    // void AddTorque(float torque);
-    // void ClearForces();
-    // void ClearTorque();
+    addForce = (force: Vec2): void => {
+        this.sumForces.addAssign(force);
+    };
 
-    // void ApplyImpulse(const Vec2& j);
+    addTorque = (torque: number): void => {
+        this.sumTorque += torque;
+    };
 
-    // void IntegrateLinear(float dt);
-    // void IntegrateAngular(float dt);
+    clearForces = (): void => {
+        this.sumForces = new Vec2(0.0, 0.0);
+    };
 
-    // void Update(float dt);
+    clearTorque = (): void => {
+        this.sumTorque = 0.0;
+    };
+
+    applyImpulse = (j: Vec2): void => {
+        if (this.isStatic()) {
+            return;
+        }
+        this.velocity.addAssign(j.scaleNew(this.invMass));
+    };
+
+    integrateLinear = (dt: number): void => {
+        if (this.isStatic()) {
+            return;
+        }
+
+        // Find the acceleration based on the forces that are being applied and the mass
+        this.acceleration = this.sumForces.scaleNew(this.invMass);
+
+        // Integrate the acceleration to find the new velocity
+        this.velocity.addAssign(this.acceleration.scaleNew(dt));
+
+        // Integrate the velocity to find the new position
+        this.position.addAssign(this.velocity.scaleNew(dt));
+
+        // Clear all the forces acting on the object before the next physics step
+        this.clearForces();
+    };
+
+    integrateAngular = (dt: number): void => {
+        if (this.isStatic()) {
+            return;
+        }
+
+        // Find the angular acceleration based on the torque that is being applied and the moment of inertia
+        this.angularAcceleration = this.sumTorque * this.invI;
+
+        // Integrate the angular acceleration to find the new angular velocity
+        this.angularVelocity += this.angularAcceleration * dt;
+
+        // Integrate the angular velocity to find the new rotation angle
+        this.rotation += this.angularVelocity * dt;
+
+        // Clear all the torque acting on the object before the next physics step
+        this.clearTorque();
+    };
+
+    update = (dt: number): void => {
+        this.integrateLinear(dt);
+        this.integrateAngular(dt);
+        
+        const isPolygon = this.shape.getType() === ShapeType.POLYGON || this.shape.getType() === ShapeType.BOX;
+        if (isPolygon) {
+            (this.shape as PolygonShape).updateVertices(this.rotation, this.position);
+        }
+    };
 }
