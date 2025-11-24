@@ -63,7 +63,7 @@ export class PolygonShape extends Shape {
     };
 
     findMinSeparation = (other: PolygonShape, axis: Vec2, point: Vec2): number => {
-        let separation = Number.MIN_SAFE_INTEGER;
+        let separation = -Infinity;
 
         // Loop all the vertices of "this" polygon
         for (let i = 0; i < this.worldVertices.length; i++) {
@@ -71,7 +71,7 @@ export class PolygonShape extends Shape {
             const normal = this.edgeAt(i).normal();
 
             // Loop all the vertices of the "other" polygon
-            let minSep = Number.MAX_SAFE_INTEGER;
+            let minSep = Infinity;
             let minVertex: Vec2 | null = null;
 
             for (let j = 0; j < other.worldVertices.length; j++) {
@@ -85,10 +85,13 @@ export class PolygonShape extends Shape {
 
             if (minSep > separation) {
                 separation = minSep;
-                axis = this.edgeAt(i);
+                const edgeAtI = this.edgeAt(i);
+                axis.x = edgeAtI.x;
+                axis.y = edgeAtI.y;
 
                 if (minVertex) {
-                    point = minVertex;
+                    point.x = minVertex.x;
+                    point.y = minVertex.y;
                 }
             }
         }
