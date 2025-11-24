@@ -11,6 +11,7 @@ import Vec2 from './physics/Vec2';
 export default class Application {
     private running: boolean;
     private bodies: Body[];
+    private generatePolygon = false;
 
     constructor() {
         this.running = false;
@@ -91,14 +92,18 @@ export default class Application {
             switch (inputEvent.type) {
                 case 'mousedown':
                     {
-                        // const box = new Body(new BoxShape(50, 50), inputEvent.x, inputEvent.y, 1.0);
-                        // box.restitution = 0.2;
-                        // this.bodies.push(box);
-
-                        const ball = new Body(new CircleShape(30), inputEvent.x, inputEvent.y, 1.0);
-                        ball.restitution = 0.5;
-                        ball.friction = 0.4;
-                        this.bodies.push(ball);
+                        if (this.generatePolygon) {
+                            const box = new Body(new BoxShape(50, 50), inputEvent.x, inputEvent.y, 1.0);
+                            box.restitution = 0.2;
+                            this.bodies.push(box);
+                        } else {
+                            const ball = new Body(new CircleShape(30), inputEvent.x, inputEvent.y, 1.0);
+                            ball.restitution = 0.5;
+                            ball.friction = 0.4;
+                            this.bodies.push(ball);
+                        }
+                        
+                        this.generatePolygon = !this.generatePolygon;
                     }
                     break;
                 case 'mouseup':
