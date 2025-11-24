@@ -55,6 +55,45 @@ export class PolygonShape extends Shape {
             this.worldVertices[i].addAssign(position);
         }
     };
+
+    edgeAt = (index: number): Vec2 => {
+        const currVertex = index;
+        const nextVertex = (index + 1) % this.worldVertices.length;
+        return this.worldVertices[nextVertex].subNew(this.worldVertices[currVertex]);
+    };
+
+    findMinSeparation = (other: PolygonShape, axis: Vec2, point: Vec2): number => {
+        let separation = Number.MIN_SAFE_INTEGER;
+
+        // Loop all the vertices of "this" polygon
+        for (let i = 0; i < this.worldVertices.length; i++) {
+            const va = this.worldVertices[i];
+            const normal = this.edgeAt(i).normal();
+
+            // Loop all the vertices of the "other" polygon
+            let minSep = Number.MAX_SAFE_INTEGER;
+            let minVertex: Vec2 | null = null;
+
+            for (let j = 0; j < other.worldVertices.length; j++) {
+                const vb = other.worldVertices[j];
+                const proj = vb.subNew(va).dot(normal);
+                if (proj < minSep) {
+                    minSep = proj;
+                    minVertex = vb;
+                }
+            }
+
+            if (minSep > separation) {
+                separation = minSep;
+                axis = this.edgeAt(i);
+
+                if (minVertex) {
+                    point = minVertex;
+                }
+            }
+        }
+        return separation;
+    };
 }
 
 export class BoxShape extends PolygonShape {
