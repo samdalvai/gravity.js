@@ -34,7 +34,7 @@ export default class Contact {
     // Resolves the collision using the impulse method
     resolveCollision = (): void => {
         if (!this.a || !this.b || !this.depth || !this.normal) {
-            throw new Error('Some Contact variables are not initialized');
+            throw new Error('Some Contact variables are not initialized: ' + this);
         }
 
         // Apply positional correction using the projection method
