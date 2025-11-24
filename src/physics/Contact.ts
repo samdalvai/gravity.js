@@ -58,7 +58,7 @@ export default class Contact {
         const jn = impulseDirection.scaleNew(impulseMagnitude);
 
         // Apply the impulse vector to both objects in opposite direction
-        this.a.applyImpulse(jn);
-        this.b.applyImpulse(jn.negate());
+        this.a.applyLinearImpulse(jn);
+        this.b.applyLinearImpulse(jn.negate());
     };
 }
