@@ -1,51 +1,58 @@
+import Body from './Body';
+import Vec2 from './Vec2';
+
 export default class Contact {
-    // Body* a;
-    // Body* b;
+    // TODO: find a way to avoid initializing all to null
+    a: Body | null = null;
+    b: Body | null = null;
 
-    // Vec2 start;
-    // Vec2 end;
+    start: Vec2 | null = null;
+    end: Vec2 | null = null;
 
-    // Vec2 normal;
-    // float depth;
+    normal: Vec2 | null = null;
+    depth: number | null = null;
 
-    // Contact() = default;
-    // ~Contact() = default;
+    constructor() {}
 
     // Resolves the collision using the position change method
-    // void Contact::ResolvePenetration() {
-    //     if (a->IsStatic() && b->IsStatic()) {
-    //         return;
-    //     }
+    resolvePenetration = (): void => {
+        if (!this.a || !this.b || !this.depth || !this.normal) {
+            throw new Error('Some Contact variables are not initialized');
+        }
 
-    //     float da = depth / (a->invMass + b->invMass) * a->invMass;
-    //     float db = depth / (a->invMass + b->invMass) * b->invMass;
-        
-    //     a->position -= normal * da;
-    //     b->position += normal * db;
-    // }
+        if (this.a.isStatic() && this.b.isStatic()) {
+            return;
+        }
+
+        const da = (this.depth / (this.a.invMass + this.b.invMass)) * this.a.invMass;
+        const db = (this.depth / (this.a.invMass + this.b.invMass)) * this.b.invMass;
+
+        this.a.position.subAssign(this.normal.scaleNew(da));
+        this.b.position.addAssign(this.normal.scaleNew(db));
+    };
 
     // Resolves the collision using the impulse method
-    // void Contact::ResolveCollision() {
-    //     // Apply positional correction using the projection method
-    //     ResolvePenetration();
-        
-    //     // Define elasticity (coefficient of restitution e)
-    //     float e = std::min(a->restitution, b->restitution);
-        
-    //     // Calculate the relative velocity between the two objects
-    //     const Vec2 vrel = (a->velocity - b->velocity);
+    resolveCollision = (): void => {
+        //     // Apply positional correction using the projection method
+        //     ResolvePenetration();
 
-    //     // Calculate the relative velocity along the normal collision vector
-    //     float vrelDotNormal = vrel.Dot(normal);
+        //     // Define elasticity (coefficient of restitution e)
+        //     float e = std::min(a->restitution, b->restitution);
 
-    //     // Now we proceed to calculate the collision impulse
-    //     const Vec2 impulseDirection = normal;
-    //     const float impulseMagnitude = -(1 + e) * vrelDotNormal / (a->invMass + b->invMass);
-        
-    //     Vec2 jn = impulseDirection * impulseMagnitude;
-        
-    //     // Apply the impulse vector to both objects in opposite direction
-    //     a->ApplyImpulse(jn);
-    //     b->ApplyImpulse(-jn);
-    // }
+        //     // Calculate the relative velocity between the two objects
+        //     const Vec2 vrel = (a->velocity - b->velocity);
+
+        //     // Calculate the relative velocity along the normal collision vector
+        //     float vrelDotNormal = vrel.Dot(normal);
+
+        //     // Now we proceed to calculate the collision impulse
+        //     const Vec2 impulseDirection = normal;
+        //     const float impulseMagnitude = -(1 + e) * vrelDotNormal / (a->invMass + b->invMass);
+
+        //     Vec2 jn = impulseDirection * impulseMagnitude;
+
+        //     // Apply the impulse vector to both objects in opposite direction
+        //     a->ApplyImpulse(jn);
+        //     b->ApplyImpulse(-jn);
+    };
 }
