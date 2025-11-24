@@ -24,8 +24,32 @@ export default class Application {
     setup = (): void => {
         this.running = Graphics.openWindow();
 
-        const bigBall = new Body(new CircleShape(200), Graphics.width() / 2, Graphics.height() / 2, 0);
-        this.bodies.push(bigBall);
+        // Add a floor and walls to contain objects objects
+        const floor = new Body(
+            new BoxShape(Graphics.width() - 50, 50),
+            Graphics.width() / 2.0,
+            Graphics.height() - 50,
+            0.0,
+        );
+        const leftWall = new Body(new BoxShape(50, Graphics.height() - 100), 50, Graphics.height() / 2.0 - 25, 0.0);
+        const rightWall = new Body(
+            new BoxShape(50, Graphics.height() - 100),
+            Graphics.width() - 50,
+            Graphics.height() / 2.0 - 25,
+            0.0,
+        );
+        floor.restitution = 0.2;
+        leftWall.restitution = 0.2;
+        rightWall.restitution = 0.2;
+        this.bodies.push(floor);
+        this.bodies.push(leftWall);
+        this.bodies.push(rightWall);
+
+        // Add a static box so other boxes can collide
+        const bigBox = new Body(new BoxShape(200, 200), Graphics.width() / 2.0, Graphics.height() / 2.0, 0.0);
+        bigBox.restitution = 0.1;
+        bigBox.rotation = 1.4;
+        this.bodies.push(bigBox);
 
         InputManager.initialize();
     };
@@ -67,9 +91,9 @@ export default class Application {
             switch (inputEvent.type) {
                 case 'mousedown':
                     {
-                        const smallBall = new Body(new CircleShape(40), inputEvent.x, inputEvent.y, 1);
-                        smallBall.restitution = 0.2;
-                        this.bodies.push(smallBall);
+                        const box = new Body(new BoxShape(50, 50), inputEvent.x, inputEvent.y, 1.0);
+                        box.restitution = 0.2;
+                        this.bodies.push(box);
                     }
                     break;
                 case 'mouseup':
@@ -79,6 +103,9 @@ export default class Application {
     };
 
     update = (deltaTime: number): void => {
+        // TODO: not the correct place to clear screen
+        Graphics.clearScreen();
+
         // Apply forces to the bodies
         for (const body of this.bodies) {
             // Apply a drag force
@@ -133,32 +160,9 @@ export default class Application {
                 }
             }
         }
-
-        // Check the boundaries of the window applying a hardcoded bounce flip in velocity
-        for (const body of this.bodies) {
-            if (body.shape.getType() === ShapeType.CIRCLE) {
-                const circleShape = body.shape as CircleShape;
-                if (body.position.x - circleShape.radius <= 0) {
-                    body.position.x = circleShape.radius;
-                    body.velocity.x *= -0.9;
-                } else if (body.position.x + circleShape.radius >= Graphics.width()) {
-                    body.position.x = Graphics.width() - circleShape.radius;
-                    body.velocity.x *= -0.9;
-                }
-                if (body.position.y - circleShape.radius <= 0) {
-                    body.position.y = circleShape.radius;
-                    body.velocity.y *= -0.9;
-                } else if (body.position.y + circleShape.radius >= Graphics.height()) {
-                    body.position.y = Graphics.height() - circleShape.radius;
-                    body.velocity.y *= -0.9;
-                }
-            }
-        }
     };
 
     render = (): void => {
-        Graphics.clearScreen();
-
         // Draw all bodies
         for (const body of this.bodies) {
             // const color = body.isColliding ? 'red' : 'white';
@@ -170,8 +174,7 @@ export default class Application {
 
             if (body.shape.getType() === ShapeType.BOX) {
                 const boxShape = body.shape as BoxShape;
-                // TODO: to be implemented
-                // Graphics.drawPolygon(body.position.x, body.position.y, boxShape.worldVertices, "white");
+                Graphics.drawPolygon(body.position.x, body.position.y, boxShape.worldVertices, 'white');
             }
         }
     };

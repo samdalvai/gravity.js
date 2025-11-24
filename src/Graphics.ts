@@ -1,3 +1,5 @@
+import Vec2 from './physics/Vec2';
+
 export default class Graphics {
     static windowWidth: number;
     static windowHeight: number;
@@ -69,10 +71,50 @@ export default class Graphics {
         this.ctx.fill();
     };
 
+    static drawRect = (x: number, y: number, width: number, height: number, color: string): void => {
+        const hw = width / 2;
+        const hh = height / 2;
+
+        this.ctx.strokeStyle = color;
+        this.ctx.beginPath();
+        this.ctx.moveTo(x - hw, y - hh);
+        this.ctx.lineTo(x + hw, y - hh);
+        this.ctx.lineTo(x + hw, y + hh);
+        this.ctx.lineTo(x - hw, y + hh);
+        this.ctx.closePath();
+        this.ctx.stroke();
+    };
+
+    static drawFillRect = (x: number, y: number, width: number, height: number, color: string): void => {
+        const hw = width / 2;
+        const hh = height / 2;
+
+        this.ctx.fillStyle = color;
+        this.ctx.fillRect(x - hw, y - hh, width, height);
+    };
+
+    static drawPolygon = (x: number, y: number, vertices: Vec2[], color: string): void => {
+        this.ctx.strokeStyle = color;
+        this.ctx.beginPath();
+
+        if (vertices.length > 0) {
+            this.ctx.moveTo(vertices[0].x, vertices[0].y);
+            for (let i = 1; i < vertices.length; i++) {
+                this.ctx.lineTo(vertices[i].x, vertices[i].y);
+            }
+            this.ctx.closePath();
+        }
+
+        this.ctx.stroke();
+
+        // draw the 1px center point like filledCircleColor(..., radius=1)
+        this.ctx.fillStyle = color;
+        this.ctx.beginPath();
+        this.ctx.arc(x, y, 1, 0, Math.PI * 2);
+        this.ctx.fill();
+    };
+
     // TODO: implement these draw methods
-    // static void DrawRect(int x, int y, int width, int height, Uint32 color);
-    // static void DrawFillRect(int x, int y, int width, int height, Uint32 color);
-    // static void DrawPolygon(int x, int y, const std::vector<Vec2>& vertices, Uint32 color);
     // static void DrawFillPolygon(int x, int y, const std::vector<Vec2>& vertices, Uint32 color);
     // static void DrawTexture(int x, int y, int width, int height, float rotation, SDL_Texture* texture);
 }
