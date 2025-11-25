@@ -16,7 +16,8 @@ export default class Contact {
 
     // Resolves the collision using the position change method
     resolvePenetration = (): void => {
-        if (!this.a || !this.b || !this.depth || !this.normal) {
+        if (!this.a || !this.b || this.depth === null || !this.normal) {
+            console.error('Some Contact variables are not initialized: ', this);
             throw new Error('Some Contact variables are not initialized');
         }
 
@@ -33,7 +34,7 @@ export default class Contact {
 
     // Resolves the collision using the impulse method
     resolveCollision = (): void => {
-        if (!this.a || !this.b || !this.depth || !this.normal || !this.start || !this.end) {
+        if (!this.a || !this.b || this.depth === null || !this.normal || !this.start || !this.end) {
             console.error('Some Contact variables are not initialized: ', this);
             throw new Error('Some Contact variables are not initialized');
         }
