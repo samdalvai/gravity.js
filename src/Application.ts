@@ -1,22 +1,21 @@
 import AssetStore from './AssetStore';
 import Graphics from './Graphics';
-import InputManager from './InputManager';
+import InputManager, { MouseButton } from './InputManager';
 import Body from './physics/Body';
 import CollisionDetection from './physics/CollisionDetection';
 import { PIXELS_PER_METER } from './physics/Constants';
 import Contact from './physics/Contact';
-import Force from './physics/Force';
 import { BoxShape, CircleShape, ShapeType } from './physics/Shape';
 import Vec2 from './physics/Vec2';
+import World from './physics/World';
 
 export default class Application {
-    private running: boolean;
-    private bodies: Body[];
-    private generatePolygon = false;
+    private running = false;
+    private debug = false;
+    private world: World;
 
     constructor() {
-        this.running = false;
-        this.bodies = [];
+        this.world = new World(-9.8);
     }
 
     isRunning = (): boolean => {
@@ -24,8 +23,6 @@ export default class Application {
     };
 
     setup = async (): Promise<void> => {
-        this.running = Graphics.openWindow();
-
         InputManager.initialize();
 
         const textures = {
@@ -34,7 +31,10 @@ export default class Application {
             crate: 'assets/crate.png',
             metal: 'assets/metal.png',
         };
+
         await AssetStore.loadTextures(textures);
+
+        this.running = Graphics.openWindow();
 
         // Add a floor and walls to contain objects objects
         const floor = new Body(
@@ -50,18 +50,22 @@ export default class Application {
             Graphics.height() / 2.0 - 25,
             0.0,
         );
-        floor.restitution = 0.2;
+        floor.restitution = 0.5;
         leftWall.restitution = 0.2;
         rightWall.restitution = 0.2;
-        this.bodies.push(floor);
-        this.bodies.push(leftWall);
-        this.bodies.push(rightWall);
+        this.world.addBody(floor);
+        this.world.addBody(leftWall);
+        this.world.addBody(rightWall);
 
         // Add a static box so other boxes can collide
         const bigBox = new Body(new BoxShape(200, 200), Graphics.width() / 2.0, Graphics.height() / 2.0, 0.0);
         bigBox.restitution = 0.7;
         bigBox.rotation = 1.4;
-        this.bodies.push(bigBox);
+        this.world.addBody(bigBox);
+
+        // Add a force to all world objects
+        const wind = new Vec2(0.5 * PIXELS_PER_METER, 0.0);
+        this.world.addForce(wind);
     };
 
     input = (): void => {
@@ -75,6 +79,9 @@ export default class Application {
 
             switch (inputEvent.type) {
                 case 'keydown':
+                    if (inputEvent.key === 'd') {
+                        this.debug = !this.debug;
+                    }
                     break;
                 case 'keyup':
                     break;
@@ -100,19 +107,22 @@ export default class Application {
 
             switch (inputEvent.type) {
                 case 'mousedown':
-                    {
-                        if (this.generatePolygon) {
-                            const box = new Body(new BoxShape(50, 50), inputEvent.x, inputEvent.y, 1.0);
-                            box.restitution = 0.2;
-                            this.bodies.push(box);
-                        } else {
-                            const ball = new Body(new CircleShape(30), inputEvent.x, inputEvent.y, 1.0);
-                            ball.restitution = 0.5;
-                            ball.friction = 0.4;
-                            this.bodies.push(ball);
-                        }
-
-                        this.generatePolygon = !this.generatePolygon;
+                    switch (inputEvent.button) {
+                        case MouseButton.LEFT:
+                            {
+                                const ball = new Body(new CircleShape(30), inputEvent.x, inputEvent.y, 1.0);
+                                ball.restitution = 0.5;
+                                ball.friction = 0.4;
+                                this.world.addBody(ball);
+                            }
+                            break;
+                        case MouseButton.RIGHT:
+                            {
+                                const box = new Body(new BoxShape(60, 60), inputEvent.x, inputEvent.y, 1.0);
+                                box.restitution = 0.2;
+                                this.world.addBody(box);
+                            }
+                            break;
                     }
                     break;
                 case 'mouseup':
@@ -125,67 +135,13 @@ export default class Application {
         // TODO: not the correct place to clear screen
         Graphics.clearScreen();
 
-        // Apply forces to the bodies
-        for (const body of this.bodies) {
-            // Apply a drag force
-            // const drag = Force.generateDragForce(body, 0.003);
-            // body.addForce(drag);
-
-            // Apply the weight force
-            const weight = new Vec2(0.0, body.mass * 9.8 * PIXELS_PER_METER);
-            body.addForce(weight);
-
-            // Apply the wind force
-            // const wind = new Vec2(2.0 * PIXELS_PER_METER, 0.0);
-            // body.addForce(wind);
-        }
-
-        // // Integrate the acceleration and velocity to estimate the new position
-        for (const body of this.bodies) {
-            body.update(deltaTime);
-        }
-
-        // Check all the rigidbodies with the other rigidbodies for collision
-        for (let i = 0; i <= this.bodies.length - 1; i++) {
-            for (let j = i + 1; j < this.bodies.length; j++) {
-                const a = this.bodies[i];
-                const b = this.bodies[j];
-                a.isColliding = false;
-                b.isColliding = false;
-                const contact = new Contact();
-                if (CollisionDetection.isColliding(a, b, contact)) {
-                    // Resolve the collision using the impulse method
-                    contact.resolveCollision();
-
-                    if (!contact.start || !contact.end || !contact.normal) {
-                        console.error('Could not determine Contact information: ', contact);
-                        throw new Error('Could not determine Contact information');
-                    }
-
-                    // TODO: this debug rendering is wrong, screen is cleared afterwards,
-                    // we are mixing rendering with update
-                    // Draw debug contact information
-                    Graphics.drawFillCircle(contact.start.x, contact.start.y, 3, 'red');
-                    Graphics.drawFillCircle(contact.end.x, contact.end.y, 3, 'red');
-                    Graphics.drawLine(
-                        contact.start.x,
-                        contact.start.y,
-                        contact.start.x + contact.normal.x * 15,
-                        contact.start.y + contact.normal.y * 15,
-                        'red',
-                    );
-                    a.isColliding = true;
-                    b.isColliding = true;
-                }
-            }
-        }
+        this.world.update(deltaTime);
     };
 
     render = (): void => {
         // Draw all bodies
-        for (const body of this.bodies) {
-            const color = body.isColliding ? 'red' : 'white';
-
+        for (const body of this.world.getBodies()) {
+            // const color = body.isColliding ? 'red' : 'white';
             if (body.shape.getType() === ShapeType.CIRCLE) {
                 const circleShape = body.shape as CircleShape;
                 // Graphics.drawCircle(body.position.x, body.position.y, circleShape.radius, body.rotation, color);
@@ -199,7 +155,6 @@ export default class Application {
                     AssetStore.getTexture('basketball'),
                 );
             }
-
             if (body.shape.getType() === ShapeType.BOX) {
                 const boxShape = body.shape as BoxShape;
                 // Graphics.drawPolygon(body.position.x, body.position.y, boxShape.worldVertices, color);
