@@ -1,19 +1,25 @@
 import Application from './Application';
 
-const app = new Application();
-app.setup();
+const run = async () => {
+    const app = new Application();
+    await app.setup();
 
-let timePreviousFrame = performance.now();
+    console.log('Setup finished, starting loop');
 
-const loop = (now: number) => {
-    const deltaTime = (now - timePreviousFrame) / 1000;
-    timePreviousFrame = now;
+    let timePreviousFrame = performance.now();
 
-    app.input();
-    app.update(deltaTime);
-    app.render();
+    const loop = (now: number) => {
+        const deltaTime = (now - timePreviousFrame) / 1000;
+        timePreviousFrame = now;
+
+        app.input();
+        app.update(deltaTime);
+        app.render();
+
+        requestAnimationFrame(loop);
+    };
 
     requestAnimationFrame(loop);
 };
 
-requestAnimationFrame(loop);
+run();
