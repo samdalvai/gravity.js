@@ -28,6 +28,13 @@ export default class Application {
             bowlingball: 'assets/bowlingball.png',
             crate: 'assets/crate.png',
             metal: 'assets/metal.png',
+            bob: 'assets/ragdoll/bob.png',
+            head: 'assets/ragdoll/head.png',
+            leftArm: 'assets/ragdoll/leftArm.png',
+            leftLeg: 'assets/ragdoll/leftLeg.png',
+            rightArm: 'assets/ragdoll/rightArm.png',
+            rightLeg: 'assets/ragdoll/rightLeg.png',
+            torso: 'assets/ragdoll/torso.png',
         };
 
         await AssetStore.loadTextures(textures);
