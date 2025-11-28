@@ -1,5 +1,5 @@
 import AssetStore from '../AssetStore';
-import { PolygonShape, Shape, ShapeType } from './Shape';
+import { Shape } from './Shape';
 import Vec2 from './Vec2';
 
 export default class Body {
@@ -108,7 +108,7 @@ export default class Body {
         if (this.isStatic()) {
             return;
         }
-        
+
         this.velocity.addAssign(j.scaleNew(this.invMass));
     };
 
