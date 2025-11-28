@@ -80,7 +80,7 @@ export default class Contact {
         const j = jN.addNew(jT);
 
         // Apply the impulse vector to both objects in opposite direction
-        this.a.applyAngularImpulse(j, ra);
-        this.b.applyAngularImpulse(j.negate(), rb);
+        this.a.applyImpulseAngular(j, ra);
+        this.b.applyImpulseAngular(j.negate(), rb);
     };
 }
