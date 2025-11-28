@@ -114,7 +114,38 @@ export default class Graphics {
         this.ctx.fill();
     };
 
-    // TODO: implement these draw methods
-    // static void DrawFillPolygon(int x, int y, const std::vector<Vec2>& vertices, Uint32 color);
-    // static void DrawTexture(int x, int y, int width, int height, float rotation, SDL_Texture* texture);
+    static drawFillPolygon = (x: number, y: number, vertices: Vec2[], color: string): void => {
+        if (vertices.length === 0) return;
+
+        // Fill polygon
+        this.ctx.fillStyle = color;
+        this.ctx.beginPath();
+        this.ctx.moveTo(vertices[0].x, vertices[0].y);
+        for (let i = 1; i < vertices.length; i++) {
+            this.ctx.lineTo(vertices[i].x, vertices[i].y);
+        }
+        this.ctx.closePath();
+        this.ctx.fill();
+
+        // Draw the 1px center point
+        this.ctx.fillStyle = '#000000'; // black like 0xFF000000 in SDL
+        this.ctx.beginPath();
+        this.ctx.arc(x, y, 1, 0, Math.PI * 2);
+        this.ctx.fill();
+    };
+
+    static drawTexture = (
+        x: number,
+        y: number,
+        width: number,
+        height: number,
+        rotation: number, // in radians
+        texture: CanvasImageSource,
+    ): void => {
+        this.ctx.save();
+        this.ctx.translate(x, y);
+        this.ctx.rotate(rotation);
+        this.ctx.drawImage(texture, -width / 2, -height / 2, width, height);
+        this.ctx.restore();
+    };
 }
