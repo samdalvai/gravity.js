@@ -47,10 +47,31 @@ export default class World {
             }
         }
 
-        // Update all the bodies in the world (integrating and transforming vertices)
+        // Integrate all the forces
         for (const body of this.bodies) {
-            body.update(dt);
+            body.integrateForces(dt);
         }
+
+        // TODO: to be implemented with constraints
+        // Solve all constraints
+        // for (auto& constraint: constraints) {
+        //     constraint->PreSolve(dt);
+        // }
+
+        // for (int i = 0; i < 5; i++) {
+        //     for (auto& constraint: constraints) {
+        //         constraint->Solve();
+        //     }
+        // }
+        // for (auto& constraint: constraints) {
+        //     constraint->PostSolve();
+        // }
+
+        // Integrate all the velocities
+        for (const body of this.bodies) {
+            body.integrateVelocities(dt);
+        }
+
         // Collision detection and resolution for all bodies of the world
         this.checkCollisions();
     };
