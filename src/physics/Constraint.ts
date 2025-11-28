@@ -88,26 +88,84 @@ export class JointConstraint extends Constraint {
     }
 
     preSolve(dt: number): void {
-        throw new Error('Method not implemented.');
+        // Get the anchor point position in world space
+        const pa = this.a.localSpaceToWorldSpace(this.aPoint);
+        const pb = this.b.localSpaceToWorldSpace(this.bPoint);
+
+        const ra = pa.subNew(this.a.position);
+        const rb = pb.subNew(this.b.position);
+
+        this.jacobian.zero();
+
+        const J1 = pa.subNew(pb).scaleNew(2);
+        this.jacobian.rows[0].set(0, J1.x); // A linear velocity.x
+        this.jacobian.rows[0].set(1, J1.y); // A linear velocity.y
+
+        const J2 = ra.cross(pa.subNew(pb)) * 2;
+        this.jacobian.rows[0].set(2, J2); // A angular velocity
+
+        const J3 = pb.subNew(pa).scaleNew(2);
+        this.jacobian.rows[0].set(3, J3.x); // B linear velocity.x
+        this.jacobian.rows[0].set(4, J3.y); // B linear velocity.y
+
+        const J4 = rb.cross(pb.subNew(pa)) * 2;
+        this.jacobian.rows[0].set(5, J4); // B angular velocity
+
+        // Warm starting (apply cached lambda)
+        const Jt = this.jacobian.transpose();
+        const impulses = Jt.multiplyVec(this.cachedLambda);
+
+        // Apply the impulses to both bodies
+        this.a.applyImpulseLinear(new Vec2(impulses.get(0), impulses.get(1))); // A linear impulse
+        this.a.applyImpulseAngular(impulses.get(2)); // A angular impulse
+        this.b.applyImpulseLinear(new Vec2(impulses.get(3), impulses.get(4))); // B linear impulse
+        this.b.applyImpulseAngular(impulses.get(5)); // B angular impulse
+
+        // Compute the bias term (baumgarte stabilization)
+        const beta = 0.2;
+        let C = pb.subNew(pa).dot(pb.subNew(pa));
+        C = Math.max(0, C - 0.01);
+        this.bias = (beta / dt) * C;
     }
+
     solve(): void {
-        throw new Error('Method not implemented.');
+        const V = this.getVelocities();
+        const invM = this.getInvM();
+        const J = this.jacobian;
+        const Jt = this.jacobian.transpose();
+
+        // Compute lambda using Ax=b (Gauss-Seidel method)
+        const lhs = J.multiplyMat(invM).multiplyMat(Jt); // A
+        const rhs = J.multiplyVec(V.scaleNew(-1)); // b
+        rhs.set(0, rhs.get(0) - this.bias);
+        const lambda = MatMN.solveGaussSeidel(lhs, rhs);
+        this.cachedLambda.addAssign(lambda);
+
+        // Compute the impulses with both direction and magnitude
+        const impulses = Jt.multiplyVec(lambda);
+
+        // Apply the impulses to both bodies
+        this.a.applyImpulseLinear(new Vec2(impulses.get(0), impulses.get(1))); // A linear impulse
+        this.a.applyImpulseAngular(impulses.get(2)); // A angular impulse
+        this.b.applyImpulseLinear(new Vec2(impulses.get(3), impulses.get(5))); // B linear impulse
+        this.b.applyImpulseAngular(impulses.get(5)); // B angular impulse
     }
+
     postSolve(): void {
-        throw new Error('Method not implemented.');
+        // TODO: Maybe we should clamp the values of cached lambda to reasonable limits
     }
 }
 
-// export class PenetrationConstraint extends Constraint {
-//     //jacobian: MatMN;
+export class PenetrationConstraint extends Constraint {
+    //jacobian: MatMN;
 
-//     preSolve(dt: number): void {
-//         throw new Error('Method not implemented.');
-//     }
-//     solve(): void {
-//         throw new Error('Method not implemented.');
-//     }
-//     postSolve(): void {
-//         throw new Error('Method not implemented.');
-//     }
-// }
+    preSolve(dt: number): void {
+        // TODO: to be implemented
+    }
+    solve(): void {
+        // TODO: to be implemented
+    }
+    postSolve(): void {
+        // TODO: to be implemented
+    }
+}
