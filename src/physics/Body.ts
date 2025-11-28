@@ -1,3 +1,4 @@
+import AssetStore from '../AssetStore';
 import { PolygonShape, Shape, ShapeType } from './Shape';
 import Vec2 from './Vec2';
 
@@ -31,6 +32,8 @@ export default class Body {
     // Pointer to the shape/geometry of this rigid body
     shape: Shape;
 
+    texture: CanvasImageSource | null = null;
+
     // Body(const Shape& shape, float x, float y, float mass);
     constructor(shape: Shape, x: number, y: number, mass: number) {
         this.shape = shape;
@@ -45,12 +48,15 @@ export default class Body {
         this.restitution = 1.0;
         this.friction = 0.7;
         this.mass = mass;
+
         if (mass != 0.0) {
             this.invMass = 1.0 / mass;
         } else {
             this.invMass = 0.0;
         }
+
         this.I = shape.getMomentOfInertia() * mass;
+
         if (this.I != 0.0) {
             this.invI = 1.0 / this.I;
         } else {
@@ -77,6 +83,10 @@ export default class Body {
 
     clearTorque = (): void => {
         this.sumTorque = 0.0;
+    };
+
+    setTexture = (texture: string): void => {
+        this.texture = AssetStore.getTexture(texture);
     };
 
     applyLinearImpulse = (j: Vec2): void => {

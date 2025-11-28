@@ -2,10 +2,8 @@ import AssetStore from './AssetStore';
 import Graphics from './Graphics';
 import InputManager, { MouseButton } from './InputManager';
 import Body from './physics/Body';
-import CollisionDetection from './physics/CollisionDetection';
 import { PIXELS_PER_METER } from './physics/Constants';
-import Contact from './physics/Contact';
-import { BoxShape, CircleShape, ShapeType } from './physics/Shape';
+import { BoxShape, CircleShape, PolygonShape, ShapeType } from './physics/Shape';
 import Vec2 from './physics/Vec2';
 import World from './physics/World';
 
@@ -61,6 +59,7 @@ export default class Application {
         const bigBox = new Body(new BoxShape(200, 200), Graphics.width() / 2.0, Graphics.height() / 2.0, 0.0);
         bigBox.restitution = 0.7;
         bigBox.rotation = 1.4;
+        bigBox.setTexture('metal');
         this.world.addBody(bigBox);
 
         // Add a force to all world objects
@@ -113,6 +112,7 @@ export default class Application {
                                 const ball = new Body(new CircleShape(30), inputEvent.x, inputEvent.y, 1.0);
                                 ball.restitution = 0.5;
                                 ball.friction = 0.4;
+                                ball.setTexture('basketball');
                                 this.world.addBody(ball);
                             }
                             break;
@@ -120,6 +120,7 @@ export default class Application {
                             {
                                 const box = new Body(new BoxShape(60, 60), inputEvent.x, inputEvent.y, 1.0);
                                 box.restitution = 0.2;
+                                box.setTexture('crate');
                                 this.world.addBody(box);
                             }
                             break;
@@ -141,32 +142,65 @@ export default class Application {
     render = (): void => {
         // Draw all bodies
         for (const body of this.world.getBodies()) {
-            // const color = body.isColliding ? 'red' : 'white';
-            if (body.shape.getType() === ShapeType.CIRCLE) {
-                const circleShape = body.shape as CircleShape;
-                // Graphics.drawCircle(body.position.x, body.position.y, circleShape.radius, body.rotation, color);
-                // Graphics.drawFillCircle(body.position.x, body.position.y, circleShape.radius, color);
-                Graphics.drawTexture(
-                    body.position.x,
-                    body.position.y,
-                    circleShape.radius * 2,
-                    circleShape.radius * 2,
-                    body.rotation,
-                    AssetStore.getTexture('basketball'),
-                );
-            }
-            if (body.shape.getType() === ShapeType.BOX) {
-                const boxShape = body.shape as BoxShape;
-                // Graphics.drawPolygon(body.position.x, body.position.y, boxShape.worldVertices, color);
-                // Graphics.drawFillPolygon(body.position.x, body.position.y, boxShape.worldVertices, color);
-                Graphics.drawTexture(
-                    body.position.x,
-                    body.position.y,
-                    boxShape.width,
-                    boxShape.height,
-                    body.rotation,
-                    AssetStore.getTexture('crate'),
-                );
+            switch (body.shape.getType()) {
+                case ShapeType.CIRCLE:
+                    {
+                        const circleShape = body.shape as CircleShape;
+
+                        if (!this.debug && body.texture) {
+                            Graphics.drawTexture(
+                                body.position.x,
+                                body.position.y,
+                                circleShape.radius * 2,
+                                circleShape.radius * 2,
+                                body.rotation,
+                                body.texture,
+                            );
+                        } else {
+                            Graphics.drawCircle(
+                                body.position.x,
+                                body.position.y,
+                                circleShape.radius,
+                                body.rotation,
+                                'white',
+                            );
+                        }
+                    }
+                    break;
+                case ShapeType.POLYGON:
+                    {
+                        const polygonShape = body.shape as PolygonShape;
+
+                        if (!this.debug && body.texture) {
+                            Graphics.drawFillPolygon(
+                                body.position.x,
+                                body.position.y,
+                                polygonShape.worldVertices,
+                                'white',
+                            );
+                        } else {
+                            Graphics.drawPolygon(body.position.x, body.position.y, polygonShape.worldVertices, 'white');
+                        }
+                    }
+                    break;
+                case ShapeType.BOX:
+                    {
+                        const boxShape = body.shape as BoxShape;
+
+                        if (!this.debug && body.texture) {
+                            Graphics.drawTexture(
+                                body.position.x,
+                                body.position.y,
+                                boxShape.width,
+                                boxShape.height,
+                                body.rotation,
+                                body.texture,
+                            );
+                        } else {
+                            Graphics.drawPolygon(body.position.x, body.position.y, boxShape.worldVertices, 'white');
+                        }
+                    }
+                    break;
             }
         }
     };
