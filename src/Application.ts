@@ -1,3 +1,4 @@
+import AssetStore from './AssetStore';
 import Graphics from './Graphics';
 import InputManager from './InputManager';
 import Body from './physics/Body';
@@ -22,8 +23,18 @@ export default class Application {
         return this.running;
     };
 
-    setup = (): void => {
+    setup = async (): Promise<void> => {
         this.running = Graphics.openWindow();
+
+        InputManager.initialize();
+
+        const textures = {
+            basketball: 'assets/basketball.png',
+            bowlingball: 'assets/bowlingball.png',
+            crate: 'assets/crate.png',
+            metal: 'assets/metal.png',
+        };
+        await AssetStore.loadTextures(textures);
 
         // Add a floor and walls to contain objects objects
         const floor = new Body(
@@ -51,8 +62,6 @@ export default class Application {
         bigBox.restitution = 0.7;
         bigBox.rotation = 1.4;
         this.bodies.push(bigBox);
-
-        InputManager.initialize();
     };
 
     input = (): void => {
@@ -102,7 +111,7 @@ export default class Application {
                             ball.friction = 0.4;
                             this.bodies.push(ball);
                         }
-                        
+
                         this.generatePolygon = !this.generatePolygon;
                     }
                     break;
@@ -179,12 +188,30 @@ export default class Application {
 
             if (body.shape.getType() === ShapeType.CIRCLE) {
                 const circleShape = body.shape as CircleShape;
-                Graphics.drawCircle(body.position.x, body.position.y, circleShape.radius, body.rotation, color);
+                // Graphics.drawCircle(body.position.x, body.position.y, circleShape.radius, body.rotation, color);
+                // Graphics.drawFillCircle(body.position.x, body.position.y, circleShape.radius, color);
+                Graphics.drawTexture(
+                    body.position.x,
+                    body.position.y,
+                    circleShape.radius * 2,
+                    circleShape.radius * 2,
+                    body.rotation,
+                    AssetStore.getTexture('basketball'),
+                );
             }
 
             if (body.shape.getType() === ShapeType.BOX) {
                 const boxShape = body.shape as BoxShape;
-                Graphics.drawPolygon(body.position.x, body.position.y, boxShape.worldVertices, color);
+                // Graphics.drawPolygon(body.position.x, body.position.y, boxShape.worldVertices, color);
+                // Graphics.drawFillPolygon(body.position.x, body.position.y, boxShape.worldVertices, color);
+                Graphics.drawTexture(
+                    body.position.x,
+                    body.position.y,
+                    boxShape.width,
+                    boxShape.height,
+                    body.rotation,
+                    AssetStore.getTexture('crate'),
+                );
             }
         }
     };
