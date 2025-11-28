@@ -30,6 +30,9 @@ export default class Contact {
 
         this.a.position.subAssign(this.normal.scaleNew(da));
         this.b.position.addAssign(this.normal.scaleNew(db));
+
+        this.a.shape.updateVertices(this.a.rotation, this.a.position);
+        this.b.shape.updateVertices(this.b.rotation, this.b.position);
     };
 
     // Resolves the collision using the impulse method
@@ -80,7 +83,7 @@ export default class Contact {
         const j = jN.addNew(jT);
 
         // Apply the impulse vector to both objects in opposite direction
-        this.a.applyImpulseAngular(j, ra);
-        this.b.applyImpulseAngular(j.negate(), rb);
+        this.a.applyImpulseAtPoint(j, ra);
+        this.b.applyImpulseAtPoint(j.negate(), rb);
     };
 }
