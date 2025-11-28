@@ -7,7 +7,7 @@ export default class VecN {
         this.data = new Array(N).fill(0);
     }
 
-    // Copy constructor equivalent: static helper
+    // Copy constructor
     static from(v: VecN): VecN {
         const result = new VecN(v.N);
         for (let i = 0; i < v.N; i++) {
@@ -16,7 +16,6 @@ export default class VecN {
         return result;
     }
 
-    /** v1.Zero() */
     zero(): void {
         for (let i = 0; i < this.N; i++) {
             this.data[i] = 0.0;
