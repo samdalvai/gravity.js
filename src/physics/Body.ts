@@ -108,6 +108,7 @@ export default class Body {
         if (this.isStatic()) {
             return;
         }
+        
         this.velocity.addAssign(j.scaleNew(this.invMass));
     };
 
@@ -128,7 +129,7 @@ export default class Body {
         this.angularVelocity += r.cross(j) * this.invI;
     };
 
-    integrateLinear = (dt: number): void => {
+    integrateForces = (dt: number): void => {
         if (this.isStatic()) {
             return;
         }
@@ -139,38 +140,29 @@ export default class Body {
         // Integrate the acceleration to find the new velocity
         this.velocity.addAssign(this.acceleration.scaleNew(dt));
 
-        // Integrate the velocity to find the new position
-        this.position.addAssign(this.velocity.scaleNew(dt));
-
-        // Clear all the forces acting on the object before the next physics step
-        this.clearForces();
-    };
-
-    integrateAngular = (dt: number): void => {
-        if (this.isStatic()) {
-            return;
-        }
-
         // Find the angular acceleration based on the torque that is being applied and the moment of inertia
         this.angularAcceleration = this.sumTorque * this.invI;
 
         // Integrate the angular acceleration to find the new angular velocity
         this.angularVelocity += this.angularAcceleration * dt;
 
-        // Integrate the angular velocity to find the new rotation angle
-        this.rotation += this.angularVelocity * dt;
-
-        // Clear all the torque acting on the object before the next physics step
+        // Clear all the forces and torque acting on the object before the next physics step
+        this.clearForces();
         this.clearTorque();
     };
 
-    update = (dt: number): void => {
-        this.integrateLinear(dt);
-        this.integrateAngular(dt);
-
-        const isPolygon = this.shape.getType() === ShapeType.POLYGON || this.shape.getType() === ShapeType.BOX;
-        if (isPolygon) {
-            (this.shape as PolygonShape).updateVertices(this.rotation, this.position);
+    integrateVelocities = (dt: number): void => {
+        if (this.isStatic()) {
+            return;
         }
+
+        // Integrate the velocity to find the new position
+        this.position.addAssign(this.velocity.scaleNew(dt));
+
+        // Integrate the angular velocity to find the new rotation angle
+        this.rotation += this.angularVelocity * dt;
+
+        // Update the vertices to adjust them to the new position/rotation
+        this.shape.updateVertices(this.rotation, this.position);
     };
 }
