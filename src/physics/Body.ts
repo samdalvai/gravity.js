@@ -112,13 +112,12 @@ export default class Body {
         this.velocity.addAssign(j.scaleNew(this.invMass));
     };
 
-    applyImpulseAngular(j: Vec2, r: Vec2): void {
+    applyImpulseAngular(j: number): void {
         if (this.isStatic()) {
             return;
         }
 
-        this.velocity.addAssign(j.scaleNew(this.invMass));
-        this.angularVelocity += r.cross(j) * this.invI;
+        this.angularVelocity += j * this.invI;
     }
 
     applyImpulseAtPoint = (j: Vec2, r: Vec2): void => {
