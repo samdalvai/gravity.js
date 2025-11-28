@@ -9,6 +9,7 @@ export enum ShapeType {
 export abstract class Shape {
     abstract getType(): ShapeType;
     abstract getMomentOfInertia(): number;
+    abstract updateVertices(angle: number, position: Vec2): void;
 }
 
 export class CircleShape extends Shape {
@@ -27,6 +28,11 @@ export class CircleShape extends Shape {
         // For solid circles, the moment of inertia is 1/2 * r^2
         // But this still needs to be multiplied by the rigidbody's mass
         return 0.5 * (this.radius * this.radius);
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    updateVertices = (angle: number, position: Vec2): void => {
+        return; // Circles don't have vertices... nothing to do here
     };
 }
 

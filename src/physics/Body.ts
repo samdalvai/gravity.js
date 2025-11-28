@@ -62,7 +62,13 @@ export default class Body {
         } else {
             this.invI = 0.0;
         }
+
+        this.shape.updateVertices(this.rotation, this.position);
     }
+
+    setTexture = (texture: string): void => {
+        this.texture = AssetStore.getTexture(texture);
+    };
 
     isStatic = (): boolean => {
         const epsilon = 0.005;
@@ -85,18 +91,27 @@ export default class Body {
         this.sumTorque = 0.0;
     };
 
-    setTexture = (texture: string): void => {
-        this.texture = AssetStore.getTexture(texture);
+    localSpaceToWorldSpace = (point: Vec2): Vec2 => {
+        const rotated = point.rotate(this.rotation);
+        return rotated.addNew(this.position);
     };
 
-    applyLinearImpulse = (j: Vec2): void => {
+    worldSpaceToLocalSpace = (point: Vec2): Vec2 => {
+        const translatedX = point.x - this.position.x;
+        const translatedY = point.y - this.position.y;
+        const rotatedX = Math.cos(-this.rotation) * translatedX - Math.sin(-this.rotation) * translatedY;
+        const rotatedY = Math.cos(-this.rotation) * translatedY + Math.sin(-this.rotation) * translatedX;
+        return new Vec2(rotatedX, rotatedY);
+    };
+
+    applyImpulseLinear = (j: Vec2): void => {
         if (this.isStatic()) {
             return;
         }
         this.velocity.addAssign(j.scaleNew(this.invMass));
     };
 
-    applyAngularImpulse(j: Vec2, r: Vec2) {
+    applyImpulseAngular(j: Vec2, r: Vec2): void {
         if (this.isStatic()) {
             return;
         }
@@ -104,6 +119,14 @@ export default class Body {
         this.velocity.addAssign(j.scaleNew(this.invMass));
         this.angularVelocity += r.cross(j) * this.invI;
     }
+
+    applyImpulseAtPoint = (j: Vec2, r: Vec2): void => {
+        if (this.isStatic()) {
+            return;
+        }
+        this.velocity.addAssign(j.scaleNew(this.invMass));
+        this.angularVelocity += r.cross(j) * this.invI;
+    };
 
     integrateLinear = (dt: number): void => {
         if (this.isStatic()) {
