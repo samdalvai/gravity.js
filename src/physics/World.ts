@@ -1,12 +1,15 @@
 import Body from './Body';
 import CollisionDetection from './CollisionDetection';
 import { PIXELS_PER_METER } from './Constants';
+import { Constraint } from './Constraint';
 import Contact from './Contact';
 import Vec2 from './Vec2';
 
 export default class World {
     private G = 9.8;
     private bodies: Body[] = [];
+    private constraints: Constraint[] = [];
+
     private forces: Vec2[] = [];
     private torques: number[] = [];
 
@@ -20,6 +23,14 @@ export default class World {
 
     getBodies = (): Body[] => {
         return this.bodies;
+    };
+
+    addConstraint = (constraint: Constraint): void => {
+        this.constraints.push(constraint);
+    };
+
+    getConstraints = (): Constraint[] => {
+        return this.constraints;
     };
 
     addForce = (force: Vec2): void => {
@@ -52,20 +63,19 @@ export default class World {
             body.integrateForces(dt);
         }
 
-        // TODO: to be implemented with constraints
         // Solve all constraints
-        // for (auto& constraint: constraints) {
-        //     constraint->PreSolve(dt);
-        // }
+        for (const constraint of this.constraints) {
+            constraint.preSolve(dt);
+        }
 
-        // for (int i = 0; i < 5; i++) {
-        //     for (auto& constraint: constraints) {
-        //         constraint->Solve();
-        //     }
-        // }
-        // for (auto& constraint: constraints) {
-        //     constraint->PostSolve();
-        // }
+        for (let i = 0; i < 5; i++) {
+            for (const constraint of this.constraints) {
+                constraint.solve();
+            }
+        }
+        for (const constraint of this.constraints) {
+            constraint.postSolve();
+        }
 
         // Integrate all the velocities
         for (const body of this.bodies) {
