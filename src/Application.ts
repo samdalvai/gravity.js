@@ -130,13 +130,11 @@ export default class Application {
                 return;
             }
 
-            // int x, y;
-            // SDL_GetMouseState(&x, &y);
-            // Vec2 mouse = Vec2(x, y);
-            // const bob = this.world.GetBodies()[0];
-            // Vec2 direction = (mouse - bob.position).Normalize();
-            // float speed = 5.0;
-            // bob.position += direction * speed;
+            const mouse = new Vec2(inputEvent.x, inputEvent.y);
+            const bob = this.world.getBodies()[0];
+            const direction = mouse.subNew(bob.position).normalize();
+            const speed = 5;
+            bob.position.addAssign(direction.scaleNew(speed));
         }
 
         // Handle mouse click events
