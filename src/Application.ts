@@ -3,6 +3,7 @@ import Graphics from './Graphics';
 import InputManager, { MouseButton } from './InputManager';
 import Body from './physics/Body';
 import { PIXELS_PER_METER } from './physics/Constants';
+import { JointConstraint } from './physics/Constraint';
 import { BoxShape, CircleShape, PolygonShape, ShapeType } from './physics/Shape';
 import Vec2 from './physics/Vec2';
 import World from './physics/World';
@@ -41,6 +42,44 @@ export default class Application {
 
         this.running = Graphics.openWindow();
 
+        // Add ragdoll parts (rigid bodies)
+        const bob = new Body(new CircleShape(5), Graphics.width() / 2.0, Graphics.height() / 2.0 - 200, 0.0);
+        const head = new Body(new CircleShape(25), bob.position.x, bob.position.y + 70, 5.0);
+        const torso = new Body(new BoxShape(50, 100), head.position.x, head.position.y + 80, 3.0);
+        const leftArm = new Body(new BoxShape(15, 70), torso.position.x - 32, torso.position.y - 10, 1.0);
+        const rightArm = new Body(new BoxShape(15, 70), torso.position.x + 32, torso.position.y - 10, 1.0);
+        const leftLeg = new Body(new BoxShape(20, 90), torso.position.x - 20, torso.position.y + 97, 1.0);
+        const rightLeg = new Body(new BoxShape(20, 90), torso.position.x + 20, torso.position.y + 97, 1.0);
+        bob.setTexture('bob');
+        head.setTexture('head');
+        torso.setTexture('torso');
+        leftArm.setTexture('leftArm');
+        rightArm.setTexture('rightArm');
+        leftLeg.setTexture('leftLeg');
+        rightLeg.setTexture('rightLeg');
+        this.world.addBody(bob);
+        this.world.addBody(head);
+        this.world.addBody(torso);
+        this.world.addBody(leftArm);
+        this.world.addBody(rightArm);
+        this.world.addBody(leftLeg);
+        this.world.addBody(rightLeg);
+
+        // Add joints between ragdoll parts (distance constraints with one anchor point)
+        const string = new JointConstraint(bob, head, bob.position);
+        const neck = new JointConstraint(head, torso, head.position.addNew(new Vec2(0, 25)));
+        const leftShoulder = new JointConstraint(torso, leftArm, torso.position.addNew(new Vec2(-28, -45)));
+        const rightShoulder = new JointConstraint(torso, rightArm, torso.position.addNew(new Vec2(+28, -45)));
+        const leftHip = new JointConstraint(torso, leftLeg, torso.position.addNew(new Vec2(-20, +50)));
+        const rightHip = new JointConstraint(torso, rightLeg, torso.position.addNew(new Vec2(+20, +50)));
+
+        this.world.addConstraint(string);
+        this.world.addConstraint(neck);
+        this.world.addConstraint(leftShoulder);
+        this.world.addConstraint(rightShoulder);
+        this.world.addConstraint(leftHip);
+        this.world.addConstraint(rightHip);
+
         // Add a floor and walls to contain objects objects
         const floor = new Body(
             new BoxShape(Graphics.width() - 50, 50),
@@ -55,23 +94,12 @@ export default class Application {
             Graphics.height() / 2.0 - 25,
             0.0,
         );
-        floor.restitution = 0.5;
+        floor.restitution = 0.7;
         leftWall.restitution = 0.2;
         rightWall.restitution = 0.2;
         this.world.addBody(floor);
         this.world.addBody(leftWall);
         this.world.addBody(rightWall);
-
-        // Add a static box so other boxes can collide
-        const bigBox = new Body(new BoxShape(200, 200), Graphics.width() / 2.0, Graphics.height() / 2.0, 0.0);
-        bigBox.restitution = 0.7;
-        bigBox.rotation = 1.4;
-        bigBox.setTexture('metal');
-        this.world.addBody(bigBox);
-
-        // Add a force to all world objects
-        const wind = new Vec2(0.5 * PIXELS_PER_METER, 0.0);
-        this.world.addForce(wind);
     };
 
     input = (): void => {
@@ -101,6 +129,14 @@ export default class Application {
             if (!inputEvent) {
                 return;
             }
+
+            // int x, y;
+            // SDL_GetMouseState(&x, &y);
+            // Vec2 mouse = Vec2(x, y);
+            // const bob = this.world.GetBodies()[0];
+            // Vec2 direction = (mouse - bob.position).Normalize();
+            // float speed = 5.0;
+            // bob.position += direction * speed;
         }
 
         // Handle mouse click events
@@ -147,6 +183,19 @@ export default class Application {
     };
 
     render = (): void => {
+        // Draw a line between the bob and the ragdoll head
+        const bob = this.world.getBodies()[0];
+        const head = this.world.getBodies()[1];
+        Graphics.drawLine(bob.position.x, bob.position.y, head.position.x, head.position.y, 'white');
+
+        // Draw all joints anchor points
+        for (const joint of this.world.getConstraints()) {
+            if (this.debug) {
+                const anchorPoint = joint.a.localSpaceToWorldSpace(joint.aPoint);
+                Graphics.drawFillCircle(anchorPoint.x, anchorPoint.y, 3, 'red');
+            }
+        }
+
         // Draw all bodies
         for (const body of this.world.getBodies()) {
             switch (body.shape.getType()) {
