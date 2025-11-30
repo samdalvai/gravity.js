@@ -42,45 +42,12 @@ export default class Application {
 
         this.running = Graphics.openWindow();
 
-        // Add ragdoll parts (rigid bodies)
-        const bob = new Body(new CircleShape(5), Graphics.width() / 2.0, Graphics.height() / 2.0 - 200, 0.0);
-        const head = new Body(new CircleShape(25), bob.position.x, bob.position.y + 70, 5.0);
-        const torso = new Body(new BoxShape(50, 100), head.position.x, head.position.y + 80, 3.0);
-        const leftArm = new Body(new BoxShape(15, 70), torso.position.x - 32, torso.position.y - 10, 1.0);
-        const rightArm = new Body(new BoxShape(15, 70), torso.position.x + 32, torso.position.y - 10, 1.0);
-        const leftLeg = new Body(new BoxShape(20, 90), torso.position.x - 20, torso.position.y + 97, 1.0);
-        const rightLeg = new Body(new BoxShape(20, 90), torso.position.x + 20, torso.position.y + 97, 1.0);
-        bob.setTexture('bob');
-        head.setTexture('head');
-        torso.setTexture('torso');
-        leftArm.setTexture('leftArm');
-        rightArm.setTexture('rightArm');
-        leftLeg.setTexture('leftLeg');
-        rightLeg.setTexture('rightLeg');
-        this.world.addBody(bob);
-        this.world.addBody(head);
-        this.world.addBody(torso);
-        this.world.addBody(leftArm);
-        this.world.addBody(rightArm);
-        this.world.addBody(leftLeg);
-        this.world.addBody(rightLeg);
+        // Add a big static circle in the middle of the screen
+        const bigBall = new Body(new CircleShape(64), Graphics.width() / 2.0, Graphics.height() / 2.0, 0.0);
+        bigBall.setTexture('bowlingball');
+        this.world.addBody(bigBall);
 
-        // Add joints between ragdoll parts (distance constraints with one anchor point)
-        const string = new JointConstraint(bob, head, bob.position);
-        const neck = new JointConstraint(head, torso, head.position.addNew(new Vec2(0, 25)));
-        const leftShoulder = new JointConstraint(torso, leftArm, torso.position.addNew(new Vec2(-28, -45)));
-        const rightShoulder = new JointConstraint(torso, rightArm, torso.position.addNew(new Vec2(+28, -45)));
-        const leftHip = new JointConstraint(torso, leftLeg, torso.position.addNew(new Vec2(-20, +50)));
-        const rightHip = new JointConstraint(torso, rightLeg, torso.position.addNew(new Vec2(+20, +50)));
-
-        this.world.addConstraint(string);
-        this.world.addConstraint(neck);
-        this.world.addConstraint(leftShoulder);
-        this.world.addConstraint(rightShoulder);
-        this.world.addConstraint(leftHip);
-        this.world.addConstraint(rightHip);
-
-        // Add a floor and walls to contain objects objects
+        // Add a floor and walls to contain objects
         const floor = new Body(
             new BoxShape(Graphics.width() - 50, 50),
             Graphics.width() / 2.0,
@@ -117,10 +84,6 @@ export default class Application {
                         this.debug = !this.debug;
                     }
 
-                    if (inputEvent.key === 's') {
-                        console.log( this.world.getConstraints());
-                        this.world.getConstraints().shift();
-                    }
                     break;
                 case 'keyup':
                     break;
@@ -134,12 +97,6 @@ export default class Application {
             if (!inputEvent) {
                 return;
             }
-
-            const mouse = new Vec2(inputEvent.x, inputEvent.y);
-            const bob = this.world.getBodies()[0];
-            const direction = mouse.subNew(bob.position).normalize();
-            const speed = 5;
-            bob.position.addAssign(direction.scaleNew(speed));
         }
 
         // Handle mouse click events
@@ -186,19 +143,6 @@ export default class Application {
     };
 
     render = (): void => {
-        // Draw a line between the bob and the ragdoll head
-        // const bob = this.world.getBodies()[0];
-        // const head = this.world.getBodies()[1];
-        // Graphics.drawLine(bob.position.x, bob.position.y, head.position.x, head.position.y, 'white');
-
-        // Draw all joints anchor points
-        for (const joint of this.world.getConstraints()) {
-            if (this.debug) {
-                const anchorPoint = joint.a.localSpaceToWorldSpace(joint.aPoint);
-                Graphics.drawFillCircle(anchorPoint.x, anchorPoint.y, 3, 'red');
-            }
-        }
-
         // Draw all bodies
         for (const body of this.world.getBodies()) {
             switch (body.shape.getType()) {
