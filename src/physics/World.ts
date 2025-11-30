@@ -2,7 +2,6 @@ import Body from './Body';
 import CollisionDetection from './CollisionDetection';
 import { PIXELS_PER_METER } from './Constants';
 import { Constraint, PenetrationConstraint } from './Constraint';
-import Contact from './Contact';
 import Vec2 from './Vec2';
 
 export default class World {
@@ -71,18 +70,19 @@ export default class World {
                 const a = this.bodies[i];
                 const b = this.bodies[j];
 
-                const contact = new Contact();
+                const collisionResult = CollisionDetection.detectCollision(a, b);
 
-                if (CollisionDetection.isColliding(a, b, contact)) {
+                if (collisionResult.isColliding) {
                     // Resolve the collision
-                    // const penetration = new PenetrationConstraint(
-                    //     contact.a,
-                    //     contact.b,
-                    //     contact.start,
-                    //     contact.end,
-                    //     contact.normal,
-                    // );
-                    // penetrations.push(penetration);
+                    const contact = collisionResult.contact;
+                    const penetration = new PenetrationConstraint(
+                        contact.a,
+                        contact.b,
+                        contact.start,
+                        contact.end,
+                        contact.normal,
+                    );
+                    penetrations.push(penetration);
                 }
             }
         }
@@ -117,23 +117,6 @@ export default class World {
         // Integrate all the velocities
         for (const body of this.bodies) {
             body.integrateVelocities(dt);
-        }
-    };
-
-    checkCollisions = () => {
-        // Check all the bodies with all other bodies detecting collisions
-        for (let i = 0; i <= this.bodies.length - 1; i++) {
-            for (let j = i + 1; j < this.bodies.length; j++) {
-                const a = this.bodies[i];
-                const b = this.bodies[j];
-
-                const contact = new Contact();
-
-                if (CollisionDetection.isColliding(a, b, contact)) {
-                    // Resolve the collision
-                    contact.resolveCollision();
-                }
-            }
         }
     };
 }
