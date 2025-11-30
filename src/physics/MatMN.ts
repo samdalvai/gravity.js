@@ -70,8 +70,8 @@ export default class MatMN {
 
     /** Matrix * Matrix */
     multiplyMat(m: MatMN): MatMN {
-        if (m.M !== this.N && m.N !== this.M) {
-            return m;
+        if (m.M !== this.N) {
+            throw new Error('Matrix dimension mismatch');
         }
 
         const transposed = m.transpose();
