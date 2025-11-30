@@ -1,7 +1,7 @@
 import Body from './Body';
 import CollisionDetection from './CollisionDetection';
 import { PIXELS_PER_METER } from './Constants';
-import { Constraint } from './Constraint';
+import { Constraint, PenetrationConstraint } from './Constraint';
 import Contact from './Contact';
 import Vec2 from './Vec2';
 
@@ -42,6 +42,8 @@ export default class World {
     };
 
     update = (dt: number): void => {
+        const penetrations: PenetrationConstraint[] = [];
+
         // Loop all bodies of the world applying forces
         for (const body of this.bodies) {
             // Apply the weight force to all bodies
@@ -63,13 +65,43 @@ export default class World {
             body.integrateForces(dt);
         }
 
+        // Check all the bodies with all other bodies detecting collisions
+        for (let i = 0; i <= this.bodies.length - 1; i++) {
+            for (let j = i + 1; j < this.bodies.length; j++) {
+                const a = this.bodies[i];
+                const b = this.bodies[j];
+
+                const contact = new Contact();
+
+                if (CollisionDetection.isColliding(a, b, contact)) {
+                    // Resolve the collision
+                    // const penetration = new PenetrationConstraint(
+                    //     contact.a,
+                    //     contact.b,
+                    //     contact.start,
+                    //     contact.end,
+                    //     contact.normal,
+                    // );
+                    // penetrations.push(penetration);
+                }
+            }
+        }
+
         // Solve all constraints
         for (const constraint of this.constraints) {
             constraint.preSolve(dt);
         }
 
+        for (const constraint of penetrations) {
+            constraint.preSolve(dt);
+        }
+
         for (let i = 0; i < 5; i++) {
             for (const constraint of this.constraints) {
+                constraint.solve();
+            }
+
+            for (const constraint of penetrations) {
                 constraint.solve();
             }
         }
@@ -78,13 +110,14 @@ export default class World {
             constraint.postSolve();
         }
 
+        for (const constraint of penetrations) {
+            constraint.postSolve();
+        }
+
         // Integrate all the velocities
         for (const body of this.bodies) {
             body.integrateVelocities(dt);
         }
-
-        // Collision detection and resolution for all bodies of the world
-        this.checkCollisions();
     };
 
     checkCollisions = () => {
