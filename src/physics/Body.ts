@@ -3,8 +3,6 @@ import { Shape } from './Shape';
 import Vec2 from './Vec2';
 
 export default class Body {
-    isColliding = false;
-
     // Linear motion
     position: Vec2;
     velocity: Vec2;

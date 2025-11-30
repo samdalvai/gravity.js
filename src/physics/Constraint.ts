@@ -7,15 +7,15 @@ export abstract class Constraint {
     a: Body;
     b: Body;
 
-    aPoint: Vec2;
-    bPoint: Vec2;
+    aPoint: Vec2; // The constraint point in A's local space
+    bPoint: Vec2; // The constraint point in B's local space
 
-    constructor(a: Body, b: Body, anchorPoint: Vec2) {
+    constructor(a: Body, b: Body, aPointWorld: Vec2, bPointWorld: Vec2) {
         this.a = a;
         this.b = b;
 
-        this.aPoint = a.worldSpaceToLocalSpace(anchorPoint);
-        this.bPoint = b.worldSpaceToLocalSpace(anchorPoint);
+        this.aPoint = a.worldSpaceToLocalSpace(aPointWorld);
+        this.bPoint = b.worldSpaceToLocalSpace(bPointWorld);
     }
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -78,7 +78,7 @@ export class JointConstraint extends Constraint {
     private bias: number;
 
     constructor(a: Body, b: Body, anchorPoint: Vec2) {
-        super(a, b, anchorPoint);
+        super(a, b, anchorPoint, anchorPoint);
 
         this.jacobian = new MatMN(1, 6);
         this.cachedLambda = new VecN(1);
@@ -157,7 +157,23 @@ export class JointConstraint extends Constraint {
 }
 
 export class PenetrationConstraint extends Constraint {
-    //jacobian: MatMN;
+    private jacobian: MatMN;
+    private cachedLambda: VecN;
+    private bias: number;
+    private normal: Vec2; // Normal direction of the penetration in A's local space
+    private friction: number; // Friction coefficient between the two penetrating bodies
+
+    constructor(a: Body, b: Body, aCollisionPoint: Vec2, bCollisionPoint: Vec2, normal: Vec2) {
+        super(a, b, aCollisionPoint, bCollisionPoint);
+        this.normal = normal;
+
+        this.jacobian = new MatMN(2, 6);
+        this.cachedLambda = new VecN(2);
+        this.bias = 0;
+        this.friction = 0;
+
+        this.cachedLambda.zero();
+    }
 
     preSolve(dt: number): void {
         // TODO: to be implemented
