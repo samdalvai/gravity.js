@@ -116,6 +116,11 @@ export default class Application {
                     if (inputEvent.key === 'd') {
                         this.debug = !this.debug;
                     }
+
+                    if (inputEvent.key === 's') {
+                        console.log( this.world.getConstraints());
+                        this.world.getConstraints().shift();
+                    }
                     break;
                 case 'keyup':
                     break;
@@ -182,9 +187,9 @@ export default class Application {
 
     render = (): void => {
         // Draw a line between the bob and the ragdoll head
-        const bob = this.world.getBodies()[0];
-        const head = this.world.getBodies()[1];
-        Graphics.drawLine(bob.position.x, bob.position.y, head.position.x, head.position.y, 'white');
+        // const bob = this.world.getBodies()[0];
+        // const head = this.world.getBodies()[1];
+        // Graphics.drawLine(bob.position.x, bob.position.y, head.position.x, head.position.y, 'white');
 
         // Draw all joints anchor points
         for (const joint of this.world.getConstraints()) {
