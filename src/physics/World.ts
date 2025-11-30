@@ -93,8 +93,7 @@ export default class World {
             for (let j = i + 1; j < this.bodies.length; j++) {
                 const a = this.bodies[i];
                 const b = this.bodies[j];
-                a.isColliding = false;
-                b.isColliding = false;
+
                 const contact = new Contact();
 
                 if (CollisionDetection.isColliding(a, b, contact)) {
