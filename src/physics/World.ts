@@ -64,18 +64,19 @@ export default class World {
         }
 
         // Solve all constraints
-        // for (const constraint of this.constraints) {
-        //     constraint.preSolve(dt);
-        // }
+        for (const constraint of this.constraints) {
+            constraint.preSolve(dt);
+        }
 
-        // for (let i = 0; i < 5; i++) {
-        //     for (const constraint of this.constraints) {
-        //         constraint.solve();
-        //     }
-        // }
-        // for (const constraint of this.constraints) {
-        //     constraint.postSolve();
-        // }
+        for (let i = 0; i < 5; i++) {
+            for (const constraint of this.constraints) {
+                constraint.solve();
+            }
+        }
+
+        for (const constraint of this.constraints) {
+            constraint.postSolve();
+        }
 
         // Integrate all the velocities
         for (const body of this.bodies) {
