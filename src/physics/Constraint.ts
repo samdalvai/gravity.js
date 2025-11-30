@@ -136,7 +136,7 @@ export class JointConstraint extends Constraint {
 
         // Compute lambda using Ax=b (Gauss-Seidel method)
         const lhs = J.multiplyMat(invM).multiplyMat(Jt); // A
-        const rhs = J.multiplyVec(V.scaleNew(-1)); // b
+        const rhs = J.multiplyVec(V).scaleNew(-1); // b
         rhs.set(0, rhs.get(0) - this.bias);
         const lambda = MatMN.solveGaussSeidel(lhs, rhs);
         this.cachedLambda.addAssign(lambda);
@@ -147,7 +147,7 @@ export class JointConstraint extends Constraint {
         // Apply the impulses to both bodies
         this.a.applyImpulseLinear(new Vec2(impulses.get(0), impulses.get(1))); // A linear impulse
         this.a.applyImpulseAngular(impulses.get(2)); // A angular impulse
-        this.b.applyImpulseLinear(new Vec2(impulses.get(3), impulses.get(5))); // B linear impulse
+        this.b.applyImpulseLinear(new Vec2(impulses.get(3), impulses.get(4))); // B linear impulse
         this.b.applyImpulseAngular(impulses.get(5)); // B angular impulse
     }
 
