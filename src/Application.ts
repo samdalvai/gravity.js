@@ -2,10 +2,7 @@ import AssetStore from './AssetStore';
 import Graphics from './Graphics';
 import InputManager, { MouseButton } from './InputManager';
 import Body from './physics/Body';
-import { PIXELS_PER_METER } from './physics/Constants';
-import { JointConstraint } from './physics/Constraint';
 import { BoxShape, CircleShape, PolygonShape, ShapeType } from './physics/Shape';
-import Vec2 from './physics/Vec2';
 import World from './physics/World';
 
 export default class Application {
