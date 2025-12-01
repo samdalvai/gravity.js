@@ -110,7 +110,7 @@ export default class Application {
                         case MouseButton.LEFT:
                             {
                                 const ball = new Body(new CircleShape(30), inputEvent.x, inputEvent.y, 1.0);
-                                ball.restitution = 0.5;
+                                ball.restitution = 0.7;
                                 ball.friction = 0.4;
                                 ball.setTexture('basketball');
                                 this.world.addBody(ball);

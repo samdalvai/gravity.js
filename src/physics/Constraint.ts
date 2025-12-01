@@ -222,7 +222,17 @@ export class PenetrationConstraint extends Constraint {
         const beta = 0.2;
         let C = pb.subNew(pa).dot(n.scaleNew(-1));
         C = Math.min(0.0, C + 0.01);
-        this.bias = (beta / dt) * C;
+
+        // Calculate relative velocity pre-impulse normal, which will be used to compute elasticity
+        const va = this.a.velocity.addNew(new Vec2(-this.a.angularVelocity * ra.y, this.a.angularVelocity * ra.x));
+        const vb = this.b.velocity.addNew(new Vec2(-this.b.angularVelocity * rb.y, this.b.angularVelocity * rb.x));
+        const vrelDotNormal = va.subNew(vb).dot(n);
+
+        // Get the restitution between the two bodies
+        const e = Math.min(this.a.restitution, this.b.restitution);
+
+        // Calculate bias term considering elasticity (restitution)
+        this.bias = (beta / dt) * C + e * vrelDotNormal;
     }
 
     solve(): void {
