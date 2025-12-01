@@ -69,9 +69,9 @@ export default class Application {
             Graphics.height() / 2.0 + 340,
             0.0,
         );
-        const leftFence = new Body(new BoxShape(50, Graphics.height() - 200), 0, Graphics.height() / 2.0 - 35, 0.0);
+        const leftFence = new Body(new BoxShape(50, Graphics.height() - 75), 0, Graphics.height() / 2.0 - 35, 0.0);
         const rightFence = new Body(
-            new BoxShape(50, Graphics.height() - 200),
+            new BoxShape(50, Graphics.height() - 75),
             Graphics.width(),
             Graphics.height() / 2.0 - 35,
             0.0,
@@ -173,6 +173,7 @@ export default class Application {
                 case 'keydown':
                     if (inputEvent.key === 'd') {
                         this.debug = !this.debug;
+                        this.world.setDebug(this.debug);
                     }
 
                     break;
@@ -227,7 +228,6 @@ export default class Application {
     };
 
     update = (deltaTime: number): void => {
-        // TODO: not the correct place to clear screen
         Graphics.clearScreen();
 
         this.world.update(deltaTime);
