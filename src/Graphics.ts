@@ -148,4 +148,23 @@ export default class Graphics {
         this.ctx.drawImage(texture, -width / 2, -height / 2, width, height);
         this.ctx.restore();
     };
+
+    static drawText = (
+        text: string,
+        x: number,
+        y: number,
+        fontSize: number = 20,
+        fontFamily: string = 'Arial',
+        color: string = 'white',
+        align: CanvasTextAlign = 'center',
+        baseline: CanvasTextBaseline = 'middle',
+    ): void => {
+        this.ctx.save();
+        this.ctx.fillStyle = color;
+        this.ctx.font = `${fontSize}px ${fontFamily}`;
+        this.ctx.textAlign = align;
+        this.ctx.textBaseline = baseline;
+        this.ctx.fillText(text, x, y);
+        this.ctx.restore();
+    };
 }
