@@ -3,7 +3,7 @@ import Contact from './Contact';
 import { CircleShape, PolygonShape, ShapeType } from './Shape';
 import Vec2 from './Vec2';
 
-export type CollisionResult = { isColliding: false; contact?: undefined } | { isColliding: true; contact: Contact };
+export type CollisionResult = { isColliding: false; contacts?: undefined } | { isColliding: true; contacts: Contact[] };
 
 export default class CollisionDetection {
     static detectCollision = (a: Body, b: Body): CollisionResult => {
@@ -51,7 +51,7 @@ export default class CollisionDetection {
         const end = a.position.addNew(normal.scaleNew(aCircleShape.radius));
         const depth = end.subNew(start).magnitude();
 
-        return { isColliding: true, contact: new Contact(a, b, start, end, normal, depth) };
+        return { isColliding: true, contacts: [new Contact(a, b, start, end, normal, depth)] };
     };
 
     static detectCollisionPolygonPolygon = (a: Body, b: Body): CollisionResult => {
@@ -78,13 +78,13 @@ export default class CollisionDetection {
             const normal = aAxis.normal();
             const start = aPoint;
             const end = aPoint.addNew(normal.scaleNew(depth));
-            return { isColliding: true, contact: new Contact(a, b, start, end, normal, depth) };
+            return { isColliding: true, contacts: [new Contact(a, b, start, end, normal, depth)] };
         } else {
             const depth = -baSeparation;
             const normal = bAxis.normal().negate();
             const start = bPoint.subNew(normal.scaleNew(depth));
             const end = bPoint;
-            return { isColliding: true, contact: new Contact(a, b, start, end, normal, depth) };
+            return { isColliding: true, contacts: [new Contact(a, b, start, end, normal, depth)] };
         }
     };
 
@@ -146,7 +146,7 @@ export default class CollisionDetection {
                     const start = circle.position.addNew(normal.scaleNew(-circleShape.radius));
                     const end = start.addNew(normal.scaleNew(depth));
 
-                    return { isColliding: true, contact: new Contact(a, b, start, end, normal, depth) };
+                    return { isColliding: true, contacts: [new Contact(a, b, start, end, normal, depth)] };
                 }
             } else {
                 ///////////////////////////////////////
@@ -167,7 +167,7 @@ export default class CollisionDetection {
                         const start = circle.position.addNew(normal.scaleNew(-circleShape.radius));
                         const end = start.addNew(normal.scaleNew(depth));
 
-                        return { isColliding: true, contact: new Contact(a, b, start, end, normal, depth) };
+                        return { isColliding: true, contacts: [new Contact(a, b, start, end, normal, depth)] };
                     }
                 } else {
                     ///////////////////////////////////////
@@ -185,7 +185,7 @@ export default class CollisionDetection {
                         const start = circle.position.subNew(normal.scaleNew(circleShape.radius));
                         const end = start.addNew(normal.scaleNew(depth));
 
-                        return { isColliding: true, contact: new Contact(a, b, start, end, normal, depth) };
+                        return { isColliding: true, contacts: [new Contact(a, b, start, end, normal, depth)] };
                     }
                 }
             }
@@ -198,7 +198,7 @@ export default class CollisionDetection {
             const start = circle.position.subNew(normal.scaleNew(circleShape.radius));
             const end = start.addNew(normal.scaleNew(depth));
 
-            return { isColliding: true, contact: new Contact(a, b, start, end, normal, depth) };
+            return { isColliding: true, contacts: [new Contact(a, b, start, end, normal, depth)] };
         }
     };
 }
