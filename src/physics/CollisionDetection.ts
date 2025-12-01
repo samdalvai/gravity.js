@@ -143,6 +143,8 @@ export default class CollisionDetection {
                     contact.normal = contact.normal.scaleNew(-1);
                 }
 
+                contact.depth = contact.end.subNew(contact.start).magnitude();
+
                 contacts.push(contact);
             }
         }
