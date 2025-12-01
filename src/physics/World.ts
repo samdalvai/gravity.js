@@ -50,9 +50,6 @@ export default class World {
     update = (dt: number): void => {
         const penetrations: PenetrationConstraint[] = [];
 
-        // TODO: handle friction when objects roll
-        // https://chatgpt.com/c/692d7da0-aa78-8332-b209-a114bbed5b07
-
         // Loop all bodies of the world applying forces
         for (const body of this.bodies) {
             // Apply the weight force to all bodies
@@ -63,10 +60,15 @@ export default class World {
             for (const force of this.forces) {
                 body.addForce(force);
             }
+
             // Apply torque to all bodies
             for (const torque of this.torques) {
                 body.addTorque(torque);
             }
+
+            // Apply friction to all bodies
+            const frictionForce = body.velocity.scaleNew(-body.friction * 0.5);
+            body.applyImpulseLinear(frictionForce.scaleNew(dt));
         }
 
         // Integrate all the forces
