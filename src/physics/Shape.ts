@@ -101,8 +101,7 @@ export class PolygonShape extends Shape {
         return this.worldVertices[nextVertex].subNew(this.worldVertices[currVertex]);
     };
 
-    findMinSeparation = (other: PolygonShape, axis: Vec2, point: Vec2): number => {
-        // TODO: update to handle multiple contact points
+    findMinSeparation = (other: PolygonShape, indexReferenceEdge: { value: number }, supportPoint: Vec2): number => {
         let separation = -Infinity;
 
         // Loop all the vertices of "this" polygon
@@ -112,7 +111,7 @@ export class PolygonShape extends Shape {
 
             // Loop all the vertices of the "other" polygon
             let minSep = Infinity;
-            let minVertex: Vec2 | null = null;
+            let minVertex = new Vec2();
 
             for (let j = 0; j < other.worldVertices.length; j++) {
                 const vb = other.worldVertices[j];
@@ -125,14 +124,9 @@ export class PolygonShape extends Shape {
 
             if (minSep > separation) {
                 separation = minSep;
-                const edgeAtI = this.edgeAt(i);
-                axis.x = edgeAtI.x;
-                axis.y = edgeAtI.y;
-
-                if (minVertex) {
-                    point.x = minVertex.x;
-                    point.y = minVertex.y;
-                }
+                indexReferenceEdge.value = i;
+                supportPoint.x = minVertex.x;
+                supportPoint.y = minVertex.y;
             }
         }
         return separation;

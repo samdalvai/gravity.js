@@ -55,38 +55,99 @@ export default class CollisionDetection {
     };
 
     static detectCollisionPolygonPolygon = (a: Body, b: Body): CollisionResult => {
-        // TODO: update to handle multiple contact points
         const aPolygonShape = a.shape as PolygonShape;
         const bPolygonShape = b.shape as PolygonShape;
 
-        const aAxis = new Vec2();
-        const bAxis = new Vec2();
-        const aPoint = new Vec2();
-        const bPoint = new Vec2();
+        const aIndexReferenceEdge = { value: 0 };
+        const bIndexReferenceEdge = { value: 0 };
+        const aSupportPoint = new Vec2();
+        const bSupportPoint = new Vec2();
 
-        const abSeparation = aPolygonShape.findMinSeparation(bPolygonShape, aAxis, aPoint);
+        const abSeparation = aPolygonShape.findMinSeparation(bPolygonShape, aIndexReferenceEdge, aSupportPoint);
         if (abSeparation >= 0) {
             return { isColliding: false };
         }
 
-        const baSeparation = bPolygonShape.findMinSeparation(aPolygonShape, bAxis, bPoint);
+        const baSeparation = bPolygonShape.findMinSeparation(aPolygonShape, bIndexReferenceEdge, bSupportPoint);
         if (baSeparation >= 0) {
             return { isColliding: false };
         }
 
+        // Determine reference and incident polygons
+        let referenceShape: PolygonShape;
+        let incidentShape: PolygonShape;
+        let indexReferenceEdge: number;
+
         if (abSeparation > baSeparation) {
-            const depth = -abSeparation;
-            const normal = aAxis.normal();
-            const start = aPoint;
-            const end = aPoint.addNew(normal.scaleNew(depth));
-            return { isColliding: true, contacts: [new Contact(a, b, start, end, normal, depth)] };
+            referenceShape = aPolygonShape;
+            incidentShape = bPolygonShape;
+            indexReferenceEdge = aIndexReferenceEdge.value;
         } else {
-            const depth = -baSeparation;
-            const normal = bAxis.normal().negate();
-            const start = bPoint.subNew(normal.scaleNew(depth));
-            const end = bPoint;
-            return { isColliding: true, contacts: [new Contact(a, b, start, end, normal, depth)] };
+            referenceShape = bPolygonShape;
+            incidentShape = aPolygonShape;
+            indexReferenceEdge = bIndexReferenceEdge.value;
         }
+
+        // Find the reference edge based on the index that returned from the function
+        const referenceEdge = referenceShape.edgeAt(indexReferenceEdge);
+
+        /////////////////////////////////////
+        // Clipping
+        /////////////////////////////////////
+        const incidentIndex = incidentShape.findIncidentEdge(referenceEdge.normal());
+        const incidentNextIndex = (incidentIndex + 1) % incidentShape.worldVertices.length;
+
+        let contactPoints = [
+            incidentShape.worldVertices[incidentIndex],
+            incidentShape.worldVertices[incidentNextIndex],
+        ];
+        const clippedPoints = [...contactPoints];
+
+        // Loop through reference polygon edges and clip the incident segment
+        for (let i = 0; i < referenceShape.worldVertices.length; i++) {
+            if (i === indexReferenceEdge) continue;
+
+            const c0 = referenceShape.worldVertices[i];
+            const c1 = referenceShape.worldVertices[(i + 1) % referenceShape.worldVertices.length];
+
+            // Clip the segment to this edge
+            const numClipped = referenceShape.clipSegmentToLine(contactPoints, clippedPoints, c0, c1);
+
+            // If less than 2 points, exit
+            if (numClipped < 2) break;
+
+            // Make the next contact points the ones that were just clipped
+            contactPoints = [...clippedPoints];
+        }
+
+        const vref = referenceShape.worldVertices[indexReferenceEdge];
+        const contacts: Contact[] = [];
+
+        // Loop all clipped points, but only consider those where separation is negative (objects are penetrating each other)
+        for (const vclip of clippedPoints) {
+            const separation = vclip.subNew(vref).dot(referenceEdge.normal());
+            if (separation <= 0) {
+                const contact: Contact = {
+                    a,
+                    b,
+                    normal: referenceEdge.normal(),
+                    start: vclip,
+                    end: vclip.addNew(referenceEdge.normal().scaleNew(-separation)),
+                    depth: 0,
+                };
+
+                // Ensure the start-end points are always from "a" to "b"
+                if (baSeparation >= abSeparation) {
+                    [contact.start, contact.end] = [contact.end, contact.start];
+                    // The collision normal is always from "a" to "b"
+                    contact.normal = contact.normal.scaleNew(-1);
+                }
+
+                contacts.push(contact);
+            }
+        }
+
+        return { isColliding: true, contacts };
     };
 
     static detectCollisionPolygonCircle = (polygon: Body, circle: Body): CollisionResult => {
