@@ -50,6 +50,9 @@ export default class World {
     update = (dt: number): void => {
         const penetrations: PenetrationConstraint[] = [];
 
+        // TODO: handle friction when objects roll
+        // https://chatgpt.com/c/692d7da0-aa78-8332-b209-a114bbed5b07
+
         // Loop all bodies of the world applying forces
         for (const body of this.bodies) {
             // Apply the weight force to all bodies
