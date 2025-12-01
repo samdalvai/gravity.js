@@ -55,6 +55,7 @@ export default class CollisionDetection {
     };
 
     static detectCollisionPolygonPolygon = (a: Body, b: Body): CollisionResult => {
+        // TODO: update to handle multiple contact points
         const aPolygonShape = a.shape as PolygonShape;
         const bPolygonShape = b.shape as PolygonShape;
 

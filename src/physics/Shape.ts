@@ -102,6 +102,7 @@ export class PolygonShape extends Shape {
     };
 
     findMinSeparation = (other: PolygonShape, axis: Vec2, point: Vec2): number => {
+        // TODO: update to handle multiple contact points
         let separation = -Infinity;
 
         // Loop all the vertices of "this" polygon
@@ -135,6 +136,50 @@ export class PolygonShape extends Shape {
             }
         }
         return separation;
+    };
+
+    findIncidentEdge = (normal: Vec2): number => {
+        let index = 0;
+        let minProj = Number.POSITIVE_INFINITY;
+
+        for (let i = 0; i < this.worldVertices.length; i++) {
+            const edgeNormal = this.edgeAt(i).normal();
+            const proj = edgeNormal.dot(normal);
+
+            if (proj < minProj) {
+                minProj = proj;
+                index = i;
+            }
+        }
+
+        return index;
+    };
+
+    clipSegmentToLine = (contactsIn: Vec2[], contactsOut: Vec2[], c0: Vec2, c1: Vec2): number => {
+        // Start with no output points
+        let numOut = 0;
+
+        // Calculate the distance of end points to the line
+        const normal = c1.subNew(c0).normalize();
+        const dist0 = contactsIn[0].subNew(c0).cross(normal);
+        const dist1 = contactsIn[1].subNew(c0).cross(normal);
+
+        // If the points are behind the plane
+        if (dist0 <= 0) contactsOut[numOut++] = contactsIn[0];
+        if (dist1 <= 0) contactsOut[numOut++] = contactsIn[1];
+
+        // If the points are on different sides of the plane (one distance is negative and the other is positive)
+        if (dist0 * dist1 < 0) {
+            const totalDist = dist0 - dist1;
+
+            // Fint the intersection using linear interpolation: lerp(start,end) => start + t*(end-start)
+            const t = dist0 / totalDist;
+            const contact = contactsIn[0].addNew(contactsIn[1].subNew(contactsIn[0]).scaleNew(t));
+            contactsOut[numOut] = contact;
+            numOut++;
+        }
+
+        return numOut;
     };
 }
 
