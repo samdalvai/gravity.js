@@ -33,6 +33,18 @@ export default class Application {
             rightArm: 'assets/ragdoll/rightArm.png',
             rightLeg: 'assets/ragdoll/rightLeg.png',
             torso: 'assets/ragdoll/torso.png',
+            // background: 'assets/angrybirds/background.png',
+            // birdRed: 'assets/angrybirds/bird-red.png',
+            pig1: 'assets/angrybirds/pig-1.png',
+            // pig2: 'assets/angrybirds/pig-2.png',
+            // rockBox: 'assets/angrybirds/rock-box.png',
+            // rockBridgeAnchor: 'assets/angrybirds/rock-bridge-anchor.png',
+            // rockRound: 'assets/angrybirds/rock-round.png',
+            // woodBox: 'assets/angrybirds/wood-box.png',
+            // woodBridgeStep: 'assets/angrybirds/wood-bridge-step.png',
+            // woodPlankCracked: 'assets/angrybirds/wood-plank-craked.png',
+            // woodPlankSolid: 'assets/angrybirds/wood-plank-solid.png',
+            // woodTriangle: 'assets/angrybirds/wood-triangle.png',
         };
 
         await AssetStore.loadTextures(textures);
