@@ -13,6 +13,8 @@ export default class World {
     private forces: Vec2[] = [];
     private torques: number[] = [];
 
+    private debug = false;
+
     constructor(gravity: number) {
         this.G = -gravity;
     }
@@ -39,6 +41,10 @@ export default class World {
 
     addTorque = (torque: number): void => {
         this.torques.push(torque);
+    };
+
+    setDebug = (newValue: boolean): void => {
+        this.debug = newValue;
     };
 
     update = (dt: number): void => {
@@ -75,9 +81,11 @@ export default class World {
 
                 if (collisionResult.isColliding) {
                     for (const contact of collisionResult.contacts) {
-                        // Draw collision points
-                        // Graphics.drawCircle(contact.start.x, contact.start.y, 5, 0.0, 'red');
-                        // Graphics.drawCircle(contact.end.x, contact.end.y, 2, 0.0, 'red');
+                        if (this.debug) {
+                            // Draw collision points
+                            Graphics.drawCircle(contact.start.x, contact.start.y, 5, 0.0, 'red');
+                            Graphics.drawCircle(contact.end.x, contact.end.y, 2, 0.0, 'red');
+                        }
 
                         // Create a new penetration constraint
                         const penetration = new PenetrationConstraint(
