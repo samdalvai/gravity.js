@@ -39,10 +39,31 @@ export class CircleShape extends Shape {
 export class PolygonShape extends Shape {
     localVertices: Vec2[] = [];
     worldVertices: Vec2[] = [];
+    width: number;
+    height: number;
 
-    constructor() {
+    constructor(vertices: Vec2[]) {
         super();
-        // TODO: ....
+
+        let minX = Number.POSITIVE_INFINITY;
+        let minY = Number.POSITIVE_INFINITY;
+        let maxX = Number.NEGATIVE_INFINITY;
+        let maxY = Number.NEGATIVE_INFINITY;
+
+        // Initialize the vertices of the polygon shape and set width and height
+        for (const v of vertices) {
+            this.localVertices.push(v);
+            this.worldVertices.push(v);
+
+            // Find min and max X and Y to calculate polygon width and height
+            minX = Math.min(minX, v.x);
+            minY = Math.min(minY, v.y);
+            maxX = Math.max(maxX, v.x);
+            maxY = Math.max(maxY, v.y);
+        }
+
+        this.width = maxX - minX;
+        this.height = maxY - minY;
     }
 
     getType = (): ShapeType => {
@@ -50,11 +71,23 @@ export class PolygonShape extends Shape {
     };
 
     getMomentOfInertia = (): number => {
-        // TODO:
-        return 0.0;
+        let acc0 = 0;
+        let acc1 = 0;
+
+        for (let i = 0; i < this.localVertices.length; i++) {
+            const a = this.localVertices[i];
+            const b = this.localVertices[(i + 1) % this.localVertices.length];
+
+            const cross = Math.abs(a.cross(b));
+            acc0 += cross * (a.dot(a) + b.dot(b) + a.dot(b));
+            acc1 += cross;
+        }
+
+        return acc0 / 6 / acc1;
     };
 
     updateVertices = (angle: number, position: Vec2): void => {
+        // Loop all the vertices, transforming from local to world space
         for (let i = 0; i < this.localVertices.length; i++) {
             // First rotate, then we translate
             this.worldVertices[i] = this.localVertices[i].rotate(angle);
@@ -106,23 +139,18 @@ export class PolygonShape extends Shape {
 }
 
 export class BoxShape extends PolygonShape {
-    width: number;
-    height: number;
-
     constructor(width: number, height: number) {
-        super();
+        const verts = [
+            new Vec2(-width / 2, -height / 2),
+            new Vec2(+width / 2, -height / 2),
+            new Vec2(+width / 2, +height / 2),
+            new Vec2(-width / 2, +height / 2),
+        ];
+
+        super(verts);
+
         this.width = width;
         this.height = height;
-
-        this.localVertices.push(new Vec2(-width / 2.0, -height / 2.0));
-        this.localVertices.push(new Vec2(+width / 2.0, -height / 2.0));
-        this.localVertices.push(new Vec2(+width / 2.0, +height / 2.0));
-        this.localVertices.push(new Vec2(-width / 2.0, +height / 2.0));
-
-        this.worldVertices.push(new Vec2(-width / 2.0, -height / 2.0));
-        this.worldVertices.push(new Vec2(+width / 2.0, -height / 2.0));
-        this.worldVertices.push(new Vec2(+width / 2.0, +height / 2.0));
-        this.worldVertices.push(new Vec2(-width / 2.0, +height / 2.0));
     }
 
     getType = (): ShapeType => {
