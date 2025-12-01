@@ -132,8 +132,8 @@ export default class Application {
             const step = new Body(new CircleShape(15), x, y, mass);
             step.setTexture('woodBridgeStep');
             this.world.addBody(step);
-            // const joint = new JointConstraint(last, step, step.position);
-            // this.world.addConstraint(joint);
+            const joint = new JointConstraint(last, step, step.position);
+            this.world.addConstraint(joint);
             last = step;
         }
         const endStep = new Body(new BoxShape(80, 20), last.position.x + 60, last.position.y - 20, 0.0);
