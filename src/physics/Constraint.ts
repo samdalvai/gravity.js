@@ -152,7 +152,8 @@ export class JointConstraint extends Constraint {
     }
 
     postSolve(): void {
-        // TODO: Maybe we should clamp the values of cached lambda to reasonable limits
+        // Limit the warm starting to reasonable limits
+        this.cachedLambda.set(0, Math.min(Math.max(this.cachedLambda.get(0), -10000, 10000)));
     }
 }
 
