@@ -9,13 +9,13 @@ import World from './physics/World';
 
 export default class Application {
     private running = false;
+    private world: World;
+    private bgTexture: ImageBitmap | null = null;
+
+    // Debug related properties
     private debug = false;
     private FPS = 0;
     private lastFPSUpdate = 0;
-
-    private world: World;
-
-    private bgTexture: ImageBitmap | null = null;
 
     constructor() {
         this.world = new World(-9.8);
@@ -23,6 +23,10 @@ export default class Application {
 
     isRunning = (): boolean => {
         return this.running;
+    };
+
+    setRunning = (newValue: boolean): void => {
+        this.running = newValue;
     };
 
     setup = async (): Promise<void> => {
@@ -109,7 +113,6 @@ export default class Application {
         const triangle = new Body(new PolygonShape(triangleVertices), plank3.position.x, plank3.position.y - 50, 0.5);
         triangle.setTexture('woodTriangle');
         this.world.addBody(triangle);
-        console.log(triangle);
 
         // Add a pyramid of boxes
         const numRows = 5;
@@ -348,9 +351,5 @@ export default class Application {
                     break;
             }
         }
-    };
-
-    sleep = (milliseconds: number) => {
-        return new Promise(resolve => setTimeout(resolve, milliseconds));
     };
 }
