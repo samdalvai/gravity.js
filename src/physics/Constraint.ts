@@ -197,7 +197,7 @@ export class PenetrationConstraint extends Constraint {
         this.jacobian.rows[0].set(5, rb.cross(n)); // B angular velocity
 
         // Populate the second row of the Jacobian (tangent vector)
-        this.friction = Math.max(this.a.friction, this.b.friction);
+        this.friction = Math.min(this.a.friction, this.b.friction);
         if (this.friction > 0.0) {
             const t = n.normal(); // The tangent is the vector perpendicular to the normal
 
@@ -259,7 +259,7 @@ export class PenetrationConstraint extends Constraint {
         // Keep friction values between -(λn*µ) and +(λn*µ)
         if (this.friction > 0) {
             const maxFriction = this.cachedLambda.get(0) * this.friction;
-            const clampedFriction = Math.min(Math.max(this.cachedLambda.get(1), -maxFriction), maxFriction);
+            const clampedFriction = Utils.clamp(this.cachedLambda.get(1), -maxFriction, maxFriction);
             this.cachedLambda.set(1, clampedFriction);
         }
 
