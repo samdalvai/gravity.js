@@ -8,13 +8,23 @@ const run = async () => {
 
     let timePreviousFrame = performance.now();
 
+    document.addEventListener('visibilitychange', () => {
+        app.setRunning(!document.hidden);
+        if (!document.hidden) {
+            // Reset previous frame time to avoid a huge deltaTime spike
+            timePreviousFrame = performance.now();
+        }
+    });
+
     const loop = (now: number) => {
         const deltaTime = (now - timePreviousFrame) / 1000;
         timePreviousFrame = now;
 
-        app.input();
-        app.update(deltaTime);
-        app.render();
+        if (app.isRunning()) {
+            app.input();
+            app.update(deltaTime);
+            app.render();
+        }
 
         requestAnimationFrame(loop);
     };
