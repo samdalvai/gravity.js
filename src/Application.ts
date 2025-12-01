@@ -234,6 +234,16 @@ export default class Application {
     };
 
     render = (): void => {
+        // Draw all joints anchor points
+        if (this.debug) {
+            for (const joint of this.world.getConstraints()) {
+                if (this.debug) {
+                    const anchorPoint = joint.a.localSpaceToWorldSpace(joint.aPoint);
+                    Graphics.drawFillCircle(anchorPoint.x, anchorPoint.y, 3, 'red');
+                }
+            }
+        }
+
         // Draw background texture
         if (this.bgTexture && !this.debug) {
             Graphics.drawTexture(
