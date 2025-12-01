@@ -122,7 +122,7 @@ export class JointConstraint extends Constraint {
         this.b.applyImpulseAngular(impulses.get(5)); // B angular impulse
 
         // Compute the bias term (baumgarte stabilization)
-        const beta = 0.2;
+        const beta = 0.02;
         let C = pb.subNew(pa).dot(pb.subNew(pa));
         C = Math.max(0, C - 0.01);
         this.bias = (beta / dt) * C;
