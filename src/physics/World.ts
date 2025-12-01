@@ -1,3 +1,4 @@
+import Graphics from '../Graphics';
 import Body from './Body';
 import CollisionDetection from './CollisionDetection';
 import { PIXELS_PER_METER } from './Constants';
@@ -73,16 +74,21 @@ export default class World {
                 const collisionResult = CollisionDetection.detectCollision(a, b);
 
                 if (collisionResult.isColliding) {
-                    // Resolve the collision
-                    const contact = collisionResult.contact;
-                    const penetration = new PenetrationConstraint(
-                        contact.a,
-                        contact.b,
-                        contact.start,
-                        contact.end,
-                        contact.normal,
-                    );
-                    penetrations.push(penetration);
+                    for (const contact of collisionResult.contacts) {
+                        // Draw collision points
+                        // Graphics.drawCircle(contact.start.x, contact.start.y, 5, 0.0, 'red');
+                        // Graphics.drawCircle(contact.end.x, contact.end.y, 2, 0.0, 'red');
+
+                        // Create a new penetration constraint
+                        const penetration = new PenetrationConstraint(
+                            contact.a,
+                            contact.b,
+                            contact.start,
+                            contact.end,
+                            contact.normal,
+                        );
+                        penetrations.push(penetration);
+                    }
                 }
             }
         }
