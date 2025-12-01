@@ -16,4 +16,6 @@ export default class Utils {
 
         return `#${rHex}${gHex}${bHex}`;
     };
+
+    static clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
 }

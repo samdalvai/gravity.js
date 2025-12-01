@@ -1,3 +1,4 @@
+import Utils from '../Utils';
 import Body from './Body';
 import MatMN from './MatMN';
 import Vec2 from './Vec2';
@@ -153,7 +154,7 @@ export class JointConstraint extends Constraint {
 
     postSolve(): void {
         // Limit the warm starting to reasonable limits
-        this.cachedLambda.set(0, Math.min(Math.max(this.cachedLambda.get(0), -10000, 10000)));
+        this.cachedLambda.set(0, Utils.clamp(this.cachedLambda.get(0), -10000, 10000));
     }
 }
 
