@@ -179,6 +179,22 @@ export default class Application {
                         this.world.setDebug(this.debug);
                     }
 
+                    if (inputEvent.key === 'ArrowUp') {
+                        this.world.getBodies()[0].applyImpulseLinear(new Vec2(0, -600));
+                    }
+
+                    if (inputEvent.key === 'ArrowLeft') {
+                        this.world.getBodies()[0].applyImpulseLinear(new Vec2(-400, 0));
+                    }
+
+                    if (inputEvent.key === 'ArrowRight') {
+                        this.world.getBodies()[0].applyImpulseLinear(new Vec2(400, 0));
+                    }
+
+                    if (inputEvent.key === 'ArrowDown') {
+                        this.world.getBodies()[0].applyImpulseLinear(new Vec2(0, 600));
+                    }
+
                     break;
                 case 'keyup':
                     break;
