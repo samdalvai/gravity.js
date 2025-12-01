@@ -10,6 +10,9 @@ import World from './physics/World';
 export default class Application {
     private running = false;
     private debug = false;
+    private FPS = 0;
+    private lastFPSUpdate = 0;
+
     private world: World;
 
     private bgTexture: ImageBitmap | null = null;
@@ -229,6 +232,15 @@ export default class Application {
 
     update = (deltaTime: number): void => {
         Graphics.clearScreen();
+
+        if (this.debug) {
+            Graphics.drawText(`FPS: ${this.FPS.toFixed(2)}`, Graphics.width() - 100, 50, 25, 'arial', 'red');
+
+            if (!this.lastFPSUpdate || performance.now() - this.lastFPSUpdate > 1000) {
+                this.lastFPSUpdate = performance.now();
+                this.FPS = 1 / deltaTime;
+            }
+        }
 
         this.world.update(deltaTime);
     };
