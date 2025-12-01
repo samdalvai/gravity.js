@@ -12,6 +12,8 @@ export default class Application {
     private debug = false;
     private world: World;
 
+    private bgTexture: ImageBitmap | null = null;
+
     constructor() {
         this.world = new World(-9.8);
     }
@@ -53,6 +55,8 @@ export default class Application {
 
         this.running = Graphics.openWindow();
 
+        this.bgTexture = AssetStore.getTexture('background');
+
         // Add bird
         const bird = new Body(new CircleShape(45), 100, Graphics.height() / 2.0 + 220, 3.0);
         bird.setTexture('birdRed');
@@ -62,7 +66,7 @@ export default class Application {
         const floor = new Body(
             new BoxShape(Graphics.width() - 50, 50),
             Graphics.width() / 2.0,
-            Graphics.height() / 2.0 + 290,
+            Graphics.height() / 2.0 + 340,
             0.0,
         );
         const leftFence = new Body(new BoxShape(50, Graphics.height() - 200), 0, Graphics.height() / 2.0 - 35, 0.0);
@@ -102,6 +106,7 @@ export default class Application {
         const triangle = new Body(new PolygonShape(triangleVertices), plank3.position.x, plank3.position.y - 50, 0.5);
         triangle.setTexture('woodTriangle');
         this.world.addBody(triangle);
+        console.log(triangle);
 
         // Add a pyramid of boxes
         const numRows = 5;
@@ -229,6 +234,18 @@ export default class Application {
     };
 
     render = (): void => {
+        // Draw background texture
+        if (this.bgTexture && !this.debug) {
+            Graphics.drawTexture(
+                Graphics.width() / 2.0,
+                Graphics.height() / 2.0,
+                Graphics.width(),
+                Graphics.height(),
+                0.0,
+                this.bgTexture,
+            );
+        }
+
         // Draw all bodies
         for (const body of this.world.getBodies()) {
             switch (body.shape.getType()) {
@@ -245,7 +262,7 @@ export default class Application {
                                 body.rotation,
                                 body.texture,
                             );
-                        } else {
+                        } else if (this.debug) {
                             Graphics.drawCircle(
                                 body.position.x,
                                 body.position.y,
@@ -259,15 +276,16 @@ export default class Application {
                 case ShapeType.POLYGON:
                     {
                         const polygonShape = body.shape as PolygonShape;
-
                         if (!this.debug && body.texture) {
-                            Graphics.drawFillPolygon(
+                            Graphics.drawTexture(
                                 body.position.x,
                                 body.position.y,
-                                polygonShape.worldVertices,
-                                'white',
+                                polygonShape.width,
+                                polygonShape.height,
+                                body.rotation,
+                                body.texture,
                             );
-                        } else {
+                        } else if (this.debug) {
                             Graphics.drawPolygon(body.position.x, body.position.y, polygonShape.worldVertices, 'white');
                         }
                     }
@@ -285,7 +303,7 @@ export default class Application {
                                 body.rotation,
                                 body.texture,
                             );
-                        } else {
+                        } else if (this.debug) {
                             Graphics.drawPolygon(body.position.x, body.position.y, boxShape.worldVertices, 'white');
                         }
                     }
