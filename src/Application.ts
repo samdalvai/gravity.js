@@ -226,10 +226,10 @@ export default class Application {
                     switch (inputEvent.button) {
                         case MouseButton.LEFT:
                             {
-                                const ball = new Body(new CircleShape(30), inputEvent.x, inputEvent.y, 1.0);
+                                const ball = new Body(new CircleShape(30), inputEvent.x, inputEvent.y, 10.0);
                                 ball.restitution = 0.7;
                                 ball.friction = 0.4;
-                                ball.setTexture('basketball');
+                                ball.setTexture('rockRound');
                                 this.world.addBody(ball);
                             }
                             break;
@@ -237,7 +237,8 @@ export default class Application {
                             {
                                 const box = new Body(new BoxShape(60, 60), inputEvent.x, inputEvent.y, 1.0);
                                 box.restitution = 0.2;
-                                box.setTexture('crate');
+                                box.friction = 0.7;
+                                box.setTexture('woodBox');
                                 this.world.addBody(box);
                             }
                             break;
