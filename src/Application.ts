@@ -197,6 +197,35 @@ export default class Application {
                         this.world.setDebug(this.debug);
                     }
 
+                    if (inputEvent.key === 'e') {
+                        {
+                            const explosionPos = InputManager.mousePosition;
+                            const radius = 250; // pixels
+                            const strength = 5000; // you can tune this
+
+                            for (const body of this.world.getBodies()) {
+                                if (body.invMass === 0) continue; // static bodies don't explode
+
+                                const dir = body.position.subNew(explosionPos);
+                                const dist = dir.magnitude();
+
+                                if (dist > radius || dist === 0) continue;
+
+                                // Normalize direction
+                                dir.scaleAssign(1 / dist);
+
+                                // Falloff: weaker at distance
+                                const falloff = 1 - dist / radius;
+
+                                const impulseMag = strength * falloff;
+
+                                const impulse = dir.scaleNew(impulseMag);
+
+                                body.applyImpulseLinear(impulse);
+                            }
+                        }
+                    }
+
                     if (inputEvent.key === 'ArrowUp') {
                         this.world.getBodies()[0].applyImpulseLinear(new Vec2(0, -600));
                     }
