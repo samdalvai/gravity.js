@@ -1,3 +1,5 @@
+import Vec2 from './physics/Vec2';
+
 export enum MouseButton {
     LEFT = 0,
     MIDDLE = 1,
@@ -8,11 +10,13 @@ export default class InputManager {
     static keyboardInputBuffer: KeyboardEvent[];
     static mouseInputBuffer: MouseEvent[];
     static mouseMoveBuffer: MouseEvent[];
+    static mousePosition: Vec2;
 
     static initialize = () => {
         this.keyboardInputBuffer = [];
         this.mouseInputBuffer = [];
         this.mouseMoveBuffer = [];
+        this.mousePosition = new Vec2();
 
         window.addEventListener('keydown', this.handleKeyboardEvent);
         window.addEventListener('keyup', this.handleKeyboardEvent);
@@ -30,6 +34,8 @@ export default class InputManager {
     };
 
     static handleMouseMove = (event: MouseEvent) => {
+        this.mousePosition.x = event.x;
+        this.mousePosition.y = event.y;
         this.mouseMoveBuffer.push(event);
     };
 
