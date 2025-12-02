@@ -6,7 +6,7 @@ A Javascript 2d game physics engine, rendering in a Canvas on the browser. Inspi
 
 ## Prerequisites
 
-* Node.js installed
+- Node.js installed
 
 ## Install dependencies
 
@@ -21,3 +21,9 @@ npm start
 ```
 
 Now open the browser at http://localhost:1234
+
+# Example game
+
+The engine features a basic example scenario based on the angry birds game.
+
+![game](game.png)
