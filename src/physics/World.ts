@@ -117,7 +117,7 @@ export default class World {
             constraint.preSolve(dt);
         }
 
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 10; i++) {
             for (const constraint of this.constraints) {
                 constraint.solve();
             }
