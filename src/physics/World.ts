@@ -3,6 +3,7 @@ import Body from './Body';
 import CollisionDetection from './CollisionDetection';
 import { PIXELS_PER_METER } from './Constants';
 import { Constraint, PenetrationConstraint } from './Constraint';
+import Force from './Force';
 import Vec2 from './Vec2';
 
 export default class World {
@@ -56,6 +57,11 @@ export default class World {
             const weight = new Vec2(0.0, body.mass * this.G * PIXELS_PER_METER);
             body.addForce(weight);
 
+            // Apply friction to all bodies
+            // TODO: counter friction should only be applied if in contact with another surface
+            const frictionForce = Force.generateFrictionForce(body, body.friction);
+            body.addForce(frictionForce);
+
             // Apply forces to all bodies
             for (const force of this.forces) {
                 body.addForce(force);
@@ -65,10 +71,6 @@ export default class World {
             for (const torque of this.torques) {
                 body.addTorque(torque);
             }
-
-            // Apply friction to all bodies
-            const frictionForce = body.velocity.scaleNew(-body.friction * 0.5);
-            body.applyImpulseLinear(frictionForce.scaleNew(dt));
         }
 
         // Integrate all the forces
