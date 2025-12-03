@@ -1,8 +1,44 @@
 import Body from '../../src/physics/Body';
 import CollisionDetection from '../../src/physics/CollisionDetection';
-import { BoxShape } from '../../src/physics/Shape';
+import { BoxShape, CircleShape } from '../../src/physics/Shape';
 
 describe('CollisionDetection', () => {
+    test('detectCollisionCircleCircle() detects collision between fully overlapped circles', () => {
+        const a = new Body(new CircleShape(30), 0, 0, 1.0);
+        const b = new Body(new CircleShape(30), 0, 0, 1.0);
+
+        const collisionResult = CollisionDetection.detectCollisionCircleCircle(a, b);
+
+        expect(collisionResult.isColliding).toBe(true);
+        expect(collisionResult.contacts).not.toBeUndefined();
+        expect(collisionResult.contacts).toHaveLength(1);
+        expect(collisionResult.contacts![0].depth).toBe(60);
+    });
+
+    test('detectCollisionCircleCircle() detects collision between half overlapped circles', () => {
+        const a = new Body(new CircleShape(30), 0, 0, 1.0);
+        const b = new Body(new CircleShape(30), 30, 0, 1.0);
+
+        const collisionResult = CollisionDetection.detectCollisionCircleCircle(a, b);
+
+        expect(collisionResult.isColliding).toBe(true);
+        expect(collisionResult.contacts).not.toBeUndefined();
+        expect(collisionResult.contacts).toHaveLength(1);
+        expect(collisionResult.contacts![0].depth).toBe(30);
+    });
+
+    test('detectCollisionCircleCircle() detects collision between quarter overlapped circles', () => {
+        const a = new Body(new CircleShape(30), 0, 0, 1.0);
+        const b = new Body(new CircleShape(30), 45, 0, 1.0);
+
+        const collisionResult = CollisionDetection.detectCollisionCircleCircle(a, b);
+
+        expect(collisionResult.isColliding).toBe(true);
+        expect(collisionResult.contacts).not.toBeUndefined();
+        expect(collisionResult.contacts).toHaveLength(1);
+        expect(collisionResult.contacts![0].depth).toBe(15);
+    });
+
     test('detectCollisionPolygonPolygon() detects collision between fully overlapped boxes', () => {
         const a = new Body(new BoxShape(60, 60), 0, 0, 1.0);
         const b = new Body(new BoxShape(60, 60), 0, 0, 1.0);
