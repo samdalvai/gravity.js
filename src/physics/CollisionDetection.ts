@@ -58,17 +58,16 @@ export default class CollisionDetection {
         const aPolygonShape = a.shape as PolygonShape;
         const bPolygonShape = b.shape as PolygonShape;
 
-        const aIndexReferenceEdge = { value: 0 };
-        const bIndexReferenceEdge = { value: 0 };
-        const aSupportPoint = new Vec2();
-        const bSupportPoint = new Vec2();
+        const { separation: abSeparation, indexReferenceEdge: aIndexReferenceEdge } =
+            aPolygonShape.findMinSeparation(bPolygonShape);
 
-        const abSeparation = aPolygonShape.findMinSeparation(bPolygonShape, aIndexReferenceEdge, aSupportPoint);
         if (abSeparation >= 0) {
             return { isColliding: false };
         }
 
-        const baSeparation = bPolygonShape.findMinSeparation(aPolygonShape, bIndexReferenceEdge, bSupportPoint);
+        const { separation: baSeparation, indexReferenceEdge: bIndexReferenceEdge } =
+            aPolygonShape.findMinSeparation(aPolygonShape);
+
         if (baSeparation >= 0) {
             return { isColliding: false };
         }
@@ -81,11 +80,11 @@ export default class CollisionDetection {
         if (abSeparation > baSeparation) {
             referenceShape = aPolygonShape;
             incidentShape = bPolygonShape;
-            indexReferenceEdge = aIndexReferenceEdge.value;
+            indexReferenceEdge = aIndexReferenceEdge;
         } else {
             referenceShape = bPolygonShape;
             incidentShape = aPolygonShape;
-            indexReferenceEdge = bIndexReferenceEdge.value;
+            indexReferenceEdge = bIndexReferenceEdge;
         }
 
         // Find the reference edge based on the index that returned from the function
