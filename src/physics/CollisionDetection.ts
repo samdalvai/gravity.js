@@ -44,8 +44,13 @@ export default class CollisionDetection {
             return { isColliding: false };
         }
 
-        const normal = ab;
-        normal.normalize();
+        let normal: Vec2;
+        if (ab.magnitudeSquared() === 0) {
+            // Fully overlapping, pick arbitrary normal
+            normal = new Vec2(1, 0);
+        } else {
+            normal = ab.normalize();
+        }
 
         const start = b.position.subNew(normal.scaleNew(bCircleShape.radius));
         const end = a.position.addNew(normal.scaleNew(aCircleShape.radius));
