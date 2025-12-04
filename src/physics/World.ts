@@ -92,6 +92,7 @@ export default class World {
                             // Draw collision points
                             Graphics.drawFillCircle(contact.start.x, contact.start.y, 5, 'red');
                             Graphics.drawFillCircle(contact.end.x, contact.end.y, 2, 'red');
+                            Graphics.drawLine(contact.start.x, contact.start.y, contact.end.x, contact.end.y, 'red');
                         }
 
                         // Create a new penetration constraint
