@@ -92,13 +92,13 @@ export class JointConstraint extends Constraint {
     }
 
     preSolve(dt: number): void {
-        // 1. World-space positions and lever arms
+        // World-space positions and lever arms
         const pa = this.a.localSpaceToWorldSpace(this.aPoint);
         const pb = this.b.localSpaceToWorldSpace(this.bPoint);
         const ra = pa.subNew(this.a.position);
         const rb = pb.subNew(this.b.position);
 
-        // 2. Compute the Jacobian J (2x6) for C = pa - pb = 0
+        // Compute the Jacobian J (2x6) for C = pa - pb = 0
         this.jacobian.zero();
 
         // J = [ I  ra_perp  -I  -rb_perp ]
@@ -124,7 +124,7 @@ export class JointConstraint extends Constraint {
         this.jacobian.rows[1].set(4, -1); // B linear y (vby)
         this.jacobian.rows[1].set(5, -rb.x); // B angular (wb) (-rb_perp.y)
 
-        // 3. Warm starting (apply cached lambda)
+        // Warm starting (apply cached lambda)
         const Jt = this.jacobian.transpose();
         const impulses = Jt.multiplyVec(this.cachedLambda); // impulses is VecN (6)
 
@@ -134,7 +134,7 @@ export class JointConstraint extends Constraint {
         this.b.applyImpulseLinear(new Vec2(impulses.get(3), impulses.get(4)));
         this.b.applyImpulseAngular(impulses.get(5));
 
-        // 4. Compute the bias term (Baumgarte stabilization)
+        // Compute the bias term (Baumgarte stabilization)
         const beta = 0.02; // Stabilization factor
         const C = pa.subNew(pb); // Positional error vector (Vec2)
         const C_len = C.magnitude();
@@ -162,23 +162,23 @@ export class JointConstraint extends Constraint {
         const J = this.jacobian; // J is MatMN (2x6)
         const Jt = this.jacobian.transpose();
 
-        // 1. Compute effective mass K (K = J * invM * Jt)
+        // Compute effective mass K (K = J * invM * Jt)
         const K = J.multiplyMat(invM).multiplyMat(Jt); // K is MatMN (2x2)
 
-        // 2. Compute the right-hand side b (b = -J * V - bias)
+        // Compute the right-hand side b (b = -J * V - bias)
         const b = J.multiplyVec(V).scaleNew(-1); // b is VecN (2)
 
         // b = -J * V - bias
         b.subAssign(this.bias);
 
-        // 3. Solve for lambda (K * lambda = b)
+        // Solve for lambda (K * lambda = b)
         // Since K is 2x2, MatMN.solveGaussSeidel should handle it,
         // but often an explicit 2x2 inverse or Cramer's rule is used for performance.
         // Assuming MatMN.solveGaussSeidel works for 2x2:
         const lambda = MatMN.solveGaussSeidel(K, b); // lambda is VecN (2)
         this.cachedLambda.addAssign(lambda);
 
-        // 4. Compute and apply impulses (Impulse = Jt * lambda)
+        // Compute and apply impulses (Impulse = Jt * lambda)
         const impulses = Jt.multiplyVec(lambda); // impulses is VecN (6)
 
         // Apply the impulses to both bodies
