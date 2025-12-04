@@ -27,7 +27,7 @@ describe('CollisionDetection', () => {
         expect(collisionResult.contacts![0].depth).toBe(30);
     });
 
-    test('detectCollisionCircleCircle() detects collision between quarter overlapped circles', () => {
+    test('detectCollisionCircleCircle() detects collision between circles that overlap by a quarter', () => {
         const a = new Body(new CircleShape(30), 0, 0, 1.0);
         const b = new Body(new CircleShape(30), 45, 0, 1.0);
 
@@ -65,7 +65,7 @@ describe('CollisionDetection', () => {
         expect(collisionResult.contacts![1].depth).toBe(30);
     });
 
-    test('detectCollisionPolygonPolygon() detects collision between quarter overlapped boxes', () => {
+    test('detectCollisionPolygonPolygon() detects collision between boxes that overlap by a quarter', () => {
         const a = new Body(new BoxShape(60, 60), 0, 0, 1.0);
         const b = new Body(new BoxShape(60, 60), 30, 30, 1.0);
 
