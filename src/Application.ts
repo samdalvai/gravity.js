@@ -187,6 +187,11 @@ export default class Application {
         const triangleVertices2 = [new Vec2(30, 30), new Vec2(-30, 30), new Vec2(0, -30)];
         const triangle2 = new Body(new PolygonShape(triangleVertices2), Graphics.width() / 2, Graphics.height() / 2, 0);
         this.world.addBody(triangle2);
+
+        // const boxA = new Body(new BoxShape(60, 60), Graphics.width() / 2, Graphics.height() / 2, 0);
+        // const boxB = new Body(new BoxShape(60, 60), Graphics.width() / 2, Graphics.height() / 2, 0);
+        // this.world.addBody(boxA);
+        // this.world.addBody(boxB);
     };
 
     input = (): void => {
@@ -268,6 +273,9 @@ export default class Application {
             this.world.getBodies()[1].position.x = inputEvent.x;
             this.world.getBodies()[1].position.y = inputEvent.y;
             this.world.getBodies()[1].shape.updateVertices(0, this.world.getBodies()[1].position);
+
+            console.log('triangle 1:', this.world.getBodies()[0].position);
+            console.log('triangle 2:', this.world.getBodies()[1].position);
         }
 
         // Handle mouse click events

@@ -175,49 +175,49 @@ describe('CollisionDetection', () => {
         const a = new Body(new PolygonShape(triangleVerticesA), 0, 0, 1.0);
         const b = new Body(new PolygonShape(triangleVerticesB), 0, 15, 1.0);
 
-        console.log(a.shape);
-        console.log(b.shape);
-        
+        const collisionResult = CollisionDetection.detectCollisionPolygonPolygon(a, b);
+
+        expect(collisionResult.isColliding).toBe(true);
+        expect(collisionResult.contacts).not.toBeUndefined();
+        expect(collisionResult.contacts).toHaveLength(1);
+        expect(collisionResult.contacts![0].depth).toBe(45);
+    });
+
+    test('detectCollisionPolygonPolygon() detects collision between triangles that overlap by a quarter', () => {
+        const triangleVerticesA = [new Vec2(30, 30), new Vec2(-30, 30), new Vec2(0, -30)];
+        const triangleVerticesB = [new Vec2(30, 30), new Vec2(-30, 30), new Vec2(0, -30)];
+        const a = new Body(new PolygonShape(triangleVerticesA), 0, 0, 1.0);
+        const b = new Body(new PolygonShape(triangleVerticesB), 0, 30, 1.0);
 
         const collisionResult = CollisionDetection.detectCollisionPolygonPolygon(a, b);
 
         expect(collisionResult.isColliding).toBe(true);
         expect(collisionResult.contacts).not.toBeUndefined();
-        // expect(collisionResult.contacts).toHaveLength(2);
-        // expect(collisionResult.contacts![0].depth).toBe(30);
-        // expect(collisionResult.contacts![1].depth).toBe(30);
+        expect(collisionResult.contacts).toHaveLength(1);
+        expect(collisionResult.contacts![0].depth).toBe(30);
     });
 
-    // test('detectCollisionPolygonPolygon() detects collision between triangles that overlap by a quarter', () => {
-    //     const a = new Body(new BoxShape(60, 60), 0, 0, 1.0);
-    //     const b = new Body(new BoxShape(60, 60), 30, 30, 1.0);
+    test('detectCollisionPolygonPolygon() should not detect collision for not overlapped triangles', () => {
+        const triangleVerticesA = [new Vec2(30, 30), new Vec2(-30, 30), new Vec2(0, -30)];
+        const triangleVerticesB = [new Vec2(30, 30), new Vec2(-30, 30), new Vec2(0, -30)];
+        const a = new Body(new PolygonShape(triangleVerticesA), 0, 0, 1.0);
+        const b = new Body(new PolygonShape(triangleVerticesB), 200, 0, 1.0);
 
-    //     const collisionResult = CollisionDetection.detectCollisionPolygonPolygon(a, b);
+        const collisionResult = CollisionDetection.detectCollisionPolygonPolygon(a, b);
 
-    //     expect(collisionResult.isColliding).toBe(true);
-    //     expect(collisionResult.contacts).not.toBeUndefined();
-    //     expect(collisionResult.contacts).toHaveLength(2);
-    //     expect(collisionResult.contacts![0].depth).toBe(30);
-    //     expect(collisionResult.contacts![1].depth).toBe(30);
-    // });
+        expect(collisionResult.isColliding).toBe(false);
+        expect(collisionResult.contacts).toBeUndefined();
+    });
 
-    // test('detectCollisionPolygonPolygon() should not detect collision for not overlapped triangles', () => {
-    //     const a = new Body(new BoxShape(60, 60), 0, 0, 1.0);
-    //     const b = new Body(new BoxShape(60, 60), 200, 200, 1.0);
+    test('detectCollisionPolygonPolygon() should not detect collision for not overlapped and touching triangles', () => {
+        const triangleVerticesA = [new Vec2(30, 30), new Vec2(-30, 30), new Vec2(0, -30)];
+        const triangleVerticesB = [new Vec2(30, 30), new Vec2(-30, 30), new Vec2(0, -30)];
+        const a = new Body(new PolygonShape(triangleVerticesA), 0, 0, 1.0);
+        const b = new Body(new PolygonShape(triangleVerticesB), 60, 0, 1.0);
 
-    //     const collisionResult = CollisionDetection.detectCollisionPolygonPolygon(a, b);
+        const collisionResult = CollisionDetection.detectCollisionPolygonPolygon(a, b);
 
-    //     expect(collisionResult.isColliding).toBe(false);
-    //     expect(collisionResult.contacts).toBeUndefined();
-    // });
-
-    // test('detectCollisionPolygonPolygon() should not detect collision for not overlapped and touching triangles', () => {
-    //     const a = new Body(new BoxShape(60, 60), 0, 0, 1.0);
-    //     const b = new Body(new BoxShape(60, 60), 60, 60, 1.0);
-
-    //     const collisionResult = CollisionDetection.detectCollisionPolygonPolygon(a, b);
-
-    //     expect(collisionResult.isColliding).toBe(false);
-    //     expect(collisionResult.contacts).toBeUndefined();
-    // });
+        expect(collisionResult.isColliding).toBe(false);
+        expect(collisionResult.contacts).toBeUndefined();
+    });
 });
