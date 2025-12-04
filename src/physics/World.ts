@@ -90,8 +90,8 @@ export default class World {
                     for (const contact of collisionResult.contacts) {
                         if (this.debug) {
                             // Draw collision points
-                            Graphics.drawCircle(contact.start.x, contact.start.y, 5, 0.0, 'red');
-                            Graphics.drawCircle(contact.end.x, contact.end.y, 2, 0.0, 'red');
+                            Graphics.drawFillCircle(contact.start.x, contact.start.y, 5, 'red');
+                            Graphics.drawFillCircle(contact.end.x, contact.end.y, 2, 'red');
                         }
 
                         // Create a new penetration constraint
