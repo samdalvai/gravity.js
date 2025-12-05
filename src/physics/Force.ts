@@ -18,6 +18,7 @@ export default class Force {
 
         return dragForce;
     };
+    
     static generateFrictionForce = (body: Body, k: number): Vec2 => {
         // Calculate the friction direction (inverse of velocity unit vector)
         const frictionDirection = body.velocity.unitVector().scaleNew(-1);
