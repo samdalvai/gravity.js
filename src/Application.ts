@@ -12,6 +12,7 @@ export default class Application {
     private running = false;
     private world: World;
     private bgTexture: ImageBitmap | null = null;
+    private generateParticle = false;
 
     // Debug related properties
     private debug = false;
@@ -232,6 +233,10 @@ export default class Application {
                         }
                     }
 
+                    if (inputEvent.key === 'g') {
+                        this.generateParticle = true;
+                    }
+
                     if (inputEvent.key === 'ArrowUp') {
                         this.world.getBodies()[0].applyImpulseLinear(new Vec2(0, -600));
                     }
@@ -250,6 +255,10 @@ export default class Application {
 
                     break;
                 case 'keyup':
+                    if (inputEvent.key === 'g') {
+                        this.generateParticle = false;
+                    }
+
                     break;
             }
         }
@@ -263,9 +272,9 @@ export default class Application {
             }
 
             // Test for body collision
-            this.world.getBodies()[4].position.x = inputEvent.x;
-            this.world.getBodies()[4].position.y = inputEvent.y;
-            this.world.getBodies()[4].shape.updateVertices(0, this.world.getBodies()[4].position);
+            // this.world.getBodies()[4].position.x = inputEvent.x;
+            // this.world.getBodies()[4].position.y = inputEvent.y;
+            // this.world.getBodies()[4].shape.updateVertices(0, this.world.getBodies()[4].position);
         }
 
         // Handle mouse click events
@@ -281,7 +290,7 @@ export default class Application {
                     switch (inputEvent.button) {
                         case MouseButton.LEFT:
                             {
-                                const ball = new Body(new CircleShape(30), inputEvent.x, inputEvent.y, 1.0);
+                                const ball = new Body(new CircleShape(30), inputEvent.x, inputEvent.y, 4.0);
                                 ball.restitution = 0.2;
                                 ball.friction = 10;
                                 ball.setTexture('rockRound');
@@ -290,7 +299,7 @@ export default class Application {
                             break;
                         case MouseButton.RIGHT:
                             {
-                                const box = new Body(new BoxShape(60, 60), inputEvent.x, inputEvent.y, 1.0);
+                                const box = new Body(new BoxShape(60, 60), inputEvent.x, inputEvent.y, 6.0);
                                 box.restitution = 0.5;
                                 box.friction = 0.7;
                                 box.setTexture('woodBox');
@@ -310,6 +319,14 @@ export default class Application {
 
         if (this.debug) {
             Graphics.drawText(`FPS: ${this.FPS.toFixed(2)}`, Graphics.width() - 100, 50, 25, 'arial', 'red');
+            Graphics.drawText(
+                `Num objects: ${this.world.getBodies().length}`,
+                Graphics.width() - 120,
+                75,
+                25,
+                'arial',
+                'red',
+            );
 
             if (!this.lastFPSUpdate || performance.now() - this.lastFPSUpdate > 1000) {
                 this.lastFPSUpdate = performance.now();
@@ -318,6 +335,14 @@ export default class Application {
         }
 
         this.world.update(deltaTime);
+
+        if (this.generateParticle) {
+            const ball = new Body(new CircleShape(5), InputManager.mousePosition.x, InputManager.mousePosition.y, 1.0);
+            ball.restitution = 0.2;
+            ball.friction = 10;
+            ball.setTexture('rockRound');
+            this.world.addBody(ball);
+        }
     };
 
     render = (): void => {
