@@ -140,5 +140,22 @@ export default class World {
         for (const body of this.bodies) {
             body.integrateVelocities(dt);
         }
+
+        // Remove objects that wen out of the screen
+        const bodiesInScreen: Body[] = [];
+        for (const body of this.bodies) {
+            if (
+                body.position.x < 0 ||
+                body.position.y > Graphics.width() ||
+                body.position.y < 0 ||
+                body.position.y > Graphics.height()
+            ) {
+                continue;
+            }
+
+            bodiesInScreen.push(body);
+        }
+
+        this.bodies = bodiesInScreen;
     };
 }
