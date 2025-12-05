@@ -18,7 +18,7 @@ export default class Force {
 
         return dragForce;
     };
-    
+
     static generateFrictionForce = (body: Body, k: number): Vec2 => {
         // Calculate the friction direction (inverse of velocity unit vector)
         const frictionDirection = body.velocity.unitVector().scaleNew(-1);
@@ -87,5 +87,27 @@ export default class Force {
 
         // Calculate the final resulting spring force vector
         return springDirection.scaleNew(sprintMagnitude);
+    };
+
+    static generateExplosionForce = (body: Body, explosionSource: Vec2, radius: number, strength: number): Vec2 => {
+        // Static bodies don't explode
+        if (body.invMass === 0) return new Vec2();
+
+        const dir = body.position.subNew(explosionSource);
+        const dist = dir.magnitude();
+
+        // If body is farther than radius, explosion force is 0
+        if (dist > radius || dist === 0) return new Vec2();
+
+        // Normalize direction
+        dir.scaleAssign(1 / dist);
+
+        // Falloff: weaker at distance
+        const falloff = 1 - dist / radius;
+
+        const impulseMag = strength * falloff;
+
+        const impulse = dir.scaleNew(impulseMag);
+        return impulse;
     };
 }
