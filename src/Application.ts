@@ -3,6 +3,7 @@ import Graphics from './Graphics';
 import InputManager, { MouseButton } from './InputManager';
 import Body from './physics/Body';
 import { JointConstraint } from './physics/Constraint';
+import Force from './physics/Force';
 import { BoxShape, CircleShape, PolygonShape, ShapeType } from './physics/Shape';
 import Vec2 from './physics/Vec2';
 import World from './physics/World';
@@ -69,23 +70,23 @@ export default class Application {
         // bird.setTexture('birdRed');
         // this.world.addBody(bird);
 
-        // // Add a floor and walls to contain objects objects
-        // const floor = new Body(
-        //     new BoxShape(Graphics.width() - 50, 50),
-        //     Graphics.width() / 2.0,
-        //     Graphics.height() / 2.0 + 340,
-        //     0.0,
-        // );
-        // const leftFence = new Body(new BoxShape(50, Graphics.height() - 75), 0, Graphics.height() / 2.0 - 35, 0.0);
-        // const rightFence = new Body(
-        //     new BoxShape(50, Graphics.height() - 75),
-        //     Graphics.width(),
-        //     Graphics.height() / 2.0 - 35,
-        //     0.0,
-        // );
-        // this.world.addBody(floor);
-        // this.world.addBody(leftFence);
-        // this.world.addBody(rightFence);
+        // Add a floor and walls to contain objects objects
+        const floor = new Body(
+            new BoxShape(Graphics.width() - 50, 50),
+            Graphics.width() / 2.0,
+            Graphics.height() / 2.0 + 340,
+            0.0,
+        );
+        const leftFence = new Body(new BoxShape(50, Graphics.height() - 75), 0, Graphics.height() / 2.0 - 35, 0.0);
+        const rightFence = new Body(
+            new BoxShape(50, Graphics.height() - 75),
+            Graphics.width(),
+            Graphics.height() / 2.0 - 35,
+            0.0,
+        );
+        this.world.addBody(floor);
+        this.world.addBody(leftFence);
+        this.world.addBody(rightFence);
 
         // // Add a stack of boxes
         // for (let i = 1; i <= 4; i++) {
@@ -220,24 +221,13 @@ export default class Application {
                             const strength = 5000; // you can tune this
 
                             for (const body of this.world.getBodies()) {
-                                if (body.invMass === 0) continue; // static bodies don't explode
-
-                                const dir = body.position.subNew(explosionPos);
-                                const dist = dir.magnitude();
-
-                                if (dist > radius || dist === 0) continue;
-
-                                // Normalize direction
-                                dir.scaleAssign(1 / dist);
-
-                                // Falloff: weaker at distance
-                                const falloff = 1 - dist / radius;
-
-                                const impulseMag = strength * falloff;
-
-                                const impulse = dir.scaleNew(impulseMag);
-
-                                body.applyImpulseLinear(impulse);
+                                const explosionImpulse = Force.generateExplosionForce(
+                                    body,
+                                    explosionPos,
+                                    radius,
+                                    strength,
+                                );
+                                body.applyImpulseLinear(explosionImpulse);
                             }
                         }
                     }
@@ -273,12 +263,9 @@ export default class Application {
             }
 
             // Test for body collision
-            this.world.getBodies()[1].position.x = inputEvent.x;
-            this.world.getBodies()[1].position.y = inputEvent.y;
-            this.world.getBodies()[1].shape.updateVertices(0, this.world.getBodies()[1].position);
-
-            // console.log('triangle 1:', this.world.getBodies()[0].position);
-            // console.log('triangle 2:', this.world.getBodies()[1].position);
+            this.world.getBodies()[4].position.x = inputEvent.x;
+            this.world.getBodies()[4].position.y = inputEvent.y;
+            this.world.getBodies()[4].shape.updateVertices(0, this.world.getBodies()[4].position);
         }
 
         // Handle mouse click events
