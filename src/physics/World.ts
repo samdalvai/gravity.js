@@ -141,21 +141,15 @@ export default class World {
             body.integrateVelocities(dt);
         }
 
-        // Remove objects that wen out of the screen
-        const bodiesInScreen: Body[] = [];
-        for (const body of this.bodies) {
-            if (
-                body.position.x < 0 ||
-                body.position.y > Graphics.width() ||
-                body.position.y < 0 ||
-                body.position.y > Graphics.height()
-            ) {
-                continue;
+        // Remove objects that went out of the screen
+        for (let i = 0; i < this.bodies.length; i++) {
+            const body = this.bodies[i];
+
+            // It suffices to look for the position going below the screen
+            if (body.position.y > Graphics.height()) {
+                this.bodies[i] = this.bodies[this.bodies.length - 1];
+                this.bodies.pop();
             }
-
-            bodiesInScreen.push(body);
         }
-
-        this.bodies = bodiesInScreen;
     };
 }
