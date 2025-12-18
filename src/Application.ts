@@ -1,12 +1,11 @@
 import AssetStore from './AssetStore';
 import Graphics from './Graphics';
 import InputManager, { MouseButton } from './InputManager';
+import Vec2 from './math/Vec2';
 import Body from './physics/Body';
-import { JointConstraint } from './physics/Constraint';
 import Force from './physics/Force';
 import JointConstraintV2 from './physics/JointConstraintV2';
 import { BoxShape, CircleShape, PolygonShape, ShapeType } from './physics/Shape';
-import Vec2 from './math/Vec2';
 import World from './physics/World';
 
 export default class Application {
@@ -169,6 +168,7 @@ export default class Application {
         this.world.addConstraint(lastJoint);
 
         const pendulumAnchor = new Body(new BoxShape(10, 10), endStep.position.x + 200, 200, 0);
+        pendulumAnchor.setTexture('rockBridgeAnchor');
         this.world.addBody(pendulumAnchor);
 
         last = pendulumAnchor;
@@ -177,7 +177,9 @@ export default class Application {
             const x = endStep.position.x + 200;
             const y = i === 0 ? 240 : 240 + 60 * i;
             const pendulumElement = new Body(new BoxShape(10, 50), x, y, 10);
+            pendulumElement.setTexture('crate');
             this.world.addBody(pendulumElement);
+
             const anchor = pendulumElement.position.subNew(new Vec2(0, 25));
             const j = new JointConstraintV2(last, pendulumElement, anchor);
             this.world.addConstraint(j);
@@ -258,21 +260,21 @@ export default class Application {
                         this.generateParticle = true;
                     }
 
-                    if (inputEvent.key === 'ArrowUp') {
-                        this.world.getBodies()[0].applyImpulseLinear(new Vec2(0, -600));
-                    }
+                    // if (inputEvent.key === 'ArrowUp') {
+                    //     this.world.getBodies()[0].applyImpulseLinear(new Vec2(0, -600));
+                    // }
 
-                    if (inputEvent.key === 'ArrowLeft') {
-                        this.world.getBodies()[0].applyImpulseLinear(new Vec2(-400, 0));
-                    }
+                    // if (inputEvent.key === 'ArrowLeft') {
+                    //     this.world.getBodies()[0].applyImpulseLinear(new Vec2(-400, 0));
+                    // }
 
-                    if (inputEvent.key === 'ArrowRight') {
-                        this.world.getBodies()[0].applyImpulseLinear(new Vec2(400, 0));
-                    }
+                    // if (inputEvent.key === 'ArrowRight') {
+                    //     this.world.getBodies()[0].applyImpulseLinear(new Vec2(400, 0));
+                    // }
 
-                    if (inputEvent.key === 'ArrowDown') {
-                        this.world.getBodies()[0].applyImpulseLinear(new Vec2(0, 600));
-                    }
+                    // if (inputEvent.key === 'ArrowDown') {
+                    //     this.world.getBodies()[0].applyImpulseLinear(new Vec2(0, 600));
+                    // }
 
                     break;
                 case 'keyup':
@@ -360,7 +362,7 @@ export default class Application {
     };
 
     render = (): void => {
-        // Draw all joints anchor points
+        // Draw all joints anchor points and debug properties
         if (this.debug) {
             for (const joint of this.world.getConstraints()) {
                 if (this.debug) {
