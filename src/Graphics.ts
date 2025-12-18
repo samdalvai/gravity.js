@@ -1,4 +1,4 @@
-import Vec2 from './physics/Vec2';
+import Vec2 from './math/Vec2';
 
 export default class Graphics {
     static windowWidth: number;

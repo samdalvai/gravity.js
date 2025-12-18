@@ -6,7 +6,7 @@ import { JointConstraint } from './physics/Constraint';
 import Force from './physics/Force';
 import JointConstraintV2 from './physics/JointConstraintV2';
 import { BoxShape, CircleShape, PolygonShape, ShapeType } from './physics/Shape';
-import Vec2 from './physics/Vec2';
+import Vec2 from './math/Vec2';
 import World from './physics/World';
 
 export default class Application {

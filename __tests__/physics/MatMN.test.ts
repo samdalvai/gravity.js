@@ -1,5 +1,5 @@
-import MatMN from '../../src/physics/MatMN';
-import VecN from '../../src/physics/VecN';
+import MatMN from '../../src/math/MatMN';
+import VecN from '../../src/math/VecN';
 
 describe('MatMN', () => {
     test('constructor creates correct MxN matrix with zeros', () => {
