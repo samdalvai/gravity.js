@@ -15,7 +15,7 @@ export default class Application {
     private generateParticle = false;
 
     // Debug related properties
-    private debug = false;
+    private debug = true;
     private FPS = 0;
     private lastFPSUpdate = 0;
 
