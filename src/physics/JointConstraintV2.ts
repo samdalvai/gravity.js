@@ -18,7 +18,7 @@ export default class JointConstraintV2 {
     biasFactor: number;
     softness: number;
 
-    constructor(b1: Body, b2: Body, anchor: Vec2, softness = 0.0001, biasFactor = 0.2) {
+    constructor(b1: Body, b2: Body, anchor: Vec2, softness = 0.01, biasFactor = 0.2) {
         this.body1 = b1;
         this.body2 = b2;
 
