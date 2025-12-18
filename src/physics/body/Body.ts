@@ -1,4 +1,4 @@
-import AssetStore from '../../AssetStore';
+import AssetStore, { TEXTURES } from '../../AssetStore';
 import { Shape } from './Shape';
 import Vec2 from '../../math/Vec2';
 
@@ -64,7 +64,7 @@ export default class Body {
         this.shape.updateVertices(this.rotation, this.position);
     }
 
-    setTexture = (texture: string): void => {
+    setTexture = (texture: keyof typeof TEXTURES): void => {
         this.texture = AssetStore.getTexture(texture);
     };
 
