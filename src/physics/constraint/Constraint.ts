@@ -1,5 +1,4 @@
 import MatMN from '../../math/MatMN';
-import Utils from '../../math/Utils';
 import Vec2 from '../../math/Vec2';
 import VecN from '../../math/VecN';
 import Body from '../body/Body';

@@ -2,6 +2,7 @@ import Mat22 from '../../math/Mat22';
 import Vec2 from '../../math/Vec2';
 import Body from '../body/Body';
 
+// TODO: extend a common Constraint class
 export default class JointConstraint {
     body1: Body;
     body2: Body;
