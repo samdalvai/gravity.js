@@ -137,7 +137,7 @@ export default class Application {
         const spacing = 33;
 
         // Start anchor (static)
-        const startStep = new Body(new BoxShape(80, 20), 200, 200, 0.0);
+        const startStep = new Body(new BoxShape(80, 20), Graphics.width() / 2 - 300, 200, 0.0);
         startStep.setTexture('rockBridgeAnchor');
         this.world.addBody(startStep);
 
