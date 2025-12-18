@@ -14,7 +14,7 @@ export default class World {
     private forces: Vec2[] = [];
     private torques: number[] = [];
 
-    private debug = false;
+    private debug = true;
 
     constructor(gravity: number) {
         this.G = -gravity;
