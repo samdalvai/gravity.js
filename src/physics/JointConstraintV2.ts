@@ -36,7 +36,7 @@ export default class JointConstraintV2 {
         this.bias = new Vec2();
         this.P = new Vec2();
 
-        // Is 0.001 as softness a good default?
+        // Is 0.01 as softness a good default?
         this.softness = softness;
         this.biasFactor = biasFactor;
     }
