@@ -174,7 +174,9 @@ export default class Application {
         last = pendulumAnchor;
 
         for (let i = 0; i < 8; i++) {
-            const pendulumElement = new Body(new BoxShape(10, 50), endStep.position.x + 200, 250 + 60 * i, 10);
+            const x = endStep.position.x + 200;
+            const y = i === 0 ? 240 : 240 + 60 * i;
+            const pendulumElement = new Body(new BoxShape(10, 50), x, y, 10);
             this.world.addBody(pendulumElement);
             const anchor = pendulumElement.position.subNew(new Vec2(0, 25));
             const j = new JointConstraintV2(last, pendulumElement, anchor);

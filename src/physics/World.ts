@@ -116,10 +116,12 @@ export default class World {
             }
         }
 
+        const invDt = dt > 0.0 ? 1.0 / dt : 0.0;
+
         // Solve all constraints
         for (const constraint of this.jointConstraints) {
             // for (const constraint of this.constraints) {
-            constraint.preSolve(dt);
+            constraint.preSolve(invDt);
         }
 
         for (const constraint of penetrations) {
