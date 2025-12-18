@@ -48,25 +48,34 @@ export default class Demo {
     };
 
     static demo2 = (world: World) => {
-        // Demo 1: Pyramid of boxes
+        // Demo 2: Pyramid of boxes
+        const floorHeight = 50;
         const floor = new Body(
-            new BoxShape(Graphics.width(), 50),
+            new BoxShape(Graphics.width(), floorHeight),
             Graphics.width() / 2.0,
             Graphics.height() - 100,
             0.0,
         );
         world.addBody(floor);
 
-        const totalWidth = 60 * 10;
-        for (let i = 0; i < 10; i++) {
-            const box = new Body(
-                new BoxShape(60, 60),
-                Graphics.width() / 2.0 - totalWidth / 2 + 30 + 60 * i,
-                Graphics.height() - 300,
-                10,
-            );
-            box.setTexture('crate');
-            world.addBody(box);
+        const boxSize = 60;
+        const rows = 10;
+
+        const centerX = Graphics.width() / 2;
+        const baseY = floor.position.y - floorHeight / 2 - boxSize / 2;
+
+        for (let row = 0; row < rows; row++) {
+            const boxesInRow = rows - row;
+            const rowWidth = boxesInRow * boxSize;
+
+            for (let col = 0; col < boxesInRow; col++) {
+                const x = centerX - rowWidth / 2 + boxSize / 2 + col * boxSize;
+                const y = baseY - row * boxSize;
+
+                const box = new Body(new BoxShape(boxSize, boxSize), x, y, 10);
+                box.setTexture('crate');
+                world.addBody(box);
+            }
         }
     };
 
