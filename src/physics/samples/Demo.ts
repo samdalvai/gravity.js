@@ -12,7 +12,7 @@ export default class Demo {
         'Demo 1: A single box',
         'Demo 2: A pyramid of boxes',
         'Demo 3: A suspension bridge',
-        'Demo 4: ....',
+        'Demo 4: As simple whip',
         'Demo 5: ....',
         'Demo 6: ....',
         'Demo 7: ....',
@@ -129,7 +129,38 @@ export default class Demo {
     };
 
     static demo4 = (world: World) => {
-        // Demo 4: ....
+        // Demo 4: A simple whip
+        const floor = new Body(
+            new BoxShape(Graphics.width(), 50),
+            Graphics.width() / 2.0,
+            Graphics.height() - 100,
+            0.0,
+        );
+        world.addBody(floor);
+
+        const whipAnchor = new Body(new BoxShape(10, 10), Graphics.width() / 2, 200, 0);
+        whipAnchor.setTexture('rockBridgeAnchor');
+        world.addBody(whipAnchor);
+
+        let last = whipAnchor;
+
+        for (let i = 0; i < 10; i++) {
+            const x = whipAnchor.position.x;
+            const y = i === 0 ? 240 : 240 + 60 * i;
+            const whipElement = new Body(new BoxShape(10, 50), x, y, 10);
+            whipElement.setTexture('crate');
+            world.addBody(whipElement);
+
+            const anchor = whipElement.position.subNew(new Vec2(0, 25));
+            const j = new JointConstraint(last, whipElement, anchor);
+            world.addConstraint(j);
+
+            last = whipElement;
+        }
+
+        // // Connect last step to final anchor
+        // const finalJoint = new JointConstraint(last, endStep, endStep.position);
+        // world.addConstraint(finalJoint);
     };
 
     static demo5 = (world: World) => {
