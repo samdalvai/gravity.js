@@ -118,7 +118,7 @@ export default class World {
 
         // Solve all constraints
         for (const constraint of this.jointConstraints) {
-        // for (const constraint of this.constraints) {
+            // for (const constraint of this.constraints) {
             constraint.preSolve(dt);
         }
 
@@ -128,7 +128,7 @@ export default class World {
 
         for (let i = 0; i < 10; i++) {
             for (const constraint of this.jointConstraints) {
-            // for (const constraint of this.constraints) {
+                // for (const constraint of this.constraints) {
                 constraint.solve();
             }
 
