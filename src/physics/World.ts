@@ -65,8 +65,9 @@ export default class World {
         // Loop all bodies of the world applying forces
         for (const body of this.bodies) {
             // Apply the weight force to all bodies
-            const weight = new Vec2(0.0, body.mass * this.G * PIXELS_PER_METER);
-            body.addForce(weight);
+            // TODO: can we add this as force to the world? instead of recreating it each time? No, because it depends on the bodies mass
+            const weightForce = Force.generateWeightForce(body, this.G);
+            body.addForce(weightForce);
 
             // Apply friction to all bodies
             // TODO: counter friction should only be applied if in contact with another surface

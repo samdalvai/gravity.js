@@ -1,7 +1,14 @@
-import Body from './body/Body';
 import Vec2 from '../math/Vec2';
+import { PIXELS_PER_METER } from './Constants';
+import Body from './body/Body';
 
 export default class Force {
+    static generateWeightForce = (body: Body, G: number): Vec2 => {
+        const weightForce = new Vec2(0.0, body.mass * G * PIXELS_PER_METER);
+
+        return weightForce;
+    };
+
     static generateDragForce = (body: Body, k: number): Vec2 => {
         let dragForce = new Vec2(0, 0);
 
