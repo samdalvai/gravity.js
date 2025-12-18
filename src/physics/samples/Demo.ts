@@ -29,7 +29,7 @@ export default class Demo {
         const floor = new Body(
             new BoxShape(Graphics.width(), 50),
             Graphics.width() / 2.0,
-            Graphics.height() - 100,
+            Graphics.height() - 190,
             0.0,
         );
         world.addBody(floor);
@@ -54,7 +54,7 @@ export default class Demo {
         const floor = new Body(
             new BoxShape(Graphics.width(), floorHeight),
             Graphics.width() / 2.0,
-            Graphics.height() - 100,
+            Graphics.height() - 190,
             0.0,
         );
         world.addBody(floor);
@@ -86,7 +86,7 @@ export default class Demo {
         const floor = new Body(
             new BoxShape(Graphics.width(), 50),
             Graphics.width() / 2.0,
-            Graphics.height() - 100,
+            Graphics.height() - 190,
             0.0,
         );
         world.addBody(floor);
@@ -147,12 +147,12 @@ export default class Demo {
         const floor = new Body(
             new BoxShape(Graphics.width(), 50),
             Graphics.width() / 2.0,
-            Graphics.height() - 100,
+            Graphics.height() - 190,
             0.0,
         );
         world.addBody(floor);
 
-        const whipAnchor = new Body(new BoxShape(10, 10), Graphics.width() / 2, 200, 0);
+        const whipAnchor = new Body(new BoxShape(40, 20), Graphics.width() / 2, 200, 0);
         whipAnchor.setTexture('rockBridgeAnchor');
         world.addBody(whipAnchor);
 
