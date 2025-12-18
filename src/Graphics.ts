@@ -156,7 +156,7 @@ export default class Graphics {
         fontSize: number = 20,
         fontFamily: string = 'Arial',
         color: string = 'white',
-        align: CanvasTextAlign = 'center',
+        align: CanvasTextAlign = 'left',
         baseline: CanvasTextBaseline = 'middle',
     ): void => {
         this.ctx.save();
