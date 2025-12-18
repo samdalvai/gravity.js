@@ -2,17 +2,19 @@ import AssetStore from './AssetStore';
 import Graphics from './Graphics';
 import InputManager, { MouseButton } from './InputManager';
 import Vec2 from './math/Vec2';
-import Body from './physics/body/Body';
 import Force from './physics/Force';
-import JointConstraint from './physics/constraint/JointConstraint';
-import { BoxShape, CircleShape, PolygonShape, ShapeType } from './physics/body/Shape';
 import World from './physics/World';
+import Body from './physics/body/Body';
+import { BoxShape, CircleShape, PolygonShape, ShapeType } from './physics/body/Shape';
+import JointConstraint from './physics/constraint/JointConstraint';
+import Demo from './physics/samples/Demo';
 
 export default class Application {
     private running = false;
     private world: World;
     private bgTexture: ImageBitmap | null = null;
     private generateParticle = false;
+    private demoIndex = 0;
 
     // Debug related properties
     private debug = true;
@@ -275,6 +277,18 @@ export default class Application {
                     // if (inputEvent.key === 'ArrowDown') {
                     //     this.world.getBodies()[0].applyImpulseLinear(new Vec2(0, 600));
                     // }
+                    if (inputEvent.code.includes('Digit')) {
+                        const index = inputEvent.code.substring('Digit'.length);
+                        this.demoIndex = Number.parseInt(index);
+
+                        const demo = Demo.demoFunctions[this.demoIndex];
+
+                        if (!demo) {
+                            throw new Error(`Demo ${index} does not exist`);
+                        }
+
+                        this.world.clear();
+                    }
 
                     break;
                 case 'keyup':
@@ -343,6 +357,7 @@ export default class Application {
         if (this.debug) {
             Graphics.drawText(`FPS: ${this.FPS.toFixed(2)}`, 50, 50, 25, 'arial', 'red');
             Graphics.drawText(`Num objects: ${this.world.getBodies().length}`, 50, 75, 25, 'arial', 'red');
+            Graphics.drawText(`${Demo.demoStrings[this.demoIndex]}`, 50, 100, 25, 'arial', 'red');
 
             if (!this.lastFPSUpdate || performance.now() - this.lastFPSUpdate > 1000) {
                 this.lastFPSUpdate = performance.now();
