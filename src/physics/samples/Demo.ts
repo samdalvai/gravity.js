@@ -62,7 +62,7 @@ export default class Demo {
         const rows = 10;
 
         const centerX = Graphics.width() / 2;
-        const baseY = floor.position.y - floorHeight / 2 - boxSize / 2;
+        const baseY = floor.position.y - floorHeight / 2 - 100;
 
         for (let row = 0; row < rows; row++) {
             const boxesInRow = rows - row;
@@ -74,6 +74,7 @@ export default class Demo {
 
                 const box = new Body(new BoxShape(boxSize, boxSize), x, y, 10);
                 box.setTexture('crate');
+                box.restitution = 0.001;
                 world.addBody(box);
             }
         }
