@@ -4,6 +4,7 @@ import InputManager, { MouseButton } from './InputManager';
 import Body from './physics/Body';
 import { JointConstraint } from './physics/Constraint';
 import Force from './physics/Force';
+import JointConstraintV2 from './physics/JointConstraintV2';
 import { BoxShape, CircleShape, PolygonShape, ShapeType } from './physics/Shape';
 import Vec2 from './physics/Vec2';
 import World from './physics/World';
@@ -153,7 +154,7 @@ export default class Application {
             this.world.addBody(step);
 
             // Connect previous link to this link
-            const joint = new JointConstraint(last, step, step.position);
+            const joint = new JointConstraintV2(last, step, step.position);
             this.world.addConstraint(joint);
 
             last = step;
@@ -343,7 +344,8 @@ export default class Application {
         if (this.debug) {
             for (const joint of this.world.getConstraints()) {
                 if (this.debug) {
-                    const anchorPoint = joint.a.localSpaceToWorldSpace(joint.aPoint);
+                    // const anchorPoint = joint.a.localSpaceToWorldSpace(joint.aPoint);
+                    const anchorPoint = joint.position;
                     Graphics.drawFillCircle(anchorPoint.x, anchorPoint.y, 3, 'red');
                 }
             }
