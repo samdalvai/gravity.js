@@ -1,8 +1,8 @@
-import Utils from '../Utils';
+import Utils from '../math/Utils';
 import Body from './Body';
-import MatMN from './MatMN';
-import Vec2 from './Vec2';
-import VecN from './VecN';
+import MatMN from '../math/MatMN';
+import Vec2 from '../math/Vec2';
+import VecN from '../math/VecN';
 
 export abstract class Constraint {
     a: Body;

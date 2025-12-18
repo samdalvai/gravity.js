@@ -5,7 +5,7 @@
  *
  * See LICENSE file for full license text.
  */
-import Vec2 from '../physics/Vec2';
+import Vec2 from './Vec2';
 
 export default class Mat22 {
     col1: Vec2;

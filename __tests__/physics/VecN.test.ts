@@ -1,4 +1,4 @@
-import VecN from '../../src/physics/VecN';
+import VecN from '../../src/math/VecN';
 
 describe('VecN', () => {
     test('constructor creates zero-filled vector', () => {
