@@ -147,7 +147,7 @@ export default class Application {
         for (let i = 1; i <= numSteps; i++) {
             const x = startStep.position.x + 30 + i * spacing;
             const y = startStep.position.y + 20;
-            const mass = 3;
+            const mass = i < numSteps ? 3 : 0;
 
             const step = new Body(new CircleShape(15), x, y, mass);
             step.setTexture('woodBridgeStep');
