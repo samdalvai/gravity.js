@@ -318,15 +318,8 @@ export default class Application {
         Graphics.clearScreen();
 
         if (this.debug) {
-            Graphics.drawText(`FPS: ${this.FPS.toFixed(2)}`, Graphics.width() - 100, 50, 25, 'arial', 'red');
-            Graphics.drawText(
-                `Num objects: ${this.world.getBodies().length}`,
-                Graphics.width() - 120,
-                75,
-                25,
-                'arial',
-                'red',
-            );
+            Graphics.drawText(`FPS: ${this.FPS.toFixed(2)}`, 50, 50, 25, 'arial', 'red');
+            Graphics.drawText(`Num objects: ${this.world.getBodies().length}`, 50, 75, 25, 'arial', 'red');
 
             if (!this.lastFPSUpdate || performance.now() - this.lastFPSUpdate > 1000) {
                 this.lastFPSUpdate = performance.now();
