@@ -1,6 +1,6 @@
 import Mat22 from '../math/Mat22';
 import Body from './Body';
-import Vec2 from './Vec2';
+import Vec2 from '../math/Vec2';
 
 export default class JointConstraintV2 {
     body1: Body;
