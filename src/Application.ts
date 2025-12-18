@@ -65,6 +65,7 @@ export default class Application {
         await AssetStore.loadTextures(textures);
 
         this.running = Graphics.openWindow();
+        Demo.demo1(this.world);
 
         // this.bgTexture = AssetStore.getTexture('background');
 
@@ -74,22 +75,22 @@ export default class Application {
         // this.world.addBody(bird);
 
         // Add a floor and walls to contain objects objects
-        const floor = new Body(
-            new BoxShape(Graphics.width() - 50, 50),
-            Graphics.width() / 2.0,
-            Graphics.height() / 2.0 + 340,
-            0.0,
-        );
-        const leftFence = new Body(new BoxShape(50, Graphics.height() - 75), 0, Graphics.height() / 2.0 - 35, 0.0);
-        const rightFence = new Body(
-            new BoxShape(50, Graphics.height() - 75),
-            Graphics.width(),
-            Graphics.height() / 2.0 - 35,
-            0.0,
-        );
-        this.world.addBody(floor);
-        this.world.addBody(leftFence);
-        this.world.addBody(rightFence);
+        // const floor = new Body(
+        //     new BoxShape(Graphics.width() - 50, 50),
+        //     Graphics.width() / 2.0,
+        //     Graphics.height() / 2.0 + 340,
+        //     0.0,
+        // );
+        // const leftFence = new Body(new BoxShape(50, Graphics.height() - 75), 0, Graphics.height() / 2.0 - 35, 0.0);
+        // const rightFence = new Body(
+        //     new BoxShape(50, Graphics.height() - 75),
+        //     Graphics.width(),
+        //     Graphics.height() / 2.0 - 35,
+        //     0.0,
+        // );
+        // this.world.addBody(floor);
+        // this.world.addBody(leftFence);
+        // this.world.addBody(rightFence);
 
         // // Add a stack of boxes
         // for (let i = 1; i <= 4; i++) {
@@ -133,61 +134,61 @@ export default class Application {
         //     }
         // }
 
-        // Add a bridge of connected steps and joints
-        const numSteps = 10;
-        const spacing = 33;
+        // // Add a bridge of connected steps and joints
+        // const numSteps = 10;
+        // const spacing = 33;
 
-        // Start anchor (static)
-        const startStep = new Body(new BoxShape(80, 20), Graphics.width() / 2 - 300, 200, 0.0);
-        startStep.setTexture('rockBridgeAnchor');
-        this.world.addBody(startStep);
+        // // Start anchor (static)
+        // const startStep = new Body(new BoxShape(80, 20), Graphics.width() / 2 - 300, 200, 0.0);
+        // startStep.setTexture('rockBridgeAnchor');
+        // this.world.addBody(startStep);
 
-        // The first connection should be from the anchor, not the floor
-        let last = startStep;
+        // // The first connection should be from the anchor, not the floor
+        // let last = startStep;
 
-        for (let i = 1; i <= numSteps; i++) {
-            const x = startStep.position.x + 30 + i * spacing;
-            const y = startStep.position.y + 20;
-            const mass = i < numSteps ? 3 : 0;
+        // for (let i = 1; i <= numSteps; i++) {
+        //     const x = startStep.position.x + 30 + i * spacing;
+        //     const y = startStep.position.y + 20;
+        //     const mass = i < numSteps ? 3 : 0;
 
-            const step = new Body(new CircleShape(15), x, y, mass);
-            step.setTexture('woodBridgeStep');
-            this.world.addBody(step);
+        //     const step = new Body(new CircleShape(15), x, y, mass);
+        //     step.setTexture('woodBridgeStep');
+        //     this.world.addBody(step);
 
-            // Connect previous link to this link
-            const joint = new JointConstraint(last, step, step.position);
-            this.world.addConstraint(joint);
+        //     // Connect previous link to this link
+        //     const joint = new JointConstraint(last, step, step.position);
+        //     this.world.addConstraint(joint);
 
-            last = step;
-        }
+        //     last = step;
+        // }
 
-        // Final anchor
-        const endStep = new Body(new BoxShape(80, 20), last.position.x + 60, last.position.y - 20, 0.0);
-        endStep.setTexture('rockBridgeAnchor');
-        this.world.addBody(endStep);
+        // // Final anchor
+        // const endStep = new Body(new BoxShape(80, 20), last.position.x + 60, last.position.y - 20, 0.0);
+        // endStep.setTexture('rockBridgeAnchor');
+        // this.world.addBody(endStep);
 
-        const lastJoint = new JointConstraint(last, endStep, endStep.position);
-        this.world.addConstraint(lastJoint);
+        // const lastJoint = new JointConstraint(last, endStep, endStep.position);
+        // this.world.addConstraint(lastJoint);
 
-        const pendulumAnchor = new Body(new BoxShape(10, 10), endStep.position.x + 200, 200, 0);
-        pendulumAnchor.setTexture('rockBridgeAnchor');
-        this.world.addBody(pendulumAnchor);
+        // const pendulumAnchor = new Body(new BoxShape(10, 10), endStep.position.x + 200, 200, 0);
+        // pendulumAnchor.setTexture('rockBridgeAnchor');
+        // this.world.addBody(pendulumAnchor);
 
-        last = pendulumAnchor;
+        // last = pendulumAnchor;
 
-        for (let i = 0; i < 8; i++) {
-            const x = endStep.position.x + 200;
-            const y = i === 0 ? 240 : 240 + 60 * i;
-            const pendulumElement = new Body(new BoxShape(10, 50), x, y, 10);
-            pendulumElement.setTexture('crate');
-            this.world.addBody(pendulumElement);
+        // for (let i = 0; i < 8; i++) {
+        //     const x = endStep.position.x + 200;
+        //     const y = i === 0 ? 240 : 240 + 60 * i;
+        //     const pendulumElement = new Body(new BoxShape(10, 50), x, y, 10);
+        //     pendulumElement.setTexture('crate');
+        //     this.world.addBody(pendulumElement);
 
-            const anchor = pendulumElement.position.subNew(new Vec2(0, 25));
-            const j = new JointConstraint(last, pendulumElement, anchor);
-            this.world.addConstraint(j);
+        //     const anchor = pendulumElement.position.subNew(new Vec2(0, 25));
+        //     const j = new JointConstraint(last, pendulumElement, anchor);
+        //     this.world.addConstraint(j);
 
-            last = pendulumElement;
-        }
+        //     last = pendulumElement;
+        // }
 
         // // Connect last step to final anchor
         // const finalJoint = new JointConstraint(last, endStep, endStep.position);
@@ -288,6 +289,7 @@ export default class Application {
                         }
 
                         this.world.clear();
+                        demo(this.world);
                     }
 
                     break;
