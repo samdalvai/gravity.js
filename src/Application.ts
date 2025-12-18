@@ -168,12 +168,19 @@ export default class Application {
         const lastJoint = new JointConstraintV2(last, endStep, endStep.position);
         this.world.addConstraint(lastJoint);
 
-        const pendulumAnchor = new Body(new BoxShape(50, 10), endStep.position.x + 200, 200, 0);
+        const pendulumAnchor = new Body(new BoxShape(10, 10), endStep.position.x + 200, 200, 0);
         this.world.addBody(pendulumAnchor);
 
+        last = pendulumAnchor;
+
         for (let i = 0; i < 8; i++) {
-            const pendulumElement = new Body(new BoxShape(10, 50), endStep.position.x + 200, 250 + 60 * i , 0);
+            const pendulumElement = new Body(new BoxShape(10, 50), endStep.position.x + 200, 250 + 60 * i, 10);
             this.world.addBody(pendulumElement);
+            const anchor = pendulumElement.position.subNew(new Vec2(0, 25));
+            const j = new JointConstraintV2(last, pendulumElement, anchor);
+            this.world.addConstraint(j);
+
+            last = pendulumElement;
         }
 
         // // Connect last step to final anchor
