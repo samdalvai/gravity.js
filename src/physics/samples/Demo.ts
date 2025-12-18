@@ -32,6 +32,8 @@ export default class Demo {
             Graphics.height() / 2.0 + 340,
             0.0,
         );
+        world.addBody(floor);
+
         const leftFence = new Body(new BoxShape(50, Graphics.height() - 75), 0, Graphics.height() / 2.0 - 35, 0.0);
         const rightFence = new Body(
             new BoxShape(50, Graphics.height() - 75),
@@ -39,7 +41,6 @@ export default class Demo {
             Graphics.height() / 2.0 - 35,
             0.0,
         );
-        world.addBody(floor);
         world.addBody(leftFence);
         world.addBody(rightFence);
     };
