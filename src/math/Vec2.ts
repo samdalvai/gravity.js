@@ -95,10 +95,7 @@ export default class Vec2 {
 
     /** operator - */
     subNew(v: Vec2): Vec2 {
-        const result = new Vec2();
-        result.x = this.x - v.x;
-        result.y = this.y - v.y;
-        return result;
+        return new Vec2(this.x - v.x, this.y - v.y);
     }
 
     /** operator * (scalar) */

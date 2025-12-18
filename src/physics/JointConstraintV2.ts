@@ -1,6 +1,6 @@
 import Mat22 from '../math/Mat22';
-import Body from './Body';
 import Vec2 from '../math/Vec2';
+import Body from './Body';
 
 export default class JointConstraintV2 {
     body1: Body;
@@ -27,8 +27,8 @@ export default class JointConstraintV2 {
         const Rot1T = Rot1.transpose();
         const Rot2T = Rot2.transpose();
 
-        this.localAnchor1 = Mat22.multiply(Rot1T, Vec2.sub(anchor, this.body1.position));
-        this.localAnchor2 = Mat22.multiply(Rot2T, Vec2.sub(anchor, this.body2.position));
+        this.localAnchor1 = Mat22.multiply(Rot1T, anchor.subNew(this.body1.position));
+        this.localAnchor2 = Mat22.multiply(Rot2T, anchor.subNew(this.body2.position));
 
         this.M = new Mat22();
         this.r1 = new Vec2();
