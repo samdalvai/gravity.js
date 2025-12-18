@@ -131,38 +131,38 @@ export default class Application {
         //     }
         // }
 
-        // // Add a bridge of connected steps and joints
-        // const numSteps = 10;
-        // const spacing = 33;
+        // Add a bridge of connected steps and joints
+        const numSteps = 10;
+        const spacing = 33;
 
-        // // Start anchor (static)
-        // const startStep = new Body(new BoxShape(80, 20), 200, 200, 0.0);
-        // startStep.setTexture('rockBridgeAnchor');
-        // this.world.addBody(startStep);
+        // Start anchor (static)
+        const startStep = new Body(new BoxShape(80, 20), 200, 200, 0.0);
+        startStep.setTexture('rockBridgeAnchor');
+        this.world.addBody(startStep);
 
-        // // The first connection should be from the anchor, not the floor
-        // let last = startStep;
+        // The first connection should be from the anchor, not the floor
+        let last = startStep;
 
-        // for (let i = 1; i <= numSteps; i++) {
-        //     const x = startStep.position.x + 30 + i * spacing;
-        //     const y = startStep.position.y + 20;
-        //     const mass = i == numSteps ? 0.0 : 3.0;
+        for (let i = 1; i <= numSteps; i++) {
+            const x = startStep.position.x + 30 + i * spacing;
+            const y = startStep.position.y + 20;
+            const mass = i == numSteps ? 0.0 : 3.0;
 
-        //     const step = new Body(new CircleShape(15), x, y, mass);
-        //     step.setTexture('woodBridgeStep');
-        //     this.world.addBody(step);
+            const step = new Body(new CircleShape(15), x, y, mass);
+            step.setTexture('woodBridgeStep');
+            this.world.addBody(step);
 
-        //     // Connect previous link to this link
-        //     const joint = new JointConstraint(last, step, step.position);
-        //     this.world.addConstraint(joint);
+            // Connect previous link to this link
+            const joint = new JointConstraint(last, step, step.position);
+            this.world.addConstraint(joint);
 
-        //     last = step;
-        // }
+            last = step;
+        }
 
-        // // Final anchor
-        // const endStep = new Body(new BoxShape(80, 20), last.position.x + 60, last.position.y - 20, 0.0);
-        // endStep.setTexture('rockBridgeAnchor');
-        // this.world.addBody(endStep);
+        // Final anchor
+        const endStep = new Body(new BoxShape(80, 20), last.position.x + 60, last.position.y - 20, 0.0);
+        endStep.setTexture('rockBridgeAnchor');
+        this.world.addBody(endStep);
 
         // // Connect last step to final anchor
         // const finalJoint = new JointConstraint(last, endStep, endStep.position);
