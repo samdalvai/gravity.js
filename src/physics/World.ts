@@ -4,12 +4,14 @@ import CollisionDetection from './CollisionDetection';
 import { PIXELS_PER_METER } from './Constants';
 import { Constraint, PenetrationConstraint } from './Constraint';
 import Force from './Force';
+import JointConstraintV2 from './JointConstraintV2';
 import Vec2 from './Vec2';
 
 export default class World {
     private G = 9.8;
     private bodies: Body[] = [];
-    private constraints: Constraint[] = [];
+    // private constraints: Constraint[] = [];
+    private jointConstraints: JointConstraintV2[] = [];
 
     private forces: Vec2[] = [];
     private torques: number[] = [];
@@ -28,12 +30,17 @@ export default class World {
         return this.bodies;
     };
 
-    addConstraint = (constraint: Constraint): void => {
-        this.constraints.push(constraint);
+    addConstraint = (constraint: JointConstraintV2): void => {
+        // addConstraint = (constraint: Constraint): void => {
+        // this.constraints.push(constraint);
+        this.jointConstraints.push(constraint);
     };
 
-    getConstraints = (): Constraint[] => {
-        return this.constraints;
+    // getConstraints = (): Constraint[] => {
+    //     return this.constraints;
+    // };
+    getConstraints = (): JointConstraintV2[] => {
+        return this.jointConstraints;
     };
 
     addForce = (force: Vec2): void => {
@@ -110,7 +117,8 @@ export default class World {
         }
 
         // Solve all constraints
-        for (const constraint of this.constraints) {
+        for (const constraint of this.jointConstraints) {
+        // for (const constraint of this.constraints) {
             constraint.preSolve(dt);
         }
 
@@ -119,7 +127,8 @@ export default class World {
         }
 
         for (let i = 0; i < 10; i++) {
-            for (const constraint of this.constraints) {
+            for (const constraint of this.jointConstraints) {
+            // for (const constraint of this.constraints) {
                 constraint.solve();
             }
 
@@ -128,9 +137,9 @@ export default class World {
             }
         }
 
-        for (const constraint of this.constraints) {
-            constraint.postSolve();
-        }
+        // for (const constraint of this.constraints) {
+        //     constraint.postSolve();
+        // }
 
         for (const constraint of penetrations) {
             constraint.postSolve();
