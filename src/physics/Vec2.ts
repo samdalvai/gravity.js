@@ -152,4 +152,15 @@ export default class Vec2 {
         result.y = -this.y;
         return result;
     }
+
+    // TODO: reuse the previous methods instead of these ones
+
+    /** Operator + */
+    static add = (a: Vec2, b: Vec2): Vec2 => {
+        return new Vec2(a.x + b.x, a.y + b.y);
+    };
+
+    static abs = (a: Vec2): Vec2 => {
+        return new Vec2(Math.abs(a.x), Math.abs(a.y));
+    };
 }
