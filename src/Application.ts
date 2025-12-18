@@ -182,11 +182,11 @@ export default class Application {
         // this.world.addBody(pig3);
         // this.world.addBody(pig4);
 
-        const triangleVertices = [new Vec2(30, 30), new Vec2(-30, 30), new Vec2(0, -30)];
-        const triangle1 = new Body(new PolygonShape(triangleVertices), Graphics.width() / 2, Graphics.height() / 2, 0);
-        const triangle2 = new Body(new PolygonShape(triangleVertices), Graphics.width() / 2, Graphics.height() / 2, 0);
-        this.world.addBody(triangle1);
-        this.world.addBody(triangle2);
+        // const triangleVertices = [new Vec2(30, 30), new Vec2(-30, 30), new Vec2(0, -30)];
+        // const triangle1 = new Body(new PolygonShape(triangleVertices), Graphics.width() / 2, Graphics.height() / 2, 0);
+        // const triangle2 = new Body(new PolygonShape(triangleVertices), Graphics.width() / 2, Graphics.height() / 2, 0);
+        // this.world.addBody(triangle1);
+        // this.world.addBody(triangle2);
 
         // const boxA = new Body(new BoxShape(60, 60), Graphics.width() / 2, Graphics.height() / 2, 0);
         // const boxB = new Body(new BoxShape(60, 60), Graphics.width() / 2, Graphics.height() / 2, 0);
