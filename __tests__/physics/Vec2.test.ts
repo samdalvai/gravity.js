@@ -1,4 +1,4 @@
-import Vec2 from '../../src/physics/Vec2';
+import Vec2 from '../../src/math/Vec2';
 
 describe('Vec2', () => {
     test('constructor initializes values', () => {

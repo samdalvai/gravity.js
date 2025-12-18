@@ -1,7 +1,7 @@
 import Body from '../../src/physics/Body';
 import CollisionDetection from '../../src/physics/CollisionDetection';
 import { BoxShape, CircleShape, PolygonShape } from '../../src/physics/Shape';
-import Vec2 from '../../src/physics/Vec2';
+import Vec2 from '../../src/math/Vec2';
 
 describe('CollisionDetection', () => {
     test('detectCollisionCircleCircle() detects collision between fully overlapped circles', () => {

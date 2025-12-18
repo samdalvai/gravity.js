@@ -5,7 +5,7 @@ import { PIXELS_PER_METER } from './Constants';
 import { Constraint, PenetrationConstraint } from './Constraint';
 import Force from './Force';
 import JointConstraintV2 from './JointConstraintV2';
-import Vec2 from './Vec2';
+import Vec2 from '../math/Vec2';
 
 export default class World {
     private G = 9.8;
