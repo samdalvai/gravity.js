@@ -41,7 +41,7 @@ export default class Application {
         this.running = Graphics.openWindow();
         Demo.demo1(this.world);
 
-        // this.bgTexture = AssetStore.getTexture('background');
+        this.bgTexture = AssetStore.getTexture('background');
 
         // // Add bird
         // const bird = new Body(new CircleShape(45), 100, Graphics.height() / 2.0 + 220, 3.0);
