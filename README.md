@@ -22,8 +22,8 @@ npm start
 
 Now open the browser at http://localhost:1234
 
-# Example game
+# Example scenarios
 
-The engine features a basic example scenario based on the angry birds game.
+The engine features a set of basic example scenarios with sprites based on the angry birds game.
 
 ![game](game.png)
