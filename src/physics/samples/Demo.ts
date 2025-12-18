@@ -91,40 +91,54 @@ export default class Demo {
         );
         world.addBody(floor);
 
-        // Add a bridge of connected steps and joints
+        // Suspension Bridge Creation
         const numSteps = 10;
-        const spacing = 33;
+        const stepWidth = 40;
+        const stepHeight = 10;
+        const spacing = stepWidth + 10; // distance between centers
+        const startX = Graphics.width() / 2 - (numSteps * spacing) / 2;
+        const startY = Graphics.height() / 2;
 
         // Start anchor (static)
-        const startStep = new Body(new BoxShape(80, 20), Graphics.width() / 2 - 200, Graphics.height() / 2, 0.0);
-        startStep.setTexture('rockBridgeAnchor');
-        world.addBody(startStep);
+        const startAnchor = new Body(new BoxShape(stepWidth * 2, stepWidth * 0.5), startX - stepWidth / 2, startY, 0.0);
+        startAnchor.setTexture('rockBridgeAnchor');
+        world.addBody(startAnchor);
 
-        // The first connection should be from the anchor, not the floor
-        let last = startStep;
+        // First connection uses the start anchor
+        let lastStep = startAnchor;
 
+        // Create steps
         for (let i = 1; i <= numSteps; i++) {
-            const x = startStep.position.x + 30 + i * spacing;
-            const y = startStep.position.y + 20;
-            const mass = i < numSteps ? 3 : 0;
+            const x = startX + i * spacing;
 
-            const step = new Body(new CircleShape(15), x, y, mass);
-            step.setTexture('woodBridgeStep');
+            // Optional sag: small vertical sinusoidal displacement
+            const y = startY + Math.sin((i / numSteps) * Math.PI) * 10;
+
+            const step = new Body(new BoxShape(stepWidth, stepHeight), x, y, 3);
+            step.setTexture('woodPlankSolid');
             world.addBody(step);
 
-            // Connect previous link to this link
-            const joint = new JointConstraint(last, step, step.position);
+            // Joint anchor at left edge of this step
+            const anchor = step.position.subNew(new Vec2(stepWidth / 2, 0));
+            const joint = new JointConstraint(lastStep, step, anchor, 0.02, 0.1); // softness, biasFactor
             world.addConstraint(joint);
 
-            last = step;
+            lastStep = step;
         }
 
-        // Final anchor
-        const endStep = new Body(new BoxShape(80, 20), last.position.x + 60, last.position.y - 20, 0.0);
-        endStep.setTexture('rockBridgeAnchor');
-        world.addBody(endStep);
+        // End anchor (static)
+        const endAnchor = new Body(
+            new BoxShape(stepWidth * 2, stepWidth * 0.5),
+            lastStep.position.x + spacing + stepWidth / 2,
+            startY,
+            0.0,
+        );
+        endAnchor.setTexture('rockBridgeAnchor');
+        world.addBody(endAnchor);
 
-        const lastJoint = new JointConstraint(last, endStep, endStep.position);
+        // Final joint anchor at right edge of last step
+        const finalAnchor = lastStep.position.addNew(new Vec2(stepWidth / 2, 0));
+        const lastJoint = new JointConstraint(lastStep, endAnchor, finalAnchor, 0.02, 0.1);
         world.addConstraint(lastJoint);
     };
 
