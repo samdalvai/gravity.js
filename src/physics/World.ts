@@ -1,25 +1,28 @@
 import Graphics from '../Graphics';
-import Body from './Body';
+import Vec2 from '../math/Vec2';
+import Body from './body/Body';
 import CollisionDetection from './CollisionDetection';
 import { PIXELS_PER_METER } from './Constants';
-import { Constraint, PenetrationConstraint } from './Constraint';
 import Force from './Force';
-import JointConstraintV2 from './JointConstraintV2';
-import Vec2 from '../math/Vec2';
+import JointConstraint from './constraint/JointConstraint';
+import PenetrationConstraint from './constraint/PenetrationConstraint';
 
 export default class World {
-    private G = 9.8;
+    private G: number;
+    private iterations: number;
+
     private bodies: Body[] = [];
     // private constraints: Constraint[] = [];
-    private jointConstraints: JointConstraintV2[] = [];
+    private jointConstraints: JointConstraint[] = [];
 
     private forces: Vec2[] = [];
     private torques: number[] = [];
 
     private debug = true;
 
-    constructor(gravity: number) {
+    constructor(gravity: number, iterations = 10) {
         this.G = -gravity;
+        this.iterations = iterations;
     }
 
     addBody = (body: Body): void => {
@@ -30,7 +33,7 @@ export default class World {
         return this.bodies;
     };
 
-    addConstraint = (constraint: JointConstraintV2): void => {
+    addConstraint = (constraint: JointConstraint): void => {
         // addConstraint = (constraint: Constraint): void => {
         // this.constraints.push(constraint);
         this.jointConstraints.push(constraint);
@@ -39,7 +42,7 @@ export default class World {
     // getConstraints = (): Constraint[] => {
     //     return this.constraints;
     // };
-    getConstraints = (): JointConstraintV2[] => {
+    getConstraints = (): JointConstraint[] => {
         return this.jointConstraints;
     };
 
@@ -128,7 +131,7 @@ export default class World {
             constraint.preSolve(dt);
         }
 
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < this.iterations; i++) {
             for (const constraint of this.jointConstraints) {
                 // for (const constraint of this.constraints) {
                 constraint.solve();

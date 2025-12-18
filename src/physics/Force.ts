@@ -1,4 +1,4 @@
-import Body from './Body';
+import Body from './body/Body';
 import Vec2 from '../math/Vec2';
 
 export default class Force {
