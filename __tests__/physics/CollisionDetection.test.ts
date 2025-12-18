@@ -1,6 +1,6 @@
-import Body from '../../src/physics/Body';
+import Body from '../../src/physics/body/Body';
 import CollisionDetection from '../../src/physics/CollisionDetection';
-import { BoxShape, CircleShape, PolygonShape } from '../../src/physics/Shape';
+import { BoxShape, CircleShape, PolygonShape } from '../../src/physics/body/Shape';
 import Vec2 from '../../src/math/Vec2';
 
 describe('CollisionDetection', () => {
