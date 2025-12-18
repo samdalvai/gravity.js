@@ -1,9 +1,9 @@
 import Graphics from '../Graphics';
 import Vec2 from '../math/Vec2';
-import Body from './body/Body';
 import CollisionDetection from './CollisionDetection';
 import { PIXELS_PER_METER } from './Constants';
 import Force from './Force';
+import Body from './body/Body';
 import JointConstraint from './constraint/JointConstraint';
 import PenetrationConstraint from './constraint/PenetrationConstraint';
 
@@ -59,6 +59,7 @@ export default class World {
     };
 
     update = (dt: number): void => {
+        const invDt = dt > 0.0 ? 1.0 / dt : 0.0;
         const penetrations: PenetrationConstraint[] = [];
 
         // Loop all bodies of the world applying forces
@@ -118,8 +119,6 @@ export default class World {
                 }
             }
         }
-
-        const invDt = dt > 0.0 ? 1.0 / dt : 0.0;
 
         // Solve all constraints
         for (const constraint of this.jointConstraints) {
