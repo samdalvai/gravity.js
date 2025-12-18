@@ -147,7 +147,7 @@ export default class Demo {
         for (let i = 0; i < 10; i++) {
             const x = whipAnchor.position.x;
             const y = i === 0 ? 240 : 240 + 60 * i;
-            const whipElement = new Body(new BoxShape(10, 50), x, y, 10);
+            const whipElement = new Body(new BoxShape(10, 50), x, y, 1);
             whipElement.setTexture('crate');
             world.addBody(whipElement);
 
