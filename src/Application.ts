@@ -165,6 +165,9 @@ export default class Application {
         endStep.setTexture('rockBridgeAnchor');
         this.world.addBody(endStep);
 
+        const lastJoint = new JointConstraintV2(last, endStep, endStep.position);
+        this.world.addConstraint(lastJoint);
+
         // // Connect last step to final anchor
         // const finalJoint = new JointConstraint(last, endStep, endStep.position);
         // this.world.addConstraint(finalJoint);
@@ -345,8 +348,15 @@ export default class Application {
             for (const joint of this.world.getConstraints()) {
                 if (this.debug) {
                     // const anchorPoint = joint.a.localSpaceToWorldSpace(joint.aPoint);
-                    const anchorPoint = joint.position;
-                    Graphics.drawFillCircle(anchorPoint.x, anchorPoint.y, 3, 'red');
+                    // Graphics.drawFillCircle(anchorPoint.x, anchorPoint.y, 3, 'red');
+                    // Graphics.drawFillCircle(joint.a.position.x, joint.a.position.y, 3, 'blue');
+                    Graphics.drawLine(
+                        joint.a.position.x,
+                        joint.a.position.y,
+                        joint.b.position.x,
+                        joint.b.position.y,
+                        'blue',
+                    );
                 }
             }
         }
