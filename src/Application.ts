@@ -350,11 +350,12 @@ export default class Application {
                     // const anchorPoint = joint.a.localSpaceToWorldSpace(joint.aPoint);
                     // Graphics.drawFillCircle(anchorPoint.x, anchorPoint.y, 3, 'red');
                     // Graphics.drawFillCircle(joint.a.position.x, joint.a.position.y, 3, 'blue');
+                    // TODO: this is just a simpòe draw method, need to consider local anchors
                     Graphics.drawLine(
-                        joint.a.position.x,
-                        joint.a.position.y,
-                        joint.b.position.x,
-                        joint.b.position.y,
+                        joint.body1.position.x,
+                        joint.body1.position.y,
+                        joint.body2.position.x,
+                        joint.body2.position.y,
                         'blue',
                     );
                 }
