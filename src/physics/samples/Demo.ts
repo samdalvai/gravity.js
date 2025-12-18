@@ -172,9 +172,8 @@ export default class Demo {
             last = whipElement;
         }
 
-        // // Connect last step to final anchor
-        // const finalJoint = new JointConstraint(last, endStep, endStep.position);
-        // world.addConstraint(finalJoint);
+        // Add a lateral wind force to the world
+        world.addForce(new Vec2(100, 0));
     };
 
     static demo5 = (world: World) => {
