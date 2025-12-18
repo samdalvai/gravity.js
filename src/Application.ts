@@ -14,7 +14,7 @@ export default class Application {
     private world: World;
     private bgTexture: ImageBitmap | null = null;
     private generateParticle = false;
-    private demoIndex = 0;
+    private demoIndex = 1;
 
     // Debug related properties
     private debug = true;
@@ -331,10 +331,6 @@ export default class Application {
         Graphics.clearScreen();
 
         if (this.debug) {
-            Graphics.drawText(`FPS: ${this.FPS.toFixed(2)}`, 50, 50, 25, 'arial', 'red');
-            Graphics.drawText(`Num objects: ${this.world.getBodies().length}`, 50, 75, 25, 'arial', 'red');
-            Graphics.drawText(`${Demo.demoStrings[this.demoIndex]}`, 50, 100, 25, 'arial', 'red');
-
             if (!this.lastFPSUpdate || performance.now() - this.lastFPSUpdate > 1000) {
                 this.lastFPSUpdate = performance.now();
                 this.FPS = 1 / deltaTime;
@@ -369,6 +365,17 @@ export default class Application {
                         'blue',
                     );
                 }
+            }
+
+            const debugText = [
+                'Keys: 1-9 Demos, Left Mouse to generate circles, Right Mouse to generate boxes',
+                `${Demo.demoStrings[this.demoIndex]}`,
+                `FPS: ${this.FPS.toFixed(2)}`,
+                `Num objects: ${this.world.getBodies().length}`,
+            ];
+
+            for (let i = 0; i < debugText.length; i++) {
+                Graphics.drawText(debugText[i], 50, 50 + i * 25, 18, 'arial', 'orange');
             }
         }
 
