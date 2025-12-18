@@ -165,4 +165,11 @@ export default class World {
             }
         }
     };
+
+    clear = () => {
+        this.bodies.length = 0;
+        this.jointConstraints.length = 0;
+        this.forces.length = 0;
+        this.torques.length = 0;
+    };
 }
