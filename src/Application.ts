@@ -2,10 +2,10 @@ import AssetStore from './AssetStore';
 import Graphics from './Graphics';
 import InputManager, { MouseButton } from './InputManager';
 import Vec2 from './math/Vec2';
-import Body from './physics/Body';
+import Body from './physics/body/Body';
 import Force from './physics/Force';
-import JointConstraintV2 from './physics/JointConstraintV2';
-import { BoxShape, CircleShape, PolygonShape, ShapeType } from './physics/Shape';
+import JointConstraint from './physics/constraint/JointConstraint';
+import { BoxShape, CircleShape, PolygonShape, ShapeType } from './physics/body/Shape';
 import World from './physics/World';
 
 export default class Application {
@@ -153,7 +153,7 @@ export default class Application {
             this.world.addBody(step);
 
             // Connect previous link to this link
-            const joint = new JointConstraintV2(last, step, step.position);
+            const joint = new JointConstraint(last, step, step.position);
             this.world.addConstraint(joint);
 
             last = step;
@@ -164,7 +164,7 @@ export default class Application {
         endStep.setTexture('rockBridgeAnchor');
         this.world.addBody(endStep);
 
-        const lastJoint = new JointConstraintV2(last, endStep, endStep.position);
+        const lastJoint = new JointConstraint(last, endStep, endStep.position);
         this.world.addConstraint(lastJoint);
 
         const pendulumAnchor = new Body(new BoxShape(10, 10), endStep.position.x + 200, 200, 0);
@@ -181,7 +181,7 @@ export default class Application {
             this.world.addBody(pendulumElement);
 
             const anchor = pendulumElement.position.subNew(new Vec2(0, 25));
-            const j = new JointConstraintV2(last, pendulumElement, anchor);
+            const j = new JointConstraint(last, pendulumElement, anchor);
             this.world.addConstraint(j);
 
             last = pendulumElement;

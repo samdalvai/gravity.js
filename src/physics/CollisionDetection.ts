@@ -1,6 +1,6 @@
-import Body from './Body';
+import Body from './body/Body';
 import Contact from './Contact';
-import { CircleShape, PolygonShape, ShapeType } from './Shape';
+import { CircleShape, PolygonShape, ShapeType } from './body/Shape';
 import Vec2 from '../math/Vec2';
 
 export type CollisionResult = { isColliding: false; contacts?: undefined } | { isColliding: true; contacts: Contact[] };
