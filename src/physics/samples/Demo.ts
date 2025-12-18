@@ -8,7 +8,7 @@ import { BoxShape } from '../body/Shape';
 export default class Demo {
     static demoStrings = [
         'Demo 0: ....',
-        'Demo 1: ....',
+        'Demo 1: A single box',
         'Demo 2: ....',
         'Demo 3: ....',
         'Demo 4: ....',
@@ -27,22 +27,25 @@ export default class Demo {
         // Demo 1: ....
         // Add a floor and walls to contain objects objects
         const floor = new Body(
-            new BoxShape(Graphics.width() - 50, 50),
+            new BoxShape(Graphics.width(), 50),
             Graphics.width() / 2.0,
-            Graphics.height() / 2.0 + 340,
+            Graphics.height() - 100,
             0.0,
         );
         world.addBody(floor);
 
-        const leftFence = new Body(new BoxShape(50, Graphics.height() - 75), 0, Graphics.height() / 2.0 - 35, 0.0);
-        const rightFence = new Body(
-            new BoxShape(50, Graphics.height() - 75),
-            Graphics.width(),
-            Graphics.height() / 2.0 - 35,
-            0.0,
-        );
-        world.addBody(leftFence);
-        world.addBody(rightFence);
+        // const leftFence = new Body(new BoxShape(50, Graphics.height() - 75), 0, Graphics.height() / 2.0 - 35, 0.0);
+        // const rightFence = new Body(
+        //     new BoxShape(50, Graphics.height() - 75),
+        //     Graphics.width(),
+        //     Graphics.height() / 2.0 - 35,
+        //     0.0,
+        // );
+        // world.addBody(leftFence);
+        // world.addBody(rightFence);
+        const box = new Body(new BoxShape(60, 60), Graphics.width() / 2.0, Graphics.height() - 300, 10);
+        box.setTexture('crate');
+        world.addBody(box);
     };
 
     static demo2 = (world: World) => {
