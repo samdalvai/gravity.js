@@ -9,7 +9,7 @@ export default class Demo {
     static demoStrings = [
         'Demo 0: ....',
         'Demo 1: A single box',
-        'Demo 2: ....',
+        'Demo 2: A pyramid of boxes',
         'Demo 3: ....',
         'Demo 4: ....',
         'Demo 5: ....',
@@ -24,8 +24,7 @@ export default class Demo {
     };
 
     static demo1 = (world: World) => {
-        // Demo 1: ....
-        // Add a floor and walls to contain objects objects
+        // Demo 1: Single box demo
         const floor = new Body(
             new BoxShape(Graphics.width(), 50),
             Graphics.width() / 2.0,
@@ -49,7 +48,26 @@ export default class Demo {
     };
 
     static demo2 = (world: World) => {
-        // Demo 2: ....
+        // Demo 1: Pyramid of boxes
+        const floor = new Body(
+            new BoxShape(Graphics.width(), 50),
+            Graphics.width() / 2.0,
+            Graphics.height() - 100,
+            0.0,
+        );
+        world.addBody(floor);
+
+        const totalWidth = 60 * 10;
+        for (let i = 0; i < 10; i++) {
+            const box = new Body(
+                new BoxShape(60, 60),
+                Graphics.width() / 2.0 - totalWidth / 2 + 30 + 60 * i,
+                Graphics.height() - 300,
+                10,
+            );
+            box.setTexture('crate');
+            world.addBody(box);
+        }
     };
 
     static demo3 = (world: World) => {
