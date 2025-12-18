@@ -1,7 +1,9 @@
+import Graphics from '../../Graphics';
 import Utils from '../../math/Utils';
 import Vec2 from '../../math/Vec2';
 import World from '../World';
 import Body from '../body/Body';
+import { BoxShape } from '../body/Shape';
 
 export default class Demo {
     static demoStrings = [
@@ -23,6 +25,23 @@ export default class Demo {
 
     static demo1 = (world: World) => {
         // Demo 1: ....
+        // Add a floor and walls to contain objects objects
+        const floor = new Body(
+            new BoxShape(Graphics.width() - 50, 50),
+            Graphics.width() / 2.0,
+            Graphics.height() / 2.0 + 340,
+            0.0,
+        );
+        const leftFence = new Body(new BoxShape(50, Graphics.height() - 75), 0, Graphics.height() / 2.0 - 35, 0.0);
+        const rightFence = new Body(
+            new BoxShape(50, Graphics.height() - 75),
+            Graphics.width(),
+            Graphics.height() / 2.0 - 35,
+            0.0,
+        );
+        world.addBody(floor);
+        world.addBody(leftFence);
+        world.addBody(rightFence);
     };
 
     static demo2 = (world: World) => {
