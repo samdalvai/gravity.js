@@ -150,7 +150,8 @@ export default class Vec2 {
         return result;
     }
 
-    // TODO: reuse the previous methods instead of these ones
+    // TODO: reuse the previous methods instead of these ones, from now on methods are the ones
+    // of box 2d
 
     /** Dot product between two vectors */
     static dot = (a: Vec2, b: Vec2): number => {
