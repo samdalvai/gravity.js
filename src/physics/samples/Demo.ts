@@ -29,7 +29,7 @@ export default class Demo {
         const floor = new Body(
             new BoxShape(Graphics.width(), 50),
             Graphics.width() / 2.0,
-            Graphics.height() - 190,
+            Graphics.height() - 150,
             0.0,
         );
         world.addBody(floor);
@@ -54,7 +54,7 @@ export default class Demo {
         const floor = new Body(
             new BoxShape(Graphics.width(), floorHeight),
             Graphics.width() / 2.0,
-            Graphics.height() - 190,
+            Graphics.height() - 150,
             0.0,
         );
         world.addBody(floor);
@@ -86,7 +86,7 @@ export default class Demo {
         const floor = new Body(
             new BoxShape(Graphics.width(), 50),
             Graphics.width() / 2.0,
-            Graphics.height() - 190,
+            Graphics.height() - 150,
             0.0,
         );
         world.addBody(floor);
@@ -94,7 +94,7 @@ export default class Demo {
         // Suspension Bridge Creation
         const numSteps = 10;
         const stepWidth = 40;
-        const stepHeight = 10;
+        const stepHeight = 15;
         const spacing = stepWidth + 10; // distance between centers
         const startX = Graphics.width() / 2 - (numSteps * spacing) / 2;
         const startY = Graphics.height() / 2;
@@ -147,12 +147,12 @@ export default class Demo {
         const floor = new Body(
             new BoxShape(Graphics.width(), 50),
             Graphics.width() / 2.0,
-            Graphics.height() - 190,
+            Graphics.height() - 150,
             0.0,
         );
         world.addBody(floor);
 
-        const whipAnchor = new Body(new BoxShape(40, 20), Graphics.width() / 2, 200, 0);
+        const whipAnchor = new Body(new BoxShape(40, 20), Graphics.width() / 2, 100, 0);
         whipAnchor.setTexture('rockBridgeAnchor');
         world.addBody(whipAnchor);
 
@@ -160,7 +160,7 @@ export default class Demo {
 
         for (let i = 0; i < 10; i++) {
             const x = whipAnchor.position.x;
-            const y = i === 0 ? 240 : 240 + 60 * i;
+            const y = i === 0 ? whipAnchor.position.y + 40 : whipAnchor.position.y + 40 + 60 * i;
             const whipElement = new Body(new BoxShape(10, 50), x, y, 1);
             whipElement.setTexture('crate');
             world.addBody(whipElement);
@@ -173,7 +173,7 @@ export default class Demo {
         }
 
         // Add a lateral wind force to the world
-        world.addForce(new Vec2(100, 0));
+        // world.addForce(new Vec2(100, 0));
     };
 
     static demo5 = (world: World) => {
