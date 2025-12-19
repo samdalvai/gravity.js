@@ -1,7 +1,6 @@
 import Graphics from '../Graphics';
 import Vec2 from '../math/Vec2';
 import CollisionDetection from './CollisionDetection';
-import { PIXELS_PER_METER } from './Constants';
 import Force from './Force';
 import Body from './body/Body';
 import JointConstraint from './constraint/JointConstraint';
@@ -96,26 +95,40 @@ export default class World {
                 const a = this.bodies[i];
                 const b = this.bodies[j];
 
-                const collisionResult = CollisionDetection.detectCollision(a, b);
+                // Broad phase check
+                const ab = b.position.subNew(a.position);
+                const radiusSum = a.shape.radius + b.shape.radius;
 
-                if (collisionResult.isColliding) {
-                    for (const contact of collisionResult.contacts) {
-                        if (this.debug) {
-                            // Draw collision points
-                            Graphics.drawFillCircle(contact.start.x, contact.start.y, 5, 'red');
-                            Graphics.drawFillCircle(contact.end.x, contact.end.y, 2, 'red');
-                            Graphics.drawLine(contact.start.x, contact.start.y, contact.end.x, contact.end.y, 'red');
+                if (ab.magnitudeSquared() <= radiusSum * radiusSum) {
+                    // TODO: no need to recheck collision if the two shapes are circles, in that case 
+                    // return the contact info directly
+                    const collisionResult = CollisionDetection.detectCollision(a, b);
+
+                    if (collisionResult.isColliding) {
+                        for (const contact of collisionResult.contacts) {
+                            if (this.debug) {
+                                // Draw collision points
+                                Graphics.drawFillCircle(contact.start.x, contact.start.y, 5, 'red');
+                                Graphics.drawFillCircle(contact.end.x, contact.end.y, 2, 'red');
+                                Graphics.drawLine(
+                                    contact.start.x,
+                                    contact.start.y,
+                                    contact.end.x,
+                                    contact.end.y,
+                                    'red',
+                                );
+                            }
+
+                            // Create a new penetration constraint
+                            const penetration = new PenetrationConstraint(
+                                contact.a,
+                                contact.b,
+                                contact.start,
+                                contact.end,
+                                contact.normal,
+                            );
+                            penetrations.push(penetration);
                         }
-
-                        // Create a new penetration constraint
-                        const penetration = new PenetrationConstraint(
-                            contact.a,
-                            contact.b,
-                            contact.start,
-                            contact.end,
-                            contact.normal,
-                        );
-                        penetrations.push(penetration);
                     }
                 }
             }
