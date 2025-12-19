@@ -1,7 +1,7 @@
-import Body from './body/Body';
-import Contact from './Contact';
-import { CircleShape, PolygonShape, ShapeType } from './body/Shape';
 import Vec2 from '../math/Vec2';
+import Contact from './Contact';
+import { ShapeType, CircleShape, PolygonShape } from './body/Shape';
+import Body from './body/Body';
 
 export type CollisionResult = { isColliding: false; contacts?: undefined } | { isColliding: true; contacts: Contact[] };
 
@@ -60,6 +60,9 @@ export default class CollisionDetection {
     };
 
     static detectCollisionPolygonPolygon = (a: Body, b: Body): CollisionResult => {
+        // TODO: performance can be improved by avoiding allocating new Vec2 instances each time, e.g
+        // referenceEdge.normal() is recomputed 4 times
+
         const aPolygonShape = a.shape as PolygonShape;
         const bPolygonShape = b.shape as PolygonShape;
 
