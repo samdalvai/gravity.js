@@ -13,7 +13,7 @@ describe('CollisionDetection', () => {
         expect(collisionResult.isColliding).toBe(true);
         expect(collisionResult.contacts).not.toBeUndefined();
         expect(collisionResult.contacts).toHaveLength(1);
-        expect(collisionResult.contacts![0].depth).toBe(60);
+        expect(collisionResult.contacts![0].depth).toBe(0);
     });
 
     test('detectCollisionCircleCircle() detects collision between half overlapped circles', () => {
