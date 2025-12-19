@@ -7,14 +7,14 @@ export enum ShapeType {
 }
 
 export abstract class Shape {
+    radius: number = 0;
+
     abstract getType(): ShapeType;
     abstract getMomentOfInertia(): number;
     abstract updateVertices(angle: number, position: Vec2): void;
 }
 
 export class CircleShape extends Shape {
-    radius: number;
-
     constructor(radius: number) {
         super();
         this.radius = radius;
@@ -44,11 +44,12 @@ export class PolygonShape extends Shape {
 
     constructor(vertices: Vec2[]) {
         super();
-
         let minX = Number.POSITIVE_INFINITY;
         let minY = Number.POSITIVE_INFINITY;
         let maxX = Number.NEGATIVE_INFINITY;
         let maxY = Number.NEGATIVE_INFINITY;
+
+        let maxRadiusSq = 0;
 
         // Initialize the vertices of the polygon shape and set width and height
         for (const v of vertices) {
@@ -60,7 +61,14 @@ export class PolygonShape extends Shape {
             minY = Math.min(minY, v.y);
             maxX = Math.max(maxX, v.x);
             maxY = Math.max(maxY, v.y);
+
+            const r2 = v.x * v.x + v.y * v.y;
+            if (r2 > maxRadiusSq) {
+                maxRadiusSq = r2;
+            }
         }
+
+        this.radius = Math.sqrt(maxRadiusSq);
 
         this.width = maxX - minX;
         this.height = maxY - minY;
