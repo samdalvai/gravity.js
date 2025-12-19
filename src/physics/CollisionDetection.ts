@@ -1,7 +1,7 @@
 import Vec2 from '../math/Vec2';
 import Contact from './Contact';
-import { ShapeType, CircleShape, PolygonShape } from './body/Shape';
 import Body from './body/Body';
+import { CircleShape, PolygonShape, ShapeType } from './body/Shape';
 
 export type CollisionResult = { isColliding: false; contacts?: undefined } | { isColliding: true; contacts: Contact[] };
 
@@ -60,9 +60,6 @@ export default class CollisionDetection {
     };
 
     static detectCollisionPolygonPolygon = (a: Body, b: Body): CollisionResult => {
-        // TODO: performance can be improved by avoiding allocating new Vec2 instances each time, e.g
-        // referenceEdge.normal() is recomputed 4 times
-
         const aPolygonShape = a.shape as PolygonShape;
         const bPolygonShape = b.shape as PolygonShape;
 
@@ -101,7 +98,8 @@ export default class CollisionDetection {
         /////////////////////////////////////
         // Clipping
         /////////////////////////////////////
-        const incidentIndex = incidentShape.findIncidentEdge(referenceEdge.normal());
+        const referenceEdgeNormal = referenceEdge.normal();
+        const incidentIndex = incidentShape.findIncidentEdge(referenceEdgeNormal);
         const incidentNextIndex = (incidentIndex + 1) % incidentShape.worldVertices.length;
 
         let contactPoints = [
@@ -132,14 +130,14 @@ export default class CollisionDetection {
 
         // Loop all clipped points, but only consider those where separation is negative (objects are penetrating each other)
         for (const vclip of clippedPoints) {
-            const separation = vclip.subNew(vref).dot(referenceEdge.normal());
+            const separation = vclip.subNew(vref).dot(referenceEdgeNormal);
             if (separation <= 0) {
                 const contact: Contact = {
                     a,
                     b,
-                    normal: referenceEdge.normal(),
+                    normal: referenceEdgeNormal,
                     start: vclip,
-                    end: vclip.addNew(referenceEdge.normal().scaleNew(-separation)),
+                    end: vclip.addNew(referenceEdgeNormal.scaleNew(-separation)),
                     depth: 0,
                 };
 
