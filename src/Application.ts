@@ -1,12 +1,12 @@
-import AssetStore, { TEXTURES } from './AssetStore';
+import AssetStore from './AssetStore';
 import Graphics from './Graphics';
 import InputManager, { MouseButton } from './InputManager';
+import Utils from './math/Utils';
 import Vec2 from './math/Vec2';
 import Force from './physics/Force';
 import World from './physics/World';
 import Body from './physics/body/Body';
 import { BoxShape, CircleShape, PolygonShape, ShapeType } from './physics/body/Shape';
-import JointConstraint from './physics/constraint/JointConstraint';
 import Demo from './physics/samples/Demo';
 
 export default class Application {
@@ -15,6 +15,7 @@ export default class Application {
     private bgTexture: ImageBitmap | null = null;
     private generateParticle = false;
     private demoIndex = 1;
+    private bomb: Body | null = null;
 
     // Debug related properties
     private debug = true;
@@ -233,29 +234,33 @@ export default class Application {
                         }
                     }
 
+                    if (inputEvent.code === 'Space') {
+                        // Drop bomb
+                        if (!this.bomb) {
+                            const bomb = new Body(new CircleShape(30), Graphics.width() / 2, 0, 10);
+                            bomb.friction = 0.2;
+                            this.bomb = bomb;
+                            this.bomb.setTexture('rockRound');
+
+                            this.world.addBody(bomb);
+                        }
+
+                        this.bomb.position = new Vec2(Graphics.width() / 2 + Utils.randomNumber(-500, 500), -50);
+                        const middleFloor = new Vec2(
+                            Graphics.width() / 2 + Utils.randomNumber(-100, 100),
+                            Graphics.height() - 300,
+                        );
+                        const vectorFromBombToFloor = middleFloor.subNew(this.bomb.position);
+                        this.bomb.velocity = vectorFromBombToFloor;
+                    }
+
                     if (inputEvent.key === 'g') {
                         this.generateParticle = true;
                     }
 
-                    // if (inputEvent.key === 'ArrowUp') {
-                    //     this.world.getBodies()[0].applyImpulseLinear(new Vec2(0, -600));
-                    // }
-
-                    // if (inputEvent.key === 'ArrowLeft') {
-                    //     this.world.getBodies()[0].applyImpulseLinear(new Vec2(-400, 0));
-                    // }
-
-                    // if (inputEvent.key === 'ArrowRight') {
-                    //     this.world.getBodies()[0].applyImpulseLinear(new Vec2(400, 0));
-                    // }
-
-                    // if (inputEvent.key === 'ArrowDown') {
-                    //     this.world.getBodies()[0].applyImpulseLinear(new Vec2(0, 600));
-                    // }
-                    if (inputEvent.code.includes('Digit')) {
-                        const index = inputEvent.code.substring('Digit'.length);
-                        this.demoIndex = Number.parseInt(index);
-
+                    if (!Number.isNaN(Number.parseInt(inputEvent.key))) {
+                        const index = Number.parseInt(inputEvent.key);
+                        this.demoIndex = index;
                         const demo = Demo.demoFunctions[this.demoIndex];
 
                         if (!demo) {
@@ -263,6 +268,7 @@ export default class Application {
                         }
 
                         this.world.clear();
+                        this.bomb = null;
                         demo(this.world);
                     }
 
@@ -368,7 +374,7 @@ export default class Application {
             }
 
             const debugText = [
-                'Keys: 1-9 Demos, Left Mouse to generate circles, Right Mouse to generate boxes',
+                'Keys: 1-9 Demos, Left Mouse to generate circles, Right Mouse to generate boxes, Space to drop bomb',
                 `${Demo.demoStrings[this.demoIndex]}`,
                 `FPS: ${this.FPS.toFixed(2)}`,
                 `Num objects: ${this.world.getBodies().length}`,
