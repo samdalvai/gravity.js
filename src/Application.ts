@@ -220,7 +220,7 @@ export default class Application {
                         {
                             const explosionPos = InputManager.mousePosition;
                             const radius = 250; // pixels
-                            const strength = 5000; // you can tune this
+                            const strength = 10000; // you can tune this
 
                             for (const body of this.world.getBodies()) {
                                 const explosionImpulse = Force.generateExplosionForce(
@@ -358,10 +358,7 @@ export default class Application {
         // Draw all joints anchor points and debug properties
         if (this.debug) {
             for (const joint of this.world.getConstraints()) {
-                // const anchorPoint = joint.a.localSpaceToWorldSpace(joint.aPoint);
-                // Graphics.drawFillCircle(anchorPoint.x, anchorPoint.y, 3, 'red');
-                // Graphics.drawFillCircle(joint.a.position.x, joint.a.position.y, 3, 'blue');
-                // TODO: this is just a simple draw method, we need to consider local anchors rather than just 
+                // TODO: this is just a simple draw method, we need to consider local anchors rather than just
                 // bodies position
                 Graphics.drawLine(
                     joint.body1.position.x,
@@ -386,14 +383,16 @@ export default class Application {
         }
 
         const debugText = [
+            // General info
             'Keys: 1-9 Demos, Left Mouse to generate circles, Right Mouse to generate boxes, Space to drop bomb',
             `${Demo.demoStrings[this.demoIndex]}`,
+            `(D)ebug mode: ${this.debug ? 'ON' : 'OFF'}`,
+            // Debut related info
             `FPS: ${this.FPS.toFixed(2)}`,
             `Num objects: ${this.world.getBodies().length}`,
-            `(D)ebug mode: ${this.debug ? 'ON' : 'OFF'}`,
         ];
 
-        for (let i = 0; i < debugText.length; i++) {
+        for (let i = 0; i < debugText.length - (this.debug ? 0 : 2); i++) {
             Graphics.drawText(debugText[i], 50, 50 + i * 25, 18, 'arial', this.debug ? 'orange' : 'black');
         }
 
