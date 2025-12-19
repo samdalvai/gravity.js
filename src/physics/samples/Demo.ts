@@ -94,10 +94,11 @@ export default class Demo {
         // Suspension Bridge Creation
         const numSteps = 10;
         const stepWidth = 40;
-        const stepHeight = 15;
         const spacing = stepWidth + 10; // distance between centers
         const startX = Graphics.width() / 2 - (numSteps * spacing) / 2;
         const startY = Graphics.height() / 2;
+        const softness = 0.02;
+        const bias = 0.1;
 
         // Start anchor (static)
         const startAnchor = new Body(new BoxShape(stepWidth * 2, stepWidth * 0.5), startX - stepWidth / 2, startY, 0.0);
@@ -120,7 +121,7 @@ export default class Demo {
 
             // Joint anchor at left edge of this step
             const anchor = step.position.subNew(new Vec2(stepWidth / 2, 0));
-            const joint = new JointConstraint(lastStep, step, anchor, 0.02, 0.1); // softness, biasFactor
+            const joint = new JointConstraint(lastStep, step, anchor, softness, bias);
             world.addConstraint(joint);
 
             lastStep = step;
@@ -138,7 +139,7 @@ export default class Demo {
 
         // Final joint anchor at right edge of last step
         const finalAnchor = lastStep.position.addNew(new Vec2(stepWidth / 2, 0));
-        const lastJoint = new JointConstraint(lastStep, endAnchor, finalAnchor, 0.02, 0.1);
+        const lastJoint = new JointConstraint(lastStep, endAnchor, finalAnchor, softness, bias);
         world.addConstraint(lastJoint);
     };
 
