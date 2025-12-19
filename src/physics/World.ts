@@ -108,6 +108,7 @@ export default class World {
                         for (const contact of collisionResult.contacts) {
                             if (this.debug) {
                                 // Draw collision points
+                                // TODO: not a good place to do rendering
                                 Graphics.drawFillCircle(contact.start.x, contact.start.y, 5, 'red');
                                 Graphics.drawFillCircle(contact.end.x, contact.end.y, 2, 'red');
                                 Graphics.drawLine(
