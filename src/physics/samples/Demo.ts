@@ -13,7 +13,7 @@ export default class Demo {
         'Demo 2: A pyramid of boxes',
         'Demo 3: A suspension bridge',
         'Demo 4: As simple whip',
-        'Demo 5: ....',
+        'Demo 5: A skeleton ragdoll',
         'Demo 6: ....',
         'Demo 7: ....',
         'Demo 8: ....',
@@ -168,7 +168,47 @@ export default class Demo {
     };
 
     static demo5 = (world: World) => {
-        // Demo 5: ....
+        // Demo 5: A skeleton ragdoll
+        this.generateFloor(world);
+        this.generateFences(world);
+
+        // Add ragdoll parts (rigid bodies)
+        const bob = new Body(new CircleShape(5), Graphics.width() / 2.0, Graphics.height() / 2.0 - 200, 0.0);
+        const head = new Body(new CircleShape(25), bob.position.x, bob.position.y + 70, 5.0);
+        const torso = new Body(new BoxShape(50, 100), head.position.x, head.position.y + 80, 3.0);
+        const leftArm = new Body(new BoxShape(15, 70), torso.position.x - 32, torso.position.y - 10, 1.0);
+        const rightArm = new Body(new BoxShape(15, 70), torso.position.x + 32, torso.position.y - 10, 1.0);
+        const leftLeg = new Body(new BoxShape(20, 90), torso.position.x - 20, torso.position.y + 97, 1.0);
+        const rightLeg = new Body(new BoxShape(20, 90), torso.position.x + 20, torso.position.y + 97, 1.0);
+        bob.setTexture('bob');
+        head.setTexture('head');
+        torso.setTexture('torso');
+        leftArm.setTexture('leftArm');
+        rightArm.setTexture('rightArm');
+        leftLeg.setTexture('leftLeg');
+        rightLeg.setTexture('rightLeg');
+        world.addBody(bob);
+        world.addBody(head);
+        world.addBody(torso);
+        world.addBody(leftArm);
+        world.addBody(rightArm);
+        world.addBody(leftLeg);
+        world.addBody(rightLeg);
+
+        // Add joints between ragdoll parts (distance constraints with one anchor point)
+        const string = new JointConstraint(bob, head, bob.position);
+        const neck = new JointConstraint(head, torso, head.position.addNew(new Vec2(0, 25)));
+        const leftShoulder = new JointConstraint(torso, leftArm, torso.position.addNew(new Vec2(-28, -45)));
+        const rightShoulder = new JointConstraint(torso, rightArm, torso.position.addNew(new Vec2(+28, -45)));
+        const leftHip = new JointConstraint(torso, leftLeg, torso.position.addNew(new Vec2(-20, +50)));
+        const rightHip = new JointConstraint(torso, rightLeg, torso.position.addNew(new Vec2(+20, +50)));
+
+        world.addConstraint(string);
+        world.addConstraint(neck);
+        world.addConstraint(leftShoulder);
+        world.addConstraint(rightShoulder);
+        world.addConstraint(leftHip);
+        world.addConstraint(rightHip);
     };
 
     static demo6 = (world: World) => {
