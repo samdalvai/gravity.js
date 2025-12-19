@@ -94,7 +94,7 @@ export default class Demo {
         // Suspension Bridge Creation
         const numSteps = 10;
         const stepWidth = 40;
-        const spacing = stepWidth + 10; // distance between centers
+        const spacing = stepWidth + 2.5; // distance between centers
         const startX = Graphics.width() / 2 - (numSteps * spacing) / 2;
         const startY = Graphics.height() / 2;
         const softness = 0.02;
