@@ -74,7 +74,7 @@ export default class PenetrationConstraint extends Constraint {
         // Calculate relative velocity pre-impulse normal, which will be used to compute elasticity
         const va = this.a.velocity.addNew(new Vec2(-this.a.angularVelocity * ra.y, this.a.angularVelocity * ra.x));
         const vb = this.b.velocity.addNew(new Vec2(-this.b.angularVelocity * rb.y, this.b.angularVelocity * rb.x));
-        const vrelDotNormal = va.subNew(vb).dot(n);
+        const vrelDotNormal = vb.subNew(va).dot(n);
 
         // Get the restitution between the two bodies
         const e = Math.min(this.a.restitution, this.b.restitution);
