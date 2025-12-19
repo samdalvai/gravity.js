@@ -20,19 +20,24 @@ export default class Demo {
         'Demo 9: ....',
     ];
 
+    static generateFloor = (world: World): Body => {
+        const floor = new Body(
+            new BoxShape(Graphics.width(), 200),
+            Graphics.width() / 2.0,
+            Graphics.height() - 100,
+            0.0,
+        );
+        world.addBody(floor);
+        return floor;
+    };
+
     static demo0 = (world: World) => {
         // Demo 0: ....
     };
 
     static demo1 = (world: World) => {
         // Demo 1: Single box demo
-        const floor = new Body(
-            new BoxShape(Graphics.width(), 50),
-            Graphics.width() / 2.0,
-            Graphics.height() - 150,
-            0.0,
-        );
-        world.addBody(floor);
+        this.generateFloor(world);
 
         // const leftFence = new Body(new BoxShape(50, Graphics.height() - 75), 0, Graphics.height() / 2.0 - 35, 0.0);
         // const rightFence = new Body(
@@ -50,14 +55,8 @@ export default class Demo {
 
     static demo2 = (world: World) => {
         // Demo 2: Pyramid of boxes
-        const floorHeight = 50;
-        const floor = new Body(
-            new BoxShape(Graphics.width(), floorHeight),
-            Graphics.width() / 2.0,
-            Graphics.height() - 150,
-            0.0,
-        );
-        world.addBody(floor);
+        const floor = this.generateFloor(world);
+        const floorHeight = 200;
 
         const boxSize = 60;
         const rows = 10;
@@ -83,13 +82,7 @@ export default class Demo {
 
     static demo3 = (world: World) => {
         // Demo 3: As suspension bridge
-        const floor = new Body(
-            new BoxShape(Graphics.width(), 50),
-            Graphics.width() / 2.0,
-            Graphics.height() - 150,
-            0.0,
-        );
-        world.addBody(floor);
+        this.generateFloor(world);
 
         // Suspension Bridge Creation
         const numSteps = 10;
@@ -145,13 +138,7 @@ export default class Demo {
 
     static demo4 = (world: World) => {
         // Demo 4: A simple whip
-        const floor = new Body(
-            new BoxShape(Graphics.width(), 50),
-            Graphics.width() / 2.0,
-            Graphics.height() - 150,
-            0.0,
-        );
-        world.addBody(floor);
+        this.generateFloor(world);
 
         const whipAnchor = new Body(new BoxShape(40, 20), Graphics.width() / 2, 100, 0);
         whipAnchor.setTexture('rockBridgeAnchor');
@@ -172,9 +159,6 @@ export default class Demo {
 
             last = whipElement;
         }
-
-        // Add a lateral wind force to the world
-        // world.addForce(new Vec2(100, 0));
     };
 
     static demo5 = (world: World) => {
