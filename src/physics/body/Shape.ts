@@ -109,9 +109,8 @@ export class PolygonShape extends Shape {
         return this.worldVertices[nextVertex].subNew(this.worldVertices[currVertex]);
     };
 
-    findMinSeparation = (other: PolygonShape): { separation: number; indexReferenceEdge: number } => {
+    findMinSeparation = (other: PolygonShape, indexReferenceEdge: { value: number }, supportPoint: Vec2): number => {
         let separation = -Infinity;
-        let indexReferenceEdge = 0;
 
         // Loop all the vertices of "this" polygon
         for (let i = 0; i < this.worldVertices.length; i++) {
@@ -120,22 +119,25 @@ export class PolygonShape extends Shape {
 
             // Loop all the vertices of the "other" polygon
             let minSep = Infinity;
+            let minVertex = new Vec2();
 
             for (let j = 0; j < other.worldVertices.length; j++) {
                 const vb = other.worldVertices[j];
                 const proj = vb.subNew(va).dot(normal);
                 if (proj < minSep) {
                     minSep = proj;
+                    minVertex = vb;
                 }
             }
 
             if (minSep > separation) {
                 separation = minSep;
-                indexReferenceEdge = i;
+                indexReferenceEdge.value = i;
+                supportPoint.x = minVertex.x;
+                supportPoint.y = minVertex.y;
             }
         }
-
-        return { separation, indexReferenceEdge };
+        return separation;
     };
 
     findIncidentEdge = (normal: Vec2): number => {
