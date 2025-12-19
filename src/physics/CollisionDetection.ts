@@ -44,13 +44,8 @@ export default class CollisionDetection {
             return { isColliding: false };
         }
 
-        let normal: Vec2;
-        if (ab.magnitudeSquared() === 0) {
-            // Fully overlapping, pick arbitrary normal
-            normal = new Vec2(1, 0);
-        } else {
-            normal = ab.normalize();
-        }
+        const normal = ab;
+        normal.normalize();
 
         const start = b.position.subNew(normal.scaleNew(bCircleShape.radius));
         const end = a.position.addNew(normal.scaleNew(aCircleShape.radius));
@@ -63,16 +58,17 @@ export default class CollisionDetection {
         const aPolygonShape = a.shape as PolygonShape;
         const bPolygonShape = b.shape as PolygonShape;
 
-        const { separation: abSeparation, indexReferenceEdge: aIndexReferenceEdge } =
-            aPolygonShape.findMinSeparation(bPolygonShape);
+        const aIndexReferenceEdge = { value: 0 };
+        const bIndexReferenceEdge = { value: 0 };
+        const aSupportPoint = new Vec2();
+        const bSupportPoint = new Vec2();
 
+        const abSeparation = aPolygonShape.findMinSeparation(bPolygonShape, aIndexReferenceEdge, aSupportPoint);
         if (abSeparation >= 0) {
             return { isColliding: false };
         }
 
-        const { separation: baSeparation, indexReferenceEdge: bIndexReferenceEdge } =
-            aPolygonShape.findMinSeparation(aPolygonShape);
-
+        const baSeparation = bPolygonShape.findMinSeparation(aPolygonShape, bIndexReferenceEdge, bSupportPoint);
         if (baSeparation >= 0) {
             return { isColliding: false };
         }
@@ -85,11 +81,11 @@ export default class CollisionDetection {
         if (abSeparation > baSeparation) {
             referenceShape = aPolygonShape;
             incidentShape = bPolygonShape;
-            indexReferenceEdge = aIndexReferenceEdge;
+            indexReferenceEdge = aIndexReferenceEdge.value;
         } else {
             referenceShape = bPolygonShape;
             incidentShape = aPolygonShape;
-            indexReferenceEdge = bIndexReferenceEdge;
+            indexReferenceEdge = bIndexReferenceEdge.value;
         }
 
         // Find the reference edge based on the index that returned from the function
@@ -98,8 +94,7 @@ export default class CollisionDetection {
         /////////////////////////////////////
         // Clipping
         /////////////////////////////////////
-        const referenceEdgeNormal = referenceEdge.normal();
-        const incidentIndex = incidentShape.findIncidentEdge(referenceEdgeNormal);
+        const incidentIndex = incidentShape.findIncidentEdge(referenceEdge.normal());
         const incidentNextIndex = (incidentIndex + 1) % incidentShape.worldVertices.length;
 
         let contactPoints = [
@@ -130,14 +125,14 @@ export default class CollisionDetection {
 
         // Loop all clipped points, but only consider those where separation is negative (objects are penetrating each other)
         for (const vclip of clippedPoints) {
-            const separation = vclip.subNew(vref).dot(referenceEdgeNormal);
+            const separation = vclip.subNew(vref).dot(referenceEdge.normal());
             if (separation <= 0) {
                 const contact: Contact = {
                     a,
                     b,
-                    normal: referenceEdgeNormal,
+                    normal: referenceEdge.normal(),
                     start: vclip,
-                    end: vclip.addNew(referenceEdgeNormal.scaleNew(-separation)),
+                    end: vclip.addNew(referenceEdge.normal().scaleNew(-separation)),
                     depth: 0,
                 };
 
