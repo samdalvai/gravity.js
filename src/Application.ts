@@ -358,30 +358,18 @@ export default class Application {
         // Draw all joints anchor points and debug properties
         if (this.debug) {
             for (const joint of this.world.getConstraints()) {
-                if (this.debug) {
-                    // const anchorPoint = joint.a.localSpaceToWorldSpace(joint.aPoint);
-                    // Graphics.drawFillCircle(anchorPoint.x, anchorPoint.y, 3, 'red');
-                    // Graphics.drawFillCircle(joint.a.position.x, joint.a.position.y, 3, 'blue');
-                    // TODO: this is just a simpòe draw method, need to consider local anchors
-                    Graphics.drawLine(
-                        joint.body1.position.x,
-                        joint.body1.position.y,
-                        joint.body2.position.x,
-                        joint.body2.position.y,
-                        'blue',
-                    );
-                }
-            }
-
-            const debugText = [
-                'Keys: 1-9 Demos, Left Mouse to generate circles, Right Mouse to generate boxes, Space to drop bomb',
-                `${Demo.demoStrings[this.demoIndex]}`,
-                `FPS: ${this.FPS.toFixed(2)}`,
-                `Num objects: ${this.world.getBodies().length}`,
-            ];
-
-            for (let i = 0; i < debugText.length; i++) {
-                Graphics.drawText(debugText[i], 50, 50 + i * 25, 18, 'arial', 'orange');
+                // const anchorPoint = joint.a.localSpaceToWorldSpace(joint.aPoint);
+                // Graphics.drawFillCircle(anchorPoint.x, anchorPoint.y, 3, 'red');
+                // Graphics.drawFillCircle(joint.a.position.x, joint.a.position.y, 3, 'blue');
+                // TODO: this is just a simple draw method, we need to consider local anchors rather than just 
+                // bodies position
+                Graphics.drawLine(
+                    joint.body1.position.x,
+                    joint.body1.position.y,
+                    joint.body2.position.x,
+                    joint.body2.position.y,
+                    'blue',
+                );
             }
         }
 
@@ -395,6 +383,18 @@ export default class Application {
                 0.0,
                 this.bgTexture,
             );
+        }
+
+        const debugText = [
+            'Keys: 1-9 Demos, Left Mouse to generate circles, Right Mouse to generate boxes, Space to drop bomb',
+            `${Demo.demoStrings[this.demoIndex]}`,
+            `FPS: ${this.FPS.toFixed(2)}`,
+            `Num objects: ${this.world.getBodies().length}`,
+            `(D)ebug mode: ${this.debug ? 'ON' : 'OFF'}`,
+        ];
+
+        for (let i = 0; i < debugText.length; i++) {
+            Graphics.drawText(debugText[i], 50, 50 + i * 25, 18, 'arial', this.debug ? 'orange' : 'black');
         }
 
         // Draw all bodies
