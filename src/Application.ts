@@ -304,18 +304,18 @@ export default class Application {
                         case MouseButton.LEFT:
                             {
                                 const ball = new Body(new CircleShape(30), inputEvent.x, inputEvent.y, 4.0);
-                                ball.restitution = 0.2;
+                                ball.restitution = 0.6;
                                 ball.friction = 10;
-                                ball.setTexture('rockRound');
+                                ball.setTexture('basketball');
                                 this.world.addBody(ball);
                             }
                             break;
                         case MouseButton.RIGHT:
                             {
                                 const box = new Body(new BoxShape(60, 60), inputEvent.x, inputEvent.y, 6.0);
-                                box.restitution = 0.5;
+                                box.restitution = 0.2;
                                 box.friction = 0.7;
-                                box.setTexture('woodBox');
+                                box.setTexture('crate');
                                 this.world.addBody(box);
                             }
                             break;

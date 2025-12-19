@@ -114,8 +114,8 @@ export default class Demo {
             // Optional sag: small vertical sinusoidal displacement
             const y = startY + Math.sin((i / numSteps) * Math.PI) * 10;
 
-            const step = new Body(new BoxShape(stepWidth, stepHeight), x, y, 3);
-            step.setTexture('woodPlankSolid');
+            const step = new Body(new CircleShape(stepWidth * 0.5), x, y, 3);
+            step.setTexture('woodBridgeStep');
             world.addBody(step);
 
             // Joint anchor at left edge of this step
