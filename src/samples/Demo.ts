@@ -1,10 +1,9 @@
-import Graphics from '../../Graphics';
-import Utils from '../../math/Utils';
-import Vec2 from '../../math/Vec2';
-import World from '../World';
-import Body from '../body/Body';
-import { BoxShape, CircleShape } from '../body/Shape';
-import JointConstraint from '../constraint/JointConstraint';
+import Graphics from '../Graphics';
+import Vec2 from '../math/Vec2';
+import World from '../physics/World';
+import Body from '../physics/body/Body';
+import { BoxShape, CircleShape } from '../physics/body/Shape';
+import JointConstraint from '../physics/constraint/JointConstraint';
 
 export default class Demo {
     static demoStrings = [
