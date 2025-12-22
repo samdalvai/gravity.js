@@ -1,7 +1,6 @@
 import Vec2 from '../math/Vec2';
 import Body from './Body';
 import { ContactConstraint } from './Constraint';
-import Contact from './Contact';
 import { CircleShape, PolygonShape, ShapeType } from './Shape';
 
 export default class CollisionDetection {
@@ -127,28 +126,18 @@ export default class CollisionDetection {
         for (const vclip of clippedPoints) {
             const separation = vclip.subNew(vref).dot(referenceEdgeNormal);
             if (separation <= 0) {
-                const contact: Contact = {
-                    a,
-                    b,
-                    start: vclip,
-                    end: vclip.addNew(referenceEdgeNormal.scaleNew(-separation)),
-                    normal: referenceEdgeNormal,
-                    depth: 0,
-                };
-
                 let start = vclip;
                 let end = vclip.addNew(referenceEdgeNormal.scaleNew(-separation));
+                const normal = referenceEdgeNormal.clone();
 
                 // Ensure the start-end points are always from "a" to "b"
                 if (baSeparation >= abSeparation) {
                     [start, end] = [end, start];
                     // The collision normal is always from "a" to "b"
-                    contact.normal = contact.normal.scaleNew(-1);
+                    normal.scale(-1);
                 }
 
-                contact.depth = end.subNew(start).magnitude();
-
-                contacts.push(new ContactConstraint(contact.a, contact.b, start, end, contact.normal, contact.depth));
+                contacts.push(new ContactConstraint(a, b, start, end, normal, end.subNew(start).magnitude()));
             }
         }
 
