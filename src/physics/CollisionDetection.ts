@@ -94,7 +94,8 @@ export default class CollisionDetection {
         /////////////////////////////////////
         // Clipping
         /////////////////////////////////////
-        const incidentIndex = incidentShape.findIncidentEdge(referenceEdge.normal());
+        const referenceEdgeNormal = referenceEdge.normal();
+        const incidentIndex = incidentShape.findIncidentEdge(referenceEdgeNormal);
         const incidentNextIndex = (incidentIndex + 1) % incidentShape.worldVertices.length;
 
         let contactPoints = [
@@ -124,14 +125,14 @@ export default class CollisionDetection {
 
         // Loop all clipped points, but only consider those where separation is negative (objects are penetrating each other)
         for (const vclip of clippedPoints) {
-            const separation = vclip.subNew(vref).dot(referenceEdge.normal());
+            const separation = vclip.subNew(vref).dot(referenceEdgeNormal);
             if (separation <= 0) {
                 const contact: Contact = {
                     a,
                     b,
                     start: vclip,
-                    end: vclip.addNew(referenceEdge.normal().scaleNew(-separation)),
-                    normal: referenceEdge.normal(),
+                    end: vclip.addNew(referenceEdgeNormal.scaleNew(-separation)),
+                    normal: referenceEdgeNormal,
                     depth: 0,
                 };
 
