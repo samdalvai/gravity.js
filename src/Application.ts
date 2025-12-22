@@ -214,7 +214,6 @@ export default class Application {
                 case 'keydown':
                     if (inputEvent.key === 'd') {
                         this.debug = !this.debug;
-                        this.world.setDebug(this.debug);
                     }
 
                     if (inputEvent.key === 'e') {
