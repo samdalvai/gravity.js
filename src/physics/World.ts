@@ -10,8 +10,8 @@ export default class World {
     private iterations: number;
 
     private bodies: Body[] = [];
-    private jointConstraints: JointConstraint[] = [];
-    private penetrations: ContactConstraint[] = [];
+    private contacts: ContactConstraint[] = [];
+    private joints: JointConstraint[] = [];
 
     private forces: Vec2[] = [];
     private torques: number[] = [];
@@ -30,20 +30,15 @@ export default class World {
     };
 
     getContacts = (): ContactConstraint[] => {
-        return this.penetrations;
+        return this.contacts;
     };
 
-    addConstraint = (constraint: JointConstraint): void => {
-        // addConstraint = (constraint: Constraint): void => {
-        // this.constraints.push(constraint);
-        this.jointConstraints.push(constraint);
+    addJoint = (constraint: JointConstraint): void => {
+        this.joints.push(constraint);
     };
 
-    // getConstraints = (): Constraint[] => {
-    //     return this.constraints;
-    // };
-    getConstraints = (): JointConstraint[] => {
-        return this.jointConstraints;
+    getJoints = (): JointConstraint[] => {
+        return this.joints;
     };
 
     addForce = (force: Vec2): void => {
@@ -60,7 +55,6 @@ export default class World {
         // Loop all bodies of the world applying forces
         for (const body of this.bodies) {
             // Apply the weight force to all bodies
-            // TODO: can we add this as force to the world? instead of recreating it each time? No, because it depends on the bodies mass
             const weightForce = Force.generateWeightForce(body, this.G);
             body.addForce(weightForce);
 
@@ -88,7 +82,7 @@ export default class World {
         // Check all the bodies with all other bodies detecting collisions
         console.time('loop');
 
-        this.penetrations.length = 0;
+        this.contacts.length = 0;
         for (let i = 0; i <= this.bodies.length - 1; i++) {
             for (let j = i + 1; j < this.bodies.length; j++) {
                 const a = this.bodies[i];
@@ -101,7 +95,7 @@ export default class World {
                 if (ab.magnitudeSquared() <= radiusSum * radiusSum) {
                     // TODO: no need to recheck collision if the two shapes are circles, in that case
                     // return the contact info directly
-                    CollisionDetection.detectCollision(a, b, this.penetrations);
+                    CollisionDetection.detectCollision(a, b, this.contacts);
                 }
             }
         }
@@ -109,31 +103,31 @@ export default class World {
         console.timeEnd('loop');
 
         // Solve all constraints
-        for (const constraint of this.jointConstraints) {
+        for (const constraint of this.joints) {
             // for (const constraint of this.constraints) {
             constraint.preSolve(invDt);
         }
 
-        for (const constraint of this.penetrations) {
+        for (const constraint of this.contacts) {
             constraint.preSolve(invDt);
         }
 
         for (let i = 0; i < this.iterations; i++) {
-            for (const constraint of this.jointConstraints) {
+            for (const constraint of this.joints) {
                 // for (const constraint of this.constraints) {
                 constraint.solve();
             }
 
-            for (const constraint of this.penetrations) {
+            for (const constraint of this.contacts) {
                 constraint.solve();
             }
         }
 
-        for (const constraint of this.jointConstraints) {
+        for (const constraint of this.joints) {
             constraint.postSolve();
         }
 
-        for (const constraint of this.penetrations) {
+        for (const constraint of this.contacts) {
             constraint.postSolve();
         }
 
@@ -156,7 +150,7 @@ export default class World {
 
     clear = () => {
         this.bodies.length = 0;
-        this.jointConstraints.length = 0;
+        this.joints.length = 0;
         this.forces.length = 0;
         this.torques.length = 0;
     };
