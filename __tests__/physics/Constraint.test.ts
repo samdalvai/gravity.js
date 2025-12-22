@@ -1,8 +1,7 @@
 import Vec2 from '../../src/math/Vec2';
 import Body from '../../src/physics/Body';
 import CollisionDetection from '../../src/physics/CollisionDetection';
-import { JointConstraint, PenetrationConstraint } from '../../src/physics/Constraint';
-import Contact from '../../src/physics/Contact';
+import { ContactConstraint, JointConstraint } from '../../src/physics/Constraint';
 import { CircleShape } from '../../src/physics/Shape';
 
 describe('Constraint', () => {
@@ -50,17 +49,16 @@ describe('Constraint', () => {
         const numFrames = 60;
         const solverIterations = 10;
 
-        const contacts: Contact[] = [];
+        const contacts: ContactConstraint[] = [];
         CollisionDetection.detectCollisionCircleCircle(a, b, contacts);
         const contact = contacts![0];
-        const penetrationConstraint = new PenetrationConstraint(contact);
 
         const deltaTime = 1 / 60;
         for (let i = 0; i < numFrames; i++) {
-            penetrationConstraint.preSolve(1 / deltaTime);
+            contact.preSolve(1 / deltaTime);
 
             for (let j = 0; j < solverIterations; j++) {
-                penetrationConstraint.solve();
+                contact.solve();
             }
 
             a.integrateVelocities(deltaTime);
