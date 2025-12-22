@@ -11,9 +11,8 @@ export default class World {
     private iterations: number;
 
     private bodies: Body[] = [];
-    private contacts: Contact[] = [];
-    // private constraints: Constraint[] = [];
     private jointConstraints: JointConstraint[] = [];
+    private penetrations: PenetrationConstraint[] = [];
 
     private forces: Vec2[] = [];
     private torques: number[] = [];
@@ -33,8 +32,8 @@ export default class World {
         return this.bodies;
     };
 
-    getContacts = (): Contact[] => {
-        return this.contacts;
+    getContacts = (): PenetrationConstraint[] => {
+        return this.penetrations;
     };
 
     addConstraint = (constraint: JointConstraint): void => {
@@ -64,7 +63,6 @@ export default class World {
 
     update = (dt: number): void => {
         const invDt = dt > 0.0 ? 1.0 / dt : 0.0;
-        const penetrations: PenetrationConstraint[] = [];
 
         // Loop all bodies of the world applying forces
         for (const body of this.bodies) {
@@ -95,8 +93,6 @@ export default class World {
         }
 
         // Check all the bodies with all other bodies detecting collisions
-        this.contacts.length = 0;
-
         console.time('loop');
         for (let i = 0; i <= this.bodies.length - 1; i++) {
             for (let j = i + 1; j < this.bodies.length; j++) {
@@ -106,19 +102,14 @@ export default class World {
                 // Broad phase check
                 const ab = b.position.subNew(a.position);
                 const radiusSum = a.shape.radius + b.shape.radius;
-
-                if (ab.magnitudeSquared() <= radiusSum * radiusSum) {
-                    // TODO: no need to recheck collision if the two shapes are circles, in that case
-                    // return the contact info directly
-                    CollisionDetection.detectCollision(a, b, this.contacts);
+                if (ab.magnitudeSquared() > radiusSum * radiusSum) {
+                    continue;
                 }
-            }
-        }
 
-        for (const contact of this.contacts) {
-            penetrations.push(
-                new PenetrationConstraint(contact.a, contact.b, contact.start, contact.end, contact.normal),
-            );
+                // TODO: no need to recheck collision if the two shapes are circles, in that case
+                // return the contact info directly
+                CollisionDetection.detectCollision(a, b, this.penetrations);
+            }
         }
 
         console.timeEnd('loop');
@@ -129,7 +120,7 @@ export default class World {
             constraint.preSolve(invDt);
         }
 
-        for (const constraint of penetrations) {
+        for (const constraint of this.penetrations) {
             constraint.preSolve(invDt);
         }
 
@@ -139,7 +130,7 @@ export default class World {
                 constraint.solve();
             }
 
-            for (const constraint of penetrations) {
+            for (const constraint of this.penetrations) {
                 constraint.solve();
             }
         }
@@ -148,7 +139,7 @@ export default class World {
             constraint.postSolve();
         }
 
-        for (const constraint of penetrations) {
+        for (const constraint of this.penetrations) {
             constraint.postSolve();
         }
 
@@ -167,6 +158,8 @@ export default class World {
                 this.bodies.pop();
             }
         }
+
+        this.penetrations.length = 0;
     };
 
     clear = () => {

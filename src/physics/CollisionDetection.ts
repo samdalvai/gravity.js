@@ -1,10 +1,11 @@
 import Vec2 from '../math/Vec2';
 import Body from './Body';
+import { PenetrationConstraint } from './Constraint';
 import Contact from './Contact';
 import { CircleShape, PolygonShape, ShapeType } from './Shape';
 
 export default class CollisionDetection {
-    static detectCollision = (a: Body, b: Body, contacts: Contact[]): boolean => {
+    static detectCollision = (a: Body, b: Body, contacts: PenetrationConstraint[]): boolean => {
         const aIsCircle = a.shape.getType() === ShapeType.CIRCLE;
         const bIsCircle = b.shape.getType() === ShapeType.CIRCLE;
         const aIsPolygon = a.shape.getType() === ShapeType.POLYGON || a.shape.getType() === ShapeType.BOX;
@@ -29,7 +30,7 @@ export default class CollisionDetection {
         return false;
     };
 
-    static detectCollisionCircleCircle = (a: Body, b: Body, contacts: Contact[]): boolean => {
+    static detectCollisionCircleCircle = (a: Body, b: Body, contacts: PenetrationConstraint[]): boolean => {
         const aCircleShape = a.shape as CircleShape;
         const bCircleShape = b.shape as CircleShape;
 
@@ -48,12 +49,12 @@ export default class CollisionDetection {
         const start = b.position.subNew(normal.scaleNew(bCircleShape.radius));
         const end = a.position.addNew(normal.scaleNew(aCircleShape.radius));
         const depth = end.subNew(start).magnitude();
-        contacts.push(new Contact(a, b, start, end, normal, depth));
+        contacts.push(new PenetrationConstraint(a, b, start, end, normal, depth));
 
         return true;
     };
 
-    static detectCollisionPolygonPolygon = (a: Body, b: Body, contacts: Contact[]): boolean => {
+    static detectCollisionPolygonPolygon = (a: Body, b: Body, contacts: PenetrationConstraint[]): boolean => {
         const aPolygonShape = a.shape as PolygonShape;
         const bPolygonShape = b.shape as PolygonShape;
 
@@ -128,9 +129,9 @@ export default class CollisionDetection {
                 const contact: Contact = {
                     a,
                     b,
-                    normal: referenceEdge.normal(),
                     start: vclip,
                     end: vclip.addNew(referenceEdge.normal().scaleNew(-separation)),
+                    normal: referenceEdge.normal(),
                     depth: 0,
                 };
 
@@ -143,14 +144,23 @@ export default class CollisionDetection {
 
                 contact.depth = contact.end.subNew(contact.start).magnitude();
 
-                contacts.push(contact);
+                contacts.push(
+                    new PenetrationConstraint(
+                        contact.a,
+                        contact.b,
+                        contact.start,
+                        contact.end,
+                        contact.normal,
+                        contact.depth,
+                    ),
+                );
             }
         }
 
         return true;
     };
 
-    static detectCollisionPolygonCircle = (polygon: Body, circle: Body, contacts: Contact[]): boolean => {
+    static detectCollisionPolygonCircle = (polygon: Body, circle: Body, contacts: PenetrationConstraint[]): boolean => {
         const polygonShape = polygon.shape as PolygonShape;
         const circleShape = circle.shape as CircleShape;
         const polygonVertices = polygonShape.worldVertices;
@@ -208,7 +218,7 @@ export default class CollisionDetection {
                     const start = circle.position.addNew(normal.scaleNew(-circleShape.radius));
                     const end = start.addNew(normal.scaleNew(depth));
 
-                    contacts.push(new Contact(a, b, start, end, normal, depth));
+                    contacts.push(new PenetrationConstraint(a, b, start, end, normal, depth));
                     return true;
                 }
             } else {
@@ -230,7 +240,7 @@ export default class CollisionDetection {
                         const start = circle.position.addNew(normal.scaleNew(-circleShape.radius));
                         const end = start.addNew(normal.scaleNew(depth));
 
-                        contacts.push(new Contact(a, b, start, end, normal, depth));
+                        contacts.push(new PenetrationConstraint(a, b, start, end, normal, depth));
                         return true;
                     }
                 } else {
@@ -249,7 +259,7 @@ export default class CollisionDetection {
                         const start = circle.position.subNew(normal.scaleNew(circleShape.radius));
                         const end = start.addNew(normal.scaleNew(depth));
 
-                        contacts.push(new Contact(a, b, start, end, normal, depth));
+                        contacts.push(new PenetrationConstraint(a, b, start, end, normal, depth));
                         return true;
                     }
                 }
@@ -263,7 +273,7 @@ export default class CollisionDetection {
             const start = circle.position.subNew(normal.scaleNew(circleShape.radius));
             const end = start.addNew(normal.scaleNew(depth));
 
-            contacts.push(new Contact(a, b, start, end, normal, depth));
+            contacts.push(new PenetrationConstraint(a, b, start, end, normal, depth));
             return true;
         }
     };
