@@ -94,7 +94,6 @@ export default class World {
             body.integrateForces(dt);
         }
 
-        console.time('collision');
         // Check all the bodies with all other bodies detecting collisions
         this.contacts.length = 0;
 
@@ -114,11 +113,10 @@ export default class World {
                 }
             }
         }
+
         for (const contact of this.contacts) {
             penetrations.push(new PenetrationConstraint(contact));
         }
-
-        console.timeEnd('collision');
 
         // Solve all constraints
         for (const constraint of this.jointConstraints) {
