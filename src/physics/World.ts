@@ -115,7 +115,9 @@ export default class World {
         }
 
         for (const contact of this.contacts) {
-            penetrations.push(new PenetrationConstraint(contact));
+            penetrations.push(
+                new PenetrationConstraint(contact.a, contact.b, contact.start, contact.end, contact.normal),
+            );
         }
 
         // Solve all constraints
