@@ -23,113 +23,108 @@ export abstract class Constraint {
     abstract postSolve(): void;
 }
 
-export class JointConstraint {
-    body1: Body;
-    body2: Body;
-
-    localAnchor1: Vec2;
-    localAnchor2: Vec2;
-
+export class JointConstraint extends Constraint {
     M: Mat22;
-    r1: Vec2;
-    r2: Vec2;
+
+    rA: Vec2;
+    rB: Vec2;
 
     bias: Vec2;
     P: Vec2; // accumulated impulse
+
     biasFactor: number;
     softness: number;
 
-    constructor(b1: Body, b2: Body, anchor: Vec2, softness = 0.01, biasFactor = 0.2) {
-        this.body1 = b1;
-        this.body2 = b2;
-
-        const Rot1 = new Mat22(this.body1.rotation);
-        const Rot2 = new Mat22(this.body2.rotation);
-        const Rot1T = Rot1.transpose();
-        const Rot2T = Rot2.transpose();
-
-        this.localAnchor1 = Mat22.multiply(Rot1T, anchor.subNew(this.body1.position));
-        this.localAnchor2 = Mat22.multiply(Rot2T, anchor.subNew(this.body2.position));
+    constructor(a: Body, b: Body, anchorWorld: Vec2, softness = 0.01, biasFactor = 0.2) {
+        super(a, b, anchorWorld, anchorWorld);
 
         this.M = new Mat22();
-        this.r1 = new Vec2();
-        this.r2 = new Vec2();
+
+        this.rA = new Vec2();
+        this.rB = new Vec2();
+
         this.bias = new Vec2();
         this.P = new Vec2();
 
-        // Is 0.01 as softness a good default?
         this.softness = softness;
         this.biasFactor = biasFactor;
     }
 
-    preSolve = (dt: number): void => {
-        // Pre-compute anchors, mass matrix, and bias.
-        const Rot1 = new Mat22(this.body1.rotation);
-        const Rot2 = new Mat22(this.body2.rotation);
+    preSolve(dt: number): void {
+        const pa = this.a.localSpaceToWorldSpace(this.aPoint);
+        const pb = this.b.localSpaceToWorldSpace(this.bPoint);
+        this.rA = pa.subNew(this.a.position);
+        this.rB = pb.subNew(this.b.position);
 
-        this.r1 = Mat22.multiply(Rot1, this.localAnchor1);
-        this.r2 = Mat22.multiply(Rot2, this.localAnchor2);
+        // ---- Effective mass matrix ----
+        const invMassSum = this.a.invMass + this.b.invMass;
 
-        // deltaV = deltaV0 + K * impulse
-        // invM = [(1/m1 + 1/m2) * eye(2) - skew(r1) * invI1 * skew(r1) - skew(r2) * invI2 * skew(r2)]
-        //      = [1/m1+1/m2     0    ] + invI1 * [r1.y*r1.y -r1.x*r1.y] + invI2 * [r1.y*r1.y -r1.x*r1.y]
-        //        [    0     1/m1+1/m2]           [-r1.x*r1.y r1.x*r1.x]           [-r1.x*r1.y r1.x*r1.x]
         const K1 = new Mat22();
-        K1.col1.x = this.body1.invMass + this.body2.invMass;
-        K1.col1.y = 0.0;
-        K1.col2.x = 0.0;
-        K1.col2.y = this.body1.invMass + this.body2.invMass;
+        K1.col1.x = invMassSum;
+        K1.col1.y = 0;
+        K1.col2.x = 0;
+        K1.col2.y = invMassSum;
 
         const K2 = new Mat22();
-        K2.col1.x = this.body1.invI * this.r1.y * this.r1.y;
-        K2.col1.y = -this.body1.invI * this.r1.x * this.r1.y;
-        K2.col2.x = -this.body1.invI * this.r1.x * this.r1.y;
-        K2.col2.y = this.body1.invI * this.r1.x * this.r1.x;
+        K2.col1.x = this.a.invI * this.rA.y * this.rA.y;
+        K2.col1.y = -this.a.invI * this.rA.x * this.rA.y;
+        K2.col2.x = -this.a.invI * this.rA.x * this.rA.y;
+        K2.col2.y = this.a.invI * this.rA.x * this.rA.x;
 
         const K3 = new Mat22();
-        K3.col1.x = this.body2.invI * this.r2.y * this.r2.y;
-        K3.col1.y = -this.body2.invI * this.r2.x * this.r2.y;
-        K3.col2.x = -this.body2.invI * this.r2.x * this.r2.y;
-        K3.col2.y = this.body2.invI * this.r2.x * this.r2.x;
+        K3.col1.x = this.b.invI * this.rB.y * this.rB.y;
+        K3.col1.y = -this.b.invI * this.rB.x * this.rB.y;
+        K3.col2.x = -this.b.invI * this.rB.x * this.rB.y;
+        K3.col2.y = this.b.invI * this.rB.x * this.rB.x;
 
         const K = Mat22.add(Mat22.add(K1, K2), K3);
+
+        // softness (CFM)
         K.col1.x += this.softness;
         K.col2.y += this.softness;
 
         this.M = K.invert();
 
-        const p1 = Vec2.add(this.body1.position, this.r1);
-        const p2 = Vec2.add(this.body2.position, this.r2);
-        const dp = Vec2.sub(p2, p1);
+        // ---- Bias (position correction) ----
+        const pA = Vec2.add(this.a.position, this.rA);
+        const pB = Vec2.add(this.b.position, this.rB);
+        const C = Vec2.sub(pB, pA);
 
-        this.bias = Vec2.scale(-this.biasFactor * 1 / dt, dp);
+        this.bias = Vec2.scale(-this.biasFactor / dt, C);
 
-        // Apply accumulated impulse.
-        this.body1.velocity.sub(Vec2.scale(this.body1.invMass, this.P));
-        this.body1.angularVelocity -= this.body1.invI * Vec2.cross(this.r1, this.P);
+        // ---- Warm starting ----
+        this.a.velocity.sub(Vec2.scale(this.a.invMass, this.P));
+        this.a.angularVelocity -= this.a.invI * Vec2.cross(this.rA, this.P);
 
-        this.body2.velocity.add(Vec2.scale(this.body2.invMass, this.P));
-        this.body2.angularVelocity += this.body2.invI * Vec2.cross(this.r2, this.P);
-    };
+        this.b.velocity.add(Vec2.scale(this.b.invMass, this.P));
+        this.b.angularVelocity += this.b.invI * Vec2.cross(this.rB, this.P);
+    }
 
-    solve = (): void => {
-        // Linear velocity of the center of mass of body 1 and 2.
-        const lv1 = Vec2.add(this.body1.velocity, Vec2.cross(this.body1.angularVelocity, this.r1));
-        const lv2 = Vec2.add(this.body2.velocity, Vec2.cross(this.body2.angularVelocity, this.r2));
+    solve(): void {
+        const vA = Vec2.add(this.a.velocity, Vec2.cross(this.a.angularVelocity, this.rA));
+        const vB = Vec2.add(this.b.velocity, Vec2.cross(this.b.angularVelocity, this.rB));
 
-        // Relative velocity at contact
-        const dv = Vec2.sub(lv2, lv1);
+        const dv = Vec2.sub(vB, vA);
 
         const impulse = Mat22.multiply(this.M, Vec2.sub(Vec2.sub(this.bias, dv), Vec2.scale(this.softness, this.P)));
 
-        this.body1.velocity.sub(Vec2.scale(this.body1.invMass, impulse));
-        this.body1.angularVelocity -= this.body1.invI * Vec2.cross(this.r1, impulse);
+        this.a.velocity.sub(Vec2.scale(this.a.invMass, impulse));
+        this.a.angularVelocity -= this.a.invI * Vec2.cross(this.rA, impulse);
 
-        this.body2.velocity.add(Vec2.scale(this.body2.invMass, impulse));
-        this.body2.angularVelocity += this.body2.invI * Vec2.cross(this.r2, impulse);
+        this.b.velocity.add(Vec2.scale(this.b.invMass, impulse));
+        this.b.angularVelocity += this.b.invI * Vec2.cross(this.rB, impulse);
 
         this.P.add(impulse);
-    };
+    }
+
+    postSolve(): void {
+        // Optional: clamp accumulated impulse (recommended for stability)
+        // const maxImpulse = 1000;
+        // const mag = this.P.magnitude();
+        // if (mag > maxImpulse) {
+        //     this.P.scaleAssign(maxImpulse / mag);
+        // }
+    }
 }
 
 export class PenetrationConstraint extends Constraint {
