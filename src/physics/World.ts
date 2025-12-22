@@ -156,9 +156,9 @@ export default class World {
             }
         }
 
-        // for (const constraint of this.constraints) {
-        //     constraint.postSolve();
-        // }
+        for (const constraint of this.jointConstraints) {
+            constraint.postSolve();
+        }
 
         for (const constraint of penetrations) {
             constraint.postSolve();
