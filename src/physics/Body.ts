@@ -1,6 +1,6 @@
 import AssetStore, { TEXTURES } from '../AssetStore';
-import { Shape } from './Shape';
 import Vec2 from '../math/Vec2';
+import { Shape } from './Shape';
 
 export default class Body {
     // Linear motion
@@ -107,7 +107,8 @@ export default class Body {
             return;
         }
 
-        this.velocity.addAssign(j.scaleNew(this.invMass));
+        this.velocity.x += j.x * this.invMass;
+        this.velocity.y += j.y * this.invMass;
     };
 
     applyImpulseAngular(j: number): void {
