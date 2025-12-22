@@ -1,9 +1,9 @@
 import Graphics from '../Graphics';
 import Vec2 from '../math/Vec2';
-import World from '../physics/World';
 import Body from '../physics/Body';
-import { BoxShape, CircleShape } from '../physics/Shape';
 import { JointConstraint } from '../physics/Constraint';
+import { BoxShape, CircleShape } from '../physics/Shape';
+import World from '../physics/World';
 
 export default class Demo {
     static demoStrings = [
@@ -217,7 +217,20 @@ export default class Demo {
     };
 
     static demo6 = (world: World) => {
-        // Demo 6: ....
+        // Demo 6: Debig demo
+        this.generateFloor(world);
+        this.generateFences(world);
+
+        const a = new Body(new CircleShape(30), 500, 100, 5);
+        const b = new Body(new CircleShape(30), 500, 200, 5);
+        const joint = new JointConstraint(a, b, new Vec2(500, 200));
+
+        a.position.y -= 100;
+        b.position.y += 100;
+
+        world.addBody(a);
+        world.addBody(b);
+        world.addConstraint(joint);
     };
 
     static demo7 = (world: World) => {
