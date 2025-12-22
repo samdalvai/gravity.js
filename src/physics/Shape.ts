@@ -99,7 +99,8 @@ export class PolygonShape extends Shape {
         for (let i = 0; i < this.localVertices.length; i++) {
             // First rotate, then we translate
             this.worldVertices[i] = this.localVertices[i].rotate(angle);
-            this.worldVertices[i].addAssign(position);
+            this.worldVertices[i].x += position.x;
+            this.worldVertices[i].y += position.y;
         }
     };
 

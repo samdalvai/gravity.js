@@ -7,10 +7,10 @@ describe('Performance', () => {
         console.time('test');
         const a = new Body(new CircleShape(20), 100, 100, 5);
 
-        const impulse = new Vec2(50, 50);
+        const dt = 1 / 60;
 
         for (let i = 0; i < 10000000; i++) {
-            a.applyImpulseLinear(impulse);
+            a.integrateVelocities(dt);
         }
 
         console.timeEnd('test');
