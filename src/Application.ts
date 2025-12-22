@@ -3,10 +3,10 @@ import Graphics from './Graphics';
 import InputManager, { MouseButton } from './InputManager';
 import Utils from './math/Utils';
 import Vec2 from './math/Vec2';
-import Force from './physics/Force';
-import World from './physics/World';
 import Body from './physics/Body';
+import Force from './physics/Force';
 import { BoxShape, CircleShape, PolygonShape, ShapeType } from './physics/Shape';
+import World from './physics/World';
 import Demo from './samples/Demo';
 
 export default class Application {
@@ -14,6 +14,7 @@ export default class Application {
     private world: World;
     private bgTexture: ImageBitmap | null = null;
     private generateParticle = false;
+    private generateCircles = true;
     private demoIndex = 1;
     private bomb: Body | null = null;
 
@@ -258,6 +259,10 @@ export default class Application {
                         this.generateParticle = true;
                     }
 
+                    if (inputEvent.key === 'c') {
+                        this.generateCircles = !this.generateCircles;
+                    }
+
                     if (!Number.isNaN(Number.parseInt(inputEvent.key))) {
                         const index = Number.parseInt(inputEvent.key);
                         this.demoIndex = index;
@@ -347,16 +352,12 @@ export default class Application {
 
         if (this.generateParticle) {
             for (let i = 0; i < 10; i++) {
-                const ball = new Body(
-                    new CircleShape(5),
-                    InputManager.mousePosition.x,
-                    InputManager.mousePosition.y,
-                    1.0,
-                );
-                ball.restitution = 0.2;
-                ball.friction = 10;
-                ball.setTexture('rockRound');
-                this.world.addBody(ball);
+                const shape = this.generateCircles ? new CircleShape(5) : new BoxShape(10, 10);
+                const particle = new Body(shape, InputManager.mousePosition.x, InputManager.mousePosition.y, 1.0);
+                particle.restitution = 0.2;
+                particle.friction = 10;
+                particle.setTexture(this.generateCircles ? 'rockRound' : 'rockBox');
+                this.world.addBody(particle);
             }
         }
     };
