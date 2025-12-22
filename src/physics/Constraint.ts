@@ -86,9 +86,9 @@ export class JointConstraint extends Constraint {
         // ---- Bias (position correction) ----
         const pA = this.a.position.addNew(this.rA);
         const pB = this.b.position.addNew(this.rB);
-        const C = pB.subNew(pA);
+        const relPos = pB.subNew(pA);
 
-        this.bias = C.scaleNew(-this.biasFactor * invDt);
+        this.bias = relPos.scaleNew(-this.biasFactor * invDt);
 
         // ---- Warm starting ----
         this.a.velocity.sub(this.cachedLambda.scaleNew(this.a.invMass));
