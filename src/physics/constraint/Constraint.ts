@@ -126,11 +126,14 @@ export class JointConstraint extends Constraint {
 }
 
 export class PenetrationConstraint extends Constraint {
-    private cachedLambdaNormal: number;
-    private cachedLambdaFriction: number;
-    private bias: number;
-    private normal: Vec2; // Normal direction of the penetration in A's local space
-    private friction: number; // Friction coefficient between the two penetrating bodies
+    cachedLambdaNormal: number;
+    cachedLambdaFriction: number;
+    bias: number;
+    normal: Vec2; // Normal direction of the penetration in A's local space
+    friction: number; // Friction coefficient between the two penetrating bodies
+
+    rA: Vec2;
+    rB: Vec2;
 
     constructor(a: Body, b: Body, aCollisionPoint: Vec2, bCollisionPoint: Vec2, normal: Vec2) {
         super(a, b, aCollisionPoint, bCollisionPoint);
@@ -140,6 +143,9 @@ export class PenetrationConstraint extends Constraint {
         this.cachedLambdaFriction = 0;
         this.bias = 0;
         this.friction = 0;
+
+        this.rA = new Vec2();
+        this.rB = new Vec2();
     }
 
     preSolve(dt: number): void {
@@ -148,8 +154,8 @@ export class PenetrationConstraint extends Constraint {
         const pb = this.b.localSpaceToWorldSpace(this.bPoint);
         const n = this.a.localSpaceToWorldSpace(this.normal); // The normal vector in world space
 
-        const ra = pa.subNew(this.a.position);
-        const rb = pb.subNew(this.b.position);
+        this.rA = pa.subNew(this.a.position);
+        this.rB = pb.subNew(this.b.position);
 
         // Set friction
         this.friction = Math.min(this.a.friction, this.b.friction);
@@ -163,9 +169,9 @@ export class PenetrationConstraint extends Constraint {
         // Warm starting (apply cached lambda)
         const totalDir = n.scaleNew(this.cachedLambdaNormal).addNew(t.scaleNew(this.cachedLambdaFriction));
         const impulseA = totalDir.scaleNew(-1);
-        const angularImpulseA = -ra.cross(totalDir);
+        const angularImpulseA = -this.rA.cross(totalDir);
         const impulseB = totalDir;
-        const angularImpulseB = rb.cross(totalDir);
+        const angularImpulseB = this.rB.cross(totalDir);
 
         this.a.applyImpulseLinear(impulseA);
         this.a.applyImpulseAngular(angularImpulseA);
@@ -178,8 +184,8 @@ export class PenetrationConstraint extends Constraint {
         c = Math.min(0.0, c + 0.01);
 
         // Calculate relative velocity
-        const perpRa = new Vec2(-ra.y, ra.x);
-        const perpRb = new Vec2(-rb.y, rb.x);
+        const perpRa = new Vec2(-this.rA.y, this.rA.x);
+        const perpRb = new Vec2(-this.rB.y, this.rB.x);
         const va = this.a.velocity.addNew(perpRa.scaleNew(this.a.angularVelocity));
         const vb = this.b.velocity.addNew(perpRb.scaleNew(this.b.angularVelocity));
         const relVel = va.subNew(vb);
@@ -194,11 +200,7 @@ export class PenetrationConstraint extends Constraint {
 
     solve(): void {
         // Recompute ra, rb, n as positions/velocities may have changed
-        const pa = this.a.localSpaceToWorldSpace(this.aPoint);
-        const pb = this.b.localSpaceToWorldSpace(this.bPoint);
         const n = this.a.localSpaceToWorldSpace(this.normal);
-        const ra = pa.subNew(this.a.position);
-        const rb = pb.subNew(this.b.position);
 
         // Compute tangent if friction > 0
         let t = new Vec2(0, 0);
@@ -207,8 +209,8 @@ export class PenetrationConstraint extends Constraint {
         }
 
         // Compute relative velocity
-        const perpRa = new Vec2(-ra.y, ra.x);
-        const perpRb = new Vec2(-rb.y, rb.x);
+        const perpRa = new Vec2(-this.rA.y, this.rA.x);
+        const perpRb = new Vec2(-this.rB.y, this.rB.x);
         const velAP = this.a.velocity.addNew(perpRa.scaleNew(this.a.angularVelocity));
         const velBP = this.b.velocity.addNew(perpRb.scaleNew(this.b.angularVelocity));
         const relVel = velAP.subNew(velBP);
@@ -222,8 +224,8 @@ export class PenetrationConstraint extends Constraint {
         const invIa = this.a.invI;
         const invIb = this.b.invI;
 
-        const crossRaN = ra.cross(n);
-        const crossRbN = rb.cross(n);
+        const crossRaN = this.rA.cross(n);
+        const crossRbN = this.rB.cross(n);
         const knn = invMa + invMb + crossRaN * crossRaN * invIa + crossRbN * crossRbN * invIb;
 
         let ktt = 0;
@@ -231,8 +233,8 @@ export class PenetrationConstraint extends Constraint {
         let crossRaT = 0;
         let crossRbT = 0;
         if (this.friction > 0) {
-            crossRaT = ra.cross(t);
-            crossRbT = rb.cross(t);
+            crossRaT = this.rA.cross(t);
+            crossRbT = this.rB.cross(t);
             ktt = invMa + invMb + crossRaT * crossRaT * invIa + crossRbT * crossRbT * invIb;
             knt = crossRaN * crossRaT * invIa + crossRbN * crossRbT * invIb;
         }
@@ -279,9 +281,9 @@ export class PenetrationConstraint extends Constraint {
         // Apply impulses
         const totalDir = n.scaleNew(deltaLambdaN).addNew(t.scaleNew(deltaLambdaT));
         const impulseA = totalDir.scaleNew(-1);
-        const angularImpulseA = -ra.cross(totalDir);
+        const angularImpulseA = -this.rA.cross(totalDir);
         const impulseB = totalDir;
-        const angularImpulseB = rb.cross(totalDir);
+        const angularImpulseB = this.rB.cross(totalDir);
 
         this.a.applyImpulseLinear(impulseA);
         this.a.applyImpulseAngular(angularImpulseA);
