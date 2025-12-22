@@ -99,21 +99,18 @@ export class JointConstraint extends Constraint {
     }
 
     solve(): void {
-        const vA = Vec2.add(this.a.velocity, Vec2.cross(this.a.angularVelocity, this.rA));
-        const vB = Vec2.add(this.b.velocity, Vec2.cross(this.b.angularVelocity, this.rB));
+        const vA = this.a.velocity.addNew(this.rA.crossScalar(this.a.angularVelocity));
+        const vB = this.b.velocity.addNew(this.rB.crossScalar(this.b.angularVelocity));
 
-        const dv = Vec2.sub(vB, vA);
+        const dv = vB.subNew(vA);
 
-        const impulse = Mat22.multiply(
-            this.M,
-            Vec2.sub(Vec2.sub(this.bias, dv), Vec2.scale(this.softness, this.cachedLambda)),
-        );
+        const impulse = Mat22.multiply(this.M, this.bias.subNew(dv).subNew(this.cachedLambda.scaleNew(this.softness)));
 
-        this.a.velocity.sub(Vec2.scale(this.a.invMass, impulse));
-        this.a.angularVelocity -= this.a.invI * Vec2.cross(this.rA, impulse);
+        this.a.velocity.sub(impulse.scaleNew(this.a.invMass));
+        this.a.angularVelocity -= this.a.invI * this.rA.cross(impulse);
 
-        this.b.velocity.add(Vec2.scale(this.b.invMass, impulse));
-        this.b.angularVelocity += this.b.invI * Vec2.cross(this.rB, impulse);
+        this.b.velocity.add(impulse.scaleNew(this.b.invMass));
+        this.b.angularVelocity += this.b.invI * this.rB.cross(impulse);
 
         this.cachedLambda.add(impulse);
     }
