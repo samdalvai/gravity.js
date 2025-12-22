@@ -1,11 +1,11 @@
 import Vec2 from '../../src/math/Vec2';
 import Body from '../../src/physics/Body';
 import CollisionDetection from '../../src/physics/CollisionDetection';
-import Contact from '../../src/physics/Contact';
+import { ContactConstraint } from '../../src/physics/Constraint';
 import { BoxShape, CircleShape, PolygonShape } from '../../src/physics/Shape';
 
 describe('CollisionDetection', () => {
-    const contacts: Contact[] = [];
+    const contacts: ContactConstraint[] = [];
 
     beforeEach(() => {
         contacts.length = 0;

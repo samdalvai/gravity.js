@@ -126,7 +126,7 @@ export class JointConstraint extends Constraint {
     }
 }
 
-export class PenetrationConstraint extends Constraint {
+export class ContactConstraint extends Constraint {
     cachedLambdaNormal: number;
     cachedLambdaFriction: number;
     bias: number;

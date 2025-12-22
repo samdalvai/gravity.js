@@ -2,8 +2,7 @@ import Graphics from '../Graphics';
 import Vec2 from '../math/Vec2';
 import Body from './Body';
 import CollisionDetection from './CollisionDetection';
-import { JointConstraint, PenetrationConstraint } from './Constraint';
-import Contact from './Contact';
+import { ContactConstraint, JointConstraint } from './Constraint';
 import Force from './Force';
 
 export default class World {
@@ -12,12 +11,10 @@ export default class World {
 
     private bodies: Body[] = [];
     private jointConstraints: JointConstraint[] = [];
-    private penetrations: PenetrationConstraint[] = [];
+    private penetrations: ContactConstraint[] = [];
 
     private forces: Vec2[] = [];
     private torques: number[] = [];
-
-    private debug = true;
 
     constructor(gravity: number, iterations = 10) {
         this.G = -gravity;
@@ -32,7 +29,7 @@ export default class World {
         return this.bodies;
     };
 
-    getContacts = (): PenetrationConstraint[] => {
+    getContacts = (): ContactConstraint[] => {
         return this.penetrations;
     };
 
@@ -55,10 +52,6 @@ export default class World {
 
     addTorque = (torque: number): void => {
         this.torques.push(torque);
-    };
-
-    setDebug = (newValue: boolean): void => {
-        this.debug = newValue;
     };
 
     update = (dt: number): void => {
@@ -94,7 +87,7 @@ export default class World {
 
         // Check all the bodies with all other bodies detecting collisions
         console.time('loop');
-        
+
         this.penetrations.length = 0;
         for (let i = 0; i <= this.bodies.length - 1; i++) {
             for (let j = i + 1; j < this.bodies.length; j++) {
