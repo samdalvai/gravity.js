@@ -1,6 +1,7 @@
 import Vec2 from '../../src/math/Vec2';
 import Body from '../../src/physics/Body';
-import { JointConstraint } from '../../src/physics/Constraint';
+import CollisionDetection from '../../src/physics/CollisionDetection';
+import { JointConstraint, PenetrationConstraint } from '../../src/physics/Constraint';
 import { CircleShape } from '../../src/physics/Shape';
 
 describe('Constraint', () => {
@@ -38,5 +39,44 @@ describe('Constraint', () => {
 
         expect(Math.abs(b.velocity.x)).toBeLessThan(0.005);
         expect(Math.abs(b.velocity.y)).toBeLessThan(0.005);
+    });
+
+    test('Penetration constraint solving should apply impulses to correct position of bodies', () => {
+        const a = new Body(new CircleShape(60), 100, 100, 5);
+        const b = new Body(new CircleShape(60), 217.5, 100, 5);
+
+        // Move bodies apart
+        const numFrames = 60;
+        const solverIterations = 10;
+
+        const contactResults = CollisionDetection.detectCollisionCircleCircle(a, b);
+        const contact = contactResults.contacts![0];
+        const penetrationConstraint = new PenetrationConstraint(
+            contact.a,
+            contact.b,
+            contact.start,
+            contact.end,
+            contact.normal,
+        );
+
+        const deltaTime = 1 / 60;
+        for (let i = 0; i < numFrames; i++) {
+            penetrationConstraint.preSolve(1 / deltaTime);
+
+            for (let j = 0; j < solverIterations; j++) {
+                penetrationConstraint.solve();
+            }
+
+            a.integrateVelocities(deltaTime);
+            b.integrateVelocities(deltaTime);
+        }
+
+        expect(a.position.y).toBe(100);
+        expect(b.position.y).toBe(100);
+
+        // Check that the solver approximation is "good enough"
+        expect(Math.abs(a.position.x - b.position.x)).toBeGreaterThan(120);
+        expect(a.velocity.x).toBeLessThan(-30);
+        expect(b.velocity.x).toBeGreaterThan(30);
     });
 });
