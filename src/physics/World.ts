@@ -69,8 +69,8 @@ export default class World {
 
             // Apply friction to all bodies
             // TODO: counter friction should only be applied if in contact with another surface
-            const frictionForce = Force.generateFrictionForce(body, body.friction);
-            body.addForce(frictionForce);
+            // const frictionForce = Force.generateFrictionForce(body, body.friction);
+            // body.addForce(frictionForce);
 
             // Apply forces to all bodies
             for (const force of this.forces) {
