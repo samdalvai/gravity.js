@@ -346,11 +346,18 @@ export default class Application {
         this.world.update(deltaTime);
 
         if (this.generateParticle) {
-            const ball = new Body(new CircleShape(5), InputManager.mousePosition.x, InputManager.mousePosition.y, 1.0);
-            ball.restitution = 0.2;
-            ball.friction = 10;
-            ball.setTexture('rockRound');
-            this.world.addBody(ball);
+            for (let i = 0; i < 10; i++) {
+                const ball = new Body(
+                    new CircleShape(5),
+                    InputManager.mousePosition.x,
+                    InputManager.mousePosition.y,
+                    1.0,
+                );
+                ball.restitution = 0.2;
+                ball.friction = 10;
+                ball.setTexture('rockRound');
+                this.world.addBody(ball);
+            }
         }
     };
 
