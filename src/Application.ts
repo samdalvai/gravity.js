@@ -395,6 +395,7 @@ export default class Application {
             'Keys: 1-9 Demos, Left Mouse to generate circles, Right Mouse to generate boxes, Space to drop bomb',
             `${Demo.demoStrings[this.demoIndex]}`,
             `(D)ebug mode: ${this.debug ? 'ON' : 'OFF'}`,
+            `(C)hoosen particle: ${this.generateCircles ? 'Circle' : 'Box'}`,
             // Debut related info
             `FPS: ${this.FPS.toFixed(2)}`,
             `Num objects: ${this.world.getBodies().length}`,
