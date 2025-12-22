@@ -94,6 +94,8 @@ export default class World {
 
         // Check all the bodies with all other bodies detecting collisions
         console.time('loop');
+        
+        this.penetrations.length = 0;
         for (let i = 0; i <= this.bodies.length - 1; i++) {
             for (let j = i + 1; j < this.bodies.length; j++) {
                 const a = this.bodies[i];
@@ -158,8 +160,6 @@ export default class World {
                 this.bodies.pop();
             }
         }
-
-        this.penetrations.length = 0;
     };
 
     clear = () => {
