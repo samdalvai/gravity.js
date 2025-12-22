@@ -54,18 +54,18 @@ export class JointConstraint extends Constraint {
 
         // Compute the bias term (Baumgarte stabilization)
         const beta = 0.02; // Stabilization factor
-        const C = pa.subNew(pb); // Positional error vector (Vec2)
-        const C_len = C.magnitude();
+        const c = pa.subNew(pb); // Positional error vector (Vec2)
+        const cLength = c.magnitude();
         const slop = 0.5; // Small tolerance (e.g., 5mm)
 
-        if (C_len > slop) {
+        if (cLength > slop) {
             // Apply correction only if error is greater than slop
-            const correction = Math.max(0, C_len - slop);
-            const C_normalized = C.normalize();
-            const bias_magnitude = (beta / dt) * correction;
+            const correction = Math.max(0, cLength - slop);
+            const cNormalized = c.normalize();
+            const biasMagnitude = (beta / dt) * correction;
 
             // Bias vector pointing in the direction of correction
-            this.bias = C_normalized.scaleNew(bias_magnitude);
+            this.bias = cNormalized.scaleNew(biasMagnitude);
         } else {
             this.bias = new Vec2(0, 0);
         }
@@ -179,8 +179,8 @@ export class PenetrationConstraint extends Constraint {
 
         // Compute the bias term (Baumgarte stabilization)
         const beta = 0.2;
-        let C = pb.subNew(pa).dot(n.scaleNew(-1));
-        C = Math.min(0.0, C + 0.01);
+        let c = pb.subNew(pa).dot(n.scaleNew(-1));
+        c = Math.min(0.0, c + 0.01);
 
         // Calculate relative velocity
         const perpRa = new Vec2(-ra.y, ra.x);
@@ -194,7 +194,7 @@ export class PenetrationConstraint extends Constraint {
         const e = Math.min(this.a.restitution, this.b.restitution);
 
         // Calculate bias term considering elasticity (restitution)
-        this.bias = (beta / dt) * C + e * vrelDotNormal;
+        this.bias = (beta / dt) * c + e * vrelDotNormal;
     }
 
     solve(): void {
