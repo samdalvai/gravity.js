@@ -5,8 +5,8 @@ import Utils from './math/Utils';
 import Vec2 from './math/Vec2';
 import Force from './physics/Force';
 import World from './physics/World';
-import Body from './physics/body/Body';
-import { BoxShape, CircleShape, PolygonShape, ShapeType } from './physics/body/Shape';
+import Body from './physics/Body';
+import { BoxShape, CircleShape, PolygonShape, ShapeType } from './physics/Shape';
 import Demo from './samples/Demo';
 
 export default class Application {
