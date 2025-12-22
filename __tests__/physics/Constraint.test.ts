@@ -53,13 +53,7 @@ describe('Constraint', () => {
         const contacts: Contact[] = [];
         CollisionDetection.detectCollisionCircleCircle(a, b, contacts);
         const contact = contacts![0];
-        const penetrationConstraint = new PenetrationConstraint(
-            contact.a,
-            contact.b,
-            contact.start,
-            contact.end,
-            contact.normal,
-        );
+        const penetrationConstraint = new PenetrationConstraint(contact);
 
         const deltaTime = 1 / 60;
         for (let i = 0; i < numFrames; i++) {
