@@ -133,10 +133,13 @@ export default class Body {
         }
 
         // Find the acceleration based on the forces that are being applied and the mass
-        this.acceleration = this.sumForces.scaleNew(this.invMass);
+        this.acceleration.x = this.sumForces.x * this.invMass;
+        this.acceleration.y = this.sumForces.y * this.invMass;
 
         // Integrate the acceleration to find the new velocity
-        this.velocity.addAssign(this.acceleration.scaleNew(dt));
+
+        this.velocity.x += this.acceleration.x * dt;
+        this.velocity.y += this.acceleration.y * dt;
 
         // Find the angular acceleration based on the torque that is being applied and the moment of inertia
         this.angularAcceleration = this.sumTorque * this.invI;
@@ -155,7 +158,8 @@ export default class Body {
         }
 
         // Integrate the velocity to find the new position
-        this.position.addAssign(this.velocity.scaleNew(dt));
+        this.position.x += this.velocity.x * dt;
+        this.position.y += this.velocity.y * dt;
 
         // Integrate the angular velocity to find the new rotation angle
         this.rotation += this.angularVelocity * dt;
