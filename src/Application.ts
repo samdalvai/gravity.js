@@ -339,8 +339,6 @@ export default class Application {
     };
 
     update = (deltaTime: number): void => {
-        Graphics.clearScreen();
-
         if (this.debug) {
             if (!this.lastFPSUpdate || performance.now() - this.lastFPSUpdate > 1000) {
                 this.lastFPSUpdate = performance.now();
@@ -363,6 +361,7 @@ export default class Application {
     };
 
     render = (): void => {
+        Graphics.clearScreen();
         // Draw all joints anchor points and debug properties
         if (this.debug) {
             for (const joint of this.world.getConstraints()) {
@@ -375,6 +374,12 @@ export default class Application {
                     joint.b.position.y,
                     'blue',
                 );
+            }
+
+            for (const contact of this.world.getContacts()) {
+                Graphics.drawFillCircle(contact.start.x, contact.start.y, 5, 'red');
+                Graphics.drawFillCircle(contact.end.x, contact.end.y, 2, 'red');
+                Graphics.drawLine(contact.start.x, contact.start.y, contact.end.x, contact.end.y, 'red');
             }
         }
 
