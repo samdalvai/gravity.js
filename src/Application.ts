@@ -368,10 +368,10 @@ export default class Application {
                 // TODO: this is just a simple draw method, we need to consider local anchors rather than just
                 // bodies position
                 Graphics.drawLine(
-                    joint.body1.position.x,
-                    joint.body1.position.y,
-                    joint.body2.position.x,
-                    joint.body2.position.y,
+                    joint.a.position.x,
+                    joint.a.position.y,
+                    joint.b.position.x,
+                    joint.b.position.y,
                     'blue',
                 );
             }
