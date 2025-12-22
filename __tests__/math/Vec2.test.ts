@@ -177,4 +177,16 @@ describe('Vec2', () => {
         expect(result.x).toBe(-3);
         expect(result.y).toBe(4);
     });
+
+    test('Vec2 methods speed test', () => {
+        console.time('test');
+
+        const v = new Vec2(50, 50);
+
+        for (let i = 0; i < 1000000; i++) {
+            v.rotate(2);
+        }
+
+        console.timeEnd('test');
+    });
 });
