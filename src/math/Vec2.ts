@@ -27,10 +27,9 @@ export default class Vec2 {
     }
 
     rotate(angle: number): Vec2 {
-        const result = new Vec2();
-        result.x = this.x * Math.cos(angle) - this.y * Math.sin(angle);
-        result.y = this.x * Math.sin(angle) + this.y * Math.cos(angle);
-        return result;
+        const cos = Math.cos(angle);
+        const sin = Math.sin(angle);
+        return new Vec2(this.x * cos - this.y * sin, this.x * sin + this.y * cos);
     }
 
     magnitude(): number {
