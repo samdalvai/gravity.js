@@ -117,7 +117,7 @@ export class JointConstraint extends Constraint {
 
     postSolve(): void {
         // Optional: clamp accumulated impulse (recommended for stability)
-        const maxImpulse = 10000;
+        const maxImpulse = 1000;
         const mag = this.cachedLambda.magnitude();
         if (mag > maxImpulse) {
             this.cachedLambda.scaleAssign(maxImpulse / mag);
