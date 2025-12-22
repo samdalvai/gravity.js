@@ -63,6 +63,11 @@ export default class Vec2 {
         return new Vec2(this.y, -this.x).normalize();
     }
 
+    /** Perpendicular (clockwise), NOT normalized */
+    perp(): Vec2 {
+        return new Vec2(this.y, -this.x);
+    }
+
     dot(v: Vec2): number {
         return this.x * v.x + this.y * v.y;
     }
