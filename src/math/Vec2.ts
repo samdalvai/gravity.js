@@ -68,6 +68,11 @@ export default class Vec2 {
         return this.x * v.y - this.y * v.x;
     }
 
+    /** Vector in the -90° (clockwise) perpendicular direction scaled by n */
+    crossScalar(n: number): Vec2 {
+        return new Vec2(-n * this.y, n * this.x);
+    }
+
     /** operator = */
     assign(v: Vec2): this {
         this.x = v.x;
