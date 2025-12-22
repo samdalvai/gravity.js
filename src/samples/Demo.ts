@@ -31,10 +31,16 @@ export default class Demo {
     };
 
     static generateFences = (world: World): void => {
-        const leftFence = new Body(new BoxShape(50, Graphics.height() - 200), 0, Graphics.height() / 2.0 - 100, 0.0);
+        const fenceWidth = 50;
+        const leftFence = new Body(
+            new BoxShape(fenceWidth, Graphics.height() - 200),
+            -(fenceWidth / 2),
+            Graphics.height() / 2.0 - 100,
+            0.0,
+        );
         const rightFence = new Body(
-            new BoxShape(50, Graphics.height() - 200),
-            Graphics.width(),
+            new BoxShape(fenceWidth, Graphics.height() - 200),
+            Graphics.width() + fenceWidth / 2,
             Graphics.height() / 2.0 - 100,
             0.0,
         );
@@ -118,7 +124,7 @@ export default class Demo {
 
             // Joint anchor at left edge of this step
             const anchor = step.position.subNew(new Vec2(stepWidth / 2, 0));
-            const joint = new JointConstraint(lastStep, step, anchor);//, softness, bias);
+            const joint = new JointConstraint(lastStep, step, anchor); //, softness, bias);
             world.addConstraint(joint);
 
             lastStep = step;
@@ -136,7 +142,7 @@ export default class Demo {
 
         // Final joint anchor at right edge of last step
         const finalAnchor = lastStep.position.addNew(new Vec2(stepWidth / 2, 0));
-        const lastJoint = new JointConstraint(lastStep, endAnchor, finalAnchor);//, softness, bias);, softness, bias);
+        const lastJoint = new JointConstraint(lastStep, endAnchor, finalAnchor); //, softness, bias);, softness, bias);
         world.addConstraint(lastJoint);
     };
 
