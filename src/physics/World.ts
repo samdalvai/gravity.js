@@ -2,8 +2,8 @@ import Graphics from '../Graphics';
 import Vec2 from '../math/Vec2';
 import CollisionDetection from './CollisionDetection';
 import Force from './Force';
-import Body from './body/Body';
-import { JointConstraint, PenetrationConstraint } from './constraint/Constraint';
+import Body from './Body';
+import { JointConstraint, PenetrationConstraint } from './Constraint';
 
 
 export default class World {
