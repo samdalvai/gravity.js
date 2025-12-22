@@ -1,7 +1,5 @@
-import MatMN from '../../math/MatMN';
 import Utils from '../../math/Utils';
 import Vec2 from '../../math/Vec2';
-import VecN from '../../math/VecN';
 import Body from '../body/Body';
 
 export abstract class Constraint {
@@ -19,76 +17,20 @@ export abstract class Constraint {
         this.bPoint = b.worldSpaceToLocalSpace(bPointWorld);
     }
 
-    ///////////////////////////////////////////////////////////////////////////////
-    // Mat6x6 with the all inverse mass and inverse I of bodies "a" and "b"
-    ///////////////////////////////////////////////////////////////////////////////
-    //  [ 1/ma  0     0     0     0     0    ]
-    //  [ 0     1/ma  0     0     0     0    ]
-    //  [ 0     0     1/Ia  0     0     0    ]
-    //  [ 0     0     0     1/mb  0     0    ]
-    //  [ 0     0     0     0     1/mb  0    ]
-    //  [ 0     0     0     0     0     1/Ib ]
-    ///////////////////////////////////////////////////////////////////////////////
-    getInvM = (): MatMN => {
-        const invM = new MatMN(6, 6);
-        invM.zero();
-
-        invM.rows[0].set(0, this.a.invMass);
-        invM.rows[1].set(1, this.a.invMass);
-        invM.rows[2].set(2, this.a.invI);
-
-        invM.rows[3].set(3, this.b.invMass);
-        invM.rows[4].set(4, this.b.invMass);
-        invM.rows[5].set(5, this.b.invI);
-
-        return invM;
-    };
-
-    ///////////////////////////////////////////////////////////////////////////////
-    // VecN with the all linear and angular velocities of bodies "a" and "b"
-    ///////////////////////////////////////////////////////////////////////////////
-    //  [ va.x ]
-    //  [ va.y ]
-    //  [ ωa   ]
-    //  [ vb.x ]
-    //  [ vb.y ]
-    //  [ ωb   ]
-    ///////////////////////////////////////////////////////////////////////////////
-    getVelocities = (): VecN => {
-        const V = new VecN(6);
-        V.zero();
-
-        V.set(0, this.a.velocity.x);
-        V.set(1, this.a.velocity.y);
-        V.set(2, this.a.angularVelocity);
-        V.set(3, this.b.velocity.x);
-        V.set(4, this.b.velocity.y);
-        V.set(5, this.b.angularVelocity);
-
-        return V;
-    };
-
     abstract preSolve(dt: number): void;
     abstract solve(): void;
     abstract postSolve(): void;
 }
 
 export class JointConstraint extends Constraint {
-    // Dimensions updated: Jacobian is 2x6, CachedLambda and Bias are 2x1 (VecN)
-    private jacobian: MatMN;
-    private cachedLambda: VecN;
-    private bias: VecN; // Changed from number to VecN (2 elements)
+    private cachedLambda: Vec2;
+    private bias: Vec2;
 
     constructor(a: Body, b: Body, anchorPoint: Vec2) {
         super(a, b, anchorPoint, anchorPoint);
 
-        // J must be 2 rows (for X and Y constraints) and 6 columns
-        this.jacobian = new MatMN(2, 6);
-        this.cachedLambda = new VecN(2); // Lambda is now a 2D vector
-        this.bias = new VecN(2); // Bias is now a 2D vector
-
-        this.cachedLambda.zero();
-        this.bias.zero();
+        this.cachedLambda = new Vec2(0, 0);
+        this.bias = new Vec2(0, 0);
     }
 
     preSolve(dt: number): void {
@@ -98,41 +40,17 @@ export class JointConstraint extends Constraint {
         const ra = pa.subNew(this.a.position);
         const rb = pb.subNew(this.b.position);
 
-        // Compute the Jacobian J (2x6) for C = pa - pb = 0
-        this.jacobian.zero();
-
-        // J = [ I  ra_perp  -I  -rb_perp ]
-        // where ra_perp = (-ra.y, ra.x)
-
-        // Row 0: Constraint X (enforces pa.x - pb.x = 0)
-        // [ 1, 0, -ra.y, -1, 0, rb.y ]
-        this.jacobian.rows[0].set(0, 1); // A linear x (vax)
-        this.jacobian.rows[0].set(1, 0); // A linear y (vay)
-        this.jacobian.rows[0].set(2, -ra.y); // A angular (wa) (ra_perp.x)
-
-        this.jacobian.rows[0].set(3, -1); // B linear x (vbx)
-        this.jacobian.rows[0].set(4, 0); // B linear y (vby)
-        this.jacobian.rows[0].set(5, rb.y); // B angular (wb) (-rb_perp.x)
-
-        // Row 1: Constraint Y (enforces pa.y - pb.y = 0)
-        // [ 0, 1, ra.x, 0, -1, -rb.x ]
-        this.jacobian.rows[1].set(0, 0); // A linear x (vax)
-        this.jacobian.rows[1].set(1, 1); // A linear y (vay)
-        this.jacobian.rows[1].set(2, ra.x); // A angular (wa) (ra_perp.y)
-
-        this.jacobian.rows[1].set(3, 0); // B linear x (vbx)
-        this.jacobian.rows[1].set(4, -1); // B linear y (vby)
-        this.jacobian.rows[1].set(5, -rb.x); // B angular (wb) (-rb_perp.y)
-
         // Warm starting (apply cached lambda)
-        const Jt = this.jacobian.transpose();
-        const impulses = Jt.multiplyVec(this.cachedLambda); // impulses is VecN (6)
+        const lambda = this.cachedLambda;
+        const impulseA = new Vec2(lambda.x, lambda.y);
+        const angularImpulseA = -ra.y * lambda.x + ra.x * lambda.y;
+        const impulseB = new Vec2(-lambda.x, -lambda.y);
+        const angularImpulseB = rb.y * lambda.x - rb.x * lambda.y;
 
-        // Apply the impulses to both bodies
-        this.a.applyImpulseLinear(new Vec2(impulses.get(0), impulses.get(1)));
-        this.a.applyImpulseAngular(impulses.get(2));
-        this.b.applyImpulseLinear(new Vec2(impulses.get(3), impulses.get(4)));
-        this.b.applyImpulseAngular(impulses.get(5));
+        this.a.applyImpulseLinear(impulseA);
+        this.a.applyImpulseAngular(angularImpulseA);
+        this.b.applyImpulseLinear(impulseB);
+        this.b.applyImpulseAngular(angularImpulseB);
 
         // Compute the bias term (Baumgarte stabilization)
         const beta = 0.02; // Stabilization factor
@@ -147,59 +65,74 @@ export class JointConstraint extends Constraint {
             const bias_magnitude = (beta / dt) * correction;
 
             // Bias vector pointing in the direction of correction
-            const biasVec = C_normalized.scaleNew(bias_magnitude);
-
-            this.bias.set(0, biasVec.x);
-            this.bias.set(1, biasVec.y);
+            this.bias = C_normalized.scaleNew(bias_magnitude);
         } else {
-            this.bias.zero();
+            this.bias = new Vec2(0, 0);
         }
     }
 
     solve(): void {
-        const V = this.getVelocities(); // V is VecN (6)
-        const invM = this.getInvM(); // invM is MatMN (6x6)
-        const J = this.jacobian; // J is MatMN (2x6)
-        const Jt = this.jacobian.transpose();
+        // Recompute ra and rb as positions may have changed slightly from warm start
+        const pa = this.a.localSpaceToWorldSpace(this.aPoint);
+        const pb = this.b.localSpaceToWorldSpace(this.bPoint);
+        const ra = pa.subNew(this.a.position);
+        const rb = pb.subNew(this.b.position);
 
-        // Compute effective mass K (K = J * invM * Jt)
-        const K = J.multiplyMat(invM).multiplyMat(Jt); // K is MatMN (2x2)
+        // Compute relative velocity
+        const perpRa = new Vec2(-ra.y, ra.x);
+        const perpRb = new Vec2(-rb.y, rb.x);
+        const velAP = this.a.velocity.addNew(perpRa.scaleNew(this.a.angularVelocity));
+        const velBP = this.b.velocity.addNew(perpRb.scaleNew(this.b.angularVelocity));
+        const relVel = velAP.subNew(velBP);
 
-        // Compute the right-hand side b (b = -J * V - bias)
-        const b = J.multiplyVec(V).scaleNew(-1); // b is VecN (2)
+        // b = -relVel - bias
+        const bVec = relVel.scaleNew(-1).subNew(this.bias);
 
-        // b = -J * V - bias
-        b.subAssign(this.bias);
+        // Compute effective mass components (K matrix as scalars)
+        const invMa = this.a.invMass;
+        const invMb = this.b.invMass;
+        const invIa = this.a.invI;
+        const invIb = this.b.invI;
 
-        // Solve for lambda (K * lambda = b)
-        // Since K is 2x2, MatMN.solveGaussSeidel should handle it,
-        // but often an explicit 2x2 inverse or Cramer's rule is used for performance.
-        // Assuming MatMN.solveGaussSeidel works for 2x2:
-        const lambda = MatMN.solveGaussSeidel(K, b); // lambda is VecN (2)
-        this.cachedLambda.addAssign(lambda);
+        const kxx = invMa + invMb + ra.y * ra.y * invIa + rb.y * rb.y * invIb;
+        const kyy = invMa + invMb + ra.x * ra.x * invIa + rb.x * rb.x * invIb;
+        const kxy = -ra.x * ra.y * invIa + rb.x * rb.y * invIb;
 
-        // Compute and apply impulses (Impulse = Jt * lambda)
-        const impulses = Jt.multiplyVec(lambda); // impulses is VecN (6)
+        // Solve 2x2 system for delta lambda
+        const det = kxx * kyy - kxy * kxy;
+        let deltaLambda = new Vec2(0, 0);
+        if (det !== 0) {
+            const deltaX = (kyy * bVec.x - kxy * bVec.y) / det;
+            const deltaY = (kxx * bVec.y - kxy * bVec.x) / det;
+            deltaLambda = new Vec2(deltaX, deltaY);
+        }
 
-        // Apply the impulses to both bodies
-        this.a.applyImpulseLinear(new Vec2(impulses.get(0), impulses.get(1)));
-        this.a.applyImpulseAngular(impulses.get(2));
-        this.b.applyImpulseLinear(new Vec2(impulses.get(3), impulses.get(4)));
-        this.b.applyImpulseAngular(impulses.get(5));
+        // Accumulate lambda
+        this.cachedLambda.addAssign(deltaLambda);
+
+        // Apply impulses based on delta lambda
+        const impulseA = new Vec2(deltaLambda.x, deltaLambda.y);
+        const angularImpulseA = -ra.y * deltaLambda.x + ra.x * deltaLambda.y;
+        const impulseB = new Vec2(-deltaLambda.x, -deltaLambda.y);
+        const angularImpulseB = rb.y * deltaLambda.x - rb.x * deltaLambda.y;
+
+        this.a.applyImpulseLinear(impulseA);
+        this.a.applyImpulseAngular(angularImpulseA);
+        this.b.applyImpulseLinear(impulseB);
+        this.b.applyImpulseAngular(angularImpulseB);
     }
 
     postSolve(): void {
-        // Limit the warm starting (clamping a 2D vector's magnitude is better)
-        // For simplicity, we clamp the components, but a magnitude clamp is technically better.
+        // Clamp components of cached lambda
         const maxImpulse = 10000;
-        this.cachedLambda.set(0, Utils.clamp(this.cachedLambda.get(0), -maxImpulse, maxImpulse));
-        this.cachedLambda.set(1, Utils.clamp(this.cachedLambda.get(1), -maxImpulse, maxImpulse));
+        this.cachedLambda.x = Utils.clamp(this.cachedLambda.x, -maxImpulse, maxImpulse);
+        this.cachedLambda.y = Utils.clamp(this.cachedLambda.y, -maxImpulse, maxImpulse);
     }
 }
 
 export class PenetrationConstraint extends Constraint {
-    private jacobian: MatMN;
-    private cachedLambda: VecN;
+    private cachedLambdaNormal: number;
+    private cachedLambdaFriction: number;
     private bias: number;
     private normal: Vec2; // Normal direction of the penetration in A's local space
     private friction: number; // Friction coefficient between the two penetrating bodies
@@ -208,12 +141,10 @@ export class PenetrationConstraint extends Constraint {
         super(a, b, aCollisionPoint, bCollisionPoint);
         this.normal = a.worldSpaceToLocalSpace(normal);
 
-        this.jacobian = new MatMN(2, 6);
-        this.cachedLambda = new VecN(2);
+        this.cachedLambdaNormal = 0;
+        this.cachedLambdaFriction = 0;
         this.bias = 0;
         this.friction = 0;
-
-        this.cachedLambda.zero();
     }
 
     preSolve(dt: number): void {
@@ -225,48 +156,39 @@ export class PenetrationConstraint extends Constraint {
         const ra = pa.subNew(this.a.position);
         const rb = pb.subNew(this.b.position);
 
-        this.jacobian.zero();
-
-        // Populate the first row of the Jacobian (normal vector)
-        this.jacobian.rows[0].set(0, -n.x); // A linear velocity.x
-        this.jacobian.rows[0].set(1, -n.y); // A linear velocity.y
-        this.jacobian.rows[0].set(2, -ra.cross(n)); // A angular velocity
-        this.jacobian.rows[0].set(3, n.x); // B linear velocity.x
-        this.jacobian.rows[0].set(4, n.y); // B linear velocity.y
-        this.jacobian.rows[0].set(5, rb.cross(n)); // B angular velocity
-
-        // Populate the second row of the Jacobian (tangent vector)
+        // Set friction
         this.friction = Math.min(this.a.friction, this.b.friction);
-        if (this.friction > 0.0) {
-            const t = n.normal(); // The tangent is the vector perpendicular to the normal
 
-            this.jacobian.rows[1].set(0, -t.x); // A linear velocity.x
-            this.jacobian.rows[1].set(1, -t.y); // A linear velocity.y
-            this.jacobian.rows[1].set(2, -ra.cross(t)); // A angular velocity
-            this.jacobian.rows[1].set(3, t.x); // B linear velocity.x
-            this.jacobian.rows[1].set(4, t.y); // B linear velocity.y
-            this.jacobian.rows[1].set(5, rb.cross(t)); // B angular velocity
+        // Compute tangent if friction > 0
+        let t = new Vec2(0, 0);
+        if (this.friction > 0) {
+            t = n.normal(); // Assuming normal() returns perpendicular vector, e.g., new Vec2(-n.y, n.x)
         }
 
         // Warm starting (apply cached lambda)
-        const Jt = this.jacobian.transpose();
-        const impulses = Jt.multiplyVec(this.cachedLambda);
+        const totalDir = n.scaleNew(this.cachedLambdaNormal).addNew(t.scaleNew(this.cachedLambdaFriction));
+        const impulseA = totalDir.scaleNew(-1);
+        const angularImpulseA = -ra.cross(totalDir);
+        const impulseB = totalDir;
+        const angularImpulseB = rb.cross(totalDir);
 
-        // Apply the impulses to both bodies
-        this.a.applyImpulseLinear(new Vec2(impulses.get(0), impulses.get(1))); // A linear impulse
-        this.a.applyImpulseAngular(impulses.get(2)); // A angular impulse
-        this.b.applyImpulseLinear(new Vec2(impulses.get(3), impulses.get(4))); // B linear impulse
-        this.b.applyImpulseAngular(impulses.get(5)); // B angular impulse
+        this.a.applyImpulseLinear(impulseA);
+        this.a.applyImpulseAngular(angularImpulseA);
+        this.b.applyImpulseLinear(impulseB);
+        this.b.applyImpulseAngular(angularImpulseB);
 
-        // Compute the bias term (baumgarte stabilization)
+        // Compute the bias term (Baumgarte stabilization)
         const beta = 0.2;
         let C = pb.subNew(pa).dot(n.scaleNew(-1));
         C = Math.min(0.0, C + 0.01);
 
-        // Calculate relative velocity pre-impulse normal, which will be used to compute elasticity
-        const va = this.a.velocity.addNew(new Vec2(-this.a.angularVelocity * ra.y, this.a.angularVelocity * ra.x));
-        const vb = this.b.velocity.addNew(new Vec2(-this.b.angularVelocity * rb.y, this.b.angularVelocity * rb.x));
-        const vrelDotNormal = va.subNew(vb).dot(n);
+        // Calculate relative velocity
+        const perpRa = new Vec2(-ra.y, ra.x);
+        const perpRb = new Vec2(-rb.y, rb.x);
+        const va = this.a.velocity.addNew(perpRa.scaleNew(this.a.angularVelocity));
+        const vb = this.b.velocity.addNew(perpRb.scaleNew(this.b.angularVelocity));
+        const relVel = va.subNew(vb);
+        const vrelDotNormal = relVel.dot(n);
 
         // Get the restitution between the two bodies
         const e = Math.min(this.a.restitution, this.b.restitution);
@@ -276,43 +198,100 @@ export class PenetrationConstraint extends Constraint {
     }
 
     solve(): void {
-        const V = this.getVelocities();
-        const invM = this.getInvM();
+        // Recompute ra, rb, n as positions/velocities may have changed
+        const pa = this.a.localSpaceToWorldSpace(this.aPoint);
+        const pb = this.b.localSpaceToWorldSpace(this.bPoint);
+        const n = this.a.localSpaceToWorldSpace(this.normal);
+        const ra = pa.subNew(this.a.position);
+        const rb = pb.subNew(this.b.position);
 
-        const J = this.jacobian;
-        const Jt = this.jacobian.transpose();
-
-        // Compute lambda using Ax=b (Gauss-Seidel method)
-        const lhs = J.multiplyMat(invM).multiplyMat(Jt); // A
-        const rhs = J.multiplyVec(V.scaleNew(-1)); // b
-        rhs.set(0, rhs.get(0) - this.bias);
-
-        let lambda = MatMN.solveGaussSeidel(lhs, rhs);
-
-        // Accumulate impulses and clamp it within constraint limits
-        const oldLambda = VecN.from(this.cachedLambda);
-        this.cachedLambda.addAssign(lambda);
-        // Clamp normal impulse to be non-negative
-        this.cachedLambda.set(0, Math.max(0, this.cachedLambda.get(0)));
-
-        // Keep friction values between -(λn*µ) and +(λn*µ)
+        // Compute tangent if friction > 0
+        let t = new Vec2(0, 0);
         if (this.friction > 0) {
-            const maxFriction = this.cachedLambda.get(0) * this.friction;
-            const clampedFriction = Utils.clamp(this.cachedLambda.get(1), -maxFriction, maxFriction);
-            this.cachedLambda.set(1, clampedFriction);
+            t = n.normal();
         }
 
-        // Compute the change in lambda to get the actual impulses to apply
-        lambda = this.cachedLambda.subNew(oldLambda);
+        // Compute relative velocity
+        const perpRa = new Vec2(-ra.y, ra.x);
+        const perpRb = new Vec2(-rb.y, rb.x);
+        const velAP = this.a.velocity.addNew(perpRa.scaleNew(this.a.angularVelocity));
+        const velBP = this.b.velocity.addNew(perpRb.scaleNew(this.b.angularVelocity));
+        const relVel = velAP.subNew(velBP);
 
-        // Compute the impulses with both direction and magnitude
-        const impulses = Jt.multiplyVec(lambda);
+        const relVelN = relVel.dot(n);
+        const relVelT = this.friction > 0 ? relVel.dot(t) : 0;
 
-        // Apply the impulses to both bodies
-        this.a.applyImpulseLinear(new Vec2(impulses.get(0), impulses.get(1))); // A linear impulse
-        this.a.applyImpulseAngular(impulses.get(2)); // A angular impulse
-        this.b.applyImpulseLinear(new Vec2(impulses.get(3), impulses.get(4))); // B linear impulse
-        this.b.applyImpulseAngular(impulses.get(5)); // B angular impulse
+        // Compute effective mass components
+        const invMa = this.a.invMass;
+        const invMb = this.b.invMass;
+        const invIa = this.a.invI;
+        const invIb = this.b.invI;
+
+        const crossRaN = ra.cross(n);
+        const crossRbN = rb.cross(n);
+        const knn = invMa + invMb + crossRaN * crossRaN * invIa + crossRbN * crossRbN * invIb;
+
+        let ktt = 0;
+        let knt = 0;
+        let crossRaT = 0;
+        let crossRbT = 0;
+        if (this.friction > 0) {
+            crossRaT = ra.cross(t);
+            crossRbT = rb.cross(t);
+            ktt = invMa + invMb + crossRaT * crossRaT * invIa + crossRbT * crossRbT * invIb;
+            knt = crossRaN * crossRaT * invIa + crossRbN * crossRbT * invIb;
+        }
+
+        // Compute rhs
+        const rhsN = relVelN - this.bias;
+        const rhsT = relVelT;
+
+        // Solve for delta lambda
+        let deltaLambdaN = 0;
+        let deltaLambdaT = 0;
+        const oldLambdaN = this.cachedLambdaNormal;
+        const oldLambdaT = this.cachedLambdaFriction;
+
+        if (this.friction > 0) {
+            // 2x2 solve
+            const det = knn * ktt - knt * knt;
+            if (det !== 0) {
+                deltaLambdaN = (ktt * rhsN - knt * rhsT) / det;
+                deltaLambdaT = (knn * rhsT - knt * rhsN) / det;
+            }
+        } else {
+            // 1D solve for normal only
+            if (knn !== 0) {
+                deltaLambdaN = rhsN / knn;
+            }
+        }
+
+        // Accumulate and clamp
+        this.cachedLambdaNormal += deltaLambdaN;
+        this.cachedLambdaFriction += deltaLambdaT;
+
+        this.cachedLambdaNormal = Math.max(0, this.cachedLambdaNormal);
+
+        if (this.friction > 0) {
+            const maxFriction = this.cachedLambdaNormal * this.friction;
+            this.cachedLambdaFriction = Utils.clamp(this.cachedLambdaFriction, -maxFriction, maxFriction);
+        }
+
+        // Compute effective delta after clamping
+        deltaLambdaN = this.cachedLambdaNormal - oldLambdaN;
+        deltaLambdaT = this.cachedLambdaFriction - oldLambdaT;
+
+        // Apply impulses
+        const totalDir = n.scaleNew(deltaLambdaN).addNew(t.scaleNew(deltaLambdaT));
+        const impulseA = totalDir.scaleNew(-1);
+        const angularImpulseA = -ra.cross(totalDir);
+        const impulseB = totalDir;
+        const angularImpulseB = rb.cross(totalDir);
+
+        this.a.applyImpulseLinear(impulseA);
+        this.a.applyImpulseAngular(angularImpulseA);
+        this.b.applyImpulseLinear(impulseB);
+        this.b.applyImpulseAngular(angularImpulseB);
     }
 
     postSolve(): void {
