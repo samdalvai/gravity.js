@@ -188,11 +188,6 @@ export default class Vec2 {
         throw new Error('Invalid arguments');
     }
 
-    /** Operator + */
-    static add = (a: Vec2, b: Vec2): Vec2 => {
-        return new Vec2(a.x + b.x, a.y + b.y);
-    };
-
     /** Operator - */
     static sub = (a: Vec2, b: Vec2): Vec2 => {
         return new Vec2(a.x - b.x, a.y - b.y);
