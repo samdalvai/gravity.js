@@ -59,15 +59,13 @@ export default class CollisionDetection {
 
         const aIndexReferenceEdge = { value: 0 };
         const bIndexReferenceEdge = { value: 0 };
-        const aSupportPoint = new Vec2();
-        const bSupportPoint = new Vec2();
 
-        const abSeparation = aPolygonShape.findMinSeparation(bPolygonShape, aIndexReferenceEdge, aSupportPoint);
+        const abSeparation = aPolygonShape.findMinSeparation(bPolygonShape, aIndexReferenceEdge);
         if (abSeparation >= 0) {
             return false;
         }
 
-        const baSeparation = bPolygonShape.findMinSeparation(aPolygonShape, bIndexReferenceEdge, bSupportPoint);
+        const baSeparation = bPolygonShape.findMinSeparation(aPolygonShape, bIndexReferenceEdge);
         if (baSeparation >= 0) {
             return false;
         }
