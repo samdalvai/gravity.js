@@ -82,8 +82,4 @@ export default class Mat22 {
 
         throw new Error('Invalid arguments');
     }
-
-    static abs = (a: Mat22): Mat22 => {
-        return new Mat22(Vec2.abs(a.col1), Vec2.abs(a.col2));
-    };
 }
