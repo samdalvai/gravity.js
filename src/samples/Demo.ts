@@ -3,7 +3,7 @@ import Vec2 from '../math/Vec2';
 import World from '../physics/World';
 import Body from '../physics/body/Body';
 import { BoxShape, CircleShape } from '../physics/body/Shape';
-import JointConstraint from '../physics/constraint/JointConstraint';
+import { JointConstraint } from '../physics/constraint/Constraint';
 
 export default class Demo {
     static demoStrings = [
@@ -118,7 +118,7 @@ export default class Demo {
 
             // Joint anchor at left edge of this step
             const anchor = step.position.subNew(new Vec2(stepWidth / 2, 0));
-            const joint = new JointConstraint(lastStep, step, anchor, softness, bias);
+            const joint = new JointConstraint(lastStep, step, anchor);//, softness, bias);
             world.addConstraint(joint);
 
             lastStep = step;
@@ -136,7 +136,7 @@ export default class Demo {
 
         // Final joint anchor at right edge of last step
         const finalAnchor = lastStep.position.addNew(new Vec2(stepWidth / 2, 0));
-        const lastJoint = new JointConstraint(lastStep, endAnchor, finalAnchor, softness, bias);
+        const lastJoint = new JointConstraint(lastStep, endAnchor, finalAnchor);//, softness, bias);, softness, bias);
         world.addConstraint(lastJoint);
     };
 
