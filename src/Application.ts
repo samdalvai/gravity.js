@@ -377,9 +377,11 @@ export default class Application {
             }
 
             for (const contact of this.world.getContacts()) {
-                Graphics.drawFillCircle(contact.aPoint.x, contact.aPoint.y, 5, 'red');
-                Graphics.drawFillCircle(contact.bPoint.x, contact.bPoint.y, 2, 'red');
-                Graphics.drawLine(contact.aPoint.x, contact.aPoint.y, contact.bPoint.x, contact.bPoint.y, 'red');
+                const aW = contact.a.localSpaceToWorldSpace(contact.aPoint);
+                const bW = contact.b.localSpaceToWorldSpace(contact.bPoint);
+                Graphics.drawFillCircle(aW.x, aW.y, 5, 'red');
+                Graphics.drawFillCircle(bW.x, bW.y, 2, 'red');
+                Graphics.drawLine(aW.x, aW.y, bW.x, bW.y, 'red');
             }
         }
 
