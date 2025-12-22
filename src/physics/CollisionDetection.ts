@@ -1,37 +1,35 @@
 import Vec2 from '../math/Vec2';
-import Contact from './Contact';
 import Body from './Body';
+import Contact from './Contact';
 import { CircleShape, PolygonShape, ShapeType } from './Shape';
 
-export type CollisionResult = { isColliding: false; contacts?: undefined } | { isColliding: true; contacts: Contact[] };
-
 export default class CollisionDetection {
-    static detectCollision = (a: Body, b: Body): CollisionResult => {
+    static detectCollision = (a: Body, b: Body, contacts: Contact[]): boolean => {
         const aIsCircle = a.shape.getType() === ShapeType.CIRCLE;
         const bIsCircle = b.shape.getType() === ShapeType.CIRCLE;
         const aIsPolygon = a.shape.getType() === ShapeType.POLYGON || a.shape.getType() === ShapeType.BOX;
         const bIsPolygon = b.shape.getType() === ShapeType.POLYGON || b.shape.getType() === ShapeType.BOX;
 
         if (aIsCircle && bIsCircle) {
-            return this.detectCollisionCircleCircle(a, b);
+            return this.detectCollisionCircleCircle(a, b, contacts);
         }
 
         if (aIsPolygon && bIsPolygon) {
-            return this.detectCollisionPolygonPolygon(a, b);
+            return this.detectCollisionPolygonPolygon(a, b, contacts);
         }
 
         if (aIsPolygon && bIsCircle) {
-            return this.detectCollisionPolygonCircle(a, b);
+            return this.detectCollisionPolygonCircle(a, b, contacts);
         }
 
         if (aIsCircle && bIsPolygon) {
-            return this.detectCollisionPolygonCircle(b, a);
+            return this.detectCollisionPolygonCircle(b, a, contacts);
         }
 
-        return { isColliding: false };
+        return false;
     };
 
-    static detectCollisionCircleCircle = (a: Body, b: Body): CollisionResult => {
+    static detectCollisionCircleCircle = (a: Body, b: Body, contacts: Contact[]): boolean => {
         const aCircleShape = a.shape as CircleShape;
         const bCircleShape = b.shape as CircleShape;
 
@@ -41,7 +39,7 @@ export default class CollisionDetection {
         const isColliding = ab.magnitudeSquared() <= radiusSum * radiusSum;
 
         if (!isColliding) {
-            return { isColliding: false };
+            return false;
         }
 
         const normal = ab;
@@ -50,11 +48,12 @@ export default class CollisionDetection {
         const start = b.position.subNew(normal.scaleNew(bCircleShape.radius));
         const end = a.position.addNew(normal.scaleNew(aCircleShape.radius));
         const depth = end.subNew(start).magnitude();
+        contacts.push(new Contact(a, b, start, end, normal, depth));
 
-        return { isColliding: true, contacts: [new Contact(a, b, start, end, normal, depth)] };
+        return true;
     };
 
-    static detectCollisionPolygonPolygon = (a: Body, b: Body): CollisionResult => {
+    static detectCollisionPolygonPolygon = (a: Body, b: Body, contacts: Contact[]): boolean => {
         const aPolygonShape = a.shape as PolygonShape;
         const bPolygonShape = b.shape as PolygonShape;
 
@@ -65,12 +64,12 @@ export default class CollisionDetection {
 
         const abSeparation = aPolygonShape.findMinSeparation(bPolygonShape, aIndexReferenceEdge, aSupportPoint);
         if (abSeparation >= 0) {
-            return { isColliding: false };
+            return false;
         }
 
         const baSeparation = bPolygonShape.findMinSeparation(aPolygonShape, bIndexReferenceEdge, bSupportPoint);
         if (baSeparation >= 0) {
-            return { isColliding: false };
+            return false;
         }
 
         // Determine reference and incident polygons
@@ -121,7 +120,6 @@ export default class CollisionDetection {
         }
 
         const vref = referenceShape.worldVertices[indexReferenceEdge];
-        const contacts: Contact[] = [];
 
         // Loop all clipped points, but only consider those where separation is negative (objects are penetrating each other)
         for (const vclip of clippedPoints) {
@@ -149,10 +147,10 @@ export default class CollisionDetection {
             }
         }
 
-        return { isColliding: true, contacts };
+        return true;
     };
 
-    static detectCollisionPolygonCircle = (polygon: Body, circle: Body): CollisionResult => {
+    static detectCollisionPolygonCircle = (polygon: Body, circle: Body, contacts: Contact[]): boolean => {
         const polygonShape = polygon.shape as PolygonShape;
         const circleShape = circle.shape as CircleShape;
         const polygonVertices = polygonShape.worldVertices;
@@ -200,7 +198,7 @@ export default class CollisionDetection {
             if (v1.dot(v2) < 0) {
                 // Distance from vertex to circle center is greater than radius... no collision
                 if (v1.magnitude() > circleShape.radius) {
-                    return { isColliding: false };
+                    return false;
                 } else {
                     // Detected collision in region A:
                     const a = polygon;
@@ -210,7 +208,8 @@ export default class CollisionDetection {
                     const start = circle.position.addNew(normal.scaleNew(-circleShape.radius));
                     const end = start.addNew(normal.scaleNew(depth));
 
-                    return { isColliding: true, contacts: [new Contact(a, b, start, end, normal, depth)] };
+                    contacts.push(new Contact(a, b, start, end, normal, depth));
+                    return true;
                 }
             } else {
                 ///////////////////////////////////////
@@ -221,7 +220,7 @@ export default class CollisionDetection {
                 if (v1.dot(v2) < 0) {
                     // Distance from vertex to circle center is greater than radius... no collision
                     if (v1.magnitude() > circleShape.radius) {
-                        return { isColliding: false };
+                        return false;
                     } else {
                         // Detected collision in region B:
                         const a = polygon;
@@ -231,7 +230,8 @@ export default class CollisionDetection {
                         const start = circle.position.addNew(normal.scaleNew(-circleShape.radius));
                         const end = start.addNew(normal.scaleNew(depth));
 
-                        return { isColliding: true, contacts: [new Contact(a, b, start, end, normal, depth)] };
+                        contacts.push(new Contact(a, b, start, end, normal, depth));
+                        return true;
                     }
                 } else {
                     ///////////////////////////////////////
@@ -239,7 +239,7 @@ export default class CollisionDetection {
                     ///////////////////////////////////////
                     if (distanceCircleEdge > circleShape.radius) {
                         // No collision... Distance between the closest distance and the circle center is greater than the radius.
-                        return { isColliding: false };
+                        return false;
                     } else {
                         // Detected collision in region C:
                         const a = polygon;
@@ -249,7 +249,8 @@ export default class CollisionDetection {
                         const start = circle.position.subNew(normal.scaleNew(circleShape.radius));
                         const end = start.addNew(normal.scaleNew(depth));
 
-                        return { isColliding: true, contacts: [new Contact(a, b, start, end, normal, depth)] };
+                        contacts.push(new Contact(a, b, start, end, normal, depth));
+                        return true;
                     }
                 }
             }
@@ -262,7 +263,8 @@ export default class CollisionDetection {
             const start = circle.position.subNew(normal.scaleNew(circleShape.radius));
             const end = start.addNew(normal.scaleNew(depth));
 
-            return { isColliding: true, contacts: [new Contact(a, b, start, end, normal, depth)] };
+            contacts.push(new Contact(a, b, start, end, normal, depth));
+            return true;
         }
     };
 }

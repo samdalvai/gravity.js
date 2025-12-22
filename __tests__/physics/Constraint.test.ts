@@ -2,6 +2,7 @@ import Vec2 from '../../src/math/Vec2';
 import Body from '../../src/physics/Body';
 import CollisionDetection from '../../src/physics/CollisionDetection';
 import { JointConstraint, PenetrationConstraint } from '../../src/physics/Constraint';
+import Contact from '../../src/physics/Contact';
 import { CircleShape } from '../../src/physics/Shape';
 
 describe('Constraint', () => {
@@ -49,8 +50,9 @@ describe('Constraint', () => {
         const numFrames = 60;
         const solverIterations = 10;
 
-        const contactResults = CollisionDetection.detectCollisionCircleCircle(a, b);
-        const contact = contactResults.contacts![0];
+        const contacts: Contact[] = [];
+        CollisionDetection.detectCollisionCircleCircle(a, b, contacts);
+        const contact = contacts![0];
         const penetrationConstraint = new PenetrationConstraint(
             contact.a,
             contact.b,

@@ -1,10 +1,10 @@
 import Graphics from '../Graphics';
 import Vec2 from '../math/Vec2';
-import CollisionDetection from './CollisionDetection';
-import Force from './Force';
 import Body from './Body';
+import CollisionDetection from './CollisionDetection';
 import { JointConstraint, PenetrationConstraint } from './Constraint';
-
+import Contact from './Contact';
+import Force from './Force';
 
 export default class World {
     private G: number;
@@ -100,12 +100,11 @@ export default class World {
                 const radiusSum = a.shape.radius + b.shape.radius;
 
                 if (ab.magnitudeSquared() <= radiusSum * radiusSum) {
-                    // TODO: no need to recheck collision if the two shapes are circles, in that case 
+                    // TODO: no need to recheck collision if the two shapes are circles, in that case
                     // return the contact info directly
-                    const collisionResult = CollisionDetection.detectCollision(a, b);
-
-                    if (collisionResult.isColliding) {
-                        for (const contact of collisionResult.contacts) {
+                    const contacts: Contact[] = [];
+                    if (CollisionDetection.detectCollision(a, b, contacts)) {
+                        for (const contact of contacts) {
                             if (this.debug) {
                                 // Draw collision points
                                 // TODO: not a good place to do rendering
