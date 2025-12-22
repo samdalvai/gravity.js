@@ -78,8 +78,15 @@ describe('Vec2', () => {
     test('normal() returns a perpendicular unit vector', () => {
         const v = new Vec2(10, 0);
         const n = v.normal();
-        expect(n.x).toBeCloseTo(0);
-        expect(n.y).toBeCloseTo(-1);
+        expect(n.x).toBe(0);
+        expect(n.y).toBe(-1);
+    });
+
+    test('normal() returns the perpendicular vector', () => {
+        const v = new Vec2(10, 0);
+        const p = v.perp();
+        expect(p.x).toBe(0);
+        expect(p.y).toBe(-10);
     });
 
     test('dot() computes dot product', () => {
@@ -183,8 +190,8 @@ describe('Vec2', () => {
 
         const v = new Vec2(50, 50);
 
-        for (let i = 0; i < 1000000; i++) {
-            v.rotate(2);
+        for (let i = 0; i < 10000000; i++) {
+            v.normalize();
         }
 
         console.timeEnd('test');
