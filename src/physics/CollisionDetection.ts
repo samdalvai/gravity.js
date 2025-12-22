@@ -136,25 +136,19 @@ export default class CollisionDetection {
                     depth: 0,
                 };
 
+                let start = vclip;
+                let end = vclip.addNew(referenceEdgeNormal.scaleNew(-separation));
+
                 // Ensure the start-end points are always from "a" to "b"
                 if (baSeparation >= abSeparation) {
-                    [contact.start, contact.end] = [contact.end, contact.start];
+                    [start, end] = [end, start];
                     // The collision normal is always from "a" to "b"
                     contact.normal = contact.normal.scaleNew(-1);
                 }
 
-                contact.depth = contact.end.subNew(contact.start).magnitude();
+                contact.depth = end.subNew(start).magnitude();
 
-                contacts.push(
-                    new ContactConstraint(
-                        contact.a,
-                        contact.b,
-                        contact.start,
-                        contact.end,
-                        contact.normal,
-                        contact.depth,
-                    ),
-                );
+                contacts.push(new ContactConstraint(contact.a, contact.b, start, end, contact.normal, contact.depth));
             }
         }
 
