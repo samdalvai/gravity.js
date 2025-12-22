@@ -109,8 +109,9 @@ export class PolygonShape extends Shape {
         return this.worldVertices[nextVertex].subNew(this.worldVertices[currVertex]);
     };
 
-    findMinSeparation = (other: PolygonShape, indexReferenceEdge: { value: number }): number => {
+    findMinSeparation = (other: PolygonShape): [number, number] => {
         let separation = -Infinity;
+        let indexReferenceEdge = 0;
 
         // Loop all the vertices of "this" polygon
         for (let i = 0; i < this.worldVertices.length; i++) {
@@ -130,10 +131,10 @@ export class PolygonShape extends Shape {
 
             if (minSep > separation) {
                 separation = minSep;
-                indexReferenceEdge.value = i;
+                indexReferenceEdge = i;
             }
         }
-        return separation;
+        return [separation, indexReferenceEdge];
     };
 
     findIncidentEdge = (normal: Vec2): number => {
