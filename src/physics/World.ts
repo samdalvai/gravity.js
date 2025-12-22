@@ -97,13 +97,12 @@ export default class World {
                 // Broad phase check
                 const ab = b.position.subNew(a.position);
                 const radiusSum = a.shape.radius + b.shape.radius;
-                if (ab.magnitudeSquared() > radiusSum * radiusSum) {
-                    continue;
-                }
 
-                // TODO: no need to recheck collision if the two shapes are circles, in that case
-                // return the contact info directly
-                CollisionDetection.detectCollision(a, b, this.penetrations);
+                if (ab.magnitudeSquared() <= radiusSum * radiusSum) {
+                    // TODO: no need to recheck collision if the two shapes are circles, in that case
+                    // return the contact info directly
+                    CollisionDetection.detectCollision(a, b, this.penetrations);
+                }
             }
         }
 
