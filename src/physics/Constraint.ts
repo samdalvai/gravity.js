@@ -1,7 +1,7 @@
-import Mat22 from '../../math/Mat22';
-import Utils from '../../math/Utils';
-import Vec2 from '../../math/Vec2';
-import Body from '../body/Body';
+import Mat22 from '../math/Mat22';
+import Utils from '../math/Utils';
+import Vec2 from '../math/Vec2';
+import Body from './Body';
 
 export abstract class Constraint {
     a: Body;

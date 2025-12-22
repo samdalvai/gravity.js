@@ -1,6 +1,6 @@
-import AssetStore, { TEXTURES } from '../../AssetStore';
+import AssetStore, { TEXTURES } from '../AssetStore';
 import { Shape } from './Shape';
-import Vec2 from '../../math/Vec2';
+import Vec2 from '../math/Vec2';
 
 export default class Body {
     // Linear motion
