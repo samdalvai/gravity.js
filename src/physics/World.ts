@@ -97,6 +97,7 @@ export default class World {
         // Check all the bodies with all other bodies detecting collisions
         this.contacts.length = 0;
 
+        console.time('loop');
         for (let i = 0; i <= this.bodies.length - 1; i++) {
             for (let j = i + 1; j < this.bodies.length; j++) {
                 const a = this.bodies[i];
@@ -119,6 +120,8 @@ export default class World {
                 new PenetrationConstraint(contact.a, contact.b, contact.start, contact.end, contact.normal),
             );
         }
+
+        console.timeEnd('loop');
 
         // Solve all constraints
         for (const constraint of this.jointConstraints) {
