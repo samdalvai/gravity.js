@@ -363,7 +363,7 @@ export default class Application {
         Graphics.clearScreen();
         // Draw all joints anchor points and debug properties
         if (this.debug) {
-            for (const joint of this.world.getConstraints()) {
+            for (const joint of this.world.getJoints()) {
                 // TODO: this is just a simple draw method, we need to consider local anchors rather than just
                 // bodies position
                 Graphics.drawLine(

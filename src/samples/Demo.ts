@@ -125,7 +125,7 @@ export default class Demo {
             // Joint anchor at left edge of this step
             const anchor = step.position.subNew(new Vec2(stepWidth / 2, 0));
             const joint = new JointConstraint(lastStep, step, anchor); //, softness, bias);
-            world.addConstraint(joint);
+            world.addJoint(joint);
 
             lastStep = step;
         }
@@ -143,7 +143,7 @@ export default class Demo {
         // Final joint anchor at right edge of last step
         const finalAnchor = lastStep.position.addNew(new Vec2(stepWidth / 2, 0));
         const lastJoint = new JointConstraint(lastStep, endAnchor, finalAnchor); //, softness, bias);, softness, bias);
-        world.addConstraint(lastJoint);
+        world.addJoint(lastJoint);
     };
 
     static demo4 = (world: World) => {
@@ -166,7 +166,7 @@ export default class Demo {
 
             const anchor = whipElement.position.subNew(new Vec2(0, 25));
             const j = new JointConstraint(last, whipElement, anchor);
-            world.addConstraint(j);
+            world.addJoint(j);
 
             last = whipElement;
         }
@@ -208,12 +208,12 @@ export default class Demo {
         const leftHip = new JointConstraint(torso, leftLeg, torso.position.addNew(new Vec2(-20, +50)));
         const rightHip = new JointConstraint(torso, rightLeg, torso.position.addNew(new Vec2(+20, +50)));
 
-        world.addConstraint(string);
-        world.addConstraint(neck);
-        world.addConstraint(leftShoulder);
-        world.addConstraint(rightShoulder);
-        world.addConstraint(leftHip);
-        world.addConstraint(rightHip);
+        world.addJoint(string);
+        world.addJoint(neck);
+        world.addJoint(leftShoulder);
+        world.addJoint(rightShoulder);
+        world.addJoint(leftHip);
+        world.addJoint(rightHip);
     };
 
     static demo6 = (world: World) => {
