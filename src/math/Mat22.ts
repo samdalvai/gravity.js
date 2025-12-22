@@ -62,7 +62,7 @@ export default class Mat22 {
 
     /** Operator + */
     static add = (a: Mat22, b: Mat22): Mat22 => {
-        return new Mat22(Vec2.add(a.col1, b.col1), Vec2.add(a.col2, b.col2));
+        return new Mat22(a.col1.addNew(b.col1), a.col2.addNew(b.col2));
     };
 
     /** Operator * for matrix-vector multiplication */
