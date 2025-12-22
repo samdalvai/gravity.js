@@ -27,10 +27,16 @@ describe('Constraint', () => {
             b.integrateVelocities(deltaTime);
         }
 
-        console.log('a position: ', a.position);
-        console.log('b position: ', b.position);
+        // Check that the solver approximation is "good enough"
+        expect(Math.abs(a.position.y - 100)).toBeLessThan(0.001);
+        expect(Math.abs(a.position.x - 100)).toBeLessThan(0.001);
+        expect(Math.abs(b.position.y - 200)).toBeLessThan(0.001);
+        expect(Math.abs(b.position.x - 100)).toBeLessThan(0.001);
 
-        console.log('a velocity: ', a.velocity);
-        console.log('b velocity: ', b.velocity);
+        expect(Math.abs(a.velocity.x)).toBeLessThan(0.005);
+        expect(Math.abs(a.velocity.y)).toBeLessThan(0.005);
+
+        expect(Math.abs(b.velocity.x)).toBeLessThan(0.005);
+        expect(Math.abs(b.velocity.y)).toBeLessThan(0.005);
     });
 });
