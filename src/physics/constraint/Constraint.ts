@@ -57,13 +57,11 @@ export class JointConstraint extends Constraint {
         this.rB = pb.subNew(this.b.position);
 
         // ---- Effective mass matrix ----
-        const invMassSum = this.a.invMass + this.b.invMass;
-
         const K1 = new Mat22();
-        K1.col1.x = invMassSum;
+        K1.col1.x = this.a.invMass + this.b.invMass;
         K1.col1.y = 0;
         K1.col2.x = 0;
-        K1.col2.y = invMassSum;
+        K1.col2.y = this.a.invMass + this.b.invMass;
 
         const K2 = new Mat22();
         K2.col1.x = this.a.invI * this.rA.y * this.rA.y;
@@ -119,11 +117,11 @@ export class JointConstraint extends Constraint {
 
     postSolve(): void {
         // Optional: clamp accumulated impulse (recommended for stability)
-        // const maxImpulse = 1000;
-        // const mag = this.P.magnitude();
-        // if (mag > maxImpulse) {
-        //     this.P.scaleAssign(maxImpulse / mag);
-        // }
+        const maxImpulse = 10000;
+        const mag = this.P.magnitude();
+        if (mag > maxImpulse) {
+            this.P.scaleAssign(maxImpulse / mag);
+        }
     }
 }
 
