@@ -50,7 +50,7 @@ export class JointConstraint extends Constraint {
         this.biasFactor = biasFactor;
     }
 
-    preSolve(dt: number): void {
+    preSolve(invDt: number): void {
         const pa = this.a.localSpaceToWorldSpace(this.aPoint);
         const pb = this.b.localSpaceToWorldSpace(this.bPoint);
         this.rA = pa.subNew(this.a.position);
@@ -88,7 +88,7 @@ export class JointConstraint extends Constraint {
         const pB = Vec2.add(this.b.position, this.rB);
         const C = Vec2.sub(pB, pA);
 
-        this.bias = Vec2.scale(-this.biasFactor / dt, C);
+        this.bias = Vec2.scale(-this.biasFactor * invDt, C);
 
         // ---- Warm starting ----
         this.a.velocity.sub(Vec2.scale(this.a.invMass, this.P));
@@ -148,7 +148,7 @@ export class PenetrationConstraint extends Constraint {
         this.rB = new Vec2();
     }
 
-    preSolve(dt: number): void {
+    preSolve(invDt: number): void {
         // Get the collision points and normal in world space
         const pa = this.a.localSpaceToWorldSpace(this.aPoint);
         const pb = this.b.localSpaceToWorldSpace(this.bPoint);
@@ -195,7 +195,7 @@ export class PenetrationConstraint extends Constraint {
         const e = Math.min(this.a.restitution, this.b.restitution);
 
         // Calculate bias term considering elasticity (restitution)
-        this.bias = (beta / dt) * c + e * vrelDotNormal;
+        this.bias = beta * invDt * c + e * vrelDotNormal;
     }
 
     solve(): void {

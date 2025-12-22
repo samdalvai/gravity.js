@@ -58,6 +58,7 @@ export default class World {
     };
 
     update = (dt: number): void => {
+        const invDt = dt > 0.0 ? 1.0 / dt : 0.0;
         const penetrations: PenetrationConstraint[] = [];
 
         // Loop all bodies of the world applying forces
@@ -137,11 +138,11 @@ export default class World {
         // Solve all constraints
         for (const constraint of this.jointConstraints) {
             // for (const constraint of this.constraints) {
-            constraint.preSolve(dt);
+            constraint.preSolve(invDt);
         }
 
         for (const constraint of penetrations) {
-            constraint.preSolve(dt);
+            constraint.preSolve(invDt);
         }
 
         for (let i = 0; i < this.iterations; i++) {
