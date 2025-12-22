@@ -136,9 +136,13 @@ export class PenetrationConstraint extends Constraint {
     rA: Vec2;
     rB: Vec2;
 
-    constructor(a: Body, b: Body, aCollisionPoint: Vec2, bCollisionPoint: Vec2, normal: Vec2) {
+    // TODO: is this needed?
+    depth: number;
+
+    constructor(a: Body, b: Body, aCollisionPoint: Vec2, bCollisionPoint: Vec2, normal: Vec2, depth: number) {
         super(a, b, aCollisionPoint, bCollisionPoint);
         this.normal = a.worldSpaceToLocalSpace(normal);
+        this.depth = depth;
 
         this.cachedLambdaNormal = 0;
         this.cachedLambdaFriction = 0;
