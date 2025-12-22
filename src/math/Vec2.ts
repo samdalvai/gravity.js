@@ -7,6 +7,10 @@ export default class Vec2 {
         this.y = y;
     }
 
+    clone = (): Vec2 => {
+        return new Vec2(this.x, this.y);
+    };
+
     add(v: Vec2): void {
         this.x += v.x;
         this.y += v.y;
