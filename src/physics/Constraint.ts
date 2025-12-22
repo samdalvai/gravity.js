@@ -2,6 +2,7 @@ import Mat22 from '../math/Mat22';
 import Utils from '../math/Utils';
 import Vec2 from '../math/Vec2';
 import Body from './Body';
+import Contact from './Contact';
 
 export abstract class Constraint {
     a: Body;
@@ -135,9 +136,10 @@ export class PenetrationConstraint extends Constraint {
     rA: Vec2;
     rB: Vec2;
 
-    constructor(a: Body, b: Body, aCollisionPoint: Vec2, bCollisionPoint: Vec2, normal: Vec2) {
-        super(a, b, aCollisionPoint, bCollisionPoint);
-        this.normal = a.worldSpaceToLocalSpace(normal);
+    constructor(contact: Contact) {
+        // constructor(a: Body, b: Body, aCollisionPoint: Vec2, bCollisionPoint: Vec2, normal: Vec2) {
+        super(contact.a, contact.b, contact.start, contact.end);
+        this.normal = contact.a.worldSpaceToLocalSpace(contact.normal);
 
         this.cachedLambdaNormal = 0;
         this.cachedLambdaFriction = 0;

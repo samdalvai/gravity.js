@@ -11,6 +11,7 @@ export default class World {
     private iterations: number;
 
     private bodies: Body[] = [];
+    private contacts: Contact[] = [];
     // private constraints: Constraint[] = [];
     private jointConstraints: JointConstraint[] = [];
 
@@ -89,7 +90,10 @@ export default class World {
             body.integrateForces(dt);
         }
 
+        console.time('collision');
         // Check all the bodies with all other bodies detecting collisions
+        this.contacts.length = 0;
+
         for (let i = 0; i <= this.bodies.length - 1; i++) {
             for (let j = i + 1; j < this.bodies.length; j++) {
                 const a = this.bodies[i];
@@ -102,37 +106,22 @@ export default class World {
                 if (ab.magnitudeSquared() <= radiusSum * radiusSum) {
                     // TODO: no need to recheck collision if the two shapes are circles, in that case
                     // return the contact info directly
-                    const contacts: Contact[] = [];
-                    if (CollisionDetection.detectCollision(a, b, contacts)) {
-                        for (const contact of contacts) {
-                            if (this.debug) {
-                                // Draw collision points
-                                // TODO: not a good place to do rendering
-                                Graphics.drawFillCircle(contact.start.x, contact.start.y, 5, 'red');
-                                Graphics.drawFillCircle(contact.end.x, contact.end.y, 2, 'red');
-                                Graphics.drawLine(
-                                    contact.start.x,
-                                    contact.start.y,
-                                    contact.end.x,
-                                    contact.end.y,
-                                    'red',
-                                );
-                            }
-
-                            // Create a new penetration constraint
-                            const penetration = new PenetrationConstraint(
-                                contact.a,
-                                contact.b,
-                                contact.start,
-                                contact.end,
-                                contact.normal,
-                            );
-                            penetrations.push(penetration);
-                        }
-                    }
+                    CollisionDetection.detectCollision(a, b, this.contacts);
                 }
             }
         }
+        for (const contact of this.contacts) {
+            penetrations.push(new PenetrationConstraint(contact));
+            if (this.debug) {
+                // Draw collision points
+                // TODO: not a good place to do rendering
+                Graphics.drawFillCircle(contact.start.x, contact.start.y, 5, 'red');
+                Graphics.drawFillCircle(contact.end.x, contact.end.y, 2, 'red');
+                Graphics.drawLine(contact.start.x, contact.start.y, contact.end.x, contact.end.y, 'red');
+            }
+        }
+
+        console.timeEnd('collision');
 
         // Solve all constraints
         for (const constraint of this.jointConstraints) {
