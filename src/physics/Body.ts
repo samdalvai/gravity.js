@@ -106,8 +106,13 @@ export default class Body {
     };
 
     localSpaceToWorldSpace = (point: Vec2): Vec2 => {
-        const rotated = point.rotate(this.rotation);
-        return rotated.addNew(this.position);
+        const cos = Math.cos(this.rotation);
+        const sin = Math.sin(this.rotation);
+        const rotated = new Vec2(
+            point.x * cos - point.y * sin + this.position.x,
+            point.x * sin + point.y * cos + this.position.y,
+        );
+        return rotated;
     };
 
     worldSpaceToLocalSpace = (point: Vec2): Vec2 => {
