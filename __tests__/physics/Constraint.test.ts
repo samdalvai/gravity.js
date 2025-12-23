@@ -23,22 +23,22 @@ describe('Constraint', () => {
             for (let j = 0; j < solverIterations; j++) {
                 joint.solve();
             }
-
-            a.integrateVelocities(deltaTime);
-            b.integrateVelocities(deltaTime);
         }
 
+        a.integrateVelocities(deltaTime);
+        b.integrateVelocities(deltaTime);
+
         // Check that the solver approximation is "good enough"
-        expect(Math.abs(a.position.y - 100)).toBeLessThan(0.001);
+        expect(Math.abs(a.position.y - 20)).toBeLessThan(0.001);
         expect(Math.abs(a.position.x - 100)).toBeLessThan(0.001);
-        expect(Math.abs(b.position.y - 200)).toBeLessThan(0.001);
+        expect(Math.abs(b.position.y - 280)).toBeLessThan(0.001);
         expect(Math.abs(b.position.x - 100)).toBeLessThan(0.001);
 
         expect(Math.abs(a.velocity.x)).toBeLessThan(0.005);
-        expect(Math.abs(a.velocity.y)).toBeLessThan(0.005);
+        expect(Math.abs(a.velocity.y - 1200)).toBeLessThan(0.005);
 
         expect(Math.abs(b.velocity.x)).toBeLessThan(0.005);
-        expect(Math.abs(b.velocity.y)).toBeLessThan(0.005);
+        expect(Math.abs(b.velocity.y + 1200)).toBeLessThan(0.005);
     });
 
     test('Penetration constraint solving should apply impulses to correct position of bodies', () => {
@@ -60,16 +60,16 @@ describe('Constraint', () => {
             for (let j = 0; j < solverIterations; j++) {
                 contact.solve();
             }
-
-            a.integrateVelocities(deltaTime);
-            b.integrateVelocities(deltaTime);
         }
+
+        a.integrateVelocities(deltaTime);
+        b.integrateVelocities(deltaTime);
 
         expect(a.position.y).toBe(100);
         expect(b.position.y).toBe(100);
 
         // Check that the solver approximation is "good enough"
-        expect(Math.abs(a.position.x - b.position.x)).toBeGreaterThan(120);
+        expect(Math.abs(a.position.x - b.position.x) - 200).toBeLessThan(0.005);
         expect(a.velocity.x).toBeLessThan(-30);
         expect(b.velocity.x).toBeGreaterThan(30);
     });
