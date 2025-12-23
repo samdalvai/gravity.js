@@ -46,10 +46,10 @@ export class PolygonShape extends Shape {
 
     constructor(vertices: Vec2[]) {
         super();
-        let minX = Number.POSITIVE_INFINITY;
-        let minY = Number.POSITIVE_INFINITY;
-        let maxX = Number.NEGATIVE_INFINITY;
-        let maxY = Number.NEGATIVE_INFINITY;
+        let minX = Infinity;
+        let minY = Infinity;
+        let maxX = -Infinity;
+        let maxY = -Infinity;
 
         let maxRadiusSq = 0;
 
