@@ -140,7 +140,7 @@ export class PolygonShape extends Shape {
 
     findIncidentEdge = (normal: Vec2): number => {
         let index = 0;
-        let minProj = Number.POSITIVE_INFINITY;
+        let minProj = Infinity;
 
         for (let i = 0; i < this.worldVertices.length; i++) {
             const edgeNormal = this.edgeAt(i).normal();
