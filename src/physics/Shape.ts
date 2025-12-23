@@ -8,6 +8,8 @@ export enum ShapeType {
 
 export abstract class Shape {
     radius: number = 0;
+    cos: number = 0;
+    sin: number = 0;
 
     abstract getType(): ShapeType;
     abstract getMomentOfInertia(): number;
@@ -54,7 +56,8 @@ export class PolygonShape extends Shape {
         // Initialize the vertices of the polygon shape and set width and height
         for (const v of vertices) {
             this.localVertices.push(v);
-            this.worldVertices.push(v);
+            // Need to clone this vector, otherwise both arrays are aliasing the same vector
+            this.worldVertices.push(v.clone());
 
             // Find min and max X and Y to calculate polygon width and height
             minX = Math.min(minX, v.x);
@@ -94,11 +97,19 @@ export class PolygonShape extends Shape {
         return acc0 / 6 / acc1;
     };
 
+    /**
+     * @param angle The angle in radians, use degrees * Math.PI / 180 to convert to radians
+     * @param position The updated position of the shape
+     */
     updateVertices = (angle: number, position: Vec2): void => {
         // Loop all the vertices, transforming from local to world space
+        const cos = Math.cos(angle);
+        const sin = Math.sin(angle);
+        // console.log(this.localVertices);
         for (let i = 0; i < this.localVertices.length; i++) {
             // First rotate, then we translate
-            this.worldVertices[i] = this.localVertices[i].rotate(angle);
+            this.worldVertices[i].x = this.localVertices[i].x * cos - this.localVertices[i].y * sin;
+            this.worldVertices[i].y = this.localVertices[i].x * sin + this.localVertices[i].y * cos;
             this.worldVertices[i].x += position.x;
             this.worldVertices[i].y += position.y;
         }
