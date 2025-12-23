@@ -4,6 +4,7 @@ import InputManager, { MouseButton } from './InputManager';
 import Utils from './math/Utils';
 import Vec2 from './math/Vec2';
 import Body from './physics/Body';
+import { MAX_BODIES } from './physics/Constants';
 import Force from './physics/Force';
 import { BoxShape, CircleShape, PolygonShape, ShapeType } from './physics/Shape';
 import World from './physics/World';
@@ -349,6 +350,10 @@ export default class Application {
 
         if (this.generateParticle) {
             for (let i = 0; i < 10; i++) {
+                if (this.world.getBodies().length >= MAX_BODIES) {
+                    continue;
+                }
+
                 const shape = this.generateCircles ? new CircleShape(5) : new BoxShape(10, 10);
                 const particle = new Body(shape, InputManager.mousePosition.x, InputManager.mousePosition.y, 1.0);
                 particle.restitution = 0.2;
