@@ -167,7 +167,7 @@ export class ContactConstraint extends Constraint {
         // Compute tangent if friction > 0
         let t = new Vec2(0, 0);
         if (this.friction > 0) {
-            t = n.normal(); // Assuming normal() returns perpendicular vector, e.g., new Vec2(-n.y, n.x)
+            t = n.perp();
         }
 
         // Warm starting (apply cached lambda)
@@ -209,7 +209,7 @@ export class ContactConstraint extends Constraint {
         // Compute tangent if friction > 0
         let t = new Vec2(0, 0);
         if (this.friction > 0) {
-            t = n.normal();
+            t = n.perp();
         }
 
         // Compute relative velocity
