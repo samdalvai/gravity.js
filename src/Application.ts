@@ -16,6 +16,7 @@ export default class Application {
     private bgTexture: ImageBitmap | null = null;
     private generateParticle = false;
     private generateCircles = true;
+    private showContacts = true;
     private demoIndex = 1;
     private bomb: Body | null = null;
 
@@ -263,6 +264,10 @@ export default class Application {
                         this.generateCircles = !this.generateCircles;
                     }
 
+                    if (inputEvent.key === 's') {
+                        this.showContacts = !this.showContacts;
+                    }
+
                     if (!Number.isNaN(Number.parseInt(inputEvent.key))) {
                         const index = Number.parseInt(inputEvent.key);
                         this.demoIndex = index;
@@ -380,12 +385,14 @@ export default class Application {
                 );
             }
 
-            for (const contact of this.world.getContacts()) {
-                const aW = contact.a.localSpaceToWorldSpace(contact.aPoint);
-                const bW = contact.b.localSpaceToWorldSpace(contact.bPoint);
-                Graphics.drawFillCircle(aW.x, aW.y, 5, 'red');
-                Graphics.drawFillCircle(bW.x, bW.y, 2, 'red');
-                Graphics.drawLine(aW.x, aW.y, bW.x, bW.y, 'red');
+            if (this.showContacts) {
+                for (const contact of this.world.getContacts()) {
+                    const aW = contact.a.localSpaceToWorldSpace(contact.aPoint);
+                    const bW = contact.b.localSpaceToWorldSpace(contact.bPoint);
+                    Graphics.drawFillCircle(aW.x, aW.y, 5, 'red');
+                    Graphics.drawFillCircle(bW.x, bW.y, 2, 'red');
+                    Graphics.drawLine(aW.x, aW.y, bW.x, bW.y, 'red');
+                }
             }
         }
 
@@ -406,7 +413,8 @@ export default class Application {
             'Keys: 1-9 Demos, Left Mouse to generate circles, Right Mouse to generate boxes, Space to drop bomb',
             `${Demo.demoStrings[this.demoIndex]}`,
             `(D)ebug mode: ${this.debug ? 'ON' : 'OFF'}`,
-            `(C)hoosen particle: ${this.generateCircles ? 'Circle' : 'Box'}`,
+            `(C)hosen particle: ${this.generateCircles ? 'Circle' : 'Box'}`,
+            `(S)how contacts: ${this.showContacts ? 'Circle' : 'Box'}`,
             // Debut related info
             `FPS: ${this.FPS.toFixed(2)}`,
             `Num objects: ${this.world.getBodies().length}`,
