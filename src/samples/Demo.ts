@@ -221,15 +221,15 @@ export default class Demo {
         this.generateFloor(world);
         this.generateFences(world);
 
-        const a = new Body(new CircleShape(60), 500, 100, 5);
-        const b = new Body(new CircleShape(60), 500, 210, 5);
+        // const a = new Body(new CircleShape(60), 500, 100, 5);
+        // const b = new Body(new CircleShape(60), 500, 210, 5);
         // const joint = new JointConstraint(a, b, new Vec2(500, 200));
 
         // a.position.y -= 100;
         // b.position.y += 100;
 
-        world.addBody(a);
-        world.addBody(b);
+        // world.addBody(a);
+        // world.addBody(b);
         // world.addConstraint(joint);
     };
 
