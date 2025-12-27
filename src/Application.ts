@@ -216,6 +216,24 @@ export default class Application {
 
     render = (): void => {
         Graphics.clearScreen();
+
+        // Draw background texture
+        if (this.bgTexture && !this.debug) {
+            Graphics.drawTexture(
+                Graphics.width() / 2.0,
+                Graphics.height() / 2.0,
+                Graphics.width(),
+                Graphics.height(),
+                0.0,
+                this.bgTexture,
+            );
+        }
+
+        // Draw all bodies
+        for (const body of this.world.getBodies()) {
+            Graphics.drawBody(body, this.debug);
+        }
+
         // Draw all joints anchor points and debug properties
         if (this.debug) {
             for (const joint of this.world.getJoints()) {
@@ -241,97 +259,20 @@ export default class Application {
             }
         }
 
-        // Draw background texture
-        if (this.bgTexture && !this.debug) {
-            Graphics.drawTexture(
-                Graphics.width() / 2.0,
-                Graphics.height() / 2.0,
-                Graphics.width(),
-                Graphics.height(),
-                0.0,
-                this.bgTexture,
-            );
-        }
-
         const debugText = [
             // General info
             'Keys: 1-9 Demos, Left Mouse to generate circles, Right Mouse to generate boxes, Space to drop bomb',
             `${Demo.demoStrings[this.demoIndex]}`,
             `(D)ebug mode: ${this.debug ? 'ON' : 'OFF'}`,
             `(C)hosen particle: ${this.generateCircles ? 'Circle' : 'Box'}`,
-            `(S)how contacts: ${this.showContacts ? 'Circle' : 'Box'}`,
+            `(S)how contacts and joints: ${this.showContacts ? 'ON' : 'OFF'}`,
             // Debut related info
             `FPS: ${this.FPS.toFixed(2)}`,
             `Num objects: ${this.world.getBodies().length}`,
         ];
 
-        for (let i = 0; i < debugText.length - (this.debug ? 0 : 2); i++) {
+        for (let i = 0; i < debugText.length - (this.debug ? 0 : 3); i++) {
             Graphics.drawText(debugText[i], 50, 50 + i * 25, 18, 'arial', this.debug ? 'orange' : 'black');
-        }
-
-        // Draw all bodies
-        for (const body of this.world.getBodies()) {
-            switch (body.shape.getType()) {
-                case ShapeType.CIRCLE:
-                    {
-                        const circleShape = body.shape as CircleShape;
-
-                        if (!this.debug && body.texture) {
-                            Graphics.drawTexture(
-                                body.position.x,
-                                body.position.y,
-                                circleShape.radius * 2,
-                                circleShape.radius * 2,
-                                body.rotation,
-                                body.texture,
-                            );
-                        } else if (this.debug) {
-                            Graphics.drawCircle(
-                                body.position.x,
-                                body.position.y,
-                                circleShape.radius,
-                                body.rotation,
-                                'white',
-                            );
-                        }
-                    }
-                    break;
-                case ShapeType.POLYGON:
-                    {
-                        const polygonShape = body.shape as PolygonShape;
-                        if (!this.debug && body.texture) {
-                            Graphics.drawTexture(
-                                body.position.x,
-                                body.position.y,
-                                polygonShape.width,
-                                polygonShape.height,
-                                body.rotation,
-                                body.texture,
-                            );
-                        } else if (this.debug) {
-                            Graphics.drawPolygon(body.position.x, body.position.y, polygonShape.worldVertices, 'white');
-                        }
-                    }
-                    break;
-                case ShapeType.BOX:
-                    {
-                        const boxShape = body.shape as BoxShape;
-
-                        if (!this.debug && body.texture) {
-                            Graphics.drawTexture(
-                                body.position.x,
-                                body.position.y,
-                                boxShape.width,
-                                boxShape.height,
-                                body.rotation,
-                                body.texture,
-                            );
-                        } else if (this.debug) {
-                            Graphics.drawPolygon(body.position.x, body.position.y, boxShape.worldVertices, 'white');
-                        }
-                    }
-                    break;
-            }
         }
     };
 }
