@@ -124,7 +124,7 @@ export default class Demo {
 
             // Joint anchor at left edge of this step
             const anchor = step.position.subNew(new Vec2(stepWidth / 2, 0));
-            const joint = new JointConstraint(lastStep, step, anchor); //, softness, bias);
+            const joint = new JointConstraint(lastStep, step, anchor, softness, bias);
             world.addJoint(joint);
 
             lastStep = step;
@@ -142,7 +142,7 @@ export default class Demo {
 
         // Final joint anchor at right edge of last step
         const finalAnchor = lastStep.position.addNew(new Vec2(stepWidth / 2, 0));
-        const lastJoint = new JointConstraint(lastStep, endAnchor, finalAnchor); //, softness, bias);, softness, bias);
+        const lastJoint = new JointConstraint(lastStep, endAnchor, finalAnchor, softness, bias);
         world.addJoint(lastJoint);
     };
 
