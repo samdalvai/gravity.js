@@ -217,20 +217,11 @@ export default class Demo {
     };
 
     static demo6 = (world: World) => {
-        // Demo 6: Debig demo
+        // Demo 6: Debug demo
         this.generateFloor(world);
         this.generateFences(world);
 
-        // const a = new Body(new CircleShape(60), 500, 100, 5);
-        // const b = new Body(new CircleShape(60), 500, 210, 5);
-        // const joint = new JointConstraint(a, b, new Vec2(500, 200));
 
-        // a.position.y -= 100;
-        // b.position.y += 100;
-
-        // world.addBody(a);
-        // world.addBody(b);
-        // world.addConstraint(joint);
     };
 
     static demo7 = (world: World) => {
@@ -309,7 +300,7 @@ export default class Demo {
         for (let i = 1; i <= numSteps; i++) {
             const x = startStep.position.x + 30 + i * spacing;
             const y = startStep.position.y + 20;
-            const mass = i < numSteps ? 3 : 0;
+            const mass = 3;
 
             const step = new Body(new CircleShape(15), x, y, mass);
             step.setTexture('woodBridgeStep');
@@ -327,7 +318,7 @@ export default class Demo {
         endStep.setTexture('rockBridgeAnchor');
         world.addBody(endStep);
 
-        const lastJoint = new JointConstraint(last, endStep, endStep.position);
+        const lastJoint = new JointConstraint(last, endStep, endStep.position.addNew(new Vec2(15, 0)));
         world.addJoint(lastJoint);
 
         // Add pigs
