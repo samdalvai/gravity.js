@@ -71,7 +71,7 @@ export default class Demo {
         const rows = 10;
 
         const centerX = Graphics.width() / 2;
-        const baseY = floor.position.y - 100 - floorHeight / 2 - 100;
+        const baseY = floor.position.y - floorHeight / 2 - 100;
 
         for (let row = 0; row < rows; row++) {
             const boxesInRow = rows - row;
