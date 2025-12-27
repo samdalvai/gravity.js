@@ -8,8 +8,6 @@ export enum ShapeType {
 
 export abstract class Shape {
     radius: number = 0;
-    cos: number = 0;
-    sin: number = 0;
 
     abstract getType(): ShapeType;
     abstract getMomentOfInertia(): number;
