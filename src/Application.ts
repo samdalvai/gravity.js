@@ -236,19 +236,19 @@ export default class Application {
 
         // Draw all joints anchor points and debug properties
         if (this.debug) {
-            for (const joint of this.world.getJoints()) {
-                // TODO: this is just a simple draw method, we need to consider local anchors rather than just
-                // bodies position
-                Graphics.drawLine(
-                    joint.a.position.x,
-                    joint.a.position.y,
-                    joint.b.position.x,
-                    joint.b.position.y,
-                    'blue',
-                );
-            }
-
             if (this.showContacts) {
+                for (const joint of this.world.getJoints()) {
+                    // TODO: this is just a simple draw method, we need to consider local anchors rather than just
+                    // bodies position
+                    Graphics.drawLine(
+                        joint.a.position.x,
+                        joint.a.position.y,
+                        joint.b.position.x,
+                        joint.b.position.y,
+                        'blue',
+                    );
+                }
+
                 for (const contact of this.world.getContacts()) {
                     const aW = contact.a.localSpaceToWorldSpace(contact.aPoint);
                     const bW = contact.b.localSpaceToWorldSpace(contact.bPoint);
