@@ -250,10 +250,10 @@ export default class Application {
                 }
 
                 for (const contact of this.world.getContacts()) {
-                    // const aW = contact.a.localSpaceToWorldSpace(contact.aPoint);
-                    // const bW = contact.b.localSpaceToWorldSpace(contact.bPoint);
-                    const aW = contact.start;
-                    const bW = contact.end;
+                    const aW = contact.a.localSpaceToWorldSpace(contact.aPoint);
+                    const bW = contact.b.localSpaceToWorldSpace(contact.bPoint);
+                    // const aW = contact.start;
+                    // const bW = contact.end;
                     Graphics.drawFillCircle(aW.x, aW.y, 5, 'red');
                     Graphics.drawFillCircle(bW.x, bW.y, 2, 'red');
                     Graphics.drawLine(aW.x, aW.y, bW.x, bW.y, 'red');
