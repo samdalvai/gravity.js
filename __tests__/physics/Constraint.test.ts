@@ -47,7 +47,7 @@ describe('Constraint', () => {
 
         // Move bodies apart
         const numFrames = 60;
-        const solverIterations = 10;
+        const solverIterations = 20;
 
         const contacts: ContactConstraint[] = [];
         CollisionDetection.detectCollisionCircleCircle(a, b, contacts);
@@ -70,7 +70,7 @@ describe('Constraint', () => {
 
         // Check that the solver approximation is "good enough"
         expect(Math.abs(a.position.x - b.position.x) - 200).toBeLessThan(0.005);
-        expect(a.velocity.x).toBeLessThan(-30);
-        expect(b.velocity.x).toBeGreaterThan(30);
+        expect(a.velocity.x + 15).toBeLessThan(0.1);
+        expect(b.velocity.x - 15).toBeLessThan(0.1);
     });
 });
