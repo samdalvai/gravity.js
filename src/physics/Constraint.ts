@@ -2,6 +2,7 @@ import Mat22 from '../math/Mat22';
 import Utils from '../math/Utils';
 import Vec2 from '../math/Vec2';
 import Body from './Body';
+import { PIXELS_PER_METER } from './Constants';
 
 export abstract class Constraint {
     a: Body;
@@ -142,6 +143,7 @@ export class ContactConstraint {
     private normalMass = 0;
     private tangentMass = 0;
     private bias = 0;
+    private restitutionBias = 0;
 
     // Cached impulses (warm starting)
     private normalImpulse = 0;
@@ -197,6 +199,23 @@ export class ContactConstraint {
 
         this.bias = Math.max(this.depth - slop, 0) * (beta * invDt);
 
+        const va = a.velocity.addNew(new Vec2(-a.angularVelocity * this.ra.y, a.angularVelocity * this.ra.x));
+        const vb = b.velocity.addNew(new Vec2(-b.angularVelocity * this.rb.y, b.angularVelocity * this.rb.x));
+
+        const vrel = va.subNew(vb);
+        const vn = vrel.dot(this.normal);
+
+        const e = Math.min(a.restitution, b.restitution);
+
+        // Threshold that skips bouncing if velocity is low
+        const restitutionSlop = 30;
+        
+        if (vn < -restitutionSlop) {
+            this.restitutionBias = -e * vn;
+        } else {
+            this.restitutionBias = 0;
+        }
+
         // --- Warm start ---
         const P = this.normal.scaleNew(this.normalImpulse).addAssign(this.tangent.scaleNew(this.tangentImpulse));
 
@@ -219,7 +238,7 @@ export class ContactConstraint {
         /* -------- Normal impulse -------- */
         const vn = vrel.dot(this.normal);
 
-        let dPn = this.normalMass * (-vn + this.bias);
+        let dPn = this.normalMass * (-vn + this.bias + this.restitutionBias);
 
         const oldPn = this.normalImpulse;
         this.normalImpulse = Math.max(oldPn + dPn, 0);
@@ -257,6 +276,89 @@ export class ContactConstraint {
         // TODO: to be implemented
     }
 }
+
+// export default class Contact {
+//     // TODO: find a way to avoid initializing all to null
+//     a: Body | null = null;
+//     b: Body | null = null;
+
+//     start: Vec2 | null = null;
+//     end: Vec2 | null = null;
+
+//     normal: Vec2 | null = null;
+//     depth: number | null = null;
+
+//     constructor() {}
+
+//     // Resolves the collision using the position change method
+//     resolvePenetration = (): void => {
+//         if (!this.a || !this.b || !this.depth || !this.normal) {
+//             throw new Error('Some Contact variables are not initialized');
+//         }
+
+//         if (this.a.isStatic() && this.b.isStatic()) {
+//             return;
+//         }
+
+//         const da = (this.depth / (this.a.invMass + this.b.invMass)) * this.a.invMass;
+//         const db = (this.depth / (this.a.invMass + this.b.invMass)) * this.b.invMass;
+
+//         this.a.position.subAssign(this.normal.scaleNew(da));
+//         this.b.position.addAssign(this.normal.scaleNew(db));
+//     };
+
+//     // Resolves the collision using the impulse method
+//     resolveCollision = (): void => {
+//         if (!this.a || !this.b || !this.depth || !this.normal || !this.start || !this.end) {
+//             console.error('Some Contact variables are not initialized: ', this);
+//             throw new Error('Some Contact variables are not initialized');
+//         }
+
+//         // Apply positional correction using the projection method
+//         this.resolvePenetration();
+
+//         // Define coefficient of restitution (elasticity) and friction
+//         const e = Math.min(this.a.restitution, this.b.restitution);
+//         const f = Math.min(this.a.friction, this.b.friction);
+
+//         // Calculate the relative velocity between the two objects
+//         const ra = this.end.subNew(this.a.position);
+//         const rb = this.start.subNew(this.b.position);
+//         const va = this.a.velocity.addNew(new Vec2(-this.a.angularVelocity * ra.y, this.a.angularVelocity * ra.x));
+//         const vb = this.b.velocity.addNew(new Vec2(-this.b.angularVelocity * rb.y, this.b.angularVelocity * rb.x));
+//         const vrel = va.subNew(vb);
+
+//         // Now we proceed to calculate the collision impulse along the normal
+//         const vrelDotNormal = vrel.dot(this.normal);
+//         const impulseDirectionN = this.normal;
+//         const impulseMagnitudeN =
+//             (-(1 + e) * vrelDotNormal) /
+//             (this.a.invMass +
+//                 this.b.invMass +
+//                 ra.cross(this.normal) * ra.cross(this.normal) * this.a.invI +
+//                 rb.cross(this.normal) * rb.cross(this.normal) * this.b.invI);
+//         const jN = impulseDirectionN.scaleNew(impulseMagnitudeN);
+
+//         // Now we proceed to calculate the collision impulse along the tangent
+//         const tangent = this.normal.normal();
+//         const vrelDotTangent = vrel.dot(tangent);
+//         const impulseDirectionT = tangent;
+//         const impulseMagnitudeT =
+//             (f * -(1 + e) * vrelDotTangent) /
+//             (this.a.invMass +
+//                 this.b.invMass +
+//                 ra.cross(tangent) * ra.cross(tangent) * this.a.invI +
+//                 rb.cross(tangent) * rb.cross(tangent) * this.b.invI);
+//         const jT = impulseDirectionT.scaleNew(impulseMagnitudeT);
+
+//         // Calculate the final impulse j combining normal and tangent impulses
+//         const j = jN.addNew(jT);
+
+//         // Apply the impulse vector to both objects in opposite direction
+//         this.a.applyAngularImpulse(j, ra);
+//         this.b.applyAngularImpulse(j.negate(), rb);
+//     };
+// }
 
 // export class ContactConstraint extends Constraint {
 //     cachedLambdaNormal: number;
