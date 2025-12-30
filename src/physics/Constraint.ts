@@ -188,8 +188,8 @@ export class ContactConstraint extends Constraint {
         c = Math.min(0.0, c + 0.01);
 
         // Calculate relative velocity
-        const perpRa = new Vec2(-this.rA.y, this.rA.x);
-        const perpRb = new Vec2(-this.rB.y, this.rB.x);
+        const perpRa = this.rA.perp();
+        const perpRb = this.rB.perp();
         const va = this.a.velocity.addNew(perpRa.scaleNew(this.a.angularVelocity));
         const vb = this.b.velocity.addNew(perpRb.scaleNew(this.b.angularVelocity));
         const relVel = va.subNew(vb);
