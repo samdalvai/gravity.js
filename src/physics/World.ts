@@ -101,6 +101,7 @@ export default class World {
         }
 
         // console.timeEnd('loop');
+        console.time('solver');
 
         // Solve all constraints
         for (const constraint of this.joints) {
@@ -130,6 +131,8 @@ export default class World {
         for (const constraint of this.contacts) {
             constraint.postSolve();
         }
+
+        console.timeEnd('solver');
 
         // Integrate all the velocities
         for (const body of this.bodies) {
