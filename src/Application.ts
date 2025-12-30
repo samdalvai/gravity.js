@@ -4,9 +4,9 @@ import InputManager, { MouseButton } from './InputManager';
 import Utils from './math/Utils';
 import Vec2 from './math/Vec2';
 import Body from './physics/Body';
-import { MAX_BODIES } from './physics/Constants';
+import { GRAVITY, MAX_BODIES } from './physics/Constants';
 import Force from './physics/Force';
-import { BoxShape, CircleShape, PolygonShape, ShapeType } from './physics/Shape';
+import { BoxShape, CircleShape } from './physics/Shape';
 import World from './physics/World';
 import Demo from './samples/Demo';
 
@@ -26,7 +26,7 @@ export default class Application {
     private lastFPSUpdate = 0;
 
     constructor() {
-        this.world = new World(-9.8);
+        this.world = new World(-GRAVITY);
     }
 
     isRunning = (): boolean => {
