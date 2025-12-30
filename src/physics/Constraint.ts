@@ -2,7 +2,7 @@ import Mat22 from '../math/Mat22';
 import Utils from '../math/Utils';
 import Vec2 from '../math/Vec2';
 import Body from './Body';
-import { PIXELS_PER_METER } from './Constants';
+import { GRAVITY, PIXELS_PER_METER } from './Constants';
 
 export abstract class Constraint {
     a: Body;
@@ -208,7 +208,7 @@ export class ContactConstraint {
         const e = Math.min(a.restitution, b.restitution);
 
         // Threshold that skips bouncing if velocity is low
-        const restitutionSlop = 30;
+        const restitutionSlop = GRAVITY;
         
         if (vn < -restitutionSlop) {
             this.restitutionBias = -e * vn;
