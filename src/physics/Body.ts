@@ -48,7 +48,7 @@ export default class Body {
         this.angularAcceleration = 0.0;
         this.sumForces = new Vec2(0, 0);
         this.sumTorque = 0.0;
-        this.restitution = 0.6;
+        this.restitution = 0.2;
         this.friction = 0.7;
         this.mass = mass;
 
