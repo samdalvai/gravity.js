@@ -201,6 +201,8 @@ export class ContactConstraint extends Constraint {
 
         // --- Warm starting ---
         const P = this.normal.scaleNew(this.normalImpulse).addNew(this.tangent.scaleNew(this.tangentImpulse));
+        // const P = this.normal;
+        // this.normal
 
         a.applyImpulseLinear(P);
         a.applyImpulseAngular(this.rA.cross(P));
