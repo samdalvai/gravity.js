@@ -80,7 +80,7 @@ export default class World {
         }
 
         // Check all the bodies with all other bodies detecting collisions
-        // console.time('loop');
+        // console.time('contacts');
 
         this.contacts.length = 0;
         for (let i = 0; i <= this.bodies.length - 1; i++) {
@@ -100,7 +100,9 @@ export default class World {
             }
         }
 
-        // console.timeEnd('loop');
+        // console.timeEnd('contacts');
+
+        console.time('solver');
 
         // Solve all constraints
         for (const constraint of this.joints) {
@@ -130,6 +132,8 @@ export default class World {
         for (const constraint of this.contacts) {
             constraint.postSolve();
         }
+
+        console.timeEnd('solver');
 
         // Integrate all the velocities
         for (const body of this.bodies) {
