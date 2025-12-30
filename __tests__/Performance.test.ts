@@ -5,7 +5,8 @@ import { ContactConstraint, JointConstraint } from '../src/physics/Constraint';
 import { BoxShape, CircleShape } from '../src/physics/Shape';
 
 describe('Performance', () => {
-    test('Performance test', () => {
+    test.each(Array.from({ length: 5 }))('Performance test', () => {
+    // test('Performance test', () => {
         console.time('test');
         // const a = new Body(new BoxShape(20, 20), 100, 100, 5);
         // const a = new Body(new CircleShape(10), 100, 100, 10);
@@ -23,7 +24,7 @@ describe('Performance', () => {
 
         const deltaTime = 1 / 60;
 
-        // Baseline = 800 ms
+        // Baseline = 850 ms
         for (let i = 0; i < 1000; i++) {
             for (let i = 0; i < numFrames; i++) {
                 contact.preSolve(1 / deltaTime);
