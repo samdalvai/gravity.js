@@ -2,6 +2,7 @@ import Mat22 from '../math/Mat22';
 import Utils from '../math/Utils';
 import Vec2 from '../math/Vec2';
 import Body from './Body';
+import { GRAVITY, PIXELS_PER_METER } from './Constants';
 
 export abstract class Constraint {
     a: Body;
@@ -126,176 +127,138 @@ export class JointConstraint extends Constraint {
 }
 
 export class ContactConstraint extends Constraint {
-    cachedLambdaNormal: number;
-    cachedLambdaFriction: number;
-    bias: number;
-    normal: Vec2; // Normal direction of the penetration in A's local space
-    friction: number; // Friction coefficient between the two penetrating bodies
-
-    rA: Vec2;
-    rB: Vec2;
-
-    // TODO: is this needed?
+    normal: Vec2; // world-space normal A → B
     depth: number;
 
-    constructor(a: Body, b: Body, start: Vec2, end: Vec2, normal: Vec2, depth: number) {
-        super(a, b, start, end);
-        this.normal = a.worldSpaceToLocalSpace(normal);
+    // rA / rB (world space)
+    private rA!: Vec2;
+    private rB!: Vec2;
+
+    private tangent!: Vec2;
+
+    // Effective mass
+    private normalMass = 0;
+    private tangentMass = 0;
+
+    // Bias terms
+    private bias = 0;
+    private restitutionBias = 0;
+
+    // Warm starting
+    private normalImpulse = 0;
+    private tangentImpulse = 0;
+
+    constructor(a: Body, b: Body, pointAWorld: Vec2, pointBWorld: Vec2, normalWorld: Vec2, depth: number) {
+        super(a, b, pointAWorld, pointBWorld);
+
+        // Ensure normal always points A → B
+        this.normal = normalWorld.negate();
         this.depth = depth;
-
-        this.cachedLambdaNormal = 0;
-        this.cachedLambdaFriction = 0;
-        this.bias = 0;
-        this.friction = 0;
-
-        this.rA = new Vec2();
-        this.rB = new Vec2();
     }
 
     preSolve(invDt: number): void {
-        // Get the collision points and normal in world space
-        const pa = this.a.localSpaceToWorldSpace(this.aPoint);
-        const pb = this.b.localSpaceToWorldSpace(this.bPoint);
-        const n = this.a.localSpaceToWorldSpace(this.normal); // The normal vector in world space
+        const a = this.a;
+        const b = this.b;
 
-        this.rA = pa.subNew(this.a.position);
-        this.rB = pb.subNew(this.b.position);
+        // World-space contact points
+        const pA = a.localSpaceToWorldSpace(this.aPoint);
+        const pB = b.localSpaceToWorldSpace(this.bPoint);
 
-        // Set friction
-        this.friction = Math.min(this.a.friction, this.b.friction);
+        this.rA = pA.subNew(a.position);
+        this.rB = pB.subNew(b.position);
 
-        // Compute tangent if friction > 0
-        let t = new Vec2(0, 0);
-        if (this.friction > 0) {
-            t = n.perp();
-        }
+        // Tangent
+        this.tangent = this.normal.perp();
 
-        // Warm starting (apply cached lambda)
-        const totalDir = n.scaleNew(this.cachedLambdaNormal).addNew(t.scaleNew(this.cachedLambdaFriction));
-        const impulseA = totalDir.scaleNew(-1);
-        const angularImpulseA = -this.rA.cross(totalDir);
-        const impulseB = totalDir;
-        const angularImpulseB = this.rB.cross(totalDir);
+        // --- Effective mass (normal) ---
+        const rnA = this.rA.cross(this.normal);
+        const rnB = this.rB.cross(this.normal);
 
-        this.a.applyImpulseLinear(impulseA);
-        this.a.applyImpulseAngular(angularImpulseA);
-        this.b.applyImpulseLinear(impulseB);
-        this.b.applyImpulseAngular(angularImpulseB);
+        this.normalMass = 1 / (a.invMass + b.invMass + rnA * rnA * a.invI + rnB * rnB * b.invI);
 
-        // Compute the bias term (Baumgarte stabilization)
+        // --- Effective mass (tangent) ---
+        const rtA = this.rA.cross(this.tangent);
+        const rtB = this.rB.cross(this.tangent);
+
+        this.tangentMass = 1 / (a.invMass + b.invMass + rtA * rtA * a.invI + rtB * rtB * b.invI);
+
+        // --- Baumgarte stabilization (penetration → velocity) ---
+        const slop = 0.01;
         const beta = 0.2;
-        let c = pb.subNew(pa).dot(n.scaleNew(-1));
-        c = Math.min(0.0, c + 0.01);
 
-        // Calculate relative velocity
-        const perpRa = this.rA.perp();
-        const perpRb = this.rB.perp();
-        const va = this.a.velocity.addNew(perpRa.scaleNew(this.a.angularVelocity));
-        const vb = this.b.velocity.addNew(perpRb.scaleNew(this.b.angularVelocity));
-        const relVel = va.subNew(vb);
-        const vrelDotNormal = relVel.dot(n);
+        this.bias = Math.max(this.depth - slop, 0) * beta * invDt;
 
-        // Get the restitution between the two bodies
-        const e = Math.min(this.a.restitution, this.b.restitution);
+        // --- Restitution (bounce only if fast enough) ---
+        const vA = a.velocity.addNew(this.rA.crossScalar(a.angularVelocity));
+        const vB = b.velocity.addNew(this.rB.crossScalar(b.angularVelocity));
+        const vRel = vA.subNew(vB);
+        const vn = vRel.dot(this.normal);
 
-        // Calculate bias term considering elasticity (restitution)
-        this.bias = beta * invDt * c + e * vrelDotNormal;
+        const e = Math.min(a.restitution, b.restitution);
+
+        const restitutionSlop = 10;
+        this.restitutionBias = vn < -restitutionSlop ? -e * vn : 0;
+
+        // --- Warm starting ---
+        const P = this.normal.scaleNew(this.normalImpulse).addNew(this.tangent.scaleNew(this.tangentImpulse));
+
+        a.applyImpulseLinear(P);
+        a.applyImpulseAngular(this.rA.cross(P));
+
+        b.applyImpulseLinear(P.negate());
+        b.applyImpulseAngular(this.rB.cross(P.negate()));
     }
 
     solve(): void {
-        // Recompute ra, rb, n as positions/velocities may have changed
-        const n = this.a.localSpaceToWorldSpace(this.normal);
+        const a = this.a;
+        const b = this.b;
 
-        // Compute tangent if friction > 0
-        let t = new Vec2(0, 0);
-        if (this.friction > 0) {
-            t = n.perp();
-        }
+        const vA = a.velocity.addNew(this.rA.crossScalar(a.angularVelocity));
+        const vB = b.velocity.addNew(this.rB.crossScalar(b.angularVelocity));
+        const vRel = vA.subNew(vB);
 
-        // Compute relative velocity
-        const perpRa = new Vec2(-this.rA.y, this.rA.x);
-        const perpRb = new Vec2(-this.rB.y, this.rB.x);
-        const velAP = this.a.velocity.addNew(perpRa.scaleNew(this.a.angularVelocity));
-        const velBP = this.b.velocity.addNew(perpRb.scaleNew(this.b.angularVelocity));
-        const relVel = velAP.subNew(velBP);
+        /* -------- Normal impulse -------- */
+        const vn = vRel.dot(this.normal);
 
-        const relVelN = relVel.dot(n);
-        const relVelT = this.friction > 0 ? relVel.dot(t) : 0;
+        let dPn = this.normalMass * (-vn + this.bias + this.restitutionBias);
 
-        // Compute effective mass components
-        const invMa = this.a.invMass;
-        const invMb = this.b.invMass;
-        const invIa = this.a.invI;
-        const invIb = this.b.invI;
+        const oldPn = this.normalImpulse;
+        this.normalImpulse = Math.max(oldPn + dPn, 0);
+        dPn = this.normalImpulse - oldPn;
 
-        const crossRaN = this.rA.cross(n);
-        const crossRbN = this.rB.cross(n);
-        const knn = invMa + invMb + crossRaN * crossRaN * invIa + crossRbN * crossRbN * invIb;
+        const Pn = this.normal.scaleNew(dPn);
 
-        let ktt = 0;
-        let knt = 0;
-        let crossRaT = 0;
-        let crossRbT = 0;
-        if (this.friction > 0) {
-            crossRaT = this.rA.cross(t);
-            crossRbT = this.rB.cross(t);
-            ktt = invMa + invMb + crossRaT * crossRaT * invIa + crossRbT * crossRbT * invIb;
-            knt = crossRaN * crossRaT * invIa + crossRbN * crossRbT * invIb;
-        }
+        a.applyImpulseLinear(Pn);
+        a.applyImpulseAngular(this.rA.cross(Pn));
 
-        // Compute rhs
-        const rhsN = relVelN - this.bias;
-        const rhsT = relVelT;
+        b.applyImpulseLinear(Pn.negate());
+        b.applyImpulseAngular(this.rB.cross(Pn.negate()));
 
-        // Solve for delta lambda
-        let deltaLambdaN = 0;
-        let deltaLambdaT = 0;
-        const oldLambdaN = this.cachedLambdaNormal;
-        const oldLambdaT = this.cachedLambdaFriction;
+        /* -------- Friction impulse -------- */
+        const vt = vRel.dot(this.tangent);
 
-        if (this.friction > 0) {
-            // 2x2 solve
-            const det = knn * ktt - knt * knt;
-            if (det !== 0) {
-                deltaLambdaN = (ktt * rhsN - knt * rhsT) / det;
-                deltaLambdaT = (knn * rhsT - knt * rhsN) / det;
-            }
-        } else {
-            // 1D solve for normal only
-            if (knn !== 0) {
-                deltaLambdaN = rhsN / knn;
-            }
-        }
+        let dPt = -vt * this.tangentMass;
 
-        // Accumulate and clamp
-        this.cachedLambdaNormal += deltaLambdaN;
-        this.cachedLambdaFriction += deltaLambdaT;
+        const mu = Math.min(a.friction, b.friction);
+        const maxPt = mu * this.normalImpulse;
 
-        this.cachedLambdaNormal = Math.max(0, this.cachedLambdaNormal);
+        const oldPt = this.tangentImpulse;
+        this.tangentImpulse = Utils.clamp(oldPt + dPt, -maxPt, maxPt);
+        dPt = this.tangentImpulse - oldPt;
 
-        if (this.friction > 0) {
-            const maxFriction = this.cachedLambdaNormal * this.friction;
-            this.cachedLambdaFriction = Utils.clamp(this.cachedLambdaFriction, -maxFriction, maxFriction);
-        }
+        const Pt = this.tangent.scaleNew(dPt);
 
-        // Compute effective delta after clamping
-        deltaLambdaN = this.cachedLambdaNormal - oldLambdaN;
-        deltaLambdaT = this.cachedLambdaFriction - oldLambdaT;
+        a.applyImpulseLinear(Pt);
+        a.applyImpulseAngular(this.rA.cross(Pt));
 
-        // Apply impulses
-        const totalDir = n.scaleNew(deltaLambdaN).addNew(t.scaleNew(deltaLambdaT));
-        const impulseA = totalDir.scaleNew(-1);
-        const angularImpulseA = -this.rA.cross(totalDir);
-        const impulseB = totalDir;
-        const angularImpulseB = this.rB.cross(totalDir);
-
-        this.a.applyImpulseLinear(impulseA);
-        this.a.applyImpulseAngular(angularImpulseA);
-        this.b.applyImpulseLinear(impulseB);
-        this.b.applyImpulseAngular(angularImpulseB);
+        b.applyImpulseLinear(Pt.negate());
+        b.applyImpulseAngular(this.rB.cross(Pt.negate()));
     }
 
     postSolve(): void {
-        // TODO: to be implemented
+        // Optional: clamp cached impulses to prevent blow-up
+        const maxImpulse = 1e6;
+        this.normalImpulse = Math.min(this.normalImpulse, maxImpulse);
+        this.tangentImpulse = Utils.clamp(this.tangentImpulse, -maxImpulse, maxImpulse);
     }
 }
