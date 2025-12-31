@@ -200,15 +200,14 @@ export class ContactConstraint extends Constraint {
         this.restitutionBias = vn < -restitutionSlop ? -e * vn : 0;
 
         // --- Warm starting ---
-        const P = this.normal.scaleNew(this.normalImpulse).addNew(this.tangent.scaleNew(this.tangentImpulse));
-        // const P = this.normal;
-        // this.normal
+        const px = this.normal.x * this.normalImpulse + this.tangent.x * this.tangentImpulse;
+        const py = this.normal.y * this.normalImpulse + this.tangent.y * this.tangentImpulse;
 
-        a.applyImpulseLinear(P);
-        a.applyImpulseAngular(this.rA.cross(P));
+        a.applyScalarImpulseLinear(px, py);
+        a.applyImpulseAngular(this.rA.x * py - this.rA.y * px);
 
-        b.applyImpulseLinear(P.negate());
-        b.applyImpulseAngular(this.rB.cross(P.negate()));
+        b.applyScalarImpulseLinear(-px, -py);
+        b.applyImpulseAngular(this.rB.x * -py - this.rB.y * -px);
     }
 
     solve(): void {
