@@ -131,10 +131,10 @@ export class ContactConstraint extends Constraint {
     depth: number;
 
     // rA / rB (world space)
-    private rA!: Vec2;
-    private rB!: Vec2;
+    private rA: Vec2;
+    private rB: Vec2;
 
-    private tangent!: Vec2;
+    private tangent: Vec2;
 
     // Effective mass
     private normalMass = 0;
@@ -154,6 +154,11 @@ export class ContactConstraint extends Constraint {
         // Ensure normal always points A → B
         this.normal = normalWorld.negate();
         this.depth = depth;
+
+        this.rA = new Vec2();
+        this.rB = new Vec2();
+
+        this.tangent = new Vec2();
     }
 
     preSolve(invDt: number): void {
@@ -164,42 +169,50 @@ export class ContactConstraint extends Constraint {
         const pA = a.localSpaceToWorldSpace(this.aPoint);
         const pB = b.localSpaceToWorldSpace(this.bPoint);
 
-        this.rA = pA.subNew(a.position);
-        this.rB = pB.subNew(b.position);
+        this.rA.x = pA.x - a.position.x;
+        this.rA.y = pA.y - a.position.y;
+        this.rB.x = pB.x - b.position.x;
+        this.rB.y = pB.y - b.position.y;
 
         // Tangent
-        this.tangent = this.normal.perp();
+        this.tangent.x = this.normal.y;
+        this.tangent.y = -this.normal.x;
 
-        // --- Effective mass (normal) ---
-        const rnA = this.rA.cross(this.normal);
-        const rnB = this.rB.cross(this.normal);
+        // Effective mass (normal)
+        const rnA = this.rA.x * this.normal.x + this.rA.y * this.normal.y;
+        const rnB = this.rB.x * this.normal.x + this.rB.y * this.normal.y;
 
         this.normalMass = 1 / (a.invMass + b.invMass + rnA * rnA * a.invI + rnB * rnB * b.invI);
 
-        // --- Effective mass (tangent) ---
-        const rtA = this.rA.cross(this.tangent);
-        const rtB = this.rB.cross(this.tangent);
+        // Effective mass (tangent)
+        const rtA = this.rA.x * this.tangent.x + this.rA.y * this.tangent.y;
+        const rtB = this.rB.x * this.tangent.x + this.rB.y * this.tangent.y;
 
         this.tangentMass = 1 / (a.invMass + b.invMass + rtA * rtA * a.invI + rtB * rtB * b.invI);
 
-        // --- Baumgarte stabilization (penetration → velocity) ---
+        // Baumgarte stabilization (penetration → velocity)
         const slop = 0.01;
         const beta = 0.2;
 
         this.bias = Math.max(this.depth - slop, 0) * beta * invDt;
 
-        // --- Restitution (bounce only if fast enough) ---
-        const vA = a.velocity.addNew(this.rA.crossScalar(a.angularVelocity));
-        const vB = b.velocity.addNew(this.rB.crossScalar(b.angularVelocity));
-        const vRel = vA.subNew(vB);
-        const vn = vRel.dot(this.normal);
+        // Restitution (bounce only if fast enough)
+        const vAx = a.velocity.x + -a.angularVelocity * this.rA.y;
+        const vAy = a.velocity.y + a.angularVelocity * this.rA.x;
+        const vBx = b.velocity.x + -b.angularVelocity * this.rB.y;
+        const vBy = b.velocity.y + b.angularVelocity * this.rB.x;
+
+        const vRelx = vAx - vBx;
+        const vRely = vAy - vBy;
+
+        const vn = vRelx * this.normal.x + vRely * this.normal.y;
 
         const e = Math.min(a.restitution, b.restitution);
 
         const restitutionSlop = 10;
         this.restitutionBias = vn < -restitutionSlop ? -e * vn : 0;
 
-        // --- Warm starting ---
+        // Warm starting
         const px = this.normal.x * this.normalImpulse + this.tangent.x * this.tangentImpulse;
         const py = this.normal.y * this.normalImpulse + this.tangent.y * this.tangentImpulse;
 
@@ -224,7 +237,7 @@ export class ContactConstraint extends Constraint {
         const vRelx = vAx - vBx;
         const vRely = vAy - vBy;
 
-        /* -------- Normal impulse -------- */
+        // Normal impulse
         const vn = vRelx * this.normal.x + vRely * this.normal.y;
 
         let dPn = this.normalMass * (-vn + this.bias + this.restitutionBias);
@@ -244,7 +257,7 @@ export class ContactConstraint extends Constraint {
         b.velocity.y += -Pny * b.invMass;
         b.angularVelocity += (this.rB.x * -Pny - this.rB.y * -Pnx) * b.invI;
 
-        /* -------- Friction impulse -------- */
+        // Friction impulse
         const vt = vRelx * this.tangent.x + vRely * this.tangent.y;
 
         let dPt = -vt * this.tangentMass;
