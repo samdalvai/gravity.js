@@ -132,15 +132,6 @@ export default class Body {
         this.velocity.y += j.y * this.invMass;
     };
 
-    applyScalarImpulseLinear = (jx: number, jy: number): void => {
-        if (this.isStatic()) {
-            return;
-        }
-
-        this.velocity.x += jx * this.invMass;
-        this.velocity.y += jy * this.invMass;
-    };
-
     applyImpulseAngular(j: number): void {
         if (this.isStatic()) {
             return;
