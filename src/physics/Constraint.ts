@@ -127,14 +127,17 @@ export class JointConstraint extends Constraint {
 }
 
 export class ContactConstraint extends Constraint {
-    normal: Vec2; // world-space normal A → B
+    normal: Vec2;
     depth: number;
 
     // rA / rB (world space)
-    private rA: Vec2;
-    private rB: Vec2;
+    private rAx = 0;
+    private rAy = 0;
+    private rBx = 0;
+    private rBy = 0;
 
-    private tangent: Vec2;
+    private tangentX = 0;
+    private tangentY = 0;
 
     // Effective mass
     private normalMass = 0;
@@ -154,11 +157,6 @@ export class ContactConstraint extends Constraint {
         // Ensure normal always points A → B
         this.normal = normalWorld.negate();
         this.depth = depth;
-
-        this.rA = new Vec2();
-        this.rB = new Vec2();
-
-        this.tangent = new Vec2();
     }
 
     preSolve(invDt: number): void {
@@ -176,24 +174,24 @@ export class ContactConstraint extends Constraint {
         const pBx = this.bPoint.x * cosB - this.bPoint.y * sinB + b.position.x;
         const pBy = this.bPoint.x * sinB + this.bPoint.y * cosB + b.position.y;
 
-        this.rA.x = pAx - a.position.x;
-        this.rA.y = pAy - a.position.y;
-        this.rB.x = pBx - b.position.x;
-        this.rB.y = pBy - b.position.y;
+        this.rAx = pAx - a.position.x;
+        this.rAy = pAy - a.position.y;
+        this.rBx = pBx - b.position.x;
+        this.rBy = pBy - b.position.y;
 
         // Tangent
-        this.tangent.x = this.normal.y;
-        this.tangent.y = -this.normal.x;
+        this.tangentX = this.normal.y;
+        this.tangentY = -this.normal.x;
 
         // Effective mass (normal)
-        const rnA = this.rA.x * this.normal.y - this.rA.y * this.normal.x;
-        const rnB = this.rB.x * this.normal.y - this.rB.y * this.normal.x;
+        const rnA = this.rAx * this.normal.y - this.rAy * this.normal.x;
+        const rnB = this.rBx * this.normal.y - this.rBy * this.normal.x;
 
         this.normalMass = 1 / (a.invMass + b.invMass + rnA * rnA * a.invI + rnB * rnB * b.invI);
 
         // Effective mass (tangent)
-        const rtA = this.rA.x * this.tangent.y - this.rA.y * this.tangent.x;
-        const rtB = this.rB.x * this.tangent.y - this.rB.y * this.tangent.x;
+        const rtA = this.rAx * this.tangentY - this.rAy * this.tangentX;
+        const rtB = this.rBx * this.tangentY - this.rBy * this.tangentX;
 
         this.tangentMass = 1 / (a.invMass + b.invMass + rtA * rtA * a.invI + rtB * rtB * b.invI);
 
@@ -204,10 +202,10 @@ export class ContactConstraint extends Constraint {
         this.bias = Math.max(this.depth - slop, 0) * beta * invDt;
 
         // Restitution (bounce only if fast enough)
-        const vAx = a.velocity.x + -a.angularVelocity * this.rA.y;
-        const vAy = a.velocity.y + a.angularVelocity * this.rA.x;
-        const vBx = b.velocity.x + -b.angularVelocity * this.rB.y;
-        const vBy = b.velocity.y + b.angularVelocity * this.rB.x;
+        const vAx = a.velocity.x + -a.angularVelocity * this.rAy;
+        const vAy = a.velocity.y + a.angularVelocity * this.rAx;
+        const vBx = b.velocity.x + -b.angularVelocity * this.rBy;
+        const vBy = b.velocity.y + b.angularVelocity * this.rBx;
 
         const vRelx = vAx - vBx;
         const vRely = vAy - vBy;
@@ -220,26 +218,26 @@ export class ContactConstraint extends Constraint {
         this.restitutionBias = vn < -restitutionSlop ? -e * vn : 0;
 
         // Warm starting
-        const px = this.normal.x * this.normalImpulse + this.tangent.x * this.tangentImpulse;
-        const py = this.normal.y * this.normalImpulse + this.tangent.y * this.tangentImpulse;
+        const px = this.normal.x * this.normalImpulse + this.tangentX * this.tangentImpulse;
+        const py = this.normal.y * this.normalImpulse + this.tangentY * this.tangentImpulse;
 
         a.velocity.x += px * a.invMass;
         a.velocity.y += py * a.invMass;
-        a.angularVelocity += this.rA.x * py - this.rA.y * px;
+        a.angularVelocity += this.rAx * py - this.rAy * px;
 
         b.velocity.x += -px * b.invMass;
         b.velocity.y += -py * b.invMass;
-        b.angularVelocity += this.rB.x * -py - this.rB.y * -px;
+        b.angularVelocity += this.rBx * -py - this.rBy * -px;
     }
 
     solve(): void {
         const a = this.a;
         const b = this.b;
 
-        const vAx = a.velocity.x + -a.angularVelocity * this.rA.y;
-        const vAy = a.velocity.y + a.angularVelocity * this.rA.x;
-        const vBx = b.velocity.x + -b.angularVelocity * this.rB.y;
-        const vBy = b.velocity.y + b.angularVelocity * this.rB.x;
+        const vAx = a.velocity.x + -a.angularVelocity * this.rAy;
+        const vAy = a.velocity.y + a.angularVelocity * this.rAx;
+        const vBx = b.velocity.x + -b.angularVelocity * this.rBy;
+        const vBy = b.velocity.y + b.angularVelocity * this.rBx;
 
         const vRelx = vAx - vBx;
         const vRely = vAy - vBy;
@@ -258,14 +256,14 @@ export class ContactConstraint extends Constraint {
 
         a.velocity.x += Pnx * a.invMass;
         a.velocity.y += Pny * a.invMass;
-        a.angularVelocity += (this.rA.x * Pny - this.rA.y * Pnx) * a.invI;
+        a.angularVelocity += (this.rAx * Pny - this.rAy * Pnx) * a.invI;
 
         b.velocity.x += -Pnx * b.invMass;
         b.velocity.y += -Pny * b.invMass;
-        b.angularVelocity += (this.rB.x * -Pny - this.rB.y * -Pnx) * b.invI;
+        b.angularVelocity += (this.rBx * -Pny - this.rBy * -Pnx) * b.invI;
 
         // Friction impulse
-        const vt = vRelx * this.tangent.x + vRely * this.tangent.y;
+        const vt = vRelx * this.tangentX + vRely * this.tangentY;
 
         let dPt = -vt * this.tangentMass;
 
@@ -276,16 +274,16 @@ export class ContactConstraint extends Constraint {
         this.tangentImpulse = Utils.clamp(oldPt + dPt, -maxPt, maxPt);
         dPt = this.tangentImpulse - oldPt;
 
-        const Ptx = this.tangent.x * dPt;
-        const Pty = this.tangent.y * dPt;
+        const Ptx = this.tangentX * dPt;
+        const Pty = this.tangentY * dPt;
 
         a.velocity.x += Ptx * a.invMass;
         a.velocity.y += Pty * a.invMass;
-        a.angularVelocity += (this.rA.x * Pty - this.rA.y * Ptx) * a.invI;
+        a.angularVelocity += (this.rAx * Pty - this.rAy * Ptx) * a.invI;
 
         b.velocity.x += -Ptx * b.invMass;
         b.velocity.y += -Pty * b.invMass;
-        b.angularVelocity += (this.rB.x * -Pty - this.rB.y * -Ptx) * b.invI;
+        b.angularVelocity += (this.rBx * -Pty - this.rBy * -Ptx) * b.invI;
     }
 
     postSolve(): void {
