@@ -203,11 +203,13 @@ export class ContactConstraint extends Constraint {
         const px = this.normal.x * this.normalImpulse + this.tangent.x * this.tangentImpulse;
         const py = this.normal.y * this.normalImpulse + this.tangent.y * this.tangentImpulse;
 
-        a.applyScalarImpulseLinear(px, py);
-        a.applyImpulseAngular(this.rA.x * py - this.rA.y * px);
+        a.velocity.x += px * a.invMass;
+        a.velocity.y += py * a.invMass;
+        a.angularVelocity += this.rA.x * py - this.rA.y * px;
 
-        b.applyScalarImpulseLinear(-px, -py);
-        b.applyImpulseAngular(this.rB.x * -py - this.rB.y * -px);
+        b.velocity.x += -px * b.invMass;
+        b.velocity.y += -py * b.invMass;
+        b.angularVelocity += this.rB.x * -py - this.rB.y * -px;
     }
 
     solve(): void {
@@ -229,11 +231,13 @@ export class ContactConstraint extends Constraint {
 
         const Pn = this.normal.scaleNew(dPn);
 
-        a.applyImpulseLinear(Pn);
-        a.applyImpulseAngular(this.rA.cross(Pn));
+        a.velocity.x += Pn.x * a.invMass;
+        a.velocity.y += Pn.y * a.invMass;
+        a.angularVelocity += (this.rA.x * Pn.y - this.rA.y * Pn.x) * a.invI;
 
-        b.applyImpulseLinear(Pn.negate());
-        b.applyImpulseAngular(this.rB.cross(Pn.negate()));
+        b.velocity.x += -Pn.x * b.invMass;
+        b.velocity.y += -Pn.y * b.invMass;
+        b.angularVelocity += (this.rB.x * -Pn.y - this.rB.y * -Pn.x) * b.invI;
 
         /* -------- Friction impulse -------- */
         const vt = vRel.dot(this.tangent);
@@ -249,11 +253,13 @@ export class ContactConstraint extends Constraint {
 
         const Pt = this.tangent.scaleNew(dPt);
 
-        a.applyImpulseLinear(Pt);
-        a.applyImpulseAngular(this.rA.cross(Pt));
+        a.velocity.x += Pt.x * a.invMass;
+        a.velocity.y += Pt.y * a.invMass;
+        a.angularVelocity += (this.rA.x * Pt.y - this.rA.y * Pt.x) * a.invI;
 
-        b.applyImpulseLinear(Pt.negate());
-        b.applyImpulseAngular(this.rB.cross(Pt.negate()));
+        b.velocity.x += -Pt.x * b.invMass;
+        b.velocity.y += -Pt.y * b.invMass;
+        b.angularVelocity += (this.rB.x * -Pt.y - this.rB.y * -Pt.x) * b.invI;
     }
 
     postSolve(): void {
