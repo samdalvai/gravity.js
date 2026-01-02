@@ -151,8 +151,8 @@ export class ContactConstraint extends Constraint {
     private normalImpulse = 0;
     private tangentImpulse = 0;
 
-    constructor(a: Body, b: Body, pointAWorld: Vec2, pointBWorld: Vec2, normalWorld: Vec2, depth: number) {
-        super(a, b, pointAWorld, pointBWorld);
+    constructor(a: Body, b: Body, start: Vec2, end: Vec2, normalWorld: Vec2, depth: number) {
+        super(a, b, start, end);
 
         // Ensure normal always points A → B
         this.normal = normalWorld.negate();
