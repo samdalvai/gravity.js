@@ -166,13 +166,20 @@ export class ContactConstraint extends Constraint {
         const b = this.b;
 
         // World-space contact points
-        const pA = a.localSpaceToWorldSpace(this.aPoint);
-        const pB = b.localSpaceToWorldSpace(this.bPoint);
+        const cosA = Math.cos(a.rotation);
+        const sinA = Math.sin(a.rotation);
+        const pAx = this.aPoint.x * cosA - this.aPoint.y * sinA + a.position.x;
+        const pAy = this.aPoint.x * sinA + this.aPoint.y * cosA + a.position.y;
 
-        this.rA.x = pA.x - a.position.x;
-        this.rA.y = pA.y - a.position.y;
-        this.rB.x = pB.x - b.position.x;
-        this.rB.y = pB.y - b.position.y;
+        const cosB = Math.cos(b.rotation);
+        const sinB = Math.sin(b.rotation);
+        const pBx = this.bPoint.x * cosB - this.bPoint.y * sinB + b.position.x;
+        const pBy = this.bPoint.x * sinB + this.bPoint.y * cosB + b.position.y;
+
+        this.rA.x = pAx - a.position.x;
+        this.rA.y = pAy - a.position.y;
+        this.rB.x = pBx - b.position.x;
+        this.rB.y = pBy - b.position.y;
 
         // Tangent
         this.tangent.x = this.normal.y;
