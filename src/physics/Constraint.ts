@@ -216,12 +216,16 @@ export class ContactConstraint extends Constraint {
         const a = this.a;
         const b = this.b;
 
-        const vA = a.velocity.addNew(this.rA.crossScalar(a.angularVelocity));
-        const vB = b.velocity.addNew(this.rB.crossScalar(b.angularVelocity));
-        const vRel = vA.subNew(vB);
+        const vAx = a.velocity.x + -a.angularVelocity * this.rA.y;
+        const vAy = a.velocity.y + a.angularVelocity * this.rA.x;
+        const vBx = b.velocity.x + -b.angularVelocity * this.rB.y;
+        const vBy = b.velocity.y + b.angularVelocity * this.rB.x;
+
+        const vRelx = vAx - vBx;
+        const vRely = vAy - vBy;
 
         /* -------- Normal impulse -------- */
-        const vn = vRel.dot(this.normal);
+        const vn = vRelx * this.normal.x + vRely * this.normal.y;
 
         let dPn = this.normalMass * (-vn + this.bias + this.restitutionBias);
 
@@ -229,18 +233,19 @@ export class ContactConstraint extends Constraint {
         this.normalImpulse = Math.max(oldPn + dPn, 0);
         dPn = this.normalImpulse - oldPn;
 
-        const Pn = this.normal.scaleNew(dPn);
+        const Pnx = this.normal.x * dPn;
+        const Pny = this.normal.y * dPn;
 
-        a.velocity.x += Pn.x * a.invMass;
-        a.velocity.y += Pn.y * a.invMass;
-        a.angularVelocity += (this.rA.x * Pn.y - this.rA.y * Pn.x) * a.invI;
+        a.velocity.x += Pnx * a.invMass;
+        a.velocity.y += Pny * a.invMass;
+        a.angularVelocity += (this.rA.x * Pny - this.rA.y * Pnx) * a.invI;
 
-        b.velocity.x += -Pn.x * b.invMass;
-        b.velocity.y += -Pn.y * b.invMass;
-        b.angularVelocity += (this.rB.x * -Pn.y - this.rB.y * -Pn.x) * b.invI;
+        b.velocity.x += -Pnx * b.invMass;
+        b.velocity.y += -Pny * b.invMass;
+        b.angularVelocity += (this.rB.x * -Pny - this.rB.y * -Pnx) * b.invI;
 
         /* -------- Friction impulse -------- */
-        const vt = vRel.dot(this.tangent);
+        const vt = vRelx * this.tangent.x + vRely * this.tangent.y;
 
         let dPt = -vt * this.tangentMass;
 
@@ -251,15 +256,16 @@ export class ContactConstraint extends Constraint {
         this.tangentImpulse = Utils.clamp(oldPt + dPt, -maxPt, maxPt);
         dPt = this.tangentImpulse - oldPt;
 
-        const Pt = this.tangent.scaleNew(dPt);
+        const Ptx = this.tangent.x * dPt;
+        const Pty = this.tangent.y * dPt;
 
-        a.velocity.x += Pt.x * a.invMass;
-        a.velocity.y += Pt.y * a.invMass;
-        a.angularVelocity += (this.rA.x * Pt.y - this.rA.y * Pt.x) * a.invI;
+        a.velocity.x += Ptx * a.invMass;
+        a.velocity.y += Pty * a.invMass;
+        a.angularVelocity += (this.rA.x * Pty - this.rA.y * Ptx) * a.invI;
 
-        b.velocity.x += -Pt.x * b.invMass;
-        b.velocity.y += -Pt.y * b.invMass;
-        b.angularVelocity += (this.rB.x * -Pt.y - this.rB.y * -Pt.x) * b.invI;
+        b.velocity.x += -Ptx * b.invMass;
+        b.velocity.y += -Pty * b.invMass;
+        b.angularVelocity += (this.rB.x * -Pty - this.rB.y * -Ptx) * b.invI;
     }
 
     postSolve(): void {
