@@ -179,14 +179,14 @@ export class ContactConstraint extends Constraint {
         this.tangent.y = -this.normal.x;
 
         // Effective mass (normal)
-        const rnA = this.rA.x * this.normal.x + this.rA.y * this.normal.y;
-        const rnB = this.rB.x * this.normal.x + this.rB.y * this.normal.y;
+        const rnA = this.rA.x * this.normal.y - this.rA.y * this.normal.x;
+        const rnB = this.rB.x * this.normal.y - this.rB.y * this.normal.x;
 
         this.normalMass = 1 / (a.invMass + b.invMass + rnA * rnA * a.invI + rnB * rnB * b.invI);
 
         // Effective mass (tangent)
-        const rtA = this.rA.x * this.tangent.x + this.rA.y * this.tangent.y;
-        const rtB = this.rB.x * this.tangent.x + this.rB.y * this.tangent.y;
+        const rtA = this.rA.x * this.tangent.y - this.rA.y * this.tangent.x;
+        const rtB = this.rB.x * this.tangent.y - this.rB.y * this.tangent.x;
 
         this.tangentMass = 1 / (a.invMass + b.invMass + rtA * rtA * a.invI + rtB * rtB * b.invI);
 
