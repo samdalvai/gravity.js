@@ -127,8 +127,9 @@ export class JointConstraint extends Constraint {
 }
 
 export class ContactConstraint extends Constraint {
-    normal: Vec2;
-    depth: number;
+    private normalX = 0;
+    private normalY = 0;
+    private depth: number;
 
     // rA / rB (world space)
     private rAx = 0;
@@ -155,7 +156,9 @@ export class ContactConstraint extends Constraint {
         super(a, b, start, end);
 
         // Ensure normal always points A → B
-        this.normal = normalWorld.negate();
+        // TODO: Why do we need to negate the normal?
+        this.normalX = -normalWorld.x;
+        this.normalY = -normalWorld.y;
         this.depth = depth;
     }
 
@@ -180,12 +183,12 @@ export class ContactConstraint extends Constraint {
         this.rBy = pBy - b.position.y;
 
         // Tangent
-        this.tangentX = this.normal.y;
-        this.tangentY = -this.normal.x;
+        this.tangentX = this.normalY;
+        this.tangentY = -this.normalX;
 
         // Effective mass (normal)
-        const rnA = this.rAx * this.normal.y - this.rAy * this.normal.x;
-        const rnB = this.rBx * this.normal.y - this.rBy * this.normal.x;
+        const rnA = this.rAx * this.normalY - this.rAy * this.normalX;
+        const rnB = this.rBx * this.normalY - this.rBy * this.normalX;
 
         this.normalMass = 1 / (a.invMass + b.invMass + rnA * rnA * a.invI + rnB * rnB * b.invI);
 
@@ -210,7 +213,7 @@ export class ContactConstraint extends Constraint {
         const vRelx = vAx - vBx;
         const vRely = vAy - vBy;
 
-        const vn = vRelx * this.normal.x + vRely * this.normal.y;
+        const vn = vRelx * this.normalX + vRely * this.normalY;
 
         const e = Math.min(a.restitution, b.restitution);
 
@@ -218,8 +221,8 @@ export class ContactConstraint extends Constraint {
         this.restitutionBias = vn < -restitutionSlop ? -e * vn : 0;
 
         // Warm starting
-        const px = this.normal.x * this.normalImpulse + this.tangentX * this.tangentImpulse;
-        const py = this.normal.y * this.normalImpulse + this.tangentY * this.tangentImpulse;
+        const px = this.normalX * this.normalImpulse + this.tangentX * this.tangentImpulse;
+        const py = this.normalY * this.normalImpulse + this.tangentY * this.tangentImpulse;
 
         a.velocity.x += px * a.invMass;
         a.velocity.y += py * a.invMass;
@@ -243,7 +246,7 @@ export class ContactConstraint extends Constraint {
         const vRely = vAy - vBy;
 
         // Normal impulse
-        const vn = vRelx * this.normal.x + vRely * this.normal.y;
+        const vn = vRelx * this.normalX + vRely * this.normalY;
 
         let dPn = this.normalMass * (-vn + this.bias + this.restitutionBias);
 
@@ -251,8 +254,8 @@ export class ContactConstraint extends Constraint {
         this.normalImpulse = Math.max(oldPn + dPn, 0);
         dPn = this.normalImpulse - oldPn;
 
-        const Pnx = this.normal.x * dPn;
-        const Pny = this.normal.y * dPn;
+        const Pnx = this.normalX * dPn;
+        const Pny = this.normalY * dPn;
 
         a.velocity.x += Pnx * a.invMass;
         a.velocity.y += Pny * a.invMass;
