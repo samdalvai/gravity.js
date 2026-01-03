@@ -80,7 +80,7 @@ export default class World {
         }
 
         // Check all the bodies with all other bodies detecting collisions
-        // console.time('contacts');
+        console.time('contacts');
 
         this.contacts.length = 0;
         for (let i = 0; i <= this.bodies.length - 1; i++) {
@@ -100,7 +100,7 @@ export default class World {
             }
         }
 
-        // console.timeEnd('contacts');
+        console.timeEnd('contacts');
         // console.time('solver');
 
         // Solve all constraints
