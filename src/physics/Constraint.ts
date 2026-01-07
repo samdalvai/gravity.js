@@ -391,14 +391,14 @@ export class ContactConstraint extends Constraint {
     }
 
     postSolve(): void {
-        // Clamp accumulated impulses to prevent numerical blow-up or instability
-        const maxAccumulatedImpulse = 1e6;
-        this.accumulatedNormalImpulse = Math.min(this.accumulatedNormalImpulse, maxAccumulatedImpulse);
-        this.accumulatedTangentImpulse = Utils.clamp(
-            this.accumulatedTangentImpulse,
-            -maxAccumulatedImpulse,
-            maxAccumulatedImpulse,
-        );
+        // Optional: Clamp accumulated impulses to prevent numerical blow-up or instability
+        // const maxAccumulatedImpulse = 1e6;
+        // this.accumulatedNormalImpulse = Math.min(this.accumulatedNormalImpulse, maxAccumulatedImpulse);
+        // this.accumulatedTangentImpulse = Utils.clamp(
+        //     this.accumulatedTangentImpulse,
+        //     -maxAccumulatedImpulse,
+        //     maxAccumulatedImpulse,
+        // );
 
         // Apply opposite sign torque to avoid infinite rolling of bodies
         const rollingResistance = 0.2;
