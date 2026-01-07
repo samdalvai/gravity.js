@@ -76,11 +76,16 @@ export class JointConstraint extends Constraint {
         this.M = K.invert();
 
         // ---- Bias (position correction) ----
-        const pA = this.bodyA.position.addNew(this.rA);
-        const pB = this.bodyB.position.addNew(this.rB);
-        const relPos = pB.subNew(pA);
+        const pAX = this.bodyA.position.x + this.rA.x;
+        const pAY = this.bodyA.position.y + this.rA.y;
+        const pbX = this.bodyB.position.x + this.rB.x;
+        const pbY = this.bodyB.position.y + this.rB.y;
 
-        this.bias = relPos.scaleNew(-this.biasFactor * invDt);
+        const relPosX = pbX - pAX;
+        const relPosY = pbY - pAY;
+
+        this.bias.x = relPosX * (-this.biasFactor * invDt);
+        this.bias.y = relPosY * (-this.biasFactor * invDt);
 
         // ---- Warm starting ----
         this.bodyA.velocity.x -= this.cachedLambda.x * this.bodyA.invMass;
