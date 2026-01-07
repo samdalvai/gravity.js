@@ -53,8 +53,11 @@ export class JointConstraint extends Constraint {
     preSolve(invDt: number): void {
         const pa = this.bodyA.localSpaceToWorldSpace(this.aPointLocal);
         const pb = this.bodyB.localSpaceToWorldSpace(this.bPointLocal);
-        this.rA = pa.subNew(this.bodyA.position);
-        this.rB = pb.subNew(this.bodyB.position);
+
+        this.rA.x = pa.x - this.bodyA.position.x;
+        this.rA.y = pa.y - this.bodyA.position.y;
+        this.rB.x = pb.x - this.bodyB.position.x;
+        this.rB.y = pb.y - this.bodyB.position.y;
 
         // ---- Effective mass matrix ----
         const K = new Mat22();
