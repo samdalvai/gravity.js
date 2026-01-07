@@ -121,9 +121,14 @@ export class JointConstraint extends Constraint {
         const vA = this.bodyA.velocity.addNew(this.rA.crossScalar(this.bodyA.angularVelocity));
         const vB = this.bodyB.velocity.addNew(this.rB.crossScalar(this.bodyB.angularVelocity));
 
+        // crossScalar(n: number): Vec2 {
+        //     return new Vec2(-n * this.y, n * this.x);
+        // }
+
         const dv = vB.subNew(vA);
 
-        const impulse = Mat22.multiply(this.M, this.bias.subNew(dv).subNew(this.cachedLambda.scaleNew(this.softness)));
+        const lambdaVector = this.bias.subNew(dv).subNew(this.cachedLambda.scaleNew(this.softness));
+        const impulse = Mat22.multiply(this.M, lambdaVector);
 
         this.bodyA.velocity.x -= impulse.x * this.bodyA.invMass;
         this.bodyA.velocity.y -= impulse.y * this.bodyA.invMass;
@@ -133,7 +138,8 @@ export class JointConstraint extends Constraint {
         this.bodyB.velocity.y += impulse.y * this.bodyB.invMass;
         this.bodyB.angularVelocity += this.bodyB.invI * (this.rB.x * impulse.y - this.rB.y * impulse.x);
 
-        this.cachedLambda.add(impulse);
+        this.cachedLambda.x += impulse.x;
+        this.cachedLambda.y += impulse.y;
     }
 
     postSolve(): void {
