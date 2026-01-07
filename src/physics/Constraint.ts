@@ -23,22 +23,22 @@ export abstract class Constraint {
 }
 
 export class JointConstraint extends Constraint {
-    m00 = 0;
-    m01 = 0;
-    m11 = 0;
+    private m00 = 0;
+    private m01 = 0;
+    private m11 = 0;
 
-    rAx = 0;
-    rAy = 0;
-    rBx = 0;
-    rBy = 0;
+    private rAx = 0;
+    private rAy = 0;
+    private rBx = 0;
+    private rBy = 0;
 
-    biasX = 0;
-    biasY = 0;
-    cachedLambdaX = 0;
-    cachedLambdaY = 0;
+    private biasX = 0;
+    private biasY = 0;
+    private cachedLambdaX = 0;
+    private cachedLambdaY = 0;
 
-    biasFactor: number;
-    softness: number;
+    private biasFactor: number;
+    private softness: number;
 
     constructor(a: Body, b: Body, anchorWorld: Vec2, softness = 0.01, biasFactor = 0.2) {
         super(a, b, anchorWorld, anchorWorld);
