@@ -28,6 +28,10 @@ export class JointConstraint extends Constraint {
 
     rA: Vec2;
     rB: Vec2;
+    rAx = 0;
+    rAy = 0;
+    rBx = 0;
+    rBy = 0;
 
     bias: Vec2;
     cachedLambda: Vec2; // accumulated impulse
