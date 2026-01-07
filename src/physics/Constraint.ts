@@ -83,11 +83,15 @@ export class JointConstraint extends Constraint {
         this.bias = relPos.scaleNew(-this.biasFactor * invDt);
 
         // ---- Warm starting ----
-        this.bodyA.velocity.sub(this.cachedLambda.scaleNew(this.bodyA.invMass));
-        this.bodyA.angularVelocity -= this.bodyA.invI * this.rA.cross(this.cachedLambda);
+        this.bodyA.velocity.x -= this.cachedLambda.x * this.bodyA.invMass;
+        this.bodyA.velocity.y -= this.cachedLambda.y * this.bodyA.invMass;
+        this.bodyA.angularVelocity -=
+            this.bodyA.invI * (this.rA.x * this.cachedLambda.y - this.rA.y * this.cachedLambda.x);
 
-        this.bodyB.velocity.add(this.cachedLambda.scaleNew(this.bodyB.invMass));
-        this.bodyB.angularVelocity += this.bodyB.invI * this.rB.cross(this.cachedLambda);
+        this.bodyB.velocity.x += this.cachedLambda.x * this.bodyB.invMass;
+        this.bodyB.velocity.y += this.cachedLambda.y * this.bodyB.invMass;
+        this.bodyB.angularVelocity +=
+            this.bodyB.invI * (this.rB.x * this.cachedLambda.y - this.rB.y * this.cachedLambda.x);
     }
 
     solve(): void {
@@ -98,11 +102,13 @@ export class JointConstraint extends Constraint {
 
         const impulse = Mat22.multiply(this.M, this.bias.subNew(dv).subNew(this.cachedLambda.scaleNew(this.softness)));
 
-        this.bodyA.velocity.sub(impulse.scaleNew(this.bodyA.invMass));
-        this.bodyA.angularVelocity -= this.bodyA.invI * this.rA.cross(impulse);
+        this.bodyA.velocity.x -= impulse.x * this.bodyA.invMass;
+        this.bodyA.velocity.y -= impulse.y * this.bodyA.invMass;
+        this.bodyA.angularVelocity -= this.bodyA.invI * (this.rA.x * impulse.y - this.rA.y * impulse.x);
 
-        this.bodyB.velocity.add(impulse.scaleNew(this.bodyB.invMass));
-        this.bodyB.angularVelocity += this.bodyB.invI * this.rB.cross(impulse);
+        this.bodyB.velocity.x += impulse.x * this.bodyB.invMass;
+        this.bodyB.velocity.y += impulse.y * this.bodyB.invMass;
+        this.bodyB.angularVelocity += this.bodyB.invI * (this.rB.x * impulse.y - this.rB.y * impulse.x);
 
         this.cachedLambda.add(impulse);
     }
