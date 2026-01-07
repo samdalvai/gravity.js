@@ -294,7 +294,8 @@ export class ContactConstraint extends Constraint {
 
         // Apply restitution only if separating velocity exceeds threshold (to avoid unnecessary bounce)
         const restitutionThreshold = 0.5 * inverseDeltaTime;
-        this.restitutionVelocityBias = normalRelativeVelocity < -restitutionThreshold ? -restitution * normalRelativeVelocity : 0;
+        this.restitutionVelocityBias =
+            normalRelativeVelocity < -restitutionThreshold ? -restitution * normalRelativeVelocity : 0;
 
         // Warm starting: Apply accumulated impulses from previous frame to velocities for faster convergence
         const impulseX =
@@ -390,7 +391,7 @@ export class ContactConstraint extends Constraint {
     }
 
     postSolve(): void {
-        // Optional: Clamp accumulated impulses to prevent numerical blow-up or instability
+        // Clamp accumulated impulses to prevent numerical blow-up or instability
         const maxAccumulatedImpulse = 1e6;
         this.accumulatedNormalImpulse = Math.min(this.accumulatedNormalImpulse, maxAccumulatedImpulse);
         this.accumulatedTangentImpulse = Utils.clamp(
@@ -398,5 +399,14 @@ export class ContactConstraint extends Constraint {
             -maxAccumulatedImpulse,
             maxAccumulatedImpulse,
         );
+
+        // Apply opposite sign torque to avoid infinite rolling of bodies
+        const rollingResistance = 0.2;
+
+        const resistanceTorqueA = rollingResistance * this.accumulatedNormalImpulse * Math.sign(this.bodyA.angularVelocity);
+        const resistanceTorqueB = rollingResistance * this.accumulatedNormalImpulse * Math.sign(this.bodyB.angularVelocity);
+
+        this.bodyA.angularVelocity -= resistanceTorqueA * this.bodyA.invI;
+        this.bodyB.angularVelocity -= resistanceTorqueB * this.bodyB.invI;
     }
 }
