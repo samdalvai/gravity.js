@@ -15,7 +15,7 @@ export default class Demo {
         'Demo 5: A skeleton ragdoll',
         'Demo 6: ....',
         'Demo 7: ....',
-        'Demo 8: ....',
+        'Demo 8: Stress test',
         'Demo 9: A complex scene',
     ];
 
@@ -220,8 +220,6 @@ export default class Demo {
         // Demo 6: Debug demo
         this.generateFloor(world);
         this.generateFences(world);
-
-
     };
 
     static demo7 = (world: World) => {
@@ -229,7 +227,90 @@ export default class Demo {
     };
 
     static demo8 = (world: World) => {
-        // Demo 8: ....
+        // Demo 8: stress test
+        this.generateFloor(world);
+        this.generateFences(world);
+
+        // Suspension Bridge Creation
+        const numSteps = 10;
+        const stepWidth = 40;
+        const spacing = stepWidth + 2.5; // distance between centers
+        const startX = Graphics.width() / 2 - (numSteps * spacing) / 2 - stepWidth / 2;
+        const startY = Graphics.height() / 2;
+        const softness = 0.002;
+        const bias = 0.1;
+
+        // Start anchor (static)
+        const startAnchor = new Body(new BoxShape(stepWidth * 2, stepWidth * 0.5), startX - stepWidth / 2, startY, 0.0);
+        startAnchor.setTexture('rockBridgeAnchor');
+        world.addBody(startAnchor);
+
+        // First connection uses the start anchor
+        let lastStep = startAnchor;
+
+        // Create steps
+        for (let i = 1; i <= numSteps; i++) {
+            const x = startX + i * spacing;
+
+            // Optional sag: small vertical sinusoidal displacement
+            const y = startY + Math.sin((i / numSteps) * Math.PI) * 10;
+
+            const step = new Body(new CircleShape(stepWidth * 0.5), x, y, 3);
+            step.setTexture('woodBridgeStep');
+            world.addBody(step);
+
+            // Joint anchor at left edge of this step
+            const anchor = step.position.subNew(new Vec2(stepWidth / 2, 0));
+            const joint = new JointConstraint(lastStep, step, anchor, softness, bias);
+            world.addJoint(joint);
+
+            lastStep = step;
+        }
+
+        // End anchor (static)
+        const endAnchor = new Body(
+            new BoxShape(stepWidth * 2, stepWidth * 0.5),
+            lastStep.position.x + spacing + stepWidth / 2,
+            startY,
+            0.0,
+        );
+        endAnchor.setTexture('rockBridgeAnchor');
+        world.addBody(endAnchor);
+
+        // Final joint anchor at right edge of last step
+        const finalAnchor = lastStep.position.addNew(new Vec2(stepWidth / 2, 0));
+        const lastJoint = new JointConstraint(lastStep, endAnchor, finalAnchor, softness, bias);
+        world.addJoint(lastJoint);
+
+        const boxSizeLarge = 40;
+        const numBoxLargeHorizontal = 10;
+
+        for (let i = 0; i < numBoxLargeHorizontal; i++) {
+            for (let j = 0; j < 10; j++) {
+                const box = new Body(
+                    new BoxShape(boxSizeLarge, boxSizeLarge),
+                    Graphics.width() / 2 - (numBoxLargeHorizontal * boxSizeLarge) / 2 + boxSizeLarge / 2 + i * boxSizeLarge,
+                    -500 + j * boxSizeLarge,
+                    1,
+                );
+                world.addBody(box);
+            }
+        }
+
+        const boxSizeSmall = 20;
+        const numBoxSmallHorizontal = 20;
+
+        for (let i = 0; i < numBoxSmallHorizontal; i++) {
+            for (let j = 0; j < 10; j++) {
+                const box = new Body(
+                    new BoxShape(boxSizeSmall, boxSizeSmall),
+                    Graphics.width() / 2 - (numBoxSmallHorizontal * boxSizeSmall) / 2 + boxSizeSmall / 2 + i * boxSizeSmall,
+                    -2000 + j * boxSizeSmall,
+                    1,
+                );
+                world.addBody(box);
+            }
+        }
     };
 
     static demo9 = (world: World) => {
