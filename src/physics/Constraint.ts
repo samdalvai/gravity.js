@@ -24,7 +24,9 @@ export abstract class Constraint {
 }
 
 export class JointConstraint extends Constraint {
-    M: Mat22;
+    m00 = 0;
+    m01 = 0;
+    m11 = 0;
 
     rA: Vec2;
     rB: Vec2;
@@ -41,8 +43,6 @@ export class JointConstraint extends Constraint {
 
     constructor(a: Body, b: Body, anchorWorld: Vec2, softness = 0.01, biasFactor = 0.2) {
         super(a, b, anchorWorld, anchorWorld);
-
-        this.M = new Mat22();
 
         this.rA = new Vec2();
         this.rB = new Vec2();
@@ -74,24 +74,25 @@ export class JointConstraint extends Constraint {
         this.rB.x = anchorWorldBX - this.bodyB.position.x;
         this.rB.y = anchorWorldBY - this.bodyB.position.y;
 
-        // ---- Effective mass matrix ----
-        const K = new Mat22();
-        K.col1.x =
+        const Km00 =
             this.bodyA.invMass +
             this.bodyB.invMass +
             this.bodyA.invI * this.rA.y * this.rA.y +
             this.bodyB.invI * this.rB.y * this.rB.y +
             this.softness;
-        K.col1.y = -this.bodyA.invI * this.rA.x * this.rA.y + -this.bodyB.invI * this.rB.x * this.rB.y;
-        K.col2.x = -this.bodyA.invI * this.rA.x * this.rA.y + -this.bodyB.invI * this.rB.x * this.rB.y;
-        K.col2.y =
+        const Km01 = -this.bodyA.invI * this.rA.x * this.rA.y + -this.bodyB.invI * this.rB.x * this.rB.y;
+        const Km11 =
             this.bodyA.invMass +
             this.bodyB.invMass +
             this.bodyA.invI * this.rA.x * this.rA.x +
             this.bodyB.invI * this.rB.x * this.rB.x +
             this.softness;
 
-        this.M = K.invert();
+        const det = 1.0 / (Km00 * Km11 - Km01 * Km01);
+
+        this.m00 = det * Km11;
+        this.m01 = -det * Km01;
+        this.m11 = det * Km00;
 
         // ---- Bias (position correction) ----
         const pAX = this.bodyA.position.x + this.rA.x;
@@ -130,8 +131,8 @@ export class JointConstraint extends Constraint {
         const lambdaVectorX = this.bias.x - dvx - this.cachedLambda.x * this.softness;
         const lambdaVectorY = this.bias.y - dvy - this.cachedLambda.y * this.softness;
 
-        const impulseX = this.M.col1.x * lambdaVectorX + this.M.col2.x * lambdaVectorY;
-        const impulseY = this.M.col1.y * lambdaVectorX + this.M.col2.y * lambdaVectorY;
+        const impulseX = this.m00 * lambdaVectorX + this.m01 * lambdaVectorY;
+        const impulseY = this.m01 * lambdaVectorX + this.m11 * lambdaVectorY;
 
         this.bodyA.velocity.x -= impulseX * this.bodyA.invMass;
         this.bodyA.velocity.y -= impulseY * this.bodyA.invMass;
