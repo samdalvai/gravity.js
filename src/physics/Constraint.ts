@@ -51,13 +51,24 @@ export class JointConstraint extends Constraint {
     }
 
     preSolve(invDt: number): void {
-        const pa = this.bodyA.localSpaceToWorldSpace(this.aPointLocal);
-        const pb = this.bodyB.localSpaceToWorldSpace(this.bPointLocal);
+        const bodyA = this.bodyA;
+        const bodyB = this.bodyB;
 
-        this.rA.x = pa.x - this.bodyA.position.x;
-        this.rA.y = pa.y - this.bodyA.position.y;
-        this.rB.x = pb.x - this.bodyB.position.x;
-        this.rB.y = pb.y - this.bodyB.position.y;
+        // Transform local contact points to world space using current rotation and position
+        const cosA = Math.cos(bodyA.rotation);
+        const sinA = Math.sin(bodyA.rotation);
+        const anchorWorldAX = this.aPointLocal.x * cosA - this.aPointLocal.y * sinA + bodyA.position.x;
+        const anchorWorldAY = this.aPointLocal.x * sinA + this.aPointLocal.y * cosA + bodyA.position.y;
+
+        const cosB = Math.cos(bodyB.rotation);
+        const sinB = Math.sin(bodyB.rotation);
+        const anchorWorldBX = this.bPointLocal.x * cosB - this.bPointLocal.y * sinB + bodyB.position.x;
+        const anchorWorldBY = this.bPointLocal.x * sinB + this.bPointLocal.y * cosB + bodyB.position.y;
+
+        this.rA.x = anchorWorldAX - this.bodyA.position.x;
+        this.rA.y = anchorWorldAY - this.bodyA.position.y;
+        this.rB.x = anchorWorldBX - this.bodyB.position.x;
+        this.rB.y = anchorWorldBY - this.bodyB.position.y;
 
         // ---- Effective mass matrix ----
         const K = new Mat22();
