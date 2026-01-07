@@ -23,35 +23,43 @@ export abstract class Constraint {
 }
 
 export class JointConstraint extends Constraint {
-    private m00 = 0;
-    private m01 = 0;
-    private m11 = 0;
+    // Elements of the 2x2 effective mass matrix (inverse of the constraint mass matrix) for x-x, x-y, and y-y components.
+    private effectiveMassXX = 0;
+    private effectiveMassXY = 0;
+    private effectiveMassYY = 0;
 
-    private rAx = 0;
-    private rAy = 0;
-    private rBx = 0;
-    private rBy = 0;
+    // Lever arms (vectors from centers of mass to anchor points in world space)
+    private leverArmAX = 0;
+    private leverArmAY = 0;
+    private leverArmBX = 0;
+    private leverArmBY = 0;
 
-    private biasX = 0;
-    private biasY = 0;
-    private cachedLambdaX = 0;
-    private cachedLambdaY = 0;
+    // The position correction bias Baumgarte stabilization).
+    private positionBiasX = 0;
+    private positionBiasY = 0;
 
+    // The accumulated impulse for the x-direction (for warm starting and sequential solving).
+    private accumulatedImpulseX = 0;
+    private accumulatedImpulseY = 0;
+
+    // Strength of position correction (typically between 0 and 1)
     private biasFactor: number;
+    
+    // Softness parameter allowing some constraint compliance (for stability in soft constraints).
     private softness: number;
 
-    constructor(a: Body, b: Body, anchorWorld: Vec2, softness = 0.01, biasFactor = 0.2) {
-        super(a, b, anchorWorld, anchorWorld);
+    constructor(bodyA: Body, bodyB: Body, worldAnchorPoint: Vec2, softness = 0.01, biasFactor = 0.2) {
+        super(bodyA, bodyB, worldAnchorPoint, worldAnchorPoint);
 
         this.softness = softness;
         this.biasFactor = biasFactor;
     }
 
-    preSolve(invDt: number): void {
+    preSolve(inverseDeltaTime: number): void {
         const bodyA = this.bodyA;
         const bodyB = this.bodyB;
 
-        // Transform local contact points to world space using current rotation and position
+        // Transform local anchor points to world space using current rotation and position
         const cosA = Math.cos(bodyA.rotation);
         const sinA = Math.sin(bodyA.rotation);
         const anchorWorldAX = this.aPointLocal.x * cosA - this.aPointLocal.y * sinA + bodyA.position.x;
@@ -62,89 +70,109 @@ export class JointConstraint extends Constraint {
         const anchorWorldBX = this.bPointLocal.x * cosB - this.bPointLocal.y * sinB + bodyB.position.x;
         const anchorWorldBY = this.bPointLocal.x * sinB + this.bPointLocal.y * cosB + bodyB.position.y;
 
-        this.rAx = anchorWorldAX - this.bodyA.position.x;
-        this.rAy = anchorWorldAY - this.bodyA.position.y;
-        this.rBx = anchorWorldBX - this.bodyB.position.x;
-        this.rBy = anchorWorldBY - this.bodyB.position.y;
+        // Compute lever arms (vectors from centers of mass to anchor points in world space)
+        this.leverArmAX = anchorWorldAX - bodyA.position.x;
+        this.leverArmAY = anchorWorldAY - bodyA.position.y;
+        this.leverArmBX = anchorWorldBX - bodyB.position.x;
+        this.leverArmBY = anchorWorldBY - bodyB.position.y;
 
-        const Km00 =
-            this.bodyA.invMass +
-            this.bodyB.invMass +
-            this.bodyA.invI * this.rAy * this.rAy +
-            this.bodyB.invI * this.rBy * this.rBy +
+        // Compute the constraint mass matrix K (including softness on diagonal)
+        const massMatrixXX =
+            bodyA.invMass +
+            bodyB.invMass +
+            bodyA.invI * this.leverArmAY * this.leverArmAY +
+            bodyB.invI * this.leverArmBY * this.leverArmBY +
             this.softness;
-        const Km01 = -this.bodyA.invI * this.rAx * this.rAy + -this.bodyB.invI * this.rBx * this.rBy;
-        const Km11 =
-            this.bodyA.invMass +
-            this.bodyB.invMass +
-            this.bodyA.invI * this.rAx * this.rAx +
-            this.bodyB.invI * this.rBx * this.rBx +
+        const massMatrixXY =
+            -bodyA.invI * this.leverArmAX * this.leverArmAY - bodyB.invI * this.leverArmBX * this.leverArmBY;
+        const massMatrixYY =
+            bodyA.invMass +
+            bodyB.invMass +
+            bodyA.invI * this.leverArmAX * this.leverArmAX +
+            bodyB.invI * this.leverArmBX * this.leverArmBX +
             this.softness;
 
-        const det = 1.0 / (Km00 * Km11 - Km01 * Km01);
+        // Compute determinant for inverting the 2x2 matrix
+        const determinant = 1.0 / (massMatrixXX * massMatrixYY - massMatrixXY * massMatrixXY);
 
-        this.m00 = det * Km11;
-        this.m01 = -det * Km01;
-        this.m11 = det * Km00;
+        // Compute effective mass matrix as inverse of K
+        this.effectiveMassXX = determinant * massMatrixYY;
+        this.effectiveMassXY = -determinant * massMatrixXY;
+        this.effectiveMassYY = determinant * massMatrixXX;
 
-        // ---- Bias (position correction) ----
-        const pAX = this.bodyA.position.x + this.rAx;
-        const pAY = this.bodyA.position.y + this.rAy;
-        const pbX = this.bodyB.position.x + this.rBx;
-        const pbY = this.bodyB.position.y + this.rBy;
+        // Compute current world positions of anchors (position correction)
+        const anchorPositionAX = bodyA.position.x + this.leverArmAX;
+        const anchorPositionAY = bodyA.position.y + this.leverArmAY;
+        const anchorPositionBX = bodyB.position.x + this.leverArmBX;
+        const anchorPositionBY = bodyB.position.y + this.leverArmBY;
 
-        const relPosX = pbX - pAX;
-        const relPosY = pbY - pAY;
+        // Compute relative position error (anchorB - anchorA)
+        const relativePositionX = anchorPositionBX - anchorPositionAX;
+        const relativePositionY = anchorPositionBY - anchorPositionAY;
 
-        this.biasX = relPosX * (-this.biasFactor * invDt);
-        this.biasY = relPosY * (-this.biasFactor * invDt);
+        // Compute position biases using Baumgarte stabilization
+        this.positionBiasX = relativePositionX * (-this.biasFactor * inverseDeltaTime);
+        this.positionBiasY = relativePositionY * (-this.biasFactor * inverseDeltaTime);
 
-        // ---- Warm starting ----
-        this.bodyA.velocity.x -= this.cachedLambdaX * this.bodyA.invMass;
-        this.bodyA.velocity.y -= this.cachedLambdaY * this.bodyA.invMass;
-        this.bodyA.angularVelocity -= this.bodyA.invI * (this.rAx * this.cachedLambdaY - this.rAy * this.cachedLambdaX);
+        // Apply accumulated impulses from previous frame to velocities for faster convergence (Warm starting)
+        bodyA.velocity.x -= this.accumulatedImpulseX * bodyA.invMass;
+        bodyA.velocity.y -= this.accumulatedImpulseY * bodyA.invMass;
+        bodyA.angularVelocity -=
+            bodyA.invI * (this.leverArmAX * this.accumulatedImpulseY - this.leverArmAY * this.accumulatedImpulseX);
 
-        this.bodyB.velocity.x += this.cachedLambdaX * this.bodyB.invMass;
-        this.bodyB.velocity.y += this.cachedLambdaY * this.bodyB.invMass;
-        this.bodyB.angularVelocity += this.bodyB.invI * (this.rBx * this.cachedLambdaY - this.rBy * this.cachedLambdaX);
+        bodyB.velocity.x += this.accumulatedImpulseX * bodyB.invMass;
+        bodyB.velocity.y += this.accumulatedImpulseY * bodyB.invMass;
+        bodyB.angularVelocity +=
+            bodyB.invI * (this.leverArmBX * this.accumulatedImpulseY - this.leverArmBY * this.accumulatedImpulseX);
     }
 
     solve(): void {
-        const vAx = this.bodyA.velocity.x + -this.bodyA.angularVelocity * this.rAy;
-        const vAy = this.bodyA.velocity.y + this.bodyA.angularVelocity * this.rAx;
+        const bodyA = this.bodyA;
+        const bodyB = this.bodyB;
 
-        const vBx = this.bodyB.velocity.x + -this.bodyB.angularVelocity * this.rBy;
-        const vBy = this.bodyB.velocity.y + this.bodyB.angularVelocity * this.rBx;
+        // Compute velocities at anchor points (linear velocity plus angular contribution)
+        const velocityAtAnchorAX = bodyA.velocity.x - bodyA.angularVelocity * this.leverArmAY;
+        const velocityAtAnchorAY = bodyA.velocity.y + bodyA.angularVelocity * this.leverArmAX;
 
-        const dvx = vBx - vAx;
-        const dvy = vBy - vAy;
+        const velocityAtAnchorBX = bodyB.velocity.x - bodyB.angularVelocity * this.leverArmBY;
+        const velocityAtAnchorBY = bodyB.velocity.y + bodyB.angularVelocity * this.leverArmBX;
 
-        const lambdaVectorX = this.biasX - dvx - this.cachedLambdaX * this.softness;
-        const lambdaVectorY = this.biasY - dvy - this.cachedLambdaY * this.softness;
+        // Compute relative velocities (B - A)
+        const relativeVelocityX = velocityAtAnchorBX - velocityAtAnchorAX;
+        const relativeVelocityY = velocityAtAnchorBY - velocityAtAnchorAY;
 
-        const impulseX = this.m00 * lambdaVectorX + this.m01 * lambdaVectorY;
-        const impulseY = this.m01 * lambdaVectorX + this.m11 * lambdaVectorY;
+        // Compute the constraint violation vector (bias - relative velocity - softness * accumulated)
+        const constraintViolationX = this.positionBiasX - relativeVelocityX - this.accumulatedImpulseX * this.softness;
+        const constraintViolationY = this.positionBiasY - relativeVelocityY - this.accumulatedImpulseY * this.softness;
 
-        this.bodyA.velocity.x -= impulseX * this.bodyA.invMass;
-        this.bodyA.velocity.y -= impulseY * this.bodyA.invMass;
-        this.bodyA.angularVelocity -= this.bodyA.invI * (this.rAx * impulseY - this.rAy * impulseX);
+        // Compute delta impulse using effective mass matrix
+        const deltaImpulseX = this.effectiveMassXX * constraintViolationX + this.effectiveMassXY * constraintViolationY;
+        const deltaImpulseY = this.effectiveMassXY * constraintViolationX + this.effectiveMassYY * constraintViolationY;
 
-        this.bodyB.velocity.x += impulseX * this.bodyB.invMass;
-        this.bodyB.velocity.y += impulseY * this.bodyB.invMass;
-        this.bodyB.angularVelocity += this.bodyB.invI * (this.rBx * impulseY - this.rBy * impulseX);
+        // Apply delta impulses to bodies (negative on A, positive on B)
+        bodyA.velocity.x -= deltaImpulseX * bodyA.invMass;
+        bodyA.velocity.y -= deltaImpulseY * bodyA.invMass;
+        bodyA.angularVelocity -= bodyA.invI * (this.leverArmAX * deltaImpulseY - this.leverArmAY * deltaImpulseX);
 
-        this.cachedLambdaX += impulseX;
-        this.cachedLambdaY += impulseY;
+        bodyB.velocity.x += deltaImpulseX * bodyB.invMass;
+        bodyB.velocity.y += deltaImpulseY * bodyB.invMass;
+        bodyB.angularVelocity += bodyB.invI * (this.leverArmBX * deltaImpulseY - this.leverArmBY * deltaImpulseX);
+
+        // Accumulate the delta impulses
+        this.accumulatedImpulseX += deltaImpulseX;
+        this.accumulatedImpulseY += deltaImpulseY;
     }
 
     postSolve(): void {
-        // Optional: clamp accumulated impulse (recommended for stability)
-        const maxImpulse = 1000;
-        const mag = Math.sqrt(this.cachedLambdaX * this.cachedLambdaX + this.cachedLambdaY * this.cachedLambdaY);
+        // Optional: Clamp the magnitude of accumulated impulses to prevent numerical instability
+        const maxImpulseMagnitude = 1000;
+        const impulseMagnitude = Math.sqrt(
+            this.accumulatedImpulseX * this.accumulatedImpulseX + this.accumulatedImpulseY * this.accumulatedImpulseY,
+        );
 
-        if (mag > maxImpulse) {
-            this.cachedLambdaX *= maxImpulse / mag;
-            this.cachedLambdaY *= maxImpulse / mag;
+        if (impulseMagnitude > maxImpulseMagnitude) {
+            this.accumulatedImpulseX *= maxImpulseMagnitude / impulseMagnitude;
+            this.accumulatedImpulseY *= maxImpulseMagnitude / impulseMagnitude;
         }
     }
 }
