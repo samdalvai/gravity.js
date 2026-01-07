@@ -128,18 +128,20 @@ export class JointConstraint extends Constraint {
         const dv = vB.subNew(vA);
 
         const lambdaVector = this.bias.subNew(dv).subNew(this.cachedLambda.scaleNew(this.softness));
-        const impulse = Mat22.multiply(this.M, lambdaVector);
 
-        this.bodyA.velocity.x -= impulse.x * this.bodyA.invMass;
-        this.bodyA.velocity.y -= impulse.y * this.bodyA.invMass;
-        this.bodyA.angularVelocity -= this.bodyA.invI * (this.rA.x * impulse.y - this.rA.y * impulse.x);
+        const impulseX = this.M.col1.x * lambdaVector.x + this.M.col2.x * lambdaVector.y;
+        const impulseY = this.M.col1.y * lambdaVector.x + this.M.col2.y * lambdaVector.y;
 
-        this.bodyB.velocity.x += impulse.x * this.bodyB.invMass;
-        this.bodyB.velocity.y += impulse.y * this.bodyB.invMass;
-        this.bodyB.angularVelocity += this.bodyB.invI * (this.rB.x * impulse.y - this.rB.y * impulse.x);
+        this.bodyA.velocity.x -= impulseX * this.bodyA.invMass;
+        this.bodyA.velocity.y -= impulseY * this.bodyA.invMass;
+        this.bodyA.angularVelocity -= this.bodyA.invI * (this.rA.x * impulseY - this.rA.y * impulseX);
 
-        this.cachedLambda.x += impulse.x;
-        this.cachedLambda.y += impulse.y;
+        this.bodyB.velocity.x += impulseX * this.bodyB.invMass;
+        this.bodyB.velocity.y += impulseY * this.bodyB.invMass;
+        this.bodyB.angularVelocity += this.bodyB.invI * (this.rB.x * impulseY - this.rB.y * impulseX);
+
+        this.cachedLambda.x += impulseX;
+        this.cachedLambda.y += impulseY;
     }
 
     postSolve(): void {
