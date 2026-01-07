@@ -44,7 +44,7 @@ export class JointConstraint extends Constraint {
 
     // Strength of position correction (typically between 0 and 1)
     private biasFactor: number;
-    
+
     // Softness parameter allowing some constraint compliance (for stability in soft constraints).
     private softness: number;
 
@@ -293,9 +293,8 @@ export class ContactConstraint extends Constraint {
         const restitution = Math.min(bodyA.restitution, bodyB.restitution);
 
         // Apply restitution only if separating velocity exceeds threshold (to avoid unnecessary bounce)
-        const restitutionThreshold = 10;
-        this.restitutionVelocityBias =
-            normalRelativeVelocity < -restitutionThreshold ? -restitution * normalRelativeVelocity : 0;
+        const restitutionThreshold = 0.5 * inverseDeltaTime;
+        this.restitutionVelocityBias = normalRelativeVelocity < -restitutionThreshold ? -restitution * normalRelativeVelocity : 0;
 
         // Warm starting: Apply accumulated impulses from previous frame to velocities for faster convergence
         const impulseX =
