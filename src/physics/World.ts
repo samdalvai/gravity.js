@@ -80,7 +80,7 @@ export default class World {
         }
 
         // Check all the bodies with all other bodies detecting collisions
-        console.time('contacts');
+        // console.time('contacts');
 
         let distanceX, diastanceY, radiusSum;
 
@@ -112,7 +112,7 @@ export default class World {
             }
         }
 
-        console.timeEnd('contacts');
+        // console.timeEnd('contacts');
         // console.time('solver');
 
         // Solve all constraints
