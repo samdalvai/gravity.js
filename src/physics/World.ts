@@ -82,21 +82,33 @@ export default class World {
         // Check all the bodies with all other bodies detecting collisions
         console.time('contacts');
 
+        let distanceX, diastanceY, radiusSum;
+
         this.contacts.length = 0;
         for (let i = 0; i <= this.bodies.length - 1; i++) {
             for (let j = i + 1; j < this.bodies.length; j++) {
                 const a = this.bodies[i];
                 const b = this.bodies[j];
 
-                // Broad phase check
-                const ab = b.position.subNew(a.position);
-                const radiusSum = a.shape.radius + b.shape.radius;
+                // circle vs circle collision
+                distanceX = b.position.x - a.position.x;
+                diastanceY = b.position.y - a.position.y;
+                radiusSum = a.shape.radius + b.shape.radius;
 
-                if (ab.magnitudeSquared() <= radiusSum * radiusSum) {
-                    // TODO: no need to recheck collision if the two shapes are circles, in that case
-                    // return the contact info directly
+                if (distanceX * distanceX + diastanceY * diastanceY < radiusSum * radiusSum) {
+                    // OBB collision and update contact points
                     CollisionDetection.detectCollision(a, b, this.contacts);
                 }
+
+                // Broad phase check
+                // const ab = b.position.subNew(a.position);
+                // const radiusSum = a.shape.radius + b.shape.radius;
+
+                // if (ab.magnitudeSquared() <= radiusSum * radiusSum) {
+                //     // TODO: no need to recheck collision if the two shapes are circles, in that case
+                //     // return the contact info directly
+                //     CollisionDetection.detectCollision(a, b, this.contacts);
+                // }
             }
         }
 
