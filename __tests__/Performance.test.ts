@@ -38,6 +38,8 @@ describe('Performance', () => {
                     //contact.solve();
                     joint.solve();
                 }
+
+                joint.postSolve();
             }
         }
 
