@@ -14,8 +14,8 @@ describe('Performance', () => {
         const a = new Body(new CircleShape(60), 100, 100, 5);
         const b = new Body(new CircleShape(60), 100, 200, 5);
         const joint = new JointConstraint(a, b, new Vec2(100, 150));
-        a.position.sub(new Vec2(-100, 0));
-        b.position.add(new Vec2(100, 0));
+        a.position.x -= 100;
+        b.position.x += 100;
 
         // Move bodies apart
         const numFrames = 60;
