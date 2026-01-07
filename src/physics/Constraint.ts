@@ -125,12 +125,14 @@ export class JointConstraint extends Constraint {
         //     return new Vec2(-n * this.y, n * this.x);
         // }
 
-        const dv = vB.subNew(vA);
+        const dvx = vB.x - vA.x;
+        const dvy = vB.y - vA.y;
 
-        const lambdaVector = this.bias.subNew(dv).subNew(this.cachedLambda.scaleNew(this.softness));
+        const lambdaVectorX = this.bias.x - dvx - this.cachedLambda.x * this.softness;
+        const lambdaVectorY = this.bias.y - dvy - this.cachedLambda.y * this.softness;
 
-        const impulseX = this.M.col1.x * lambdaVector.x + this.M.col2.x * lambdaVector.y;
-        const impulseY = this.M.col1.y * lambdaVector.x + this.M.col2.y * lambdaVector.y;
+        const impulseX = this.M.col1.x * lambdaVectorX + this.M.col2.x * lambdaVectorY;
+        const impulseY = this.M.col1.y * lambdaVectorX + this.M.col2.y * lambdaVectorY;
 
         this.bodyA.velocity.x -= impulseX * this.bodyA.invMass;
         this.bodyA.velocity.y -= impulseY * this.bodyA.invMass;
@@ -147,9 +149,11 @@ export class JointConstraint extends Constraint {
     postSolve(): void {
         // Optional: clamp accumulated impulse (recommended for stability)
         const maxImpulse = 1000;
-        const mag = this.cachedLambda.magnitude();
+        const mag = Math.sqrt(this.cachedLambda.x * this.cachedLambda.x + this.cachedLambda.y * this.cachedLambda.y);
+
         if (mag > maxImpulse) {
-            this.cachedLambda.scaleAssign(maxImpulse / mag);
+            this.cachedLambda.x *= maxImpulse / mag;
+            this.cachedLambda.y *= maxImpulse / mag;
         }
     }
 }
