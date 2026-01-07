@@ -2,21 +2,20 @@ import Mat22 from '../math/Mat22';
 import Utils from '../math/Utils';
 import Vec2 from '../math/Vec2';
 import Body from './Body';
-import { GRAVITY, PIXELS_PER_METER } from './Constants';
 
 export abstract class Constraint {
-    a: Body;
-    b: Body;
+    bodyA: Body;
+    bodyB: Body;
 
-    aPoint: Vec2; // The constraint point in A's local space
-    bPoint: Vec2; // The constraint point in B's local space
+    aPointLocal: Vec2; // The constraint point in A's local space
+    bPointLocal: Vec2; // The constraint point in B's local space
 
     constructor(a: Body, b: Body, aPointWorld: Vec2, bPointWorld: Vec2) {
-        this.a = a;
-        this.b = b;
+        this.bodyA = a;
+        this.bodyB = b;
 
-        this.aPoint = a.worldSpaceToLocalSpace(aPointWorld);
-        this.bPoint = b.worldSpaceToLocalSpace(bPointWorld);
+        this.aPointLocal = a.worldSpaceToLocalSpace(aPointWorld);
+        this.bPointLocal = b.worldSpaceToLocalSpace(bPointWorld);
     }
 
     abstract preSolve(dt: number): void;
@@ -52,29 +51,29 @@ export class JointConstraint extends Constraint {
     }
 
     preSolve(invDt: number): void {
-        const pa = this.a.localSpaceToWorldSpace(this.aPoint);
-        const pb = this.b.localSpaceToWorldSpace(this.bPoint);
-        this.rA = pa.subNew(this.a.position);
-        this.rB = pb.subNew(this.b.position);
+        const pa = this.bodyA.localSpaceToWorldSpace(this.aPointLocal);
+        const pb = this.bodyB.localSpaceToWorldSpace(this.bPointLocal);
+        this.rA = pa.subNew(this.bodyA.position);
+        this.rB = pb.subNew(this.bodyB.position);
 
         // ---- Effective mass matrix ----
         const K1 = new Mat22();
-        K1.col1.x = this.a.invMass + this.b.invMass;
+        K1.col1.x = this.bodyA.invMass + this.bodyB.invMass;
         K1.col1.y = 0;
         K1.col2.x = 0;
-        K1.col2.y = this.a.invMass + this.b.invMass;
+        K1.col2.y = this.bodyA.invMass + this.bodyB.invMass;
 
         const K2 = new Mat22();
-        K2.col1.x = this.a.invI * this.rA.y * this.rA.y;
-        K2.col1.y = -this.a.invI * this.rA.x * this.rA.y;
-        K2.col2.x = -this.a.invI * this.rA.x * this.rA.y;
-        K2.col2.y = this.a.invI * this.rA.x * this.rA.x;
+        K2.col1.x = this.bodyA.invI * this.rA.y * this.rA.y;
+        K2.col1.y = -this.bodyA.invI * this.rA.x * this.rA.y;
+        K2.col2.x = -this.bodyA.invI * this.rA.x * this.rA.y;
+        K2.col2.y = this.bodyA.invI * this.rA.x * this.rA.x;
 
         const K3 = new Mat22();
-        K3.col1.x = this.b.invI * this.rB.y * this.rB.y;
-        K3.col1.y = -this.b.invI * this.rB.x * this.rB.y;
-        K3.col2.x = -this.b.invI * this.rB.x * this.rB.y;
-        K3.col2.y = this.b.invI * this.rB.x * this.rB.x;
+        K3.col1.x = this.bodyB.invI * this.rB.y * this.rB.y;
+        K3.col1.y = -this.bodyB.invI * this.rB.x * this.rB.y;
+        K3.col2.x = -this.bodyB.invI * this.rB.x * this.rB.y;
+        K3.col2.y = this.bodyB.invI * this.rB.x * this.rB.x;
 
         const K = Mat22.add(Mat22.add(K1, K2), K3);
 
@@ -85,33 +84,33 @@ export class JointConstraint extends Constraint {
         this.M = K.invert();
 
         // ---- Bias (position correction) ----
-        const pA = this.a.position.addNew(this.rA);
-        const pB = this.b.position.addNew(this.rB);
+        const pA = this.bodyA.position.addNew(this.rA);
+        const pB = this.bodyB.position.addNew(this.rB);
         const relPos = pB.subNew(pA);
 
         this.bias = relPos.scaleNew(-this.biasFactor * invDt);
 
         // ---- Warm starting ----
-        this.a.velocity.sub(this.cachedLambda.scaleNew(this.a.invMass));
-        this.a.angularVelocity -= this.a.invI * this.rA.cross(this.cachedLambda);
+        this.bodyA.velocity.sub(this.cachedLambda.scaleNew(this.bodyA.invMass));
+        this.bodyA.angularVelocity -= this.bodyA.invI * this.rA.cross(this.cachedLambda);
 
-        this.b.velocity.add(this.cachedLambda.scaleNew(this.b.invMass));
-        this.b.angularVelocity += this.b.invI * this.rB.cross(this.cachedLambda);
+        this.bodyB.velocity.add(this.cachedLambda.scaleNew(this.bodyB.invMass));
+        this.bodyB.angularVelocity += this.bodyB.invI * this.rB.cross(this.cachedLambda);
     }
 
     solve(): void {
-        const vA = this.a.velocity.addNew(this.rA.crossScalar(this.a.angularVelocity));
-        const vB = this.b.velocity.addNew(this.rB.crossScalar(this.b.angularVelocity));
+        const vA = this.bodyA.velocity.addNew(this.rA.crossScalar(this.bodyA.angularVelocity));
+        const vB = this.bodyB.velocity.addNew(this.rB.crossScalar(this.bodyB.angularVelocity));
 
         const dv = vB.subNew(vA);
 
         const impulse = Mat22.multiply(this.M, this.bias.subNew(dv).subNew(this.cachedLambda.scaleNew(this.softness)));
 
-        this.a.velocity.sub(impulse.scaleNew(this.a.invMass));
-        this.a.angularVelocity -= this.a.invI * this.rA.cross(impulse);
+        this.bodyA.velocity.sub(impulse.scaleNew(this.bodyA.invMass));
+        this.bodyA.angularVelocity -= this.bodyA.invI * this.rA.cross(impulse);
 
-        this.b.velocity.add(impulse.scaleNew(this.b.invMass));
-        this.b.angularVelocity += this.b.invI * this.rB.cross(impulse);
+        this.bodyB.velocity.add(impulse.scaleNew(this.bodyB.invMass));
+        this.bodyB.angularVelocity += this.bodyB.invI * this.rB.cross(impulse);
 
         this.cachedLambda.add(impulse);
     }
@@ -127,173 +126,226 @@ export class JointConstraint extends Constraint {
 }
 
 export class ContactConstraint extends Constraint {
-    private normalX = 0;
-    private normalY = 0;
-    private depth: number;
+    private normalWorldX = 0;
+    private normalWorldY = 0;
 
-    // rA / rB (world space)
-    private rAx = 0;
-    private rAy = 0;
-    private rBx = 0;
-    private rBy = 0;
+    penetrationDepth: number;
 
-    private tangentX = 0;
-    private tangentY = 0;
+    // Lever arms (vectors from centers of mass to contact points in world space)
+    private leverArmAX = 0;
+    private leverArmAY = 0;
+    private leverArmBX = 0;
+    private leverArmBY = 0;
 
-    // Effective mass
-    private normalMass = 0;
-    private tangentMass = 0;
+    private tangentWorldX = 0;
+    private tangentWorldY = 0;
 
-    // Bias terms
-    private bias = 0;
-    private restitutionBias = 0;
+    // Effective masses (inverse of the reduced mass for the constraint directions)
+    private effectiveMassNormal = 0;
+    private effectiveMassTangent = 0;
 
-    // Warm starting
-    private normalImpulse = 0;
-    private tangentImpulse = 0;
+    // Bias terms (for position correction and restitution)
+    private positionBias = 0;
+    private restitutionVelocityBias = 0;
 
-    constructor(a: Body, b: Body, start: Vec2, end: Vec2, normalWorld: Vec2, depth: number) {
-        super(a, b, start, end);
+    // Accumulated impulses (for warm starting and sequential impulse solving)
+    private accumulatedNormalImpulse = 0;
+    private accumulatedTangentImpulse = 0;
+
+    constructor(
+        bodyA: Body,
+        bodyB: Body,
+        localContactPointA: Vec2,
+        localContactPointB: Vec2,
+        normalWorld: Vec2,
+        penetrationDepth: number,
+    ) {
+        super(bodyA, bodyB, localContactPointA, localContactPointB);
 
         // Ensure normal always points A → B
         // TODO: Why do we need to negate the normal?
-        this.normalX = -normalWorld.x;
-        this.normalY = -normalWorld.y;
-        this.depth = depth;
+        this.normalWorldX = -normalWorld.x;
+        this.normalWorldY = -normalWorld.y;
+        this.penetrationDepth = penetrationDepth;
     }
 
-    preSolve(invDt: number): void {
-        const a = this.a;
-        const b = this.b;
+    preSolve(inverseDeltaTime: number): void {
+        const bodyA = this.bodyA;
+        const bodyB = this.bodyB;
 
-        // Convert local space collision points to world space
-        const cosA = Math.cos(a.rotation);
-        const sinA = Math.sin(a.rotation);
-        const pAx = this.aPoint.x * cosA - this.aPoint.y * sinA + a.position.x;
-        const pAy = this.aPoint.x * sinA + this.aPoint.y * cosA + a.position.y;
+        // Transform local contact points to world space using current rotation and position
+        const cosA = Math.cos(bodyA.rotation);
+        const sinA = Math.sin(bodyA.rotation);
+        const contactWorldAX = this.aPointLocal.x * cosA - this.aPointLocal.y * sinA + bodyA.position.x;
+        const contactWorldAY = this.aPointLocal.x * sinA + this.aPointLocal.y * cosA + bodyA.position.y;
 
-        const cosB = Math.cos(b.rotation);
-        const sinB = Math.sin(b.rotation);
-        const pBx = this.bPoint.x * cosB - this.bPoint.y * sinB + b.position.x;
-        const pBy = this.bPoint.x * sinB + this.bPoint.y * cosB + b.position.y;
+        const cosB = Math.cos(bodyB.rotation);
+        const sinB = Math.sin(bodyB.rotation);
+        const contactWorldBX = this.bPointLocal.x * cosB - this.bPointLocal.y * sinB + bodyB.position.x;
+        const contactWorldBY = this.bPointLocal.x * sinB + this.bPointLocal.y * cosB + bodyB.position.y;
 
-        this.rAx = pAx - a.position.x;
-        this.rAy = pAy - a.position.y;
-        this.rBx = pBx - b.position.x;
-        this.rBy = pBy - b.position.y;
+        // Compute lever arms (vectors from centers of mass to contact points)
+        this.leverArmAX = contactWorldAX - bodyA.position.x;
+        this.leverArmAY = contactWorldAY - bodyA.position.y;
+        this.leverArmBX = contactWorldBX - bodyB.position.x;
+        this.leverArmBY = contactWorldBY - bodyB.position.y;
 
-        // Tangent
-        this.tangentX = this.normalY;
-        this.tangentY = -this.normalX;
+        // Compute tangent vector as the left-perpendicular to the normal (for friction direction)
+        this.tangentWorldX = this.normalWorldY;
+        this.tangentWorldY = -this.normalWorldX;
 
-        // Effective mass (normal)
-        const rnA = this.rAx * this.normalY - this.rAy * this.normalX;
-        const rnB = this.rBx * this.normalY - this.rBy * this.normalX;
+        // Compute torque arms for normal direction (cross product of lever arm and normal)
+        const normalTorqueArmA = this.leverArmAX * this.normalWorldY - this.leverArmAY * this.normalWorldX;
+        const normalTorqueArmB = this.leverArmBX * this.normalWorldY - this.leverArmBY * this.normalWorldX;
 
-        this.normalMass = 1 / (a.invMass + b.invMass + rnA * rnA * a.invI + rnB * rnB * b.invI);
+        // Compute effective mass for normal direction (accounts for linear and angular contributions)
+        this.effectiveMassNormal =
+            1 /
+            (bodyA.invMass +
+                bodyB.invMass +
+                normalTorqueArmA * normalTorqueArmA * bodyA.invI +
+                normalTorqueArmB * normalTorqueArmB * bodyB.invI);
 
-        // Effective mass (tangent)
-        const rtA = this.rAx * this.tangentY - this.rAy * this.tangentX;
-        const rtB = this.rBx * this.tangentY - this.rBy * this.tangentX;
+        // Compute torque arms for tangent direction (cross product of lever arm and tangent)
+        const tangentTorqueArmA = this.leverArmAX * this.tangentWorldY - this.leverArmAY * this.tangentWorldX;
+        const tangentTorqueArmB = this.leverArmBX * this.tangentWorldY - this.leverArmBY * this.tangentWorldX;
 
-        this.tangentMass = 1 / (a.invMass + b.invMass + rtA * rtA * a.invI + rtB * rtB * b.invI);
+        // Compute effective mass for tangent direction (for friction)
+        this.effectiveMassTangent =
+            1 /
+            (bodyA.invMass +
+                bodyB.invMass +
+                tangentTorqueArmA * tangentTorqueArmA * bodyA.invI +
+                tangentTorqueArmB * tangentTorqueArmB * bodyB.invI);
 
-        // Baumgarte stabilization (penetration → velocity)
-        const slop = 0.01;
-        const beta = 0.2;
+        // Compute position bias using Baumgarte stabilization to gradually correct penetration
+        const allowedPenetration = 0.01; // Small allowance for penetration to avoid jitter
+        const stabilizationFactor = 0.2; // Beta factor controlling correction speed
+        this.positionBias =
+            Math.max(this.penetrationDepth - allowedPenetration, 0) * stabilizationFactor * inverseDeltaTime;
 
-        this.bias = Math.max(this.depth - slop, 0) * beta * invDt;
+        // Compute velocity at contact points (linear velocity plus angular contribution)
+        const velocityAtContactAX = bodyA.velocity.x - bodyA.angularVelocity * this.leverArmAY;
+        const velocityAtContactAY = bodyA.velocity.y + bodyA.angularVelocity * this.leverArmAX;
+        const velocityAtContactBX = bodyB.velocity.x - bodyB.angularVelocity * this.leverArmBY;
+        const velocityAtContactBY = bodyB.velocity.y + bodyB.angularVelocity * this.leverArmBX;
 
-        // Restitution (bounce only if fast enough)
-        const vAx = a.velocity.x + -a.angularVelocity * this.rAy;
-        const vAy = a.velocity.y + a.angularVelocity * this.rAx;
-        const vBx = b.velocity.x + -b.angularVelocity * this.rBy;
-        const vBy = b.velocity.y + b.angularVelocity * this.rBx;
+        // Compute relative velocity between contact points
+        const relativeVelocityX = velocityAtContactAX - velocityAtContactBX;
+        const relativeVelocityY = velocityAtContactAY - velocityAtContactBY;
 
-        const vRelx = vAx - vBx;
-        const vRely = vAy - vBy;
+        // Project relative velocity onto normal to get separating velocity
+        const normalRelativeVelocity = relativeVelocityX * this.normalWorldX + relativeVelocityY * this.normalWorldY;
 
-        const vn = vRelx * this.normalX + vRely * this.normalY;
+        // Compute combined restitution (bounciness) as minimum of both bodies
+        const restitution = Math.min(bodyA.restitution, bodyB.restitution);
 
-        const e = Math.min(a.restitution, b.restitution);
+        // Apply restitution only if separating velocity exceeds threshold (to avoid unnecessary bounce)
+        const restitutionThreshold = 10;
+        this.restitutionVelocityBias =
+            normalRelativeVelocity < -restitutionThreshold ? -restitution * normalRelativeVelocity : 0;
 
-        const restitutionSlop = 10;
-        this.restitutionBias = vn < -restitutionSlop ? -e * vn : 0;
+        // Warm starting: Apply accumulated impulses from previous frame to velocities for faster convergence
+        const impulseX =
+            this.normalWorldX * this.accumulatedNormalImpulse + this.tangentWorldX * this.accumulatedTangentImpulse;
+        const impulseY =
+            this.normalWorldY * this.accumulatedNormalImpulse + this.tangentWorldY * this.accumulatedTangentImpulse;
 
-        // Warm starting
-        const px = this.normalX * this.normalImpulse + this.tangentX * this.tangentImpulse;
-        const py = this.normalY * this.normalImpulse + this.tangentY * this.tangentImpulse;
+        bodyA.velocity.x += impulseX * bodyA.invMass;
+        bodyA.velocity.y += impulseY * bodyA.invMass;
+        bodyA.angularVelocity += this.leverArmAX * impulseY - this.leverArmAY * impulseX;
 
-        a.velocity.x += px * a.invMass;
-        a.velocity.y += py * a.invMass;
-        a.angularVelocity += this.rAx * py - this.rAy * px;
-
-        b.velocity.x += -px * b.invMass;
-        b.velocity.y += -py * b.invMass;
-        b.angularVelocity += this.rBx * -py - this.rBy * -px;
+        bodyB.velocity.x += -impulseX * bodyB.invMass;
+        bodyB.velocity.y += -impulseY * bodyB.invMass;
+        bodyB.angularVelocity += this.leverArmBX * -impulseY - this.leverArmBY * -impulseX;
     }
 
     solve(): void {
-        const a = this.a;
-        const b = this.b;
+        const bodyA = this.bodyA;
+        const bodyB = this.bodyB;
 
-        const vAx = a.velocity.x + -a.angularVelocity * this.rAy;
-        const vAy = a.velocity.y + a.angularVelocity * this.rAx;
-        const vBx = b.velocity.x + -b.angularVelocity * this.rBy;
-        const vBy = b.velocity.y + b.angularVelocity * this.rBx;
+        // Recompute velocity at contact points (may have changed from other constraints)
+        const velocityAtContactAX = bodyA.velocity.x - bodyA.angularVelocity * this.leverArmAY;
+        const velocityAtContactAY = bodyA.velocity.y + bodyA.angularVelocity * this.leverArmAX;
+        const velocityAtContactBX = bodyB.velocity.x - bodyB.angularVelocity * this.leverArmBY;
+        const velocityAtContactBY = bodyB.velocity.y + bodyB.angularVelocity * this.leverArmBX;
 
-        const vRelx = vAx - vBx;
-        const vRely = vAy - vBy;
+        // Compute relative velocity between contact points
+        const relativeVelocityX = velocityAtContactAX - velocityAtContactBX;
+        const relativeVelocityY = velocityAtContactAY - velocityAtContactBY;
 
-        // Normal impulse
-        const vn = vRelx * this.normalX + vRely * this.normalY;
+        // Project relative velocity onto normal
+        const normalRelativeVelocity = relativeVelocityX * this.normalWorldX + relativeVelocityY * this.normalWorldY;
 
-        let dPn = this.normalMass * (-vn + this.bias + this.restitutionBias);
+        // Compute delta impulse for normal direction (corrects velocity violation plus biases)
+        let deltaNormalImpulse =
+            this.effectiveMassNormal * (-normalRelativeVelocity + this.positionBias + this.restitutionVelocityBias);
 
-        const oldPn = this.normalImpulse;
-        this.normalImpulse = Math.max(oldPn + dPn, 0);
-        dPn = this.normalImpulse - oldPn;
+        // Accumulate normal impulse (non-negative to prevent pulling)
+        const oldNormalImpulse = this.accumulatedNormalImpulse;
+        this.accumulatedNormalImpulse = Math.max(oldNormalImpulse + deltaNormalImpulse, 0);
+        deltaNormalImpulse = this.accumulatedNormalImpulse - oldNormalImpulse;
 
-        const Pnx = this.normalX * dPn;
-        const Pny = this.normalY * dPn;
+        // Compute delta impulse vector for normal
+        const normalDeltaImpulseX = this.normalWorldX * deltaNormalImpulse;
+        const normalDeltaImpulseY = this.normalWorldY * deltaNormalImpulse;
 
-        a.velocity.x += Pnx * a.invMass;
-        a.velocity.y += Pny * a.invMass;
-        a.angularVelocity += (this.rAx * Pny - this.rAy * Pnx) * a.invI;
+        // Apply normal delta impulse to velocities and angular velocities
+        bodyA.velocity.x += normalDeltaImpulseX * bodyA.invMass;
+        bodyA.velocity.y += normalDeltaImpulseY * bodyA.invMass;
+        bodyA.angularVelocity +=
+            (this.leverArmAX * normalDeltaImpulseY - this.leverArmAY * normalDeltaImpulseX) * bodyA.invI;
 
-        b.velocity.x += -Pnx * b.invMass;
-        b.velocity.y += -Pny * b.invMass;
-        b.angularVelocity += (this.rBx * -Pny - this.rBy * -Pnx) * b.invI;
+        bodyB.velocity.x += -normalDeltaImpulseX * bodyB.invMass;
+        bodyB.velocity.y += -normalDeltaImpulseY * bodyB.invMass;
+        bodyB.angularVelocity +=
+            (this.leverArmBX * -normalDeltaImpulseY - this.leverArmBY * -normalDeltaImpulseX) * bodyB.invI;
 
-        // Friction impulse
-        const vt = vRelx * this.tangentX + vRely * this.tangentY;
+        // Project relative velocity onto tangent for friction
+        const tangentRelativeVelocity = relativeVelocityX * this.tangentWorldX + relativeVelocityY * this.tangentWorldY;
 
-        let dPt = -vt * this.tangentMass;
+        // Compute delta impulse for tangent direction (opposes sliding)
+        let deltaTangentImpulse = -tangentRelativeVelocity * this.effectiveMassTangent;
 
-        const mu = Math.min(a.friction, b.friction);
-        const maxPt = mu * this.normalImpulse;
+        // Compute combined friction coefficient as minimum of both bodies
+        const frictionCoefficient = Math.min(bodyA.friction, bodyB.friction);
+        // Maximum friction impulse limited by normal impulse (Coulomb friction model)
+        const maxFrictionImpulse = frictionCoefficient * this.accumulatedNormalImpulse;
 
         // TODO: add slop for tangent impulse to avoid circles rolling forever?
-        const oldPt = this.tangentImpulse;
-        this.tangentImpulse = Utils.clamp(oldPt + dPt, -maxPt, maxPt);
-        dPt = this.tangentImpulse - oldPt;
+        // Accumulate tangent impulse (clamped to friction cone)
+        const oldTangentImpulse = this.accumulatedTangentImpulse;
+        this.accumulatedTangentImpulse = Utils.clamp(
+            oldTangentImpulse + deltaTangentImpulse,
+            -maxFrictionImpulse,
+            maxFrictionImpulse,
+        );
+        deltaTangentImpulse = this.accumulatedTangentImpulse - oldTangentImpulse;
 
-        const Ptx = this.tangentX * dPt;
-        const Pty = this.tangentY * dPt;
+        // Compute delta impulse vector for tangent
+        const tangentDeltaImpulseX = this.tangentWorldX * deltaTangentImpulse;
+        const tangentDeltaImpulseY = this.tangentWorldY * deltaTangentImpulse;
 
-        a.velocity.x += Ptx * a.invMass;
-        a.velocity.y += Pty * a.invMass;
-        a.angularVelocity += (this.rAx * Pty - this.rAy * Ptx) * a.invI;
+        // Apply tangent delta impulse to velocities and angular velocities
+        bodyA.velocity.x += tangentDeltaImpulseX * bodyA.invMass;
+        bodyA.velocity.y += tangentDeltaImpulseY * bodyA.invMass;
+        bodyA.angularVelocity +=
+            (this.leverArmAX * tangentDeltaImpulseY - this.leverArmAY * tangentDeltaImpulseX) * bodyA.invI;
 
-        b.velocity.x += -Ptx * b.invMass;
-        b.velocity.y += -Pty * b.invMass;
-        b.angularVelocity += (this.rBx * -Pty - this.rBy * -Ptx) * b.invI;
+        bodyB.velocity.x += -tangentDeltaImpulseX * bodyB.invMass;
+        bodyB.velocity.y += -tangentDeltaImpulseY * bodyB.invMass;
+        bodyB.angularVelocity +=
+            (this.leverArmBX * -tangentDeltaImpulseY - this.leverArmBY * -tangentDeltaImpulseX) * bodyB.invI;
     }
 
     postSolve(): void {
-        // Optional: clamp cached impulses to prevent blow-up
-        const maxImpulse = 1e6;
-        this.normalImpulse = Math.min(this.normalImpulse, maxImpulse);
-        this.tangentImpulse = Utils.clamp(this.tangentImpulse, -maxImpulse, maxImpulse);
+        // Optional: Clamp accumulated impulses to prevent numerical blow-up or instability
+        const maxAccumulatedImpulse = 1e6;
+        this.accumulatedNormalImpulse = Math.min(this.accumulatedNormalImpulse, maxAccumulatedImpulse);
+        this.accumulatedTangentImpulse = Utils.clamp(
+            this.accumulatedTangentImpulse,
+            -maxAccumulatedImpulse,
+            maxAccumulatedImpulse,
+        );
     }
 }

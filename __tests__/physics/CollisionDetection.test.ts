@@ -19,7 +19,7 @@ describe('CollisionDetection', () => {
 
         expect(result).toBe(true);
         expect(contacts).toHaveLength(1);
-        expect(contacts![0].depth).toBe(0);
+        expect(contacts![0].penetrationDepth).toBe(0);
     });
 
     test('detectCollisionCircleCircle() detects collision between half overlapped circles', () => {
@@ -30,7 +30,7 @@ describe('CollisionDetection', () => {
 
         expect(result).toBe(true);
         expect(contacts).toHaveLength(1);
-        expect(contacts![0].depth).toBe(30);
+        expect(contacts![0].penetrationDepth).toBe(30);
     });
 
     test('detectCollisionCircleCircle() detects collision between circles that overlap by a quarter', () => {
@@ -41,7 +41,7 @@ describe('CollisionDetection', () => {
 
         expect(result).toBe(true);
         expect(contacts).toHaveLength(1);
-        expect(contacts![0].depth).toBe(15);
+        expect(contacts![0].penetrationDepth).toBe(15);
     });
 
     test('detectCollisionPolygonPolygon() detects collision between fully overlapped boxes', () => {
@@ -52,8 +52,8 @@ describe('CollisionDetection', () => {
 
         expect(result).toBe(true);
         expect(contacts).toHaveLength(2);
-        expect(contacts![0].depth).toBe(60);
-        expect(contacts![1].depth).toBe(60);
+        expect(contacts![0].penetrationDepth).toBe(60);
+        expect(contacts![1].penetrationDepth).toBe(60);
     });
 
     test('detectCollisionPolygonPolygon() detects collision between half overlapped boxes', () => {
@@ -64,8 +64,8 @@ describe('CollisionDetection', () => {
 
         expect(result).toBe(true);
         expect(contacts).toHaveLength(2);
-        expect(contacts![0].depth).toBe(30);
-        expect(contacts![1].depth).toBe(30);
+        expect(contacts![0].penetrationDepth).toBe(30);
+        expect(contacts![1].penetrationDepth).toBe(30);
     });
 
     test('detectCollisionPolygonPolygon() detects collision between boxes that overlap by a quarter', () => {
@@ -76,8 +76,8 @@ describe('CollisionDetection', () => {
 
         expect(result).toBe(true);
         expect(contacts).toHaveLength(2);
-        expect(contacts![0].depth).toBe(30);
-        expect(contacts![1].depth).toBe(30);
+        expect(contacts![0].penetrationDepth).toBe(30);
+        expect(contacts![1].penetrationDepth).toBe(30);
     });
 
     test('detectCollisionPolygonPolygon() should not detect collision for not overlapped boxes', () => {
@@ -108,7 +108,7 @@ describe('CollisionDetection', () => {
 
         expect(result).toBe(true);
         expect(contacts).toHaveLength(1);
-        expect(contacts![0].depth).toBe(60);
+        expect(contacts![0].penetrationDepth).toBe(60);
     });
 
     test('detectCollisionPolygonPolygon() detects collision between half overlapped box and circle', () => {
@@ -119,7 +119,7 @@ describe('CollisionDetection', () => {
 
         expect(result).toBe(true);
         expect(contacts).toHaveLength(1);
-        expect(contacts![0].depth).toBe(30);
+        expect(contacts![0].penetrationDepth).toBe(30);
     });
 
     test('detectCollisionPolygonPolygon() detects collision between box and circle that overlap by a quarter', () => {
@@ -130,7 +130,7 @@ describe('CollisionDetection', () => {
 
         expect(result).toBe(true);
         expect(contacts).toHaveLength(1);
-        expect(contacts![0].depth).toBe(30);
+        expect(contacts![0].penetrationDepth).toBe(30);
     });
 
     test('detectCollisionPolygonPolygon() should not detect collision for not overlapped box and circle', () => {
@@ -162,8 +162,8 @@ describe('CollisionDetection', () => {
 
         expect(result).toBe(true);
         expect(contacts).toHaveLength(2);
-        expect(contacts![0].depth).toBe(0);
-        expect(contacts![1].depth).toBeLessThanOrEqual(60);
+        expect(contacts![0].penetrationDepth).toBe(0);
+        expect(contacts![1].penetrationDepth).toBeLessThanOrEqual(60);
     });
 
     test('detectCollisionPolygonPolygon() detects collision between half overlapped triangles', () => {
@@ -176,7 +176,7 @@ describe('CollisionDetection', () => {
 
         expect(result).toBe(true);
         expect(contacts).toHaveLength(1);
-        expect(contacts![0].depth).toBe(45);
+        expect(contacts![0].penetrationDepth).toBe(45);
     });
 
     test('detectCollisionPolygonPolygon() detects collision between triangles that overlap by a quarter', () => {
@@ -189,7 +189,7 @@ describe('CollisionDetection', () => {
 
         expect(result).toBe(true);
         expect(contacts).toHaveLength(1);
-        expect(contacts![0].depth).toBe(30);
+        expect(contacts![0].penetrationDepth).toBe(30);
     });
 
     test('detectCollisionPolygonPolygon() should not detect collision for not overlapped triangles', () => {

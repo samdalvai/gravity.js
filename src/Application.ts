@@ -241,17 +241,17 @@ export default class Application {
                     // TODO: this is just a simple draw method, we need to consider local anchors rather than just
                     // bodies position
                     Graphics.drawLine(
-                        joint.a.position.x,
-                        joint.a.position.y,
-                        joint.b.position.x,
-                        joint.b.position.y,
+                        joint.bodyA.position.x,
+                        joint.bodyA.position.y,
+                        joint.bodyB.position.x,
+                        joint.bodyB.position.y,
                         'blue',
                     );
                 }
 
                 for (const contact of this.world.getContacts()) {
-                    const aW = contact.a.localSpaceToWorldSpace(contact.aPoint);
-                    const bW = contact.b.localSpaceToWorldSpace(contact.bPoint);
+                    const aW = contact.bodyA.localSpaceToWorldSpace(contact.aPointLocal);
+                    const bW = contact.bodyB.localSpaceToWorldSpace(contact.bPointLocal);
                     // const aW = contact.start;
                     // const bW = contact.end;
                     Graphics.drawFillCircle(aW.x, aW.y, 5, 'red');
