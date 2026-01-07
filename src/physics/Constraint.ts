@@ -57,29 +57,21 @@ export class JointConstraint extends Constraint {
         this.rB = pb.subNew(this.bodyB.position);
 
         // ---- Effective mass matrix ----
-        const K1 = new Mat22();
-        K1.col1.x = this.bodyA.invMass + this.bodyB.invMass;
-        K1.col1.y = 0;
-        K1.col2.x = 0;
-        K1.col2.y = this.bodyA.invMass + this.bodyB.invMass;
-
-        const K2 = new Mat22();
-        K2.col1.x = this.bodyA.invI * this.rA.y * this.rA.y;
-        K2.col1.y = -this.bodyA.invI * this.rA.x * this.rA.y;
-        K2.col2.x = -this.bodyA.invI * this.rA.x * this.rA.y;
-        K2.col2.y = this.bodyA.invI * this.rA.x * this.rA.x;
-
-        const K3 = new Mat22();
-        K3.col1.x = this.bodyB.invI * this.rB.y * this.rB.y;
-        K3.col1.y = -this.bodyB.invI * this.rB.x * this.rB.y;
-        K3.col2.x = -this.bodyB.invI * this.rB.x * this.rB.y;
-        K3.col2.y = this.bodyB.invI * this.rB.x * this.rB.x;
-
-        const K = Mat22.add(Mat22.add(K1, K2), K3);
-
-        // softness (CFM)
-        K.col1.x += this.softness;
-        K.col2.y += this.softness;
+        const K = new Mat22();
+        K.col1.x =
+            this.bodyA.invMass +
+            this.bodyB.invMass +
+            this.bodyA.invI * this.rA.y * this.rA.y +
+            this.bodyB.invI * this.rB.y * this.rB.y +
+            this.softness;
+        K.col1.y = 0 + -this.bodyA.invI * this.rA.x * this.rA.y + -this.bodyB.invI * this.rB.x * this.rB.y;
+        K.col2.x = 0 + -this.bodyA.invI * this.rA.x * this.rA.y + -this.bodyB.invI * this.rB.x * this.rB.y;
+        K.col2.y =
+            this.bodyA.invMass +
+            this.bodyB.invMass +
+            this.bodyA.invI * this.rA.x * this.rA.x +
+            this.bodyB.invI * this.rB.x * this.rB.x +
+            this.softness;
 
         this.M = K.invert();
 
