@@ -166,7 +166,7 @@ export class ContactConstraint extends Constraint {
         const a = this.a;
         const b = this.b;
 
-        // World-space contact points
+        // Convert local space collision points to world space
         const cosA = Math.cos(a.rotation);
         const sinA = Math.sin(a.rotation);
         const pAx = this.aPoint.x * cosA - this.aPoint.y * sinA + a.position.x;
@@ -273,6 +273,7 @@ export class ContactConstraint extends Constraint {
         const mu = Math.min(a.friction, b.friction);
         const maxPt = mu * this.normalImpulse;
 
+        // TODO: add slop for tangent impulse to avoid circles rolling forever?
         const oldPt = this.tangentImpulse;
         this.tangentImpulse = Utils.clamp(oldPt + dPt, -maxPt, maxPt);
         dPt = this.tangentImpulse - oldPt;
