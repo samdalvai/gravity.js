@@ -28,8 +28,6 @@ export class JointConstraint extends Constraint {
     m01 = 0;
     m11 = 0;
 
-    rA: Vec2;
-    rB: Vec2;
     rAx = 0;
     rAy = 0;
     rBx = 0;
@@ -44,8 +42,8 @@ export class JointConstraint extends Constraint {
     constructor(a: Body, b: Body, anchorWorld: Vec2, softness = 0.01, biasFactor = 0.2) {
         super(a, b, anchorWorld, anchorWorld);
 
-        this.rA = new Vec2();
-        this.rB = new Vec2();
+        // this.rA = new Vec2();
+        // this.rB = new Vec2();
 
         this.bias = new Vec2();
         this.cachedLambda = new Vec2();
@@ -69,23 +67,23 @@ export class JointConstraint extends Constraint {
         const anchorWorldBX = this.bPointLocal.x * cosB - this.bPointLocal.y * sinB + bodyB.position.x;
         const anchorWorldBY = this.bPointLocal.x * sinB + this.bPointLocal.y * cosB + bodyB.position.y;
 
-        this.rA.x = anchorWorldAX - this.bodyA.position.x;
-        this.rA.y = anchorWorldAY - this.bodyA.position.y;
-        this.rB.x = anchorWorldBX - this.bodyB.position.x;
-        this.rB.y = anchorWorldBY - this.bodyB.position.y;
+        this.rAx = anchorWorldAX - this.bodyA.position.x;
+        this.rAy = anchorWorldAY - this.bodyA.position.y;
+        this.rBx = anchorWorldBX - this.bodyB.position.x;
+        this.rBy = anchorWorldBY - this.bodyB.position.y;
 
         const Km00 =
             this.bodyA.invMass +
             this.bodyB.invMass +
-            this.bodyA.invI * this.rA.y * this.rA.y +
-            this.bodyB.invI * this.rB.y * this.rB.y +
+            this.bodyA.invI * this.rAy * this.rAy +
+            this.bodyB.invI * this.rBy * this.rBy +
             this.softness;
-        const Km01 = -this.bodyA.invI * this.rA.x * this.rA.y + -this.bodyB.invI * this.rB.x * this.rB.y;
+        const Km01 = -this.bodyA.invI * this.rAx * this.rAy + -this.bodyB.invI * this.rBx * this.rBy;
         const Km11 =
             this.bodyA.invMass +
             this.bodyB.invMass +
-            this.bodyA.invI * this.rA.x * this.rA.x +
-            this.bodyB.invI * this.rB.x * this.rB.x +
+            this.bodyA.invI * this.rAx * this.rAx +
+            this.bodyB.invI * this.rBx * this.rBx +
             this.softness;
 
         const det = 1.0 / (Km00 * Km11 - Km01 * Km01);
@@ -95,10 +93,10 @@ export class JointConstraint extends Constraint {
         this.m11 = det * Km00;
 
         // ---- Bias (position correction) ----
-        const pAX = this.bodyA.position.x + this.rA.x;
-        const pAY = this.bodyA.position.y + this.rA.y;
-        const pbX = this.bodyB.position.x + this.rB.x;
-        const pbY = this.bodyB.position.y + this.rB.y;
+        const pAX = this.bodyA.position.x + this.rAx;
+        const pAY = this.bodyA.position.y + this.rAy;
+        const pbX = this.bodyB.position.x + this.rBx;
+        const pbY = this.bodyB.position.y + this.rBy;
 
         const relPosX = pbX - pAX;
         const relPosY = pbY - pAY;
@@ -110,20 +108,20 @@ export class JointConstraint extends Constraint {
         this.bodyA.velocity.x -= this.cachedLambda.x * this.bodyA.invMass;
         this.bodyA.velocity.y -= this.cachedLambda.y * this.bodyA.invMass;
         this.bodyA.angularVelocity -=
-            this.bodyA.invI * (this.rA.x * this.cachedLambda.y - this.rA.y * this.cachedLambda.x);
+            this.bodyA.invI * (this.rAx * this.cachedLambda.y - this.rAy * this.cachedLambda.x);
 
         this.bodyB.velocity.x += this.cachedLambda.x * this.bodyB.invMass;
         this.bodyB.velocity.y += this.cachedLambda.y * this.bodyB.invMass;
         this.bodyB.angularVelocity +=
-            this.bodyB.invI * (this.rB.x * this.cachedLambda.y - this.rB.y * this.cachedLambda.x);
+            this.bodyB.invI * (this.rBx * this.cachedLambda.y - this.rBy * this.cachedLambda.x);
     }
 
     solve(): void {
-        const vAx = this.bodyA.velocity.x + -this.bodyA.angularVelocity * this.rA.y;
-        const vAy = this.bodyA.velocity.y + this.bodyA.angularVelocity * this.rA.x;
+        const vAx = this.bodyA.velocity.x + -this.bodyA.angularVelocity * this.rAy;
+        const vAy = this.bodyA.velocity.y + this.bodyA.angularVelocity * this.rAx;
 
-        const vBx = this.bodyB.velocity.x + -this.bodyB.angularVelocity * this.rB.y;
-        const vBy = this.bodyB.velocity.y + this.bodyB.angularVelocity * this.rB.x;
+        const vBx = this.bodyB.velocity.x + -this.bodyB.angularVelocity * this.rBy;
+        const vBy = this.bodyB.velocity.y + this.bodyB.angularVelocity * this.rBx;
 
         const dvx = vBx - vAx;
         const dvy = vBy - vAy;
@@ -136,11 +134,11 @@ export class JointConstraint extends Constraint {
 
         this.bodyA.velocity.x -= impulseX * this.bodyA.invMass;
         this.bodyA.velocity.y -= impulseY * this.bodyA.invMass;
-        this.bodyA.angularVelocity -= this.bodyA.invI * (this.rA.x * impulseY - this.rA.y * impulseX);
+        this.bodyA.angularVelocity -= this.bodyA.invI * (this.rAx * impulseY - this.rAy * impulseX);
 
         this.bodyB.velocity.x += impulseX * this.bodyB.invMass;
         this.bodyB.velocity.y += impulseY * this.bodyB.invMass;
-        this.bodyB.angularVelocity += this.bodyB.invI * (this.rB.x * impulseY - this.rB.y * impulseX);
+        this.bodyB.angularVelocity += this.bodyB.invI * (this.rBx * impulseY - this.rBy * impulseX);
 
         this.cachedLambda.x += impulseX;
         this.cachedLambda.y += impulseY;
