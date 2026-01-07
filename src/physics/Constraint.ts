@@ -82,8 +82,8 @@ export class JointConstraint extends Constraint {
             this.bodyA.invI * this.rA.y * this.rA.y +
             this.bodyB.invI * this.rB.y * this.rB.y +
             this.softness;
-        K.col1.y = 0 + -this.bodyA.invI * this.rA.x * this.rA.y + -this.bodyB.invI * this.rB.x * this.rB.y;
-        K.col2.x = 0 + -this.bodyA.invI * this.rA.x * this.rA.y + -this.bodyB.invI * this.rB.x * this.rB.y;
+        K.col1.y = -this.bodyA.invI * this.rA.x * this.rA.y + -this.bodyB.invI * this.rB.x * this.rB.y;
+        K.col2.x = -this.bodyA.invI * this.rA.x * this.rA.y + -this.bodyB.invI * this.rB.x * this.rB.y;
         K.col2.y =
             this.bodyA.invMass +
             this.bodyB.invMass +
@@ -118,15 +118,14 @@ export class JointConstraint extends Constraint {
     }
 
     solve(): void {
-        const vA = this.bodyA.velocity.addNew(this.rA.crossScalar(this.bodyA.angularVelocity));
-        const vB = this.bodyB.velocity.addNew(this.rB.crossScalar(this.bodyB.angularVelocity));
+        const vAx = this.bodyA.velocity.x + -this.bodyA.angularVelocity * this.rA.y;
+        const vAy = this.bodyA.velocity.y + this.bodyA.angularVelocity * this.rA.x;
 
-        // crossScalar(n: number): Vec2 {
-        //     return new Vec2(-n * this.y, n * this.x);
-        // }
+        const vBx = this.bodyB.velocity.x + -this.bodyB.angularVelocity * this.rB.y;
+        const vBy = this.bodyB.velocity.y + this.bodyB.angularVelocity * this.rB.x;
 
-        const dvx = vB.x - vA.x;
-        const dvy = vB.y - vA.y;
+        const dvx = vBx - vAx;
+        const dvy = vBy - vAy;
 
         const lambdaVectorX = this.bias.x - dvx - this.cachedLambda.x * this.softness;
         const lambdaVectorY = this.bias.y - dvy - this.cachedLambda.y * this.softness;
