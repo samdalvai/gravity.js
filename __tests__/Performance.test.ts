@@ -28,7 +28,7 @@ describe('Performance', () => {
         const deltaTime = 1 / 60;
         const inverseDeltaTime = 1 / deltaTime;
 
-        // Baseline = 850 ms
+        // Baseline = 220 ms
         for (let i = 0; i < 1000; i++) {
             for (let i = 0; i < numFrames; i++) {
                 joint.preSolve(inverseDeltaTime);
