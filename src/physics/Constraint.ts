@@ -221,6 +221,8 @@ export class ContactConstraint extends Constraint {
         this.penetrationDepth = penetrationDepth;
     }
 
+    // TODO: removing angular velocity change make the solver much stabler for stack of boxes, investigate why and how to improve
+
     preSolve(inverseDeltaTime: number): void {
         const bodyA = this.bodyA;
         const bodyB = this.bodyB;
