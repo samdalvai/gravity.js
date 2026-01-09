@@ -118,7 +118,9 @@ export default class World {
         // Check all the bodies with all other bodies detecting collisions
         // console.time('contacts');
 
-        let distanceX, diastanceY, radiusSum;
+        // let distanceX, diastanceY, radiusSum;
+
+        this.numChecks = 0;
 
         this.contacts.length = 0;
         for (let i = 0; i <= this.bodies.length - 1; i++) {
