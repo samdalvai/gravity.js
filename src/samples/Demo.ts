@@ -367,6 +367,7 @@ export default class Demo {
         }
 
         // Add a bridge of connected steps and joints
+        // TODO: use bdirge from suspension bridge demo
         const numSteps = 10;
         const spacing = 33;
 
