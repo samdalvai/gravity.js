@@ -13,8 +13,6 @@ export default class World {
     private contacts: ContactConstraint[] = [];
     private joints: JointConstraint[] = [];
 
-    private numChecks = 0;
-
     private forces: Vec2[] = [];
     private torques: number[] = [];
 
@@ -103,8 +101,6 @@ export default class World {
                 potentialPairs.push([a, b]);
             }
         }
-
-        this.numChecks = 0;
 
         this.contacts.length = 0;
         for (const [a, b] of potentialPairs) {
