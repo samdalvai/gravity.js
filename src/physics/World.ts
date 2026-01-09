@@ -80,39 +80,41 @@ export default class World {
             body.integrateForces(dt);
         }
 
-        console.time('contacts');
+        // console.time('contacts');
         this.bodies.sort((a, b) => a.minX - b.minX);
         const potentialPairs: [Body, Body][] = [];
 
+        // Broad phase check with prune & sweep algorithm
         for (let i = 0; i < this.bodies.length; i++) {
             const a = this.bodies[i];
 
             for (let j = i + 1; j < this.bodies.length; j++) {
                 const b = this.bodies[j];
 
-                // Early out on X axis
+                // If objects don't overlap on X axis they cannot collide
                 if (b.minX > a.maxX) break;
 
-                // Optional Y-axis prune (important)
+                // If objects overlap on X axis but don't overlap on Y axis the cannot collide
                 if (a.maxY < b.minY || a.minY > b.maxY) {
                     continue;
                 }
 
+                // Objects may be colliding
                 potentialPairs.push([a, b]);
             }
         }
 
         this.contacts.length = 0;
+        // Narrow phase check, potential pairs may still not collide
         for (const [a, b] of potentialPairs) {
             CollisionDetection.detectCollision(a, b, this.contacts);
         }
 
-        console.timeEnd('contacts');
+        // console.timeEnd('contacts');
         // console.time('solver');
 
         // Solve all constraints
         for (const constraint of this.joints) {
-            // for (const constraint of this.constraints) {
             constraint.preSolve(invDt);
         }
 
@@ -121,34 +123,33 @@ export default class World {
         }
 
         for (let i = 0; i < this.iterations; i++) {
-            for (const constraint of this.joints) {
-                // for (const constraint of this.constraints) {
-                constraint.solve();
+            for (const joint of this.joints) {
+                joint.solve();
             }
 
-            for (const constraint of this.contacts) {
-                constraint.solve();
+            for (const contact of this.contacts) {
+                contact.solve();
             }
         }
 
-        for (const constraint of this.joints) {
-            constraint.postSolve();
+        for (const joint of this.joints) {
+            joint.postSolve();
         }
 
-        for (const constraint of this.contacts) {
-            constraint.postSolve();
+        for (const contact of this.contacts) {
+            contact.postSolve();
         }
 
         // console.timeEnd('solver');
+        // console.time('Integrate');
 
         // Integrate all the velocities
-        // console.time('Integrate');
         for (const body of this.bodies) {
             body.integrateVelocities(dt);
         }
         // console.timeEnd('Integrate');
 
-        // Remove objects that went out of the screen
+        // Kill objects that went out of the screen
         for (let i = 0; i < this.bodies.length; i++) {
             const body = this.bodies[i];
 
