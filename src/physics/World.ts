@@ -147,9 +147,11 @@ export default class World {
         // console.timeEnd('solver');
 
         // Integrate all the velocities
+        console.time('Integrate');
         for (const body of this.bodies) {
             body.integrateVelocities(dt);
         }
+        console.timeEnd('Integrate');
 
         // Remove objects that went out of the screen
         for (let i = 0; i < this.bodies.length; i++) {
