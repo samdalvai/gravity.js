@@ -161,6 +161,10 @@ export default class Application {
 
             switch (inputEvent.type) {
                 case 'mousedown':
+                    if (this.world.getBodies().length >= MAX_BODIES) {
+                        continue;
+                    }
+
                     switch (inputEvent.button) {
                         case MouseButton.LEFT:
                             {
