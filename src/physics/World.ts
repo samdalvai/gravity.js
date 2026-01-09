@@ -12,7 +12,8 @@ export default class World {
     private bodies: Body[] = [];
     private contacts: ContactConstraint[] = [];
     private joints: JointConstraint[] = [];
-    private collidingBodies: Map<number, [Body, Body]> = new Map();
+
+    private numChecks = 0;
 
     private forces: Vec2[] = [];
     private torques: number[] = [];
@@ -87,10 +88,30 @@ export default class World {
         //     console.log(`${b.id}, ${b.minX}`);
         // }
 
+        console.time('Prune & Sweep');
         this.bodies.sort((a, b) => a.minX - b.minX);
-        this.collidingBodies.clear();
+        const pairs: [Body, Body][] = [];
 
-        
+        for (let i = 0; i < this.bodies.length; i++) {
+            const a = this.bodies[i];
+
+            for (let j = i + 1; j < this.bodies.length; j++) {
+                const b = this.bodies[j];
+
+                // Early out on X axis
+                if (b.minX > a.maxX) break;
+
+                // Optional Y-axis prune (important)
+                if (a.maxY < b.minY || a.minY > b.maxY) {
+                    continue;
+                }
+
+                pairs.push([a, b]);
+            }
+        }
+
+        console.timeEnd('Prune & Sweep');
+        console.log('Prune & sweep pairs: ', pairs.length);
 
         // console.timeEnd('Sorting');
 
@@ -106,14 +127,15 @@ export default class World {
                 const b = this.bodies[j];
 
                 // circle vs circle collision
-                distanceX = b.position.x - a.position.x;
-                diastanceY = b.position.y - a.position.y;
-                radiusSum = a.shape.radius + b.shape.radius;
+                // distanceX = b.position.x - a.position.x;
+                // diastanceY = b.position.y - a.position.y;
+                // radiusSum = a.shape.radius + b.shape.radius;
 
-                if (distanceX * distanceX + diastanceY * diastanceY < radiusSum * radiusSum) {
-                    // OBB collision and update contact points
-                    CollisionDetection.detectCollision(a, b, this.contacts);
-                }
+                // if (distanceX * distanceX + diastanceY * diastanceY < radiusSum * radiusSum) {
+                // OBB collision and update contact points
+                this.numChecks++;
+                CollisionDetection.detectCollision(a, b, this.contacts);
+                // }
 
                 // Broad phase check
                 // const ab = b.position.subNew(a.position);
@@ -126,6 +148,8 @@ export default class World {
                 // }
             }
         }
+
+        console.log('Num checks naive: ', this.numChecks);
 
         // console.timeEnd('contacts');
         // console.time('solver');
