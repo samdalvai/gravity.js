@@ -1,6 +1,6 @@
 import AssetStore, { TEXTURES } from '../AssetStore';
 import Vec2 from '../math/Vec2';
-import { Shape } from './Shape';
+import { PolygonShape, Shape, ShapeType } from './Shape';
 
 export default class Body {
     static _nextId = 0;
@@ -35,6 +35,11 @@ export default class Body {
 
     texture: CanvasImageSource | null = null;
 
+    minX!: number;
+    maxX!: number;
+    minY!: number;
+    maxY!: number;
+
     // Body(const Shape& shape, float x, float y, float mass);
     constructor(shape: Shape, x: number, y: number, mass: number) {
         this.id = Body._nextId++;
@@ -67,6 +72,7 @@ export default class Body {
         }
 
         this.shape.updateVertices(this.rotation, this.position);
+        this.updateAABB();
     }
 
     // a.id << 16 → shifts a.id into the upper 16 bits of a 32-bit integer
@@ -187,5 +193,41 @@ export default class Body {
 
         // Update the vertices to adjust them to the new position/rotation
         this.shape.updateVertices(this.rotation, this.position);
+
+        // Update AABB values based on new position
+        // TODO: add test and verify if performance is better/worst with this check
+        if (this.angularVelocity !== 0 || this.velocity.x !== 0 || this.velocity.y !== 0) {
+            this.updateAABB();
+        }
+    };
+
+    updateAABB = (): void => {
+        if (this.shape.getType() === ShapeType.CIRCLE) {
+            this.minX = this.position.x - this.shape.radius;
+            this.maxX = this.position.x + this.shape.radius;
+            this.minY = this.position.y - this.shape.radius;
+            this.maxY = this.position.y + this.shape.radius;
+        }
+
+        if (this.shape.getType() === ShapeType.POLYGON || this.shape.getType() === ShapeType.BOX) {
+            const worldVertices = (this.shape as PolygonShape).worldVertices;
+
+            let minX = Infinity;
+            let minY = Infinity;
+            let maxX = -Infinity;
+            let maxY = -Infinity;
+
+            for (const v of worldVertices) {
+                minX = Math.min(minX, v.x);
+                minY = Math.min(minY, v.y);
+                maxX = Math.max(maxX, v.x);
+                maxY = Math.max(maxY, v.y);
+            }
+
+            this.minX = minX;
+            this.maxX = maxX;
+            this.minY = minY;
+            this.maxY = maxY;
+        }
     };
 }

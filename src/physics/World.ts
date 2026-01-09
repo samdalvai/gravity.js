@@ -80,37 +80,34 @@ export default class World {
             body.integrateForces(dt);
         }
 
-        // Check all the bodies with all other bodies detecting collisions
         // console.time('contacts');
+        this.bodies.sort((a, b) => a.minX - b.minX);
+        const potentialPairs: [Body, Body][] = [];
 
-        let distanceX, diastanceY, radiusSum;
+        // Broad phase check with prune & sweep algorithm
+        for (let i = 0; i < this.bodies.length; i++) {
+            const a = this.bodies[i];
 
-        this.contacts.length = 0;
-        for (let i = 0; i <= this.bodies.length - 1; i++) {
             for (let j = i + 1; j < this.bodies.length; j++) {
-                const a = this.bodies[i];
                 const b = this.bodies[j];
 
-                // circle vs circle collision
-                distanceX = b.position.x - a.position.x;
-                diastanceY = b.position.y - a.position.y;
-                radiusSum = a.shape.radius + b.shape.radius;
+                // If objects don't overlap on X axis they cannot collide
+                if (b.minX > a.maxX) break;
 
-                if (distanceX * distanceX + diastanceY * diastanceY < radiusSum * radiusSum) {
-                    // OBB collision and update contact points
-                    CollisionDetection.detectCollision(a, b, this.contacts);
+                // If objects overlap on X axis but don't overlap on Y axis the cannot collide
+                if (a.maxY < b.minY || a.minY > b.maxY) {
+                    continue;
                 }
 
-                // Broad phase check
-                // const ab = b.position.subNew(a.position);
-                // const radiusSum = a.shape.radius + b.shape.radius;
-
-                // if (ab.magnitudeSquared() <= radiusSum * radiusSum) {
-                //     // TODO: no need to recheck collision if the two shapes are circles, in that case
-                //     // return the contact info directly
-                //     CollisionDetection.detectCollision(a, b, this.contacts);
-                // }
+                // Objects may be colliding
+                potentialPairs.push([a, b]);
             }
+        }
+
+        this.contacts.length = 0;
+        // Narrow phase check, potential pairs may still not collide
+        for (const [a, b] of potentialPairs) {
+            CollisionDetection.detectCollision(a, b, this.contacts);
         }
 
         // console.timeEnd('contacts');
@@ -118,7 +115,6 @@ export default class World {
 
         // Solve all constraints
         for (const constraint of this.joints) {
-            // for (const constraint of this.constraints) {
             constraint.preSolve(invDt);
         }
 
@@ -127,32 +123,33 @@ export default class World {
         }
 
         for (let i = 0; i < this.iterations; i++) {
-            for (const constraint of this.joints) {
-                // for (const constraint of this.constraints) {
-                constraint.solve();
+            for (const joint of this.joints) {
+                joint.solve();
             }
 
-            for (const constraint of this.contacts) {
-                constraint.solve();
+            for (const contact of this.contacts) {
+                contact.solve();
             }
         }
 
-        for (const constraint of this.joints) {
-            constraint.postSolve();
+        for (const joint of this.joints) {
+            joint.postSolve();
         }
 
-        for (const constraint of this.contacts) {
-            constraint.postSolve();
+        for (const contact of this.contacts) {
+            contact.postSolve();
         }
 
         // console.timeEnd('solver');
+        // console.time('Integrate');
 
         // Integrate all the velocities
         for (const body of this.bodies) {
             body.integrateVelocities(dt);
         }
+        // console.timeEnd('Integrate');
 
-        // Remove objects that went out of the screen
+        // Kill objects that went out of the screen
         for (let i = 0; i < this.bodies.length; i++) {
             const body = this.bodies[i];
 
