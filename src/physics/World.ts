@@ -82,8 +82,11 @@ export default class World {
         // console.time('Sorting');
 
         // Sort bodies by minX, this is needed for prune & sweep algorithm
-        this.bodies.sort((a, b) => a.minX - b.minX);
+        // for (const b of this.bodies) {
+        //     console.log(`${b.id}, ${b.minX}`);
+        // }
 
+        this.bodies.sort((a, b) => a.minX - b.minX);
         // console.timeEnd('Sorting');
 
         // Check all the bodies with all other bodies detecting collisions
