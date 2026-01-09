@@ -12,6 +12,7 @@ export default class World {
     private bodies: Body[] = [];
     private contacts: ContactConstraint[] = [];
     private joints: JointConstraint[] = [];
+    private collidingBodies: Map<number, [Body, Body]> = new Map();
 
     private forces: Vec2[] = [];
     private torques: number[] = [];
@@ -87,6 +88,10 @@ export default class World {
         // }
 
         this.bodies.sort((a, b) => a.minX - b.minX);
+        this.collidingBodies.clear();
+
+        
+
         // console.timeEnd('Sorting');
 
         // Check all the bodies with all other bodies detecting collisions
