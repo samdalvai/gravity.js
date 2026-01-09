@@ -50,6 +50,7 @@ export default class World {
     };
 
     update = (dt: number): void => {
+        // console.time('update');
         const invDt = dt > 0.0 ? 1.0 / dt : 0.0;
 
         // Loop all bodies of the world applying forces
@@ -161,6 +162,8 @@ export default class World {
                 this.bodies.pop();
             }
         }
+
+        // console.timeEnd('update');
     };
 
     clear = () => {
