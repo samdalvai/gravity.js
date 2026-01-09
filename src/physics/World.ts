@@ -79,6 +79,13 @@ export default class World {
             body.integrateForces(dt);
         }
 
+        // console.time('Sorting');
+
+        // Sort bodies by minX, this is needed for prune & sweep algorithm
+        this.bodies.sort((a, b) => a.minX - b.minX);
+
+        // console.timeEnd('Sorting');
+
         // Check all the bodies with all other bodies detecting collisions
         // console.time('contacts');
 
@@ -147,11 +154,11 @@ export default class World {
         // console.timeEnd('solver');
 
         // Integrate all the velocities
-        console.time('Integrate');
+        // console.time('Integrate');
         for (const body of this.bodies) {
             body.integrateVelocities(dt);
         }
-        console.timeEnd('Integrate');
+        // console.timeEnd('Integrate');
 
         // Remove objects that went out of the screen
         for (let i = 0; i < this.bodies.length; i++) {
