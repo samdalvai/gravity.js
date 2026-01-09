@@ -52,6 +52,7 @@ export default class World {
     };
 
     update = (dt: number): void => {
+        console.time('update');
         const invDt = dt > 0.0 ? 1.0 / dt : 0.0;
 
         // Loop all bodies of the world applying forces
@@ -81,16 +82,9 @@ export default class World {
             body.integrateForces(dt);
         }
 
-        // console.time('Sorting');
-
-        // Sort bodies by minX, this is needed for prune & sweep algorithm
-        // for (const b of this.bodies) {
-        //     console.log(`${b.id}, ${b.minX}`);
-        // }
-
-        console.time('Prune & Sweep');
+        // console.time('contacts');
         this.bodies.sort((a, b) => a.minX - b.minX);
-        const pairs: [Body, Body][] = [];
+        const potentialPairs: [Body, Body][] = [];
 
         for (let i = 0; i < this.bodies.length; i++) {
             const a = this.bodies[i];
@@ -106,52 +100,16 @@ export default class World {
                     continue;
                 }
 
-                pairs.push([a, b]);
+                potentialPairs.push([a, b]);
             }
         }
-
-        console.timeEnd('Prune & Sweep');
-        console.log('Prune & sweep pairs: ', pairs.length);
-
-        // console.timeEnd('Sorting');
-
-        // Check all the bodies with all other bodies detecting collisions
-        // console.time('contacts');
-
-        // let distanceX, diastanceY, radiusSum;
 
         this.numChecks = 0;
 
         this.contacts.length = 0;
-        for (let i = 0; i <= this.bodies.length - 1; i++) {
-            for (let j = i + 1; j < this.bodies.length; j++) {
-                const a = this.bodies[i];
-                const b = this.bodies[j];
-
-                // circle vs circle collision
-                // distanceX = b.position.x - a.position.x;
-                // diastanceY = b.position.y - a.position.y;
-                // radiusSum = a.shape.radius + b.shape.radius;
-
-                // if (distanceX * distanceX + diastanceY * diastanceY < radiusSum * radiusSum) {
-                // OBB collision and update contact points
-                this.numChecks++;
-                CollisionDetection.detectCollision(a, b, this.contacts);
-                // }
-
-                // Broad phase check
-                // const ab = b.position.subNew(a.position);
-                // const radiusSum = a.shape.radius + b.shape.radius;
-
-                // if (ab.magnitudeSquared() <= radiusSum * radiusSum) {
-                //     // TODO: no need to recheck collision if the two shapes are circles, in that case
-                //     // return the contact info directly
-                //     CollisionDetection.detectCollision(a, b, this.contacts);
-                // }
-            }
+        for (const [a, b] of potentialPairs) {
+            CollisionDetection.detectCollision(a, b, this.contacts);
         }
-
-        console.log('Num checks naive: ', this.numChecks);
 
         // console.timeEnd('contacts');
         // console.time('solver');
@@ -204,6 +162,8 @@ export default class World {
                 this.bodies.pop();
             }
         }
+
+        console.timeEnd('update');
     };
 
     clear = () => {
