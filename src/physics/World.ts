@@ -50,7 +50,7 @@ export default class World {
     };
 
     update = (dt: number): void => {
-        console.time('update');
+        // console.time('update');
         const invDt = dt > 0.0 ? 1.0 / dt : 0.0;
 
         // Loop all bodies of the world applying forces
@@ -80,7 +80,7 @@ export default class World {
             body.integrateForces(dt);
         }
 
-        // console.time('contacts');
+        console.time('contacts');
         this.bodies.sort((a, b) => a.minX - b.minX);
         const potentialPairs: [Body, Body][] = [];
 
@@ -107,7 +107,7 @@ export default class World {
             CollisionDetection.detectCollision(a, b, this.contacts);
         }
 
-        // console.timeEnd('contacts');
+        console.timeEnd('contacts');
         // console.time('solver');
 
         // Solve all constraints
@@ -159,7 +159,7 @@ export default class World {
             }
         }
 
-        console.timeEnd('update');
+        // console.timeEnd('update');
     };
 
     clear = () => {
