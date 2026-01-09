@@ -193,7 +193,12 @@ export default class Body {
 
         // Update the vertices to adjust them to the new position/rotation
         this.shape.updateVertices(this.rotation, this.position);
-        this.updateAABB();
+
+        // Update AABB values based on new position
+        // TODO: add test and verify if performance is better/worst with this check
+        if (this.angularVelocity !== 0 || this.velocity.x !== 0 || this.velocity.y !== 0) {
+            this.updateAABB();
+        }
     };
 
     updateAABB = (): void => {
