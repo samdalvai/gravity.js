@@ -307,11 +307,11 @@ export class ContactConstraint extends Constraint {
 
         bodyA.velocity.x += impulseX * bodyA.invMass;
         bodyA.velocity.y += impulseY * bodyA.invMass;
-        bodyA.angularVelocity += this.leverArmAX * impulseY - this.leverArmAY * impulseX;
+        bodyA.angularVelocity += (this.leverArmAX * impulseY - this.leverArmAY * impulseX) * bodyA.invI;
 
         bodyB.velocity.x += -impulseX * bodyB.invMass;
         bodyB.velocity.y += -impulseY * bodyB.invMass;
-        bodyB.angularVelocity += this.leverArmBX * -impulseY - this.leverArmBY * -impulseX;
+        bodyB.angularVelocity += (this.leverArmBX * -impulseY - this.leverArmBY * -impulseX) * bodyB.invI;
     }
 
     solve(): void {
@@ -405,8 +405,10 @@ export class ContactConstraint extends Constraint {
         // Apply opposite sign torque to avoid infinite rolling of bodies
         const rollingResistance = 0.2;
 
-        const resistanceTorqueA = rollingResistance * this.accumulatedNormalImpulse * Math.sign(this.bodyA.angularVelocity);
-        const resistanceTorqueB = rollingResistance * this.accumulatedNormalImpulse * Math.sign(this.bodyB.angularVelocity);
+        const resistanceTorqueA =
+            rollingResistance * this.accumulatedNormalImpulse * Math.sign(this.bodyA.angularVelocity);
+        const resistanceTorqueB =
+            rollingResistance * this.accumulatedNormalImpulse * Math.sign(this.bodyB.angularVelocity);
 
         this.bodyA.angularVelocity -= resistanceTorqueA * this.bodyA.invI;
         this.bodyB.angularVelocity -= resistanceTorqueB * this.bodyB.invI;
