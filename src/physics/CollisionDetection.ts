@@ -5,14 +5,15 @@ import { CircleShape, PolygonShape, ShapeType } from './Shape';
 
 export default class CollisionDetection {
     static detectCollision = (a: Body, b: Body, contacts: ContactConstraint[]): boolean => {
-        const aIsCircle = a.shape.getType() === ShapeType.CIRCLE;
-        const bIsCircle = b.shape.getType() === ShapeType.CIRCLE;
-        const aIsPolygon = a.shape.getType() === ShapeType.POLYGON;
-        const bIsPolygon = b.shape.getType() === ShapeType.POLYGON;
+        const aIsCircle = a.shapeType === ShapeType.CIRCLE;
+        const bIsCircle = b.shapeType === ShapeType.CIRCLE;
 
         if (aIsCircle && bIsCircle) {
             return this.detectCollisionCircleCircle(a, b, contacts);
         }
+
+        const aIsPolygon = a.shapeType === ShapeType.POLYGON;
+        const bIsPolygon = b.shapeType === ShapeType.POLYGON;
 
         if (aIsPolygon && bIsPolygon) {
             return this.detectCollisionPolygonPolygon(a, b, contacts);
