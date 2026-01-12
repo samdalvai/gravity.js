@@ -3,7 +3,6 @@ import Vec2 from '../math/Vec2';
 export enum ShapeType {
     CIRCLE,
     POLYGON,
-    BOX,
 }
 
 export abstract class Shape {
@@ -208,7 +207,7 @@ export class BoxShape extends PolygonShape {
     }
 
     getType = (): ShapeType => {
-        return ShapeType.BOX;
+        return ShapeType.POLYGON;
     };
 
     getMomentOfInertia = (): number => {

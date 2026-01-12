@@ -32,6 +32,7 @@ export default class Body {
 
     // Pointer to the shape/geometry of this rigid body
     shape: Shape;
+    shapeType: ShapeType;
 
     texture: CanvasImageSource | null = null;
 
@@ -45,6 +46,8 @@ export default class Body {
         this.id = Body._nextId++;
 
         this.shape = shape;
+        this.shapeType = shape.getType();
+
         this.position = new Vec2(x, y);
         this.velocity = new Vec2(0, 0);
         this.acceleration = new Vec2(0, 0);
@@ -209,7 +212,7 @@ export default class Body {
             this.maxY = this.position.y + this.shape.radius;
         }
 
-        if (this.shape.getType() === ShapeType.POLYGON || this.shape.getType() === ShapeType.BOX) {
+        if (this.shape.getType() === ShapeType.POLYGON) {
             const worldVertices = (this.shape as PolygonShape).worldVertices;
 
             let minX = Infinity;
