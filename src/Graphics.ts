@@ -213,24 +213,6 @@ export default class Graphics {
                     }
                 }
                 break;
-            case ShapeType.BOX:
-                {
-                    const boxShape = body.shape as BoxShape;
-
-                    if (!debug && body.texture) {
-                        Graphics.drawTexture(
-                            body.position.x,
-                            body.position.y,
-                            boxShape.width,
-                            boxShape.height,
-                            body.rotation,
-                            body.texture,
-                        );
-                    } else if (debug) {
-                        Graphics.drawPolygon(body.position.x, body.position.y, boxShape.worldVertices, 'white');
-                    }
-                }
-                break;
         }
     };
 }
