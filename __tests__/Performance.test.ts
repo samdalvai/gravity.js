@@ -49,7 +49,7 @@ describe('Performance', () => {
     //     console.timeEnd('test');
     // });
 
-    test('Performance test collision detection', () => {
+    test.each(Array.from({ length: 5 }))('Performance test', () => {
         const boxA = new Body(new BoxShape(20, 20), 100, 100, 5);
         const boxB = new Body(new BoxShape(20, 20), 110, 100, 5);
         const circleA = new Body(new CircleShape(10), 100, 100, 5);

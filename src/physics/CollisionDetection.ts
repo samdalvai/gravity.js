@@ -7,8 +7,8 @@ export default class CollisionDetection {
     static detectCollision = (a: Body, b: Body, contacts: ContactConstraint[]): boolean => {
         const aIsCircle = a.shape.getType() === ShapeType.CIRCLE;
         const bIsCircle = b.shape.getType() === ShapeType.CIRCLE;
-        const aIsPolygon = a.shape.getType() === ShapeType.POLYGON || a.shape.getType() === ShapeType.BOX;
-        const bIsPolygon = b.shape.getType() === ShapeType.POLYGON || b.shape.getType() === ShapeType.BOX;
+        const aIsPolygon = a.shape.getType() === ShapeType.POLYGON;
+        const bIsPolygon = b.shape.getType() === ShapeType.POLYGON;
 
         if (aIsCircle && bIsCircle) {
             return this.detectCollisionCircleCircle(a, b, contacts);
