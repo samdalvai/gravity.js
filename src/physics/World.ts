@@ -59,11 +59,6 @@ export default class World {
             const weightForce = Force.generateWeightForce(body, this.G);
             body.addForce(weightForce);
 
-            // Apply friction to all bodies
-            // TODO: counter friction should only be applied if in contact with another surface
-            // const frictionForce = Force.generateFrictionForce(body, body.friction);
-            // body.addForce(frictionForce);
-
             // Apply forces to all bodies
             for (const force of this.forces) {
                 body.addForce(force);
