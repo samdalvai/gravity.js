@@ -202,6 +202,9 @@ export default class Body {
         if (this.angularVelocity !== 0 || this.velocity.x !== 0 || this.velocity.y !== 0) {
             this.updateAABB();
         }
+
+        // Bleed off tiny angular velocity to avoid circle rolling forever
+        this.angularVelocity *= 0.99;
     };
 
     updateAABB = (): void => {

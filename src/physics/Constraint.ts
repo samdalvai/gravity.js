@@ -401,9 +401,5 @@ export class ContactConstraint extends Constraint {
             -maxAccumulatedImpulse,
             maxAccumulatedImpulse,
         );
-
-        // Bleed off tiny angular velocity to avoid circle rolling forever
-        this.bodyA.angularVelocity *= 0.99;
-        this.bodyB.angularVelocity *= 0.99;
     }
 }
