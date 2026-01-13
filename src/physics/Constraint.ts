@@ -299,19 +299,20 @@ export class ContactConstraint extends Constraint {
         this.restitutionVelocityBias =
             normalRelativeVelocity < -restitutionThreshold ? -restitution * normalRelativeVelocity : 0;
 
-        // Warm starting: Apply accumulated impulses from previous frame to velocities for faster convergence
-        const impulseX =
-            this.normalWorldX * this.accumulatedNormalImpulse + this.tangentWorldX * this.accumulatedTangentImpulse;
-        const impulseY =
-            this.normalWorldY * this.accumulatedNormalImpulse + this.tangentWorldY * this.accumulatedTangentImpulse;
+        // TODO: disable until warm starting is implemented
+        // Apply accumulated impulses from previous frame to velocities for faster convergence (Warm starting)
+        // const impulseX =
+        //     this.normalWorldX * this.accumulatedNormalImpulse + this.tangentWorldX * this.accumulatedTangentImpulse;
+        // const impulseY =
+        //     this.normalWorldY * this.accumulatedNormalImpulse + this.tangentWorldY * this.accumulatedTangentImpulse;
 
-        bodyA.velocity.x += impulseX * bodyA.invMass;
-        bodyA.velocity.y += impulseY * bodyA.invMass;
-        bodyA.angularVelocity += (this.leverArmAX * impulseY - this.leverArmAY * impulseX) * bodyA.invI;
+        // bodyA.velocity.x += impulseX * bodyA.invMass;
+        // bodyA.velocity.y += impulseY * bodyA.invMass;
+        // bodyA.angularVelocity += (this.leverArmAX * impulseY - this.leverArmAY * impulseX) * bodyA.invI;
 
-        bodyB.velocity.x += -impulseX * bodyB.invMass;
-        bodyB.velocity.y += -impulseY * bodyB.invMass;
-        bodyB.angularVelocity += (this.leverArmBX * -impulseY - this.leverArmBY * -impulseX) * bodyB.invI;
+        // bodyB.velocity.x += -impulseX * bodyB.invMass;
+        // bodyB.velocity.y += -impulseY * bodyB.invMass;
+        // bodyB.angularVelocity += (this.leverArmBX * -impulseY - this.leverArmBY * -impulseX) * bodyB.invI;
     }
 
     solve(): void {
