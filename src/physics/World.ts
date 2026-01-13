@@ -114,12 +114,12 @@ export default class World {
         // console.time('solver');
 
         // Solve all constraints
-        for (const constraint of this.joints) {
-            constraint.preSolve(invDt);
+        for (const joint of this.joints) {
+            joint.preSolve(invDt);
         }
 
-        for (const constraint of this.contacts) {
-            constraint.preSolve(invDt);
+        for (const contact of this.contacts) {
+            contact.preSolve(invDt);
         }
 
         for (let i = 0; i < this.iterations; i++) {
