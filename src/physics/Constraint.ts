@@ -22,6 +22,7 @@ export abstract class Constraint {
     abstract postSolve(): void;
 }
 
+// TODO: investigate separate velocity and position solver
 export class JointConstraint extends Constraint {
     // Elements of the 2x2 effective mass matrix (inverse of the constraint mass matrix) for x-x, x-y, and y-y components.
     private effectiveMassXX = 0;
