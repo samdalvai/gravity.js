@@ -210,7 +210,7 @@ export default class Application {
 
                 const shape = this.generateCircles ? new CircleShape(5) : new BoxShape(10, 10);
                 const particle = new Body(shape, InputManager.mousePosition.x, InputManager.mousePosition.y, 1.0);
-                particle.restitution = 0.2;
+                particle.restitution = 0.0;
                 particle.friction = 10;
                 particle.setTexture(this.generateCircles ? 'rockRound' : 'rockBox');
                 this.world.addBody(particle);
@@ -275,9 +275,10 @@ export default class Application {
             // Debut related info
             `FPS: ${this.FPS.toFixed(2)}`,
             `Num objects: ${this.world.getBodies().length}`,
+            `Num contacts: ${this.world.getContacts().length}`,
         ];
 
-        for (let i = 0; i < debugText.length - (this.debug ? 0 : 3); i++) {
+        for (let i = 0; i < debugText.length - (this.debug ? 0 : 4); i++) {
             Graphics.drawText(debugText[i], 50, 50 + i * 25, 18, 'arial', this.debug ? 'orange' : 'black');
         }
     };
