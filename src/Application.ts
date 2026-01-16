@@ -88,10 +88,8 @@ export default class Application {
                         //     bomb.friction = 0.2;
                         //     this.bomb = bomb;
                         //     this.bomb.setTexture('rockRound');
-
                         //     this.world.addBody(bomb);
                         // }
-
                         // this.bomb.position = new Vec2(Graphics.width() / 2 + Utils.randomNumber(-500, 500), -50);
                         // const middleFloor = new Vec2(
                         //     Graphics.width() / 2 + Utils.randomNumber(-100, 100),
@@ -233,6 +231,8 @@ export default class Application {
             );
         }
 
+        Graphics.beginWorld();
+
         // Draw all bodies
         // for (const body of this.world.getBodies()) {
         //     Graphics.drawBody(body, this.debug);
@@ -252,7 +252,6 @@ export default class Application {
             //             'blue',
             //         );
             //     }
-
             //     for (const contact of this.world.getContacts()) {
             //         const aW = contact.bodyA.localSpaceToWorldSpace(contact.aPointLocal);
             //         const bW = contact.bodyB.localSpaceToWorldSpace(contact.bPointLocal);
@@ -264,6 +263,8 @@ export default class Application {
             //     }
             // }
         }
+
+        Graphics.endWorld();
 
         const debugText = [
             // General info
