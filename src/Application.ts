@@ -319,6 +319,9 @@ export default class Application {
 
         Graphics.endWorld();
 
+        const x = InputManager.mousePosition.x - Graphics.width() / 2;
+        const y = -(InputManager.mousePosition.y - Graphics.height() / 2);
+
         const debugText = [
             // General info
             'Keys: 1-9 Demos, Left Mouse to generate circles, Right Mouse to generate boxes, Space to drop bomb',
@@ -328,6 +331,7 @@ export default class Application {
             // `(S)how contacts and joints: ${this.showContacts ? 'ON' : 'OFF'}`,
             // // Debut related info
             `FPS: ${this.FPS.toFixed(2)}`,
+            `Mouse position: {${x}, ${y}}`,
             `Num objects: ${this.world.bodies.length}`,
             `Num contacts: ${this.world.manifolds.length}`,
         ];

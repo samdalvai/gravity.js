@@ -22,32 +22,27 @@ export default class Demo {
         'Demo 9: A complex scene',
     ];
 
-    static generateFloor = (world: World): Body => {
-        const floor = new Body(
-            new BoxShape(Graphics.width(), 200),
-            Graphics.width() / 2.0,
-            Graphics.height() - 100,
-            0.0,
-        );
-        world.addBody(floor);
-        return floor;
+    static generateFloor = (world: World): void => {
+        const groundPositionY = -400;
+        const groundHeight = 50;
+        const ground = new Box(Graphics.width(), groundHeight, Type.Static);
+        ground.position.y = groundPositionY;
+        ground.restitution = 0.45;
+        world.addBody(ground);
     };
 
     static generateFences = (world: World): void => {
+        const groundPositionY = -400;
+        const fenceHeight = Graphics.height() - 200;
         const fenceWidth = 50;
-        const leftFence = new Body(
-            new BoxShape(fenceWidth, Graphics.height() - 200),
-            -(fenceWidth / 2),
-            Graphics.height() / 2.0 - 100,
-            0.0,
-        );
-        const rightFence = new Body(
-            new BoxShape(fenceWidth, Graphics.height() - 200),
-            Graphics.width() + fenceWidth / 2,
-            Graphics.height() / 2.0 - 100,
-            0.0,
-        );
+        const leftFence = new Box(fenceWidth, Graphics.height() - 200, Type.Static);
+        leftFence.position.x = -(Graphics.width() / 2) - fenceWidth / 2;
+        leftFence.position.y = groundPositionY + fenceHeight / 2 + fenceWidth / 2;
         world.addBody(leftFence);
+
+        const rightFence = new Box(fenceWidth, Graphics.height() - 200, Type.Static);
+        rightFence.position.x = Graphics.width() / 2 + fenceWidth / 2;
+        rightFence.position.y = groundPositionY + fenceHeight / 2 + fenceWidth / 2;
         world.addBody(rightFence);
     };
 
@@ -57,54 +52,21 @@ export default class Demo {
 
     static demo1 = (world: World) => {
         // Demo 1: Single box demo
-        // this.generateFloor(world);
-        // this.generateFences(world);
-        // const box = new Body(new BoxShape(60, 60), Graphics.width() / 2.0, Graphics.height() - 300, 10);
-        // box.setTexture('crate');
-        // world.addBody(box);
-        const ground = new Box(Graphics.width(), 50, Type.Static);
-        ground.position.y = -350;
-        ground.restitution = 0.45;
-        world.addBody(ground);
+        this.generateFloor(world);
+        this.generateFences(world);
 
         const b = new Box(50);
         b.mass = 2.0;
         b.position = new Vector2(0, 0);
-        b.restitution = 0.7;
+        b.restitution = 0.2;
 
         world.addBody(b);
     };
 
     static demo2 = (world: World) => {
         // Demo 2: Pyramid of boxes
-        // const floor = this.generateFloor(world);
-        // this.generateFences(world);
-        // const floorHeight = 200;
-
-        // const boxSize = 60;
-        // const rows = 10;
-
-        // const centerX = Graphics.width() / 2;
-        // const baseY = floor.position.y - floorHeight / 2 - 100;
-
-        // for (let row = 0; row < rows; row++) {
-        //     const boxesInRow = rows - row;
-        //     const rowWidth = boxesInRow * boxSize;
-
-        //     for (let col = 0; col < boxesInRow; col++) {
-        //         const x = centerX - rowWidth / 2 + boxSize / 2 + col * boxSize;
-        //         const y = baseY - row * boxSize;
-
-        //         const box = new Body(new BoxShape(boxSize, boxSize), x, y, 10);
-        //         box.setTexture('crate');
-        //         box.restitution = 0.001;
-        //         world.addBody(box);
-        //     }
-        // }
-        const ground = new Box(Graphics.width(), 50, Type.Static);
-        ground.position.y = -350;
-        ground.restitution = 0.45;
-        world.addBody(ground);
+        this.generateFloor(world);
+        this.generateFences(world);
 
         const rows = 14;
         const boxSize = 50;
