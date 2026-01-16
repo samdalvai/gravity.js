@@ -1,8 +1,9 @@
-import { Box } from './box';
-import { Circle } from './circle';
+// IMPORTANT: this fixes circular dependency loop
+// import { Box } from './box';
+// import { Circle } from './circle';
+// import { Polygon } from './polygon';
 import { Matrix3 } from './math/matrix3';
 import { Vector2 } from './math/vector2';
-import { Polygon } from './polygon';
 import { RigidBody, Type } from './rigidbody';
 import { Settings } from './settings';
 
@@ -37,6 +38,7 @@ export function lerpVector(a: Vector2, b: Vector2, uv: UV): Vector2 {
     return new Vector2(a.x * uv.u + b.x * uv.v, a.y * uv.u + b.y * uv.v);
 }
 
+// IMPORTANT: this causes circular dependency loop
 export function createRandomConvexBody(
     radius: number,
     numVertices: number = -1,
@@ -68,6 +70,7 @@ export function createRandomConvexBody(
     return res;
 }
 
+// IMPORTANT: this causes circular dependency loop
 export function createRegularPolygon(
     radius: number,
     numVertices: number = -1,
