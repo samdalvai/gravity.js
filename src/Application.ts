@@ -5,6 +5,7 @@ import Vec2 from './math/Vec2';
 import { Box } from './new/box';
 import { Circle } from './new/circle';
 import { Vector2 } from './new/math/vector2';
+import { Type } from './new/rigidbody';
 import Body from './physics/Body';
 import { GRAVITY, MAX_BODIES } from './physics/Constants';
 import Force from './physics/Force';
@@ -49,9 +50,9 @@ export default class Application {
 
         this.bgTexture = AssetStore.getTexture('background');
 
-        // const ground = new Box(Settings.clipWidth * 5, 0.4, Type.Static);
-        // ground.restitution = 0.45;
-        // world.register(ground);
+        const ground = new Box(Graphics.width(), 50, Type.Static);
+        ground.position.y = -350;
+        ground.restitution = 0.45;
 
         const b = new Box(50);
         b.mass = 2.0;
@@ -67,6 +68,7 @@ export default class Application {
         c.restitution = 0.5;
         c.rotation = 2;
 
+        this.world.register(ground);
         this.world.register(b);
         this.world.register(c);
     };
