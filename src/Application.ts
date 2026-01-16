@@ -63,10 +63,11 @@ export default class Application {
         b.angularVelocity = 0;
 
         const c = new Circle(25);
-        c.mass = 2;
+        c.mass = 10;
         c.position = new Vector2(200, 0);
         c.restitution = 0.5;
         c.rotation = 2;
+        c.angularVelocity = 5;
 
         this.world.register(ground);
         this.world.register(b);
