@@ -35,6 +35,9 @@ export abstract class RigidBody extends Entity {
     public islandID: number = 0;
     public manifoldIDs: number[] = []; // ids of contact manifold containing this body
     public jointIDs: number[] = []; // ids of the joint containing this body
+
+    // TODO: sleeping should be implemented using islands, otherwise on pyramids/stacks if the ones at the top
+    // do not get new contacts they never awake
     public resting: number = 0;
     public sleeping: boolean = false;
 
