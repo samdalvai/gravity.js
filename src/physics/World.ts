@@ -130,7 +130,7 @@ export default class World {
 
             // Apply gravity
             if (Settings.applyGravity && !b.sleeping) {
-                const gravity = new Vector2(0, this.G * PIXELS_PER_METER * deltaTime);
+                const gravity = new Vector2(0, Settings.gravity * Settings.gravityScale * deltaTime);
                 b.linearVelocity.x += gravity.x;
                 b.linearVelocity.y += gravity.y;
             }
