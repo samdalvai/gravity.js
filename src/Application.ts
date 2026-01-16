@@ -54,44 +54,44 @@ export default class Application {
         ground.position.y = -350;
         ground.restitution = 0.45;
 
-        const b = new Box(50);
-        b.mass = 2.0;
-        b.position = new Vector2(100, 0);
-        b.restitution = 0.7;
-        b.rotation = 1;
-        // b.angularVelocity = random(-8, 8);
-        b.angularVelocity = 0;
+        // const b = new Box(50);
+        // b.mass = 2.0;
+        // b.position = new Vector2(100, 0);
+        // b.restitution = 0.7;
+        // b.rotation = 1;
+        // // b.angularVelocity = random(-8, 8);
+        // b.angularVelocity = 0;
 
-        const c = new Circle(25);
-        c.mass = 10;
-        c.position = new Vector2(200, 0);
-        c.restitution = 0.5;
-        c.rotation = 2;
-        c.angularVelocity = 5;
+        // const c = new Circle(25);
+        // c.mass = 10;
+        // c.position = new Vector2(200, 0);
+        // c.restitution = 0.5;
+        // c.rotation = 2;
+        // c.angularVelocity = 5;
 
         this.world.register(ground);
-        this.world.register(b);
-        this.world.register(c);
+        // this.world.register(b);
+        // this.world.register(c);
 
-        // const rows = 14;
-        // const boxSize = 50;
-        // const xGap = 0.5;
-        // const yGap = 1.5;
-        // const xStart = (-(rows - 1) * (boxSize + xGap)) / 2.0;
-        // const yStart = -250;
+        const rows = 14;
+        const boxSize = 50;
+        const xGap = 0.5;
+        const yGap = 1.5;
+        const xStart = (-(rows - 1) * (boxSize + xGap)) / 2.0;
+        const yStart = -250;
 
-        // for (let y = 0; y < rows; y++) {
-        //     for (let x = 0; x < rows - y; x++) {
-        //         const b = new Box(boxSize);
-        //         b.mass = 0.1;
-        //         b.position = new Vector2(
-        //             xStart + (y * (boxSize + xGap)) / 2 + x * (boxSize + xGap),
-        //             yStart + y * (boxSize + yGap),
-        //         );
-        //         b.restitution = 0.0;
-        //         this.world.register(b);
-        //     }
-        // }
+        for (let y = 0; y < rows; y++) {
+            for (let x = 0; x < rows - y; x++) {
+                const b = new Box(boxSize);
+                b.mass = 0.1;
+                b.position = new Vector2(
+                    xStart + (y * (boxSize + xGap)) / 2 + x * (boxSize + xGap),
+                    yStart + y * (boxSize + yGap),
+                );
+                b.restitution = 0.0;
+                this.world.register(b);
+            }
+        }
     };
 
     input = (): void => {
