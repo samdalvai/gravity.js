@@ -1,5 +1,6 @@
 // IMPORTANT: this fixes circular dependency loop
 // import { gWorld } from './game';
+import { PIXELS_PER_METER } from '../physics/Constants';
 import * as Util from './util';
 
 export enum GenerationShape {
@@ -27,8 +28,8 @@ const strengthRange: Util.Pair<number, number> = { p1: 0.2, p2: 2.0 };
 export const Settings = {
     width: 1280,
     height: 720,
-    clipWidth: 12.8,
-    clipHeight: 7.2,
+    clipWidth: 1280,
+    clipHeight: 720,
     paused: false,
     frequency: 60,
     GJK_MAX_ITERATION: 20,
@@ -45,38 +46,36 @@ export const Settings = {
     showContactLink: false,
     mode: MouseMode.Grab,
     mouseStrength: 1.5,
-    numIterations: 10, // Number of resolution(sequential impulses) iterations
+    numIterations: 10,
     newBodySettings: {
         shape: GenerationShape.Box,
-        density: 8,
-        size: 0.5,
+        density: 8 / (PIXELS_PER_METER * PIXELS_PER_METER),
+        size: 0.5 * PIXELS_PER_METER,
         friction: 0.7,
         restitution: 0.0,
         numVertices: Math.trunc(Util.random(3.0, 18.0)),
-        generateMultiple: false
+        generateMultiple: false,
     },
     gravity: -10,
-    // TODO: Gravity needs to be consitent regardless of the framerate
-    // gravityScale: 0.25,
-    gravityScale: 0.75,
-    penetrationSlop: 0.005,
-    restitutionSlop: 0.5, // This has to be greater than (gravity * gravityScale * deltaTime)
+    gravityScale: 0.75 * PIXELS_PER_METER,
+    penetrationSlop: 0.005 * PIXELS_PER_METER,
+    restitutionSlop: 0.5 * PIXELS_PER_METER,
     positionCorrectionBeta: 0.2,
-    warmStartingThreshold: 0.005 * 0.005,
-    deadBottom: -10.0,
+    warmStartingThreshold: (0.005 * PIXELS_PER_METER) ** 2,
+    deadBottom: -10 * PIXELS_PER_METER,
     resetCamera: true,
     grabCenter: false,
     showInfo: false,
     randomConvexMaxVertices: 8,
     regularPolygonMaxVertices: 11,
-    defaultDensity: 12.5 / 1000,
+    defaultDensity: 12.5 / 1000 / (PIXELS_PER_METER * PIXELS_PER_METER),
     defaultFriction: 0.7,
     defaultRestitution: 0.0,
     blockSolve: true,
     colorizeBody: false,
     colorizeIsland: false,
-    restLinearTolerance: 0.005 * 0.005,
-    restAngularTolerance: ((0.5 * Math.PI) / 180.0) * ((0.5 * Math.PI) / 180.0),
+    restLinearTolerance: (0.005 * PIXELS_PER_METER) ** 2,
+    restAngularTolerance: ((0.5 * Math.PI) / 180.0) ** 2,
     sleepingWait: 0.5,
     colorizeActiveBody: true,
     sleepEnabled: true,
