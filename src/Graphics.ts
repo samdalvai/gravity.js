@@ -1,5 +1,7 @@
 import Vec2 from './math/Vec2';
 import { Circle } from './new/circle';
+import { Vector2 } from './new/math/vector2';
+import { Vector3 } from './new/math/vector3';
 import { Polygon } from './new/polygon';
 import { RigidBody } from './new/rigidbody';
 import Body from './physics/Body';
@@ -211,11 +213,25 @@ export default class Graphics {
             this.ctx.beginPath();
 
             const vertices = b.vertices;
+            const cos = Math.cos(b.rotation);
+            const sin = Math.sin(b.rotation);
+            const x = b.position.x;
+            const y = b.position.y;
 
+            // TODO: to be improved, maybe we can use a transform for this,
+            // see drawBody of renderer.ts
             if (vertices.length > 0) {
-                this.ctx.moveTo(vertices[0].x, vertices[0].y);
+                const rotated = new Vector2(
+                    vertices[0].x * cos - vertices[0].y * sin + x,
+                    vertices[0].x * sin + vertices[0].y * cos + y,
+                );
+                this.ctx.moveTo(rotated.x, rotated.y);
                 for (let i = 1; i < vertices.length; i++) {
-                    this.ctx.lineTo(vertices[i].x, vertices[i].y);
+                    const rotated = new Vector2(
+                        vertices[i].x * cos - vertices[i].y * sin + x,
+                        vertices[i].x * sin + vertices[i].y * cos + y,
+                    );
+                    this.ctx.lineTo(rotated.x, rotated.y);
                 }
                 this.ctx.closePath();
             }
@@ -225,7 +241,7 @@ export default class Graphics {
             // draw the 1px center point like filledCircleColor(..., radius=1)
             this.ctx.fillStyle = 'white';
             this.ctx.beginPath();
-            this.ctx.arc(b.position.x, b.position.y, 1, 0, Math.PI * 2);
+            this.ctx.arc(x, y, 1, 0, Math.PI * 2);
             this.ctx.fill();
         }
 
