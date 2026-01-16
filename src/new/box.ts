@@ -38,6 +38,9 @@ export class Box extends Polygon {
         this._invMass = 1.0 / this._mass;
         this._inertia = Util.calculateBoxInertia(this.width, this.height, this._mass);
         this._invInertia = 1.0 / this._inertia;
+        console.log('mass: ', this._mass);
+        console.log('_density: ', this._density);
+        console.log('mass: ', this._mass);
     }
 
     override get density(): number {
