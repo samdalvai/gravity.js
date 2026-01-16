@@ -204,32 +204,35 @@ export default class Application {
             }
 
             switch (inputEvent.type) {
-                case 'mousedown':
+                case 'mousedown': {
                     // if (this.world.getBodies().length >= MAX_BODIES) {
                     //     continue;
                     // }
+                    const x = inputEvent.x - Graphics.width() / 2;
+                    const y = -(inputEvent.y - Graphics.height() / 2);
 
                     switch (inputEvent.button) {
                         case MouseButton.LEFT:
                             {
-                                // const ball = new Body(new CircleShape(30), inputEvent.x, inputEvent.y, 4.0);
-                                // ball.restitution = 0.6;
-                                // ball.friction = 0.5;
-                                // ball.setTexture('basketball');
-                                // this.world.addBody(ball);
+                                const ball = new Circle(25);
+                                ball.position = new Vector2(x, y);
+                                ball.restitution = 0.6;
+                                ball.mass = 2.0;
+                                this.world.register(ball);
                             }
                             break;
                         case MouseButton.RIGHT:
                             {
-                                // const box = new Body(new BoxShape(60, 60), inputEvent.x, inputEvent.y, 6.0);
-                                // box.restitution = 0.2;
-                                // box.friction = 0.7;
-                                // box.setTexture('crate');
-                                // this.world.addBody(box);
+                                const box = new Box(50);
+                                box.position = new Vector2(x, y);
+                                box.mass = 2.0;
+                                box.restitution = 0.7;
+                                this.world.register(box);
                             }
                             break;
                     }
                     break;
+                }
                 case 'mouseup':
                     break;
             }
