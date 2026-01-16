@@ -1,5 +1,5 @@
 import AssetStore from './AssetStore';
-import Graphics from './Graphics';
+import Graphics from './Graphics_old';
 import InputManager, { MouseButton } from './InputManager';
 import Utils from './math/Utils';
 import Vec2 from './math/Vec2';
