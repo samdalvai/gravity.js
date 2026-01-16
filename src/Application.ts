@@ -57,6 +57,7 @@ export default class Application {
         b.mass = 2.0;
         b.position = new Vector2(100, 0);
         b.restitution = 0.7;
+        b.rotation = 1;
         // b.angularVelocity = random(-8, 8);
         b.angularVelocity = 0;
 
