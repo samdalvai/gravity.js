@@ -210,8 +210,8 @@ export default class Graphics {
             //
         }
 
-        // if (b instanceof Circle) {
-        //     //
-        // }
+        if (b instanceof Circle) {
+            //
+        }
     };
 }
