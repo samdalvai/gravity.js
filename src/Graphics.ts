@@ -238,6 +238,10 @@ export default class Graphics {
 
             this.ctx.stroke();
 
+            if (!b.sleeping) {
+                this.ctx.fill();
+            }
+
             // draw the 1px center point like filledCircleColor(..., radius=1)
             this.ctx.fillStyle = 'white';
             this.ctx.beginPath();
@@ -257,6 +261,10 @@ export default class Graphics {
             this.ctx.strokeStyle = 'white';
             this.ctx.stroke();
 
+            if (!b.sleeping) {
+                this.ctx.fill();
+            }
+
             // Draw the line from center to circle edge at given angle
             const endX = x + Math.cos(angle) * radius;
             const endY = y + Math.sin(angle) * radius;
@@ -264,7 +272,7 @@ export default class Graphics {
             this.ctx.beginPath();
             this.ctx.moveTo(x, y);
             this.ctx.lineTo(endX, endY);
-            this.ctx.strokeStyle = 'white';
+            this.ctx.strokeStyle = 'red';
             this.ctx.stroke();
         }
     };
