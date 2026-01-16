@@ -8,6 +8,9 @@ export default class Graphics {
     static canvas: HTMLCanvasElement;
     static ctx: CanvasRenderingContext2D;
 
+    static zoom: number;
+    static pan = new Vec2(0, 0);
+
     static width = (): number => {
         return this.windowWidth;
     };
@@ -32,6 +35,7 @@ export default class Graphics {
         this.ctx = ctx;
         this.windowWidth = window.innerWidth;
         this.windowHeight = window.innerHeight;
+        this.zoom = 1;
 
         return true;
     };
@@ -39,6 +43,34 @@ export default class Graphics {
     static clearScreen = (): void => {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     };
+
+    /**
+     * Start world coordinates to screen conversion.
+     *
+     * This is used because box 2d uses a standard coordinate system for objects
+     * positions and dimensions
+     */
+    static beginWorld(): void {
+        const ctx = this.ctx;
+
+        ctx.save();
+
+        // Move origin to screen center
+        ctx.translate(this.windowWidth / 2, this.windowHeight / 2);
+
+        // Flip Y axis (world Y up, canvas Y down)
+        ctx.scale(this.zoom, -this.zoom);
+
+        // Apply camera pan
+        ctx.translate(-this.pan.x, -this.pan.y);
+
+        ctx.lineWidth = 1 / this.zoom;
+    }
+
+    /** Restore coordinates to screen conversion */
+    static endWorld(): void {
+        this.ctx.restore();
+    }
 
     static drawLine = (x0: number, y0: number, x1: number, y1: number, color: string): void => {
         this.ctx.strokeStyle = color;
