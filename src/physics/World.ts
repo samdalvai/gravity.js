@@ -34,11 +34,21 @@ export default class World {
         this.iterations = iterations;
     }
 
-    register(b: RigidBody) {
+    register = (b: RigidBody) => {
         // TODO: let a body increment his own id
         b.id = this.uid++;
         this.bodies.push(b);
-    }
+    };
+
+    unregister = (b: RigidBody) => {
+        for (let i = 0; i < this.bodies.length; i++) {
+            const current = this.bodies[i];
+            if (current.id != b.id) continue;
+
+            this.bodies.splice(i, 1);
+            break;
+        }
+    };
 
     update = (deltaTime: number): void => {
         const inverseDeltaTime = deltaTime > 0.0 ? 1.0 / deltaTime : 0.0;
@@ -118,7 +128,7 @@ export default class World {
             // Bleed off tiny angular velocity to avoid circle rolling forever
             b.angularVelocity *= 0.99;
 
-            // if (b.position.y < Settings.deadBottom) this.unregister(b.id);
+            if (b.position.y < Settings.deadBottom) this.unregister(b);
         }
     };
 
