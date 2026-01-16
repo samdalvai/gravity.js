@@ -34,13 +34,13 @@ export default class World {
         this.iterations = iterations;
     }
 
-    register = (b: RigidBody) => {
+    addBody = (b: RigidBody) => {
         // TODO: let a body increment his own id
         b.id = this.uid++;
         this.bodies.push(b);
     };
 
-    unregister = (b: RigidBody) => {
+    removeBody = (b: RigidBody) => {
         for (let i = 0; i < this.bodies.length; i++) {
             const current = this.bodies[i];
             if (current.id != b.id) continue;
@@ -128,7 +128,7 @@ export default class World {
             // Bleed off tiny angular velocity to avoid circle rolling forever
             b.angularVelocity *= 0.99;
 
-            if (b.position.y < Settings.deadBottom) this.unregister(b);
+            if (b.position.y < Settings.deadBottom) this.removeBody(b);
         }
     };
 
