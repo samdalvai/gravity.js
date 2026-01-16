@@ -1,4 +1,5 @@
-import { gWorld } from './game';
+// IMPORTANT: this fixes circular dependency loop
+// import { gWorld } from './game';
 import * as Util from './util';
 
 export enum GenerationShape {
@@ -84,6 +85,7 @@ export const Settings = {
     visualizeAABBTree: false,
 };
 
+/*
 // Remove the default pop-up context menu
 const cvs = document.querySelector('#canvas') as HTMLCanvasElement;
 cvs.oncontextmenu = e => {
@@ -413,3 +415,4 @@ export function updateSetting(id: string, content?: any) {
             break;
     }
 }
+*/
