@@ -97,7 +97,7 @@ export default class World {
 
             // Apply gravity
             if (Settings.applyGravity && b.type !== Type.Static) {
-                const gravity = new Vector2(0, Settings.gravity * Settings.gravityScale * deltaTime);
+                const gravity = new Vector2(0, this.G * PIXELS_PER_METER * deltaTime);
                 b.linearVelocity.x += gravity.x;
                 b.linearVelocity.y += gravity.y;
             }
@@ -137,14 +137,7 @@ export default class World {
         // this.joints.length = 0;
         // this.forces.length = 0;
         // this.torques.length = 0;
-        // public bodies: RigidBody[] = [];
 
-        // // Constraints to be solved
-        // public manifolds: ContactManifold[] = [];
-        // public joints: Joint[] = [];
-
-        // public manifoldMap: Map<number, ContactManifold> = new Map();
-        // public jointMap: Map<number, Joint> = new Map();
         this.bodies.length = 0;
         this.manifolds.length = 0;
 
