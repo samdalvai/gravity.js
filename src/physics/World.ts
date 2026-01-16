@@ -142,7 +142,7 @@ export default class World {
         for (let i = 0; i < this.joints.length; i++) this.joints[i].prepare(inverseDeltaTime);
 
         // Iteratively solve the violated velocity constraint
-        for (let i = 0; i < Settings.numIterations; i++) {
+        for (let i = 0; i < this.iterations; i++) {
             for (let j = 0; j < this.manifolds.length; j++) this.manifolds[j].solve();
 
             for (let j = 0; j < this.joints.length; j++) this.joints[j].solve();
