@@ -3,6 +3,9 @@ import Graphics from './Graphics';
 import InputManager, { MouseButton } from './InputManager';
 import Utils from './math/Utils';
 import Vec2 from './math/Vec2';
+import { Box } from './new/box';
+import { Vector2 } from './new/math/vector2';
+import { random } from './new/util';
 import Body from './physics/Body';
 import { GRAVITY, MAX_BODIES } from './physics/Constants';
 import Force from './physics/Force';
@@ -46,6 +49,17 @@ export default class Application {
         // Demo.demo1(this.world);
 
         this.bgTexture = AssetStore.getTexture('background');
+
+        // const ground = new Box(Settings.clipWidth * 5, 0.4, Type.Static);
+        // ground.restitution = 0.45;
+        // world.register(ground);
+    
+        const b = new Box(0.4);
+        b.mass = 2.0;
+        b.position = new Vector2(0, 5);
+        b.restitution = 0.7;
+        b.angularVelocity = random(-8, 8);
+        this.world.register(b);
     };
 
     input = (): void => {
@@ -279,7 +293,8 @@ export default class Application {
             // `Num contacts: ${this.world.getContacts().length}`,
         ];
 
-        for (let i = 0; i < debugText.length - (this.debug ? 0 : 4); i++) {
+        // for (let i = 0; i < debugText.length - (this.debug ? 0 : 4); i++) {
+        for (let i = 0; i < debugText.length; i++) {
             Graphics.drawText(debugText[i], 50, 50 + i * 25, 18, 'arial', this.debug ? 'orange' : 'black');
         }
     };
