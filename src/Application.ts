@@ -252,6 +252,7 @@ export default class Application {
         // }
         for (const body of this.world.bodies) {
             // console.log("Body: ", body);
+            Graphics.drawBody(body);
         }
 
         // Draw all joints anchor points and debug properties

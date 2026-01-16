@@ -1,4 +1,7 @@
 import Vec2 from './math/Vec2';
+import { Circle } from './new/circle';
+import { Polygon } from './new/polygon';
+import { RigidBody } from './new/rigidbody';
 import Body from './physics/Body';
 import { BoxShape, CircleShape, PolygonShape, ShapeType } from './physics/Shape';
 
@@ -202,49 +205,13 @@ export default class Graphics {
         this.ctx.restore();
     };
 
-    static drawBody = (body: Body, debug = false): void => {
-        switch (body.shape.getType()) {
-            case ShapeType.CIRCLE:
-                {
-                    const circleShape = body.shape as CircleShape;
-
-                    if (!debug && body.texture) {
-                        Graphics.drawTexture(
-                            body.position.x,
-                            body.position.y,
-                            circleShape.radius * 2,
-                            circleShape.radius * 2,
-                            body.rotation,
-                            body.texture,
-                        );
-                    } else if (debug) {
-                        Graphics.drawCircle(
-                            body.position.x,
-                            body.position.y,
-                            circleShape.radius,
-                            body.rotation,
-                            'white',
-                        );
-                    }
-                }
-                break;
-            case ShapeType.POLYGON:
-                {
-                    const polygonShape = body.shape as PolygonShape;
-                    if (!debug && body.texture) {
-                        Graphics.drawTexture(
-                            body.position.x,
-                            body.position.y,
-                            polygonShape.width,
-                            polygonShape.height,
-                            body.rotation,
-                            body.texture,
-                        );
-                    } else if (debug) {
-                        Graphics.drawPolygon(body.position.x, body.position.y, polygonShape.worldVertices, 'white');
-                    }
-                }
-                break;
+    static drawBody = (b: RigidBody): void => {
+        if (b instanceof Polygon) {
+            //
         }
+
+        // if (b instanceof Circle) {
+        //     //
+        // }
     };
 }
