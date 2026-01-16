@@ -1,5 +1,8 @@
 import Graphics from '../Graphics';
 import Vec2 from '../math/Vec2';
+import { Box } from '../new/box';
+import { Vector2 } from '../new/math/vector2';
+import { Type } from '../new/rigidbody';
 import Body from '../physics/Body';
 import { JointConstraint } from '../physics/Constraint';
 import { BoxShape, CircleShape, PolygonShape } from '../physics/Shape';
@@ -54,37 +57,72 @@ export default class Demo {
 
     static demo1 = (world: World) => {
         // Demo 1: Single box demo
-        this.generateFloor(world);
-        this.generateFences(world);
-        const box = new Body(new BoxShape(60, 60), Graphics.width() / 2.0, Graphics.height() - 300, 10);
-        box.setTexture('crate');
-        world.addBody(box);
+        // this.generateFloor(world);
+        // this.generateFences(world);
+        // const box = new Body(new BoxShape(60, 60), Graphics.width() / 2.0, Graphics.height() - 300, 10);
+        // box.setTexture('crate');
+        // world.addBody(box);
+        const ground = new Box(Graphics.width(), 50, Type.Static);
+        ground.position.y = -350;
+        ground.restitution = 0.45;
+        world.addBody(ground);
+
+        const b = new Box(50);
+        b.mass = 2.0;
+        b.position = new Vector2(0, 0);
+        b.restitution = 0.7;
+
+        world.addBody(b);
     };
 
     static demo2 = (world: World) => {
         // Demo 2: Pyramid of boxes
-        const floor = this.generateFloor(world);
-        this.generateFences(world);
-        const floorHeight = 200;
+        // const floor = this.generateFloor(world);
+        // this.generateFences(world);
+        // const floorHeight = 200;
 
-        const boxSize = 60;
-        const rows = 10;
+        // const boxSize = 60;
+        // const rows = 10;
 
-        const centerX = Graphics.width() / 2;
-        const baseY = floor.position.y - floorHeight / 2 - 100;
+        // const centerX = Graphics.width() / 2;
+        // const baseY = floor.position.y - floorHeight / 2 - 100;
 
-        for (let row = 0; row < rows; row++) {
-            const boxesInRow = rows - row;
-            const rowWidth = boxesInRow * boxSize;
+        // for (let row = 0; row < rows; row++) {
+        //     const boxesInRow = rows - row;
+        //     const rowWidth = boxesInRow * boxSize;
 
-            for (let col = 0; col < boxesInRow; col++) {
-                const x = centerX - rowWidth / 2 + boxSize / 2 + col * boxSize;
-                const y = baseY - row * boxSize;
+        //     for (let col = 0; col < boxesInRow; col++) {
+        //         const x = centerX - rowWidth / 2 + boxSize / 2 + col * boxSize;
+        //         const y = baseY - row * boxSize;
 
-                const box = new Body(new BoxShape(boxSize, boxSize), x, y, 10);
-                box.setTexture('crate');
-                box.restitution = 0.001;
-                world.addBody(box);
+        //         const box = new Body(new BoxShape(boxSize, boxSize), x, y, 10);
+        //         box.setTexture('crate');
+        //         box.restitution = 0.001;
+        //         world.addBody(box);
+        //     }
+        // }
+        const ground = new Box(Graphics.width(), 50, Type.Static);
+        ground.position.y = -350;
+        ground.restitution = 0.45;
+        world.addBody(ground);
+
+        const rows = 14;
+        const boxSize = 50;
+        const xGap = 0.5;
+        const yGap = 1.5;
+        const xStart = (-(rows - 1) * (boxSize + xGap)) / 2.0;
+        const yStart = -250;
+
+        for (let y = 0; y < rows; y++) {
+            for (let x = 0; x < rows - y; x++) {
+                const b = new Box(boxSize);
+                b.mass = 0.1;
+                b.position = new Vector2(
+                    xStart + (y * (boxSize + xGap)) / 2 + x * (boxSize + xGap),
+                    yStart + y * (boxSize + yGap),
+                );
+                b.restitution = 0.0;
+                world.addBody(b);
             }
         }
     };
@@ -289,7 +327,10 @@ export default class Demo {
             for (let j = 0; j < 10; j++) {
                 const box = new Body(
                     new BoxShape(boxSizeLarge, boxSizeLarge),
-                    Graphics.width() / 2 - (numBoxLargeHorizontal * boxSizeLarge) / 2 + boxSizeLarge / 2 + i * boxSizeLarge,
+                    Graphics.width() / 2 -
+                        (numBoxLargeHorizontal * boxSizeLarge) / 2 +
+                        boxSizeLarge / 2 +
+                        i * boxSizeLarge,
                     -500 + j * boxSizeLarge,
                     1,
                 );
@@ -304,7 +345,10 @@ export default class Demo {
             for (let j = 0; j < 10; j++) {
                 const box = new Body(
                     new BoxShape(boxSizeSmall, boxSizeSmall),
-                    Graphics.width() / 2 - (numBoxSmallHorizontal * boxSizeSmall) / 2 + boxSizeSmall / 2 + i * boxSizeSmall,
+                    Graphics.width() / 2 -
+                        (numBoxSmallHorizontal * boxSizeSmall) / 2 +
+                        boxSizeSmall / 2 +
+                        i * boxSizeSmall,
                     -2000 + j * boxSizeSmall,
                     1,
                 );
