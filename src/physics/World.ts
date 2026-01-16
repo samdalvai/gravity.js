@@ -162,6 +162,9 @@ export default class World {
             b.position.y += b.linearVelocity.y * deltaTime;
             b.rotation += b.angularVelocity * deltaTime;
 
+            // Bleed off tiny angular velocity to avoid circle rolling forever
+            b.angularVelocity *= 0.99;
+
             // if (b.position.y < Settings.deadBottom) this.unregister(b.id);
         }
     };
