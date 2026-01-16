@@ -69,7 +69,7 @@ export default class Application {
         // c.rotation = 2;
         // c.angularVelocity = 5;
 
-        this.world.register(ground);
+        this.world.addBody(ground);
         // this.world.register(b);
         // this.world.register(c);
 
@@ -89,7 +89,7 @@ export default class Application {
                     yStart + y * (boxSize + yGap),
                 );
                 b.restitution = 0.0;
-                this.world.register(b);
+                this.world.addBody(b);
             }
         }
     };
@@ -218,7 +218,7 @@ export default class Application {
                                 ball.position = new Vector2(x, y);
                                 ball.restitution = 0.6;
                                 ball.mass = 2.0;
-                                this.world.register(ball);
+                                this.world.addBody(ball);
                             }
                             break;
                         case MouseButton.RIGHT:
@@ -227,7 +227,7 @@ export default class Application {
                                 box.position = new Vector2(x, y);
                                 box.mass = 2.0;
                                 box.restitution = 0.7;
-                                this.world.register(box);
+                                this.world.addBody(box);
                             }
                             break;
                     }
