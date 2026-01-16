@@ -20,7 +20,7 @@ export default class Application {
     // private generateParticle = false;
     // private generateCircles = true;
     // private showContacts = true;
-    // private demoIndex = 1;
+    private demoIndex = 1;
     // private bomb: Body | null = null;
 
     // Debug related properties
@@ -46,13 +46,13 @@ export default class Application {
         await AssetStore.loadTextures();
 
         this.running = Graphics.openWindow();
-        // Demo.demo1(this.world);
+        Demo.demo1(this.world);
 
         this.bgTexture = AssetStore.getTexture('background');
 
-        const ground = new Box(Graphics.width(), 50, Type.Static);
-        ground.position.y = -350;
-        ground.restitution = 0.45;
+        // const ground = new Box(Graphics.width(), 50, Type.Static);
+        // ground.position.y = -350;
+        // ground.restitution = 0.45;
 
         // const b = new Box(50);
         // b.mass = 2.0;
@@ -69,29 +69,29 @@ export default class Application {
         // c.rotation = 2;
         // c.angularVelocity = 5;
 
-        this.world.addBody(ground);
+        // this.world.addBody(ground);
         // this.world.register(b);
         // this.world.register(c);
 
-        const rows = 14;
-        const boxSize = 50;
-        const xGap = 0.5;
-        const yGap = 1.5;
-        const xStart = (-(rows - 1) * (boxSize + xGap)) / 2.0;
-        const yStart = -250;
+        // const rows = 14;
+        // const boxSize = 50;
+        // const xGap = 0.5;
+        // const yGap = 1.5;
+        // const xStart = (-(rows - 1) * (boxSize + xGap)) / 2.0;
+        // const yStart = -250;
 
-        for (let y = 0; y < rows; y++) {
-            for (let x = 0; x < rows - y; x++) {
-                const b = new Box(boxSize);
-                b.mass = 0.1;
-                b.position = new Vector2(
-                    xStart + (y * (boxSize + xGap)) / 2 + x * (boxSize + xGap),
-                    yStart + y * (boxSize + yGap),
-                );
-                b.restitution = 0.0;
-                this.world.addBody(b);
-            }
-        }
+        // for (let y = 0; y < rows; y++) {
+        //     for (let x = 0; x < rows - y; x++) {
+        //         const b = new Box(boxSize);
+        //         b.mass = 0.1;
+        //         b.position = new Vector2(
+        //             xStart + (y * (boxSize + xGap)) / 2 + x * (boxSize + xGap),
+        //             yStart + y * (boxSize + yGap),
+        //         );
+        //         b.restitution = 0.0;
+        //         this.world.addBody(b);
+        //     }
+        // }
     };
 
     input = (): void => {
@@ -157,19 +157,19 @@ export default class Application {
                     //     this.showContacts = !this.showContacts;
                     // }
 
-                    // if (!Number.isNaN(Number.parseInt(inputEvent.key))) {
-                    //     const index = Number.parseInt(inputEvent.key);
-                    //     this.demoIndex = index;
-                    //     const demo = Demo.demoFunctions[this.demoIndex];
+                    if (!Number.isNaN(Number.parseInt(inputEvent.key))) {
+                        const index = Number.parseInt(inputEvent.key);
+                        this.demoIndex = index;
+                        const demo = Demo.demoFunctions[this.demoIndex];
 
-                    //     if (!demo) {
-                    //         throw new Error(`Demo ${index} does not exist`);
-                    //     }
+                        if (!demo) {
+                            throw new Error(`Demo ${index} does not exist`);
+                        }
 
-                    //     this.world.clear();
-                    //     this.bomb = null;
-                    //     demo(this.world);
-                    // }
+                        this.world.clear();
+                        // this.bomb = null;
+                        demo(this.world);
+                    }
 
                     break;
                 case 'keyup':
