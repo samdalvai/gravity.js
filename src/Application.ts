@@ -328,8 +328,8 @@ export default class Application {
             // `(S)how contacts and joints: ${this.showContacts ? 'ON' : 'OFF'}`,
             // // Debut related info
             `FPS: ${this.FPS.toFixed(2)}`,
-            // `Num objects: ${this.world.getBodies().length}`,
-            // `Num contacts: ${this.world.getContacts().length}`,
+            `Num objects: ${this.world.bodies.length}`,
+            `Num contacts: ${this.world.manifolds.length}`,
         ];
 
         // for (let i = 0; i < debugText.length - (this.debug ? 0 : 4); i++) {
