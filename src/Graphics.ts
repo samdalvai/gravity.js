@@ -209,7 +209,8 @@ export default class Graphics {
 
     static drawBody = (b: RigidBody): void => {
         if (b instanceof Polygon) {
-            this.ctx.strokeStyle = 'white';
+            const color = 'white';
+            this.ctx.strokeStyle = color;
             this.ctx.beginPath();
 
             const vertices = b.vertices;
@@ -238,18 +239,15 @@ export default class Graphics {
 
             this.ctx.stroke();
 
-            if (!b.sleeping) {
-                this.ctx.fill();
-            }
-
             // draw the 1px center point like filledCircleColor(..., radius=1)
-            this.ctx.fillStyle = 'white';
+            this.ctx.fillStyle = color;
             this.ctx.beginPath();
             this.ctx.arc(x, y, 1, 0, Math.PI * 2);
             this.ctx.fill();
         }
 
         if (b instanceof Circle) {
+            const color = 'white';
             const x = b.position.x;
             const y = b.position.y;
             const radius = b.radius;
@@ -258,12 +256,8 @@ export default class Graphics {
             // Draw the circle
             this.ctx.beginPath();
             this.ctx.arc(x, y, radius, 0, Math.PI * 2);
-            this.ctx.strokeStyle = 'white';
+            this.ctx.strokeStyle = color;
             this.ctx.stroke();
-
-            if (!b.sleeping) {
-                this.ctx.fill();
-            }
 
             // Draw the line from center to circle edge at given angle
             const endX = x + Math.cos(angle) * radius;
@@ -272,7 +266,7 @@ export default class Graphics {
             this.ctx.beginPath();
             this.ctx.moveTo(x, y);
             this.ctx.lineTo(endX, endY);
-            this.ctx.strokeStyle = 'red';
+            this.ctx.strokeStyle = color;
             this.ctx.stroke();
         }
     };
