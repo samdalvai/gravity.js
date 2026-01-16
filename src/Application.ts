@@ -1,11 +1,9 @@
 import AssetStore from './AssetStore';
 import Graphics from './Graphics';
 import InputManager, { MouseButton } from './InputManager';
-import Utils from './math/Utils';
 import Vec2 from './math/Vec2';
 import { Box } from './new/box';
 import { Vector2 } from './new/math/vector2';
-import { random } from './new/util';
 import Body from './physics/Body';
 import { GRAVITY, MAX_BODIES } from './physics/Constants';
 import Force from './physics/Force';
@@ -53,12 +51,13 @@ export default class Application {
         // const ground = new Box(Settings.clipWidth * 5, 0.4, Type.Static);
         // ground.restitution = 0.45;
         // world.register(ground);
-    
+
         const b = new Box(0.4);
         b.mass = 2.0;
         b.position = new Vector2(0, 5);
         b.restitution = 0.7;
-        b.angularVelocity = random(-8, 8);
+        // b.angularVelocity = random(-8, 8);
+        b.angularVelocity = 0;
         this.world.register(b);
     };
 
