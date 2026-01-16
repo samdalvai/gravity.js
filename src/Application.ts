@@ -3,6 +3,7 @@ import Graphics from './Graphics';
 import InputManager, { MouseButton } from './InputManager';
 import Vec2 from './math/Vec2';
 import { Box } from './new/box';
+import { Circle } from './new/circle';
 import { Vector2 } from './new/math/vector2';
 import Body from './physics/Body';
 import { GRAVITY, MAX_BODIES } from './physics/Constants';
@@ -52,13 +53,21 @@ export default class Application {
         // ground.restitution = 0.45;
         // world.register(ground);
 
-        const b = new Box(0.4);
+        const b = new Box(50);
         b.mass = 2.0;
-        b.position = new Vector2(0, 5);
+        b.position = new Vector2(100, 0);
         b.restitution = 0.7;
         // b.angularVelocity = random(-8, 8);
         b.angularVelocity = 0;
+
+        const c = new Circle(25);
+        c.mass = 2;
+        c.position = new Vector2(200, 0);
+        c.restitution = 0.5;
+        c.rotation = 2;
+
         this.world.register(b);
+        this.world.register(c);
     };
 
     input = (): void => {
