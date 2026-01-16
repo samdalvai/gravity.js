@@ -69,7 +69,7 @@ export const Settings = {
     showInfo: false,
     randomConvexMaxVertices: 8,
     regularPolygonMaxVertices: 11,
-    defaultDensity: 12.5,
+    defaultDensity: 12.5 / 1000,
     defaultFriction: 0.7,
     defaultRestitution: 0.0,
     blockSolve: true,
