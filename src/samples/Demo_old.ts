@@ -58,8 +58,6 @@ export default class Demo {
         this.generateFences(world);
         const box = new Body(new BoxShape(60, 60), Graphics.width() / 2.0, Graphics.height() - 300, 10);
         box.setTexture('crate');
-        console.log('width: ', Graphics.width());
-        console.log('box: ', box);
         world.addBody(box);
     };
 
