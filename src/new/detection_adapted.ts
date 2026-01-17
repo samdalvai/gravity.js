@@ -53,8 +53,8 @@ export function csoSupport_adapted(b1: Body, b2: Body, dir: Vec2): Vec2 {
     let supportP1 = support_adapted(b1, localDirP1).vertex;
     let supportP2 = support_adapted(b2, localDirP2).vertex;
 
-    supportP1 = b1.localDirToWorld(supportP1);
-    supportP2 = b2.localDirToWorld(supportP2);
+    supportP1 = b1.localPointToWorld(supportP1);
+    supportP2 = b2.localPointToWorld(supportP2);
 
     return supportP1.subNew(supportP2);
 }
