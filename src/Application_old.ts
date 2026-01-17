@@ -8,7 +8,7 @@ import { GRAVITY, MAX_BODIES } from './physics/Constants';
 import Force from './physics/Force';
 import { BoxShape, CircleShape } from './physics/Shape';
 import World from './physics/World_old';
-import Demo from './samples/Demo';
+import Demo from './samples/Demo_old';
 
 export default class Application {
     private running = false;
