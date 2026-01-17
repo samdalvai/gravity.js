@@ -15,7 +15,7 @@ interface SupportResult {
 }
 
 // Returns the fardest vertex in the 'dir' direction
-function support(b: RigidBody, dir: Vector2): SupportResult {
+export function support(b: RigidBody, dir: Vector2): SupportResult {
     if (b instanceof Polygon) {
         let idx = 0;
         let maxValue = dir.dot(b.vertices[idx]);
