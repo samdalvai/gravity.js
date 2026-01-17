@@ -1,4 +1,5 @@
 import { Box } from '../../src/new/box';
+import { Circle } from '../../src/new/circle';
 import { support } from '../../src/new/detection';
 import { support_adapted } from '../../src/new/detection_adapted';
 import { Vector2 } from '../../src/new/math/vector2';
@@ -26,5 +27,24 @@ describe('Performance', () => {
 
         console.log(shape.localVertices);
         console.log(shape.worldVertices);
+    });
+
+    test('Support point', () => {
+        // OLD
+        const b1 = new Box(50);
+        b1.position = new Vector2(100, 100);
+        b1.rotation = 1;
+
+        const dir = new Vector2(1, 0);
+        const result1 = support(b1, dir);
+        console.log(result1);
+
+        const c1 = new Circle(50);
+        c1.position = new Vector2(100, 100);
+
+        const result2 = support(c1, dir);
+        console.log(result2);
+
+        // NEW
     });
 });
