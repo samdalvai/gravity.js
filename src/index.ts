@@ -1,4 +1,4 @@
-import Application from './Application_old';
+import Application from './Application';
 
 const run = async () => {
     const app = new Application();
