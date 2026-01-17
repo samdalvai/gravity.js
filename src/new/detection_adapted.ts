@@ -1,3 +1,6 @@
+import Vec2 from '../math/Vec2';
+import Body from '../physics/Body';
+import { CircleShape, PolygonShape } from '../physics/Shape';
 import { Circle } from './circle';
 import { ContactManifold } from './constraint/contact';
 import { Edge } from './edge';
@@ -10,27 +13,30 @@ import { Simplex } from './simplex';
 import * as Util from './util';
 
 interface SupportResult {
-    vertex: Vector2;
+    vertex: Vec2;
     index: number;
 }
 
 // Returns the fardest vertex in the 'dir' direction
-export function support_adapted(b: RigidBody, dir: Vector2): SupportResult {
-    if (b instanceof Polygon) {
-        let idx = 0;
-        let maxValue = dir.dot(b.vertices[idx]);
+export function support_adapted(b: Body, dir: Vec2): SupportResult {
+    const shape = b.shape;
+    if (shape instanceof PolygonShape) {
+        let idx = shape.localVertices.length - 1;
+        let maxValue = dir.dot(shape.localVertices[idx]);
 
-        for (let i = 1; i < b.vertices.length; i++) {
-            const value = dir.dot(b.vertices[i]);
+        //TODO: inverted loop compared to original implementation, check if the result is the same with the other order
+        for (let i = idx - 1; i >= 0; i--) {
+            const value = dir.dot(shape.localVertices[i]);
             if (value > maxValue) {
                 idx = i;
                 maxValue = value;
             }
         }
 
-        return { vertex: b.vertices[idx], index: idx };
-    } else if (b instanceof Circle) {
-        return { vertex: dir.normalized().mulNew(b.radius), index: -1 };
+        return { vertex: shape.localVertices[idx], index: idx };
+    } else if (shape instanceof CircleShape) {
+        console.log("readius new: ", shape.radius);
+        return { vertex: dir.normalizeNew().scaleNew(shape.radius), index: -1 };
     } else {
         throw 'Not a supported shape';
     }
