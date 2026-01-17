@@ -17,7 +17,7 @@ export default class Application {
     private running = false;
     private world: World;
     private bgTexture: ImageBitmap | null = null;
-    // private generateParticle = false;
+    private generateParticle = false;
     // private generateCircles = true;
     // private showContacts = true;
     private demoIndex = 1;
@@ -145,9 +145,9 @@ export default class Application {
                         // this.bomb.velocity = vectorFromBombToFloor;
                     }
 
-                    // if (inputEvent.key === 'g') {
-                    //     this.generateParticle = true;
-                    // }
+                    if (inputEvent.key === 'g') {
+                        this.generateParticle = true;
+                    }
 
                     // if (inputEvent.key === 'c') {
                     //     this.generateCircles = !this.generateCircles;
@@ -173,9 +173,9 @@ export default class Application {
 
                     break;
                 case 'keyup':
-                    // if (inputEvent.key === 'g') {
-                    //     this.generateParticle = false;
-                    // }
+                    if (inputEvent.key === 'g') {
+                        this.generateParticle = false;
+                    }
 
                     break;
             }
@@ -249,20 +249,28 @@ export default class Application {
 
         this.world.update(deltaTime);
 
-        // if (this.generateParticle) {
-        //     for (let i = 0; i < 10; i++) {
-        //         if (this.world.getBodies().length >= MAX_BODIES) {
-        //             continue;
-        //         }
+        if (this.generateParticle) {
+            const x = InputManager.mousePosition.x - Graphics.width() / 2;
+            const y = -(InputManager.mousePosition.y - Graphics.height() / 2);
+            for (let i = 0; i < 10; i++) {
+                // if (this.world.getBodies().length >= MAX_BODIES) {
+                //     continue;
+                // }
 
-        //         const shape = this.generateCircles ? new CircleShape(5) : new BoxShape(10, 10);
-        //         const particle = new Body(shape, InputManager.mousePosition.x, InputManager.mousePosition.y, 1.0);
-        //         particle.restitution = 0.0;
-        //         particle.friction = 10;
-        //         particle.setTexture(this.generateCircles ? 'rockRound' : 'rockBox');
-        //         this.world.addBody(particle);
-        //     }
-        // }
+                // const shape = this.generateCircles ? new CircleShape(5) : new BoxShape(10, 10);
+                // const particle = new Body(shape, InputManager.mousePosition.x, InputManager.mousePosition.y, 1.0);
+                // particle.restitution = 0.0;
+                // particle.friction = 10;
+                // particle.setTexture(this.generateCircles ? 'rockRound' : 'rockBox');
+                // this.world.addBody(particle);
+
+                const ball = new Circle(5);
+                ball.position = new Vector2(x, y);
+                ball.restitution = 0.6;
+                ball.mass = 2.0;
+                this.world.addBody(ball);
+            }
+        }
     };
 
     render = (): void => {
