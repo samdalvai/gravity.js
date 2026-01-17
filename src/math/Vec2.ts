@@ -171,4 +171,8 @@ export default class Vec2 {
         result.y = -this.y;
         return result;
     }
+
+    static squaredDistance(a: Vec2, b: Vec2): number {
+        return (a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y);
+    }
 }
