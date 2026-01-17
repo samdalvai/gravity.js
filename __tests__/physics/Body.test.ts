@@ -21,7 +21,7 @@ describe('Body', () => {
     test('Should convert local body point to world space', () => {
         const a = new Body(new CircleShape(10), 100, 100, 10);
 
-        const world = a.localSpaceToWorldSpace(new Vec2(10, 10));
+        const world = a.localPointToWorld(new Vec2(10, 10));
         expect(world.x).toBe(110);
         expect(world.y).toBe(110);
     });
@@ -29,7 +29,7 @@ describe('Body', () => {
     test('Should convert world point to body local space', () => {
         const a = new Body(new CircleShape(10), 100, 100, 10);
 
-        const local = a.worldSpaceToLocalSpace(new Vec2(110, 110));
+        const local = a.worldPointToLocal(new Vec2(110, 110));
         expect(local.x).toBe(10);
         expect(local.y).toBe(10);
     });

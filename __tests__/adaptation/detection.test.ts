@@ -1,8 +1,8 @@
 import Vec2 from '../../src/math/Vec2';
 import { Box } from '../../src/new/box';
 import { Circle } from '../../src/new/circle';
-import { support } from '../../src/new/detection';
-import { support_adapted } from '../../src/new/detection_adapted';
+import { csoSupport, support } from '../../src/new/detection';
+import { csoSupport_adapted, support_adapted } from '../../src/new/detection_adapted';
 import { Vector2 } from '../../src/new/math/vector2';
 import { RigidBody } from '../../src/new/rigidbody';
 import Body from '../../src/physics/Body';
@@ -27,7 +27,13 @@ describe('Performance', () => {
         const shape = b2.shape as PolygonShape;
 
         console.log(shape.localVertices);
-        console.log(shape.worldVertices);
+        const wordlVertexNew = [];
+        for (const v of shape.localVertices) {
+            const local = b2.localPointToWorld(v);
+            wordlVertexNew.push(local);
+        }
+        console.log('From shape: ', shape.worldVertices);
+        console.log('Computed: ', wordlVertexNew);
     });
 
     test('Support point', () => {
@@ -63,5 +69,23 @@ describe('Performance', () => {
         expect(result2.vertex.x).toEqual(result22.vertex.x);
         expect(result2.vertex.y).toEqual(result22.vertex.y);
         expect(result2.index).toBe(result22.index);
+    });
+
+    test('csoSupport', () => {
+        const b1 = new Box(50);
+        b1.position = new Vector2(100, 100);
+
+        const b2 = new Box(50);
+        b2.position = new Vector2(125, 100);
+
+        const dir1 = new Vector2(1, 0);
+        const cso1 = csoSupport(b1, b2, dir1);
+        console.log('cso1: ', cso1);
+
+        const b3 = new Body(new BoxShape(50, 50), 100, 100, 1);
+        const b4 = new Body(new BoxShape(50, 50), 125, 100, 1);
+        const dir2 = new Vec2(1, 0);
+        const cso2 = csoSupport_adapted(b3, b4, dir2);
+        console.log('cso2: ', cso2);
     });
 });

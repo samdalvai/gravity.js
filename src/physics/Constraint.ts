@@ -13,8 +13,8 @@ export abstract class Constraint {
         this.bodyA = a;
         this.bodyB = b;
 
-        this.aPointLocal = a.worldSpaceToLocalSpace(aPointWorld);
-        this.bPointLocal = b.worldSpaceToLocalSpace(bPointWorld);
+        this.aPointLocal = a.worldPointToLocal(aPointWorld);
+        this.bPointLocal = b.worldPointToLocal(bPointWorld);
     }
 
     abstract preSolve(dt: number): void;

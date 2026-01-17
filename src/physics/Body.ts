@@ -114,7 +114,7 @@ export default class Body {
         this.sumTorque = 0.0;
     };
 
-    localSpaceToWorldSpace = (point: Vec2): Vec2 => {
+    localPointToWorld = (point: Vec2): Vec2 => {
         const cos = Math.cos(this.rotation);
         const sin = Math.sin(this.rotation);
         const rotated = new Vec2(
@@ -124,12 +124,26 @@ export default class Body {
         return rotated;
     };
 
-    worldSpaceToLocalSpace = (point: Vec2): Vec2 => {
+    localDirToWorld = (dir: Vec2): Vec2 => {
+        const cos = Math.cos(this.rotation);
+        const sin = Math.sin(this.rotation);
+
+        return new Vec2(dir.x * cos - dir.y * sin, dir.x * sin + dir.y * cos);
+    };
+
+    worldPointToLocal = (point: Vec2): Vec2 => {
         const translatedX = point.x - this.position.x;
         const translatedY = point.y - this.position.y;
         const rotatedX = Math.cos(-this.rotation) * translatedX - Math.sin(-this.rotation) * translatedY;
         const rotatedY = Math.cos(-this.rotation) * translatedY + Math.sin(-this.rotation) * translatedX;
         return new Vec2(rotatedX, rotatedY);
+    };
+
+    worldDirToLocal = (dir: Vec2): Vec2 => {
+        const cos = Math.cos(-this.rotation);
+        const sin = Math.sin(-this.rotation);
+
+        return new Vec2(cos * dir.x - sin * dir.y, sin * dir.x + cos * dir.y);
     };
 
     applyImpulseLinear = (j: Vec2): void => {

@@ -21,11 +21,10 @@ interface SupportResult {
 export function support_adapted(b: Body, dir: Vec2): SupportResult {
     const shape = b.shape;
     if (shape instanceof PolygonShape) {
-        let idx = shape.localVertices.length - 1;
+        let idx = 0;
         let maxValue = dir.dot(shape.localVertices[idx]);
 
-        //TODO: inverted loop compared to original implementation, check if the result is the same with the other order
-        for (let i = idx - 1; i >= 0; i--) {
+        for (let i = 1; i < shape.localVertices.length; i++) {
             const value = dir.dot(shape.localVertices[i]);
             if (value > maxValue) {
                 idx = i;
@@ -35,7 +34,6 @@ export function support_adapted(b: Body, dir: Vec2): SupportResult {
 
         return { vertex: shape.localVertices[idx], index: idx };
     } else if (shape instanceof CircleShape) {
-        console.log("readius new: ", shape.radius);
         return { vertex: dir.normalizeNew().scaleNew(shape.radius), index: -1 };
     } else {
         throw 'Not a supported shape';
@@ -48,18 +46,18 @@ export function support_adapted(b: Body, dir: Vec2): SupportResult {
  * Minkowski Difference : A ⊖ B = {Pa - Pb| Pa ∈ A, Pb ∈ B}
  * CSO stands for Configuration Space Object
  */
-// function csoSupport(b1: RigidBody, b2: RigidBody, dir: Vector2): Vector2 {
-//     const localDirP1 = b1.globalToLocal.mulVector2(dir, 0);
-//     const localDirP2 = b2.globalToLocal.mulVector2(dir.inverted(), 0);
+export function csoSupport_adapted(b1: Body, b2: Body, dir: Vec2): Vec2 {
+    const localDirP1 = b1.worldDirToLocal(dir);
+    const localDirP2 = b2.worldDirToLocal(dir.negate());
 
-//     let supportP1 = support_adapted(b1, localDirP1).vertex;
-//     let supportP2 = support_adapted(b2, localDirP2).vertex;
+    let supportP1 = support_adapted(b1, localDirP1).vertex;
+    let supportP2 = support_adapted(b2, localDirP2).vertex;
 
-//     supportP1 = b1.localToGlobal.mulVector2(supportP1, 1);
-//     supportP2 = b2.localToGlobal.mulVector2(supportP2, 1);
+    supportP1 = b1.localDirToWorld(supportP1);
+    supportP2 = b2.localDirToWorld(supportP2);
 
-//     return supportP1.subNew(supportP2);
-// }
+    return supportP1.subNew(supportP2);
+}
 
 // interface GJKResult {
 //     collide: boolean;
