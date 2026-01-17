@@ -30,7 +30,6 @@ export function support(b: RigidBody, dir: Vector2): SupportResult {
 
         return { vertex: b.vertices[idx], index: idx };
     } else if (b instanceof Circle) {
-        console.log("readius old: ", b.radius);
         return { vertex: dir.normalized().mulNew(b.radius), index: -1 };
     } else {
         throw 'Not a supported shape';
@@ -43,7 +42,7 @@ export function support(b: RigidBody, dir: Vector2): SupportResult {
  * Minkowski Difference : A ⊖ B = {Pa - Pb| Pa ∈ A, Pb ∈ B}
  * CSO stands for Configuration Space Object
  */
-function csoSupport(b1: RigidBody, b2: RigidBody, dir: Vector2): Vector2 {
+export function csoSupport(b1: RigidBody, b2: RigidBody, dir: Vector2): Vector2 {
     const localDirP1 = b1.globalToLocal.mulVector2(dir, 0);
     const localDirP2 = b2.globalToLocal.mulVector2(dir.inverted(), 0);
 
