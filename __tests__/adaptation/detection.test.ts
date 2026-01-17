@@ -15,29 +15,30 @@ describe('Performance', () => {
         b1.position = new Vector2(100, 100);
         b1.restitution = 0.2;
 
-        console.log(b1.vertices);
-        const worldVertices = [];
+        const worldVerticesOld = [];
         for (const v of b1.vertices) {
             const worldV = b1.localToGlobal.mulVector2(v, 1);
-            worldVertices.push(worldV);
+            worldVerticesOld.push(worldV);
         }
-        console.log(worldVertices);
 
         const b2 = new Body(new BoxShape(50, 50), 100, 100, 2.0);
         const shape = b2.shape as PolygonShape;
 
-        console.log(shape.localVertices);
         const wordlVertexNew = [];
         for (const v of shape.localVertices) {
             const local = b2.localPointToWorld(v);
             wordlVertexNew.push(local);
         }
-        console.log('From shape: ', shape.worldVertices);
-        console.log('Computed: ', wordlVertexNew);
+
+        for (let i = 0; i < worldVerticesOld.length; i++) {
+            const vOld = worldVerticesOld[i];
+            const vNew = wordlVertexNew[i];
+            expect(vOld.x).toBe(vNew.x);
+            expect(vOld.y).toBe(vNew.y);
+        }
     });
 
     test('Support point', () => {
-        console.log('**** SUPPORT POINT ***');
         // OLD
         const b1 = new Box(50);
         b1.position = new Vector2(100, 100);
@@ -45,26 +46,22 @@ describe('Performance', () => {
 
         const dir1 = new Vector2(1, 0);
         const result1 = support(b1, dir1);
-        console.log(result1);
 
         const c1 = new Circle(25);
         c1.position = new Vector2(100, 100);
 
         const result2 = support(c1, dir1);
-        console.log(result2);
 
         // NEW
         const dir2 = new Vec2(1, 0);
         const b2 = new Body(new BoxShape(50, 50), 100, 100, 1);
         const result12 = support_adapted(b2, dir2);
-        console.log(result12);
         expect(result1.vertex.x).toEqual(result12.vertex.x);
         expect(result1.vertex.y).toEqual(result12.vertex.y);
         expect(result1.index).toBe(result12.index);
 
         const c2 = new Body(new CircleShape(25), 100, 100, 1);
         const result22 = support_adapted(c2, dir2);
-        console.log(result22);
 
         expect(result2.vertex.x).toEqual(result22.vertex.x);
         expect(result2.vertex.y).toEqual(result22.vertex.y);
@@ -80,12 +77,13 @@ describe('Performance', () => {
 
         const dir1 = new Vector2(1, 0);
         const cso1 = csoSupport(b1, b2, dir1);
-        console.log('cso1: ', cso1);
 
         const b3 = new Body(new BoxShape(50, 50), 100, 100, 1);
         const b4 = new Body(new BoxShape(50, 50), 125, 100, 1);
         const dir2 = new Vec2(1, 0);
         const cso2 = csoSupport_adapted(b3, b4, dir2);
-        console.log('cso2: ', cso2);
+
+        expect(cso1.x).toBe(cso2.x);
+        expect(cso1.y).toBe(cso2.y);
     });
 });
