@@ -9,7 +9,7 @@ import { Polygon } from './polygon';
 import { ClosestEdgeInfo, Polytope } from './polytope';
 import { RigidBody } from './rigidbody';
 import { Settings } from './settings';
-import { Simplex } from './simplex';
+import { Simplex } from './simplex_adapted';
 import * as Util from './util';
 
 interface SupportResult {
@@ -59,10 +59,10 @@ export function csoSupport_adapted(b1: Body, b2: Body, dir: Vec2): Vec2 {
     return supportP1.subNew(supportP2);
 }
 
-// interface GJKResult {
-//     collide: boolean;
-//     simplex: Simplex;
-// }
+interface GJKResult {
+    collide: boolean;
+    simplex: Simplex;
+}
 
 // function gjk(b1: RigidBody, b2: RigidBody): GJKResult {
 //     const origin = new Vector2(0, 0);
