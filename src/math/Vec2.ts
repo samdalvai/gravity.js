@@ -49,6 +49,15 @@ export default class Vec2 {
         return this;
     }
 
+    normalizeNew(): Vec2 {
+        const length = this.magnitude();
+        if (length !== 0.0) {
+            return this.divNew(length);
+        }
+
+        return this;
+    }
+
     unitVector(): Vec2 {
         const result = new Vec2(0, 0);
         const length = this.magnitude();

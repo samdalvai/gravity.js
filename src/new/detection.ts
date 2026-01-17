@@ -30,6 +30,7 @@ export function support(b: RigidBody, dir: Vector2): SupportResult {
 
         return { vertex: b.vertices[idx], index: idx };
     } else if (b instanceof Circle) {
+        console.log("readius old: ", b.radius);
         return { vertex: dir.normalized().mulNew(b.radius), index: -1 };
     } else {
         throw 'Not a supported shape';
