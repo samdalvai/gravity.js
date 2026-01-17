@@ -1,4 +1,4 @@
-import Graphics from '../Graphics';
+import Graphics from '../Graphics_old';
 import Vec2 from '../math/Vec2';
 import Body from '../physics/Body';
 import { JointConstraint } from '../physics/Constraint';
@@ -58,6 +58,8 @@ export default class Demo {
         this.generateFences(world);
         const box = new Body(new BoxShape(60, 60), Graphics.width() / 2.0, Graphics.height() - 300, 10);
         box.setTexture('crate');
+        console.log('width: ', Graphics.width());
+        console.log('box: ', box);
         world.addBody(box);
     };
 
@@ -289,7 +291,10 @@ export default class Demo {
             for (let j = 0; j < 10; j++) {
                 const box = new Body(
                     new BoxShape(boxSizeLarge, boxSizeLarge),
-                    Graphics.width() / 2 - (numBoxLargeHorizontal * boxSizeLarge) / 2 + boxSizeLarge / 2 + i * boxSizeLarge,
+                    Graphics.width() / 2 -
+                        (numBoxLargeHorizontal * boxSizeLarge) / 2 +
+                        boxSizeLarge / 2 +
+                        i * boxSizeLarge,
                     -500 + j * boxSizeLarge,
                     1,
                 );
@@ -304,7 +309,10 @@ export default class Demo {
             for (let j = 0; j < 10; j++) {
                 const box = new Body(
                     new BoxShape(boxSizeSmall, boxSizeSmall),
-                    Graphics.width() / 2 - (numBoxSmallHorizontal * boxSizeSmall) / 2 + boxSizeSmall / 2 + i * boxSizeSmall,
+                    Graphics.width() / 2 -
+                        (numBoxSmallHorizontal * boxSizeSmall) / 2 +
+                        boxSizeSmall / 2 +
+                        i * boxSizeSmall,
                     -2000 + j * boxSizeSmall,
                     1,
                 );
