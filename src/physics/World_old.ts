@@ -1,4 +1,4 @@
-import Graphics from '../Graphics';
+import Graphics from '../Graphics_old';
 import Vec2 from '../math/Vec2';
 import Body from './Body';
 import CollisionDetection from './CollisionDetection';
