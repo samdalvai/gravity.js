@@ -59,6 +59,7 @@ export default class Demo {
         b.mass = 2.0;
         b.position = new Vector2(0, 0);
         b.restitution = 0.2;
+        b.rotation = 1
 
         world.addBody(b);
     };
