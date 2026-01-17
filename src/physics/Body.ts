@@ -114,6 +114,7 @@ export default class Body {
         this.sumTorque = 0.0;
     };
 
+    // Equivalent to b1.localToGlobal.mulVector2(supportP1, 1); Note the 1!!
     localPointToWorld = (point: Vec2): Vec2 => {
         const cos = Math.cos(this.rotation);
         const sin = Math.sin(this.rotation);
@@ -139,6 +140,7 @@ export default class Body {
         return new Vec2(rotatedX, rotatedY);
     };
 
+    // Equivalent to b1.globalToLocal.mulVector2(dir, 0);
     worldDirToLocal = (dir: Vec2): Vec2 => {
         const cos = Math.cos(-this.rotation);
         const sin = Math.sin(-this.rotation);
