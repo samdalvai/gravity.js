@@ -108,7 +108,89 @@ export function gjk_adapted(b1: Body, b2: Body): GJKResult {
 
     result.simplex = simplex;
 
+    // TODO: added because of triangle problem, simplex is a line if x conincide
+    if (result.collide && result.simplex.vertices.length < 3) {
+        expandSimplexForEPA(result.simplex, b1, b2);
+    }
+
     return result;
+}
+
+export function expandSimplexForEPA(simplex: Simplex, b1: Body, b2: Body): void {
+    if (simplex.vertices.length === 0) {
+        throw new Error('Cannot expand empty simplex');
+    }
+
+    const EPS = Settings.GJK_TOLERANCE * 10;
+
+    /* ------------------------------
+       Case 1: Point simplex
+       ------------------------------ */
+    if (simplex.vertices.length === 1) {
+        const p = simplex.vertices[0];
+
+        // Choose two perpendicular directions
+        const dirs = [new Vec2(1, 0), new Vec2(0, 1)];
+
+        for (const d of dirs) {
+            const sp = csoSupport_adapted(b1, b2, d);
+            if (!simplex.containsVertex(sp)) {
+                simplex.addVertex(sp);
+            }
+        }
+    }
+
+    /* ------------------------------
+       Case 2: Line simplex
+       ------------------------------ */
+    if (simplex.vertices.length === 2) {
+        const a = simplex.vertices[0];
+        const b = simplex.vertices[1];
+
+        const ab = b.subNew(a);
+
+        // Perpendicular normal
+        let normal = new Vec2(-ab.y, ab.x);
+
+        // Ensure normal points toward origin
+        if (normal.dot(a.negated()) < 0) {
+            normal = normal.negated();
+        }
+
+        // Try primary normal
+        let c = csoSupport_adapted(b1, b2, normal);
+
+        // If degenerate, try opposite direction
+        if (Math.abs(ab.cross(c.subNew(a))) < EPS || simplex.containsVertex(c)) {
+            c = csoSupport_adapted(b1, b2, normal.negated());
+        }
+
+        // Still degenerate? Rotate slightly
+        if (Math.abs(ab.cross(c.subNew(a))) < EPS || simplex.containsVertex(c)) {
+            const rotated = new Vec2(normal.x * 0.707 - normal.y * 0.707, normal.x * 0.707 + normal.y * 0.707);
+            c = csoSupport_adapted(b1, b2, rotated);
+        }
+
+        simplex.addVertex(c);
+    }
+
+    /* ------------------------------
+       Final validation
+       ------------------------------ */
+    if (simplex.vertices.length !== 3) {
+        throw new Error('Failed to expand simplex to triangle');
+    }
+
+    // Ensure CCW winding
+    const v0 = simplex.vertices[0];
+    const v1 = simplex.vertices[1];
+    const v2 = simplex.vertices[2];
+
+    if (v1.subNew(v0).cross(v2.subNew(v0)) < 0) {
+        // Swap to enforce CCW
+        simplex.vertices[1] = v2;
+        simplex.vertices[2] = v1;
+    }
 }
 
 interface EPAResult {
