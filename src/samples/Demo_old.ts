@@ -58,12 +58,7 @@ export default class Demo {
         this.generateFences(world);
         // const box = new Body(new BoxShape(60, 60), Graphics.width() / 2.0, Graphics.height() - 300, 10);
         // box.setTexture('crate');
-        // world.addBody(box);
-
-        const b = new Body(new BoxShape(100, 100), Graphics.width() / 2, 500, 0);
-        b.rotation = 2;
-        b.setTexture('crate');
-        world.addBody(b);
+        // world.addBody(box)
     };
 
     static demo2 = (world: World) => {
