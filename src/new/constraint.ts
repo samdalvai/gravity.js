@@ -1,6 +1,6 @@
-import { Vector2 } from '../math/vector2';
-import { Vector3 } from '../math/vector3';
-import { RigidBody } from '../rigidbody';
+import { Vector2 } from './vector2';
+import { Vector3 } from './vector3';
+import { RigidBody } from './rigidbody';
 
 // Children: ContactManifold, Joint
 export abstract class Constraint {
