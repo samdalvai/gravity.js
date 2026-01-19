@@ -201,50 +201,50 @@ export function clipEdge(edge: Edge, p: Vec2, dir: Vec2, remove: boolean = false
     }
 }
 
-// export interface ContactPoint {
-//     point: Vector2;
-//     id: number;
-// }
+export interface ContactPoint {
+    point: Vec2;
+    id: number;
+}
 
-// // Since the findFarthestEdge function returns a edge with a minimum length of 0.01 for circle,
-// // merging threshold should be greater than sqrt(2) * minimum edge length
-// const CONTACT_MERGE_THRESHOLD = 1.415 * TANGENT_MIN_LENGTH;
+// Since the findFarthestEdge function returns a edge with a minimum length of 0.01 for circle,
+// merging threshold should be greater than sqrt(2) * minimum edge length
+const CONTACT_MERGE_THRESHOLD = 1.415 * TANGENT_MIN_LENGTH;
 
-// function findContactPoints(n: Vector2, a: RigidBody, b: RigidBody): ContactPoint[] {
-//     const edgeA = findFarthestEdge(a, n);
-//     const edgeB = findFarthestEdge(b, n.inverted());
+export function findContactPoints_adapted(n: Vec2, a: Body, b: Body): ContactPoint[] {
+    const edgeA = findFarthestEdge_adapted(a, n);
+    const edgeB = findFarthestEdge_adapted(b, n.negate());
 
-//     let ref = edgeA; // Reference edge
-//     let inc = edgeB; // Incidence edge
-//     let flip = false;
+    let ref = edgeA; // Reference edge
+    let inc = edgeB; // Incidence edge
+    let flip = false;
 
-//     const aPerpendicularness = Math.abs(edgeA.dir.dot(n));
-//     const bPerpendicularness = Math.abs(edgeB.dir.dot(n));
+    const aPerpendicularness = Math.abs(edgeA.dir.dot(n));
+    const bPerpendicularness = Math.abs(edgeB.dir.dot(n));
 
-//     if (aPerpendicularness >= bPerpendicularness) {
-//         ref = edgeB;
-//         inc = edgeA;
-//         flip = true;
-//     }
+    if (aPerpendicularness >= bPerpendicularness) {
+        ref = edgeB;
+        inc = edgeA;
+        flip = true;
+    }
 
-//     clipEdge(inc, ref.p1, ref.dir);
-//     clipEdge(inc, ref.p2, ref.dir.inverted());
-//     clipEdge(inc, ref.p1, flip ? n : n.inverted(), true);
+    clipEdge(inc, ref.p1, ref.dir);
+    clipEdge(inc, ref.p2, ref.dir.negate());
+    clipEdge(inc, ref.p1, flip ? n : n.negate(), true);
 
-//     let contactPoints: ContactPoint[];
+    let contactPoints: ContactPoint[];
 
-//     // If two points are closer than threshold, merge them into one point
-//     if (inc.length <= CONTACT_MERGE_THRESHOLD) {
-//         contactPoints = [{ point: inc.p1, id: inc.id1 }];
-//     } else {
-//         contactPoints = [
-//             { point: inc.p1, id: inc.id1 },
-//             { point: inc.p2, id: inc.id2 },
-//         ];
-//     }
+    // If two points are closer than threshold, merge them into one point
+    if (inc.length <= CONTACT_MERGE_THRESHOLD) {
+        contactPoints = [{ point: inc.p1, id: inc.id1 }];
+    } else {
+        contactPoints = [
+            { point: inc.p1, id: inc.id1 },
+            { point: inc.p2, id: inc.id2 },
+        ];
+    }
 
-//     return contactPoints;
-// }
+    return contactPoints;
+}
 
 // // Returns contact data if collide, otherwise returns null
 // export function detectCollision(a: RigidBody, b: RigidBody): ContactManifold | null {
