@@ -207,7 +207,7 @@ export interface ContactPoint {
 // merging threshold should be greater than sqrt(2) * minimum edge length
 const CONTACT_MERGE_THRESHOLD = 1.415 * TANGENT_MIN_LENGTH;
 
-function findContactPoints(n: Vector2, a: RigidBody, b: RigidBody): ContactPoint[] {
+export function findContactPoints(n: Vector2, a: RigidBody, b: RigidBody): ContactPoint[] {
     const edgeA = findFarthestEdge(a, n);
     const edgeB = findFarthestEdge(b, n.inverted());
 
