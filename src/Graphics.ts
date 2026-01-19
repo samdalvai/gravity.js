@@ -1,7 +1,7 @@
 import Vec2 from './math/Vec2';
 import { Circle } from './new/circle';
-import { Vector2 } from './new/math/vector2';
-import { Vector3 } from './new/math/vector3';
+import { Vector2 } from './new/vector2';
+import { Vector3 } from './new/vector3';
 import { Polygon } from './new/polygon';
 import { RigidBody } from './new/rigidbody';
 import Body from './physics/Body';

@@ -2,8 +2,8 @@
 // import { Box } from './box';
 // import { Circle } from './circle';
 // import { Polygon } from './polygon';
-import { Matrix3 } from './math/matrix3';
-import { Vector2 } from './math/vector2';
+import { Matrix3 } from './matrix3';
+import { Vector2 } from './vector2';
 import { RigidBody, Type } from './rigidbody';
 import { Settings } from './settings';
 

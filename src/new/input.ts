@@ -1,5 +1,5 @@
 import { Engine } from './engine';
-import { Vector2 } from './math/vector2';
+import { Vector2 } from './vector2';
 import { Settings, updateSetting } from './settings';
 
 export enum Button {
