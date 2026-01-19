@@ -1,4 +1,5 @@
 import { Mat2 } from '../math/Mat2';
+import Utils from '../math/Utils';
 import Vec2 from '../math/Vec2';
 import Body from '../physics/Body';
 import { Constraint } from './constraint_adapted';
@@ -7,7 +8,7 @@ import { ContactPoint } from './detection_adapted';
 // import { Vec2 } from './vector2';
 // import { RigidBody } from './rigidbody';
 import { Settings } from './settings';
-import * as Util from './util_adapted';
+// import * as Util from './util_adapted';
 
 enum ContactType {
     Normal,
@@ -128,8 +129,8 @@ class ContactSolver {
             case ContactType.Tangent: {
                 const maxFriction = this.friction * normalContact!.impulseSum;
                 if (Settings.impulseAccumulation)
-                    this.impulseSum = Util.clamp(this.impulseSum + lambda, -maxFriction, maxFriction);
-                else this.impulseSum = Util.clamp(lambda, -maxFriction, maxFriction);
+                    this.impulseSum = Utils.clamp(this.impulseSum + lambda, -maxFriction, maxFriction);
+                else this.impulseSum = Utils.clamp(lambda, -maxFriction, maxFriction);
                 break;
             }
         }
@@ -210,7 +211,7 @@ class BlockSolver {
 
         this.k.m10 = this.k.m01;
 
-        Util.assert(this.k.determinant != 0);
+        Utils.assert(this.k.determinant != 0);
         this.m = this.k.inverted();
     }
 
@@ -252,7 +253,7 @@ class BlockSolver {
         // b' = b - A * a;
 
         const a = new Vec2(this.nc1.impulseSum, this.nc2.impulseSum); // old total impulse
-        Util.assert(a.x >= 0.0, a.y >= 0.0);
+        Utils.assert(a.x >= 0.0, a.y >= 0.0);
 
         // (Velocity constraint) Normal velocity: Jv = 0
         let vn1: number =
@@ -328,7 +329,7 @@ class BlockSolver {
             if (vn1 >= 0.0 && vn2 >= 0.0) break;
 
             // How did you reach here?! something went wrong!
-            Util.assert(false);
+            Utils.assert(false);
             break;
         }
 
@@ -448,7 +449,7 @@ export class ContactManifold extends Constraint {
             for (; o < oldManifold.numContacts; o++) {
                 if (this.contactPoints[n].id == oldManifold.contactPoints[o].id) {
                     if (Settings.applyWarmStartingThreshold) {
-                        const dist = Util.squared_distance(
+                        const dist = Vec2.squaredDistance(
                             this.contactPoints[n].point,
                             oldManifold.contactPoints[o].point,
                         );
