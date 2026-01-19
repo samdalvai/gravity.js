@@ -1,8 +1,8 @@
 import Vec2 from '../../src/math/Vec2';
 import { Box } from '../../src/new/box';
 import { Circle } from '../../src/new/circle';
-import { csoSupport, gjk, support } from '../../src/new/detection';
-import { csoSupport_adapted, gjk_adapted, support_adapted } from '../../src/new/detection_adapted';
+import { csoSupport, epa, gjk, support } from '../../src/new/detection';
+import { csoSupport_adapted, epa_adapted, gjk_adapted, support_adapted } from '../../src/new/detection_adapted';
 import { RigidBody } from '../../src/new/rigidbody';
 import { Vector2 } from '../../src/new/vector2';
 import Body from '../../src/physics/Body';
@@ -108,5 +108,23 @@ describe('Performance', () => {
             expect(vertex1.x).toBe(vertex2.x);
             expect(vertex1.y).toBe(vertex2.y);
         }
+    });
+
+    test('epa', () => {
+        const b1 = new Box(50);
+        b1.position = new Vector2(100, 100);
+        const b2 = new Box(50);
+        b2.position = new Vector2(125, 125);
+        const result1 = gjk(b1, b2);
+        const epa1 = epa(b1, b2, result1.simplex);
+
+        const b3 = new Body(new BoxShape(50, 50), 100, 100, 1);
+        const b4 = new Body(new BoxShape(50, 50), 125, 125, 1);
+        const result2 = gjk_adapted(b3, b4);
+        const epa2 = epa_adapted(b3, b4, result2.simplex);
+
+        expect(epa1.penetrationDepth).toBe(epa2.penetrationDepth);
+        expect(epa1.contactNormal.x).toBe(epa2.contactNormal.x);
+        expect(epa1.contactNormal.y).toBe(epa2.contactNormal.y);
     });
 });
