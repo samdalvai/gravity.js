@@ -49,7 +49,7 @@ export function support_adapted(b: Body, dir: Vec2): SupportResult {
  */
 export function csoSupport_adapted(b1: Body, b2: Body, dir: Vec2): Vec2 {
     const localDirP1 = b1.worldDirToLocal(dir);
-    const localDirP2 = b2.worldDirToLocal(dir.negate());
+    const localDirP2 = b2.worldDirToLocal(dir.negated());
 
     let supportP1 = support_adapted(b1, localDirP1).vertex;
     let supportP2 = support_adapted(b2, localDirP2).vertex;
@@ -212,7 +212,7 @@ const CONTACT_MERGE_THRESHOLD = 1.415 * TANGENT_MIN_LENGTH;
 
 export function findContactPoints_adapted(n: Vec2, a: Body, b: Body): ContactPoint[] {
     const edgeA = findFarthestEdge_adapted(a, n);
-    const edgeB = findFarthestEdge_adapted(b, n.negate());
+    const edgeB = findFarthestEdge_adapted(b, n.negated());
 
     let ref = edgeA; // Reference edge
     let inc = edgeB; // Incidence edge
@@ -228,8 +228,8 @@ export function findContactPoints_adapted(n: Vec2, a: Body, b: Body): ContactPoi
     }
 
     clipEdge(inc, ref.p1, ref.dir);
-    clipEdge(inc, ref.p2, ref.dir.negate());
-    clipEdge(inc, ref.p1, flip ? n : n.negate(), true);
+    clipEdge(inc, ref.p2, ref.dir.negated());
+    clipEdge(inc, ref.p1, flip ? n : n.negated(), true);
 
     let contactPoints: ContactPoint[];
 
@@ -309,7 +309,8 @@ export function detectCollision_adapted(a: Body, b: Body): ContactManifold | nul
                     const e = new Edge(simplex.vertices[0], simplex.vertices[1]);
                     const normalSupport = csoSupport_adapted(a, b, e.normal);
 
-                    if (simplex.containsVertex(normalSupport)) simplex.addVertex(csoSupport_adapted(a, b, e.normal.negate()));
+                    if (simplex.containsVertex(normalSupport))
+                        simplex.addVertex(csoSupport_adapted(a, b, e.normal.negated()));
                     else simplex.addVertex(normalSupport);
                 }
                 break;
