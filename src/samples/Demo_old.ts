@@ -56,9 +56,14 @@ export default class Demo {
         // Demo 1: Single box demo
         this.generateFloor(world);
         this.generateFences(world);
-        const box = new Body(new BoxShape(60, 60), Graphics.width() / 2.0, Graphics.height() - 300, 10);
-        box.setTexture('crate');
-        world.addBody(box);
+        // const box = new Body(new BoxShape(60, 60), Graphics.width() / 2.0, Graphics.height() - 300, 10);
+        // box.setTexture('crate');
+        // world.addBody(box);
+
+        const b = new Body(new BoxShape(100, 100), Graphics.width() / 2, 500, 0);
+        b.rotation = 2;
+        world.addBody(b);
+        console.log(b.rotation);
     };
 
     static demo2 = (world: World) => {
