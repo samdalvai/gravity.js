@@ -1,5 +1,8 @@
 import Graphics from '../Graphics_old';
 import Vec2 from '../math/Vec2';
+import { ContactManifold } from '../new/contact_adapted';
+import { detectCollision_adapted } from '../new/detection_adapted';
+import { Settings } from '../new/settings';
 import Body from './Body';
 import CollisionDetection from './CollisionDetection';
 import { ContactConstraint, JointConstraint } from './Constraint';
@@ -12,6 +15,13 @@ export default class World {
     private bodies: Body[] = [];
     private contacts: ContactConstraint[] = [];
     private joints: JointConstraint[] = [];
+
+    // Constraints to be solved
+    public manifolds: ContactManifold[] = [];
+    // public joints: Joint[] = [];
+
+    public manifoldMap: Map<number, ContactManifold> = new Map();
+    // public jointMap: Map<number, Joint> = new Map();
 
     private forces: Vec2[] = [];
     private torques: number[] = [];
@@ -52,6 +62,8 @@ export default class World {
     update = (dt: number): void => {
         // console.time('update');
         const invDt = dt > 0.0 ? 1.0 / dt : 0.0;
+        const newManifolds: ContactManifold[] = [];
+        const newManifoldMap: Map<number, ContactManifold> = new Map();
 
         // Loop all bodies of the world applying forces
         for (const body of this.bodies) {
@@ -102,38 +114,66 @@ export default class World {
         this.contacts.length = 0;
         // Narrow phase check, potential pairs may still not collide
         for (const [a, b] of potentialPairs) {
-            CollisionDetection.detectCollision(a, b, this.contacts);
+            // CollisionDetection.detectCollision(a, b, this.contacts);
+            if (a.isStatic() && b.isStatic()) continue;
+
+            const newManifold = detectCollision_adapted(a, b);
+            if (newManifold == null) continue;
+
+            const key = Body.pairKey(a, b);
+            if (Settings.warmStarting && this.manifoldMap.has(key)) {
+                const oldManifold = this.manifoldMap.get(key)!;
+                newManifold.tryWarmStart(oldManifold);
+            }
+
+            newManifoldMap.set(key, newManifold);
+            newManifolds.push(newManifold);
+        }
+
+        this.manifoldMap = newManifoldMap;
+        this.manifolds = newManifolds;
+
+        // Prepare for solving
+        for (let i = 0; i < this.manifolds.length; i++) this.manifolds[i].prepare(invDt);
+
+        // for (let i = 0; i < this.joints.length; i++) this.joints[i].prepare(invDt);
+
+        // Iteratively solve the violated velocity constraint
+        for (let i = 0; i < this.iterations; i++) {
+            for (let j = 0; j < this.manifolds.length; j++) this.manifolds[j].solve();
+
+            // for (let j = 0; j < this.joints.length; j++) this.joints[j].solve();
         }
 
         // console.timeEnd('contacts');
         // console.time('solver');
 
         // Solve all constraints
-        for (const joint of this.joints) {
-            joint.preSolve(invDt);
-        }
+        // for (const joint of this.joints) {
+        //     joint.preSolve(invDt);
+        // }
 
-        for (const contact of this.contacts) {
-            contact.preSolve(invDt);
-        }
+        // for (const contact of this.contacts) {
+        //     contact.preSolve(invDt);
+        // }
 
-        for (let i = 0; i < this.iterations; i++) {
-            for (const joint of this.joints) {
-                joint.solve();
-            }
+        // for (let i = 0; i < this.iterations; i++) {
+        //     for (const joint of this.joints) {
+        //         joint.solve();
+        //     }
 
-            for (const contact of this.contacts) {
-                contact.solve();
-            }
-        }
+        //     for (const contact of this.contacts) {
+        //         contact.solve();
+        //     }
+        // }
 
-        for (const joint of this.joints) {
-            joint.postSolve();
-        }
+        // for (const joint of this.joints) {
+        //     joint.postSolve();
+        // }
 
-        for (const contact of this.contacts) {
-            contact.postSolve();
-        }
+        // for (const contact of this.contacts) {
+        //     contact.postSolve();
+        // }
 
         // console.timeEnd('solver');
         // console.time('Integrate');
