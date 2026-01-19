@@ -1,10 +1,11 @@
 import Vec2 from '../../src/math/Vec2';
 import { Box } from '../../src/new/box';
 import { Circle } from '../../src/new/circle';
-import { csoSupport, epa, findFarthestEdge, gjk, support } from '../../src/new/detection';
+import { csoSupport, epa, findContactPoints, findFarthestEdge, gjk, support } from '../../src/new/detection';
 import {
     csoSupport_adapted,
     epa_adapted,
+    findContactPoints_adapted,
     findFarthestEdge_adapted,
     gjk_adapted,
     support_adapted,
@@ -169,5 +170,30 @@ describe('Performance', () => {
         expect(edgeCircle1.dir.y).toBe(edgeCircle2.dir.y);
         expect(edgeCircle1.id1).toBe(edgeCircle2.id1);
         expect(edgeCircle1.id2).toBe(edgeCircle2.id2);
+    });
+
+    test('findContactPoints', () => {
+        const b1 = new Box(50);
+        b1.position = new Vector2(100, 100);
+        const b2 = new Box(50);
+        b2.position = new Vector2(125, 125);
+        const result1 = gjk(b1, b2);
+        const epa1 = epa(b1, b2, result1.simplex);
+        const contacts1 = findContactPoints(epa1.contactNormal, b1, b2);
+
+        const b3 = new Body(new BoxShape(50, 50), 100, 100, 1);
+        const b4 = new Body(new BoxShape(50, 50), 125, 125, 1);
+        const result2 = gjk_adapted(b3, b4);
+        const epa2 = epa_adapted(b3, b4, result2.simplex);
+        const contacts2 = findContactPoints_adapted(epa2.contactNormal, b3, b4);
+
+        expect(contacts1.length).toBe(contacts2.length);
+        for (let i = 0; i < contacts1.length; i++) {
+            const contact1 = contacts1[i];
+            const contact2 = contacts2[i];
+            expect(contact1.point.x).toBe(contact2.point.x);
+            expect(contact1.point.y).toBe(contact2.point.y);
+            expect(contact1.id).toBe(contact2.id);
+        }
     });
 });
