@@ -21,13 +21,13 @@ export default class CollisionDetection {
             return this.detectCollisionPolygonPolygon(a, b);
         }
 
-        // if (aIsPolygon && bIsCircle) {
-        //     return this.detectCollisionPolygonCircle(a, b, contacts);
-        // }
+        if (aIsPolygon && bIsCircle) {
+            return this.detectCollisionPolygonCircle(a, b);
+        }
 
-        // if (aIsCircle && bIsPolygon) {
-        //     return this.detectCollisionPolygonCircle(b, a, contacts);
-        // }
+        if (aIsCircle && bIsPolygon) {
+            return this.detectCollisionPolygonCircle(b, a);
+        }
 
         return null;
     };
@@ -149,7 +149,7 @@ export default class CollisionDetection {
         return null;
     };
 
-    static detectCollisionPolygonCircle = (polygon: Body, circle: Body, contacts: ContactConstraint[]): boolean => {
+    static detectCollisionPolygonCircle = (polygon: Body, circle: Body): ContactManifold | null => {
         const polygonShape = polygon.shape as PolygonShape;
         const circleShape = circle.shape as CircleShape;
         const polygonVertices = polygonShape.worldVertices;
@@ -197,7 +197,7 @@ export default class CollisionDetection {
             if (v1.dot(v2) < 0) {
                 // Distance from vertex to circle center is greater than radius... no collision
                 if (v1.magnitude() > circleShape.radius) {
-                    return false;
+                    return null;
                 } else {
                     // Detected collision in region A:
                     const a = polygon;
@@ -207,8 +207,9 @@ export default class CollisionDetection {
                     const start = circle.position.addNew(normal.scaleNew(-circleShape.radius));
                     const end = start.addNew(normal.scaleNew(depth));
 
-                    contacts.push(new ContactConstraint(a, b, start, end, normal, depth));
-                    return true;
+                    const contactPoints = findContactPoints_adapted(normal, a, b);
+                    const contact = new ContactManifold(a, b, contactPoints, depth, normal, false);
+                    return contact;
                 }
             } else {
                 ///////////////////////////////////////
@@ -219,7 +220,7 @@ export default class CollisionDetection {
                 if (v1.dot(v2) < 0) {
                     // Distance from vertex to circle center is greater than radius... no collision
                     if (v1.magnitude() > circleShape.radius) {
-                        return false;
+                        return null;
                     } else {
                         // Detected collision in region B:
                         const a = polygon;
@@ -229,8 +230,9 @@ export default class CollisionDetection {
                         const start = circle.position.addNew(normal.scaleNew(-circleShape.radius));
                         const end = start.addNew(normal.scaleNew(depth));
 
-                        contacts.push(new ContactConstraint(a, b, start, end, normal, depth));
-                        return true;
+                        const contactPoints = findContactPoints_adapted(normal, a, b);
+                        const contact = new ContactManifold(a, b, contactPoints, depth, normal, false);
+                        return contact;
                     }
                 } else {
                     ///////////////////////////////////////
@@ -238,18 +240,20 @@ export default class CollisionDetection {
                     ///////////////////////////////////////
                     if (distanceCircleEdge > circleShape.radius) {
                         // No collision... Distance between the closest distance and the circle center is greater than the radius.
-                        return false;
+                        return null;
                     } else {
                         // Detected collision in region C:
                         const a = polygon;
                         const b = circle;
                         const depth = circleShape.radius - distanceCircleEdge;
+                        // TODO: this adds right rotation to circles
                         const normal = minNextVertex.subNew(minCurrVertex).normal();
                         const start = circle.position.subNew(normal.scaleNew(circleShape.radius));
                         const end = start.addNew(normal.scaleNew(depth));
 
-                        contacts.push(new ContactConstraint(a, b, start, end, normal, depth));
-                        return true;
+                        const contactPoints = findContactPoints_adapted(normal, a, b);
+                        const contact = new ContactManifold(a, b, contactPoints, depth, normal, false);
+                        return contact;
                     }
                 }
             }
@@ -258,12 +262,14 @@ export default class CollisionDetection {
             const a = polygon;
             const b = circle;
             const depth = circleShape.radius - distanceCircleEdge;
+            // TODO: this adds right rotation to circles
             const normal = minNextVertex.subNew(minCurrVertex).normal();
             const start = circle.position.subNew(normal.scaleNew(circleShape.radius));
             const end = start.addNew(normal.scaleNew(depth));
 
-            contacts.push(new ContactConstraint(a, b, start, end, normal, depth));
-            return true;
+            const contactPoints = findContactPoints_adapted(normal, a, b);
+            const contact = new ContactManifold(a, b, contactPoints, depth, normal, false);
+            return contact;
         }
     };
 }
