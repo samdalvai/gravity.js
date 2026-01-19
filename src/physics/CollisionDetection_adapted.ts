@@ -129,18 +129,20 @@ export default class CollisionDetection {
                 let end = vclip.addNew(referenceEdgeNormal.scaleNew(-separation));
                 const normal = referenceEdgeNormal.clone();
 
+                let flipped = false;
                 // Ensure the start-end points are always from "a" to "b"
                 if (baSeparation >= abSeparation) {
                     [start, end] = [end, start];
                     // The collision normal is always from "a" to "b"
                     normal.scale(-1);
+                    flipped = true;
                 }
 
                 const depth = end.subNew(start).magnitude();
 
                 // TODO: check the clipped points, this should be ran once
                 const contactPoints = findContactPoints_adapted(normal, a, b);
-                const contact = new ContactManifold(a, b, contactPoints, depth, normal, false);
+                const contact = new ContactManifold(a, b, contactPoints, depth, normal, flipped);
 
                 return contact;
             }
@@ -246,7 +248,7 @@ export default class CollisionDetection {
                         const a = polygon;
                         const b = circle;
                         const depth = circleShape.radius - distanceCircleEdge;
-                        // TODO: this adds right rotation to circles
+
                         const normal = minNextVertex.subNew(minCurrVertex).normal();
                         const start = circle.position.subNew(normal.scaleNew(circleShape.radius));
                         const end = start.addNew(normal.scaleNew(depth));
@@ -262,7 +264,7 @@ export default class CollisionDetection {
             const a = polygon;
             const b = circle;
             const depth = circleShape.radius - distanceCircleEdge;
-            // TODO: this adds right rotation to circles
+
             const normal = minNextVertex.subNew(minCurrVertex).normal();
             const start = circle.position.subNew(normal.scaleNew(circleShape.radius));
             const end = start.addNew(normal.scaleNew(depth));
