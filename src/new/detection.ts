@@ -138,7 +138,7 @@ export function epa(b1: RigidBody, b2: RigidBody, gjkResult: Simplex): EPAResult
 
 const TANGENT_MIN_LENGTH = 0.01;
 
-function findFarthestEdge(b: RigidBody, dir: Vector2): Edge {
+export function findFarthestEdge(b: RigidBody, dir: Vector2): Edge {
     const localDir = b.globalToLocal.mulVector2(dir, 0);
     const farthest = support(b, localDir);
     let curr = farthest.vertex;

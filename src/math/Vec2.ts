@@ -175,4 +175,8 @@ export default class Vec2 {
     static squaredDistance(a: Vec2, b: Vec2): number {
         return (a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y);
     }
+
+    static cross(scalar: number, vector: Vec2): Vec2 {
+        return new Vec2(-scalar * vector.y, scalar * vector.x);
+    }
 }
