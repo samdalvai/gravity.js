@@ -8,6 +8,7 @@ import { RigidBody } from './rigidbody';
 import { Settings } from './settings';
 import { Simplex } from './simplex';
 import * as Util from './util';
+import { PIXELS_PER_METER } from '../physics/Constants';
 
 interface SupportResult {
     vertex: Vector2;
@@ -136,7 +137,7 @@ export function epa(b1: RigidBody, b2: RigidBody, gjkResult: Simplex): EPAResult
     };
 }
 
-const TANGENT_MIN_LENGTH = 0.01;
+const TANGENT_MIN_LENGTH = 0.01 * PIXELS_PER_METER;
 
 export function findFarthestEdge(b: RigidBody, dir: Vector2): Edge {
     const localDir = b.globalToLocal.mulVector2(dir, 0);
@@ -172,7 +173,7 @@ export function findFarthestEdge(b: RigidBody, dir: Vector2): Edge {
     }
 }
 
-function clipEdge(edge: Edge, p: Vector2, dir: Vector2, remove: boolean = false) {
+export function clipEdge(edge: Edge, p: Vector2, dir: Vector2, remove: boolean = false) {
     const d1 = edge.p1.subNew(p).dot(dir);
     const d2 = edge.p2.subNew(p).dot(dir);
 
