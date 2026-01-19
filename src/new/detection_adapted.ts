@@ -3,11 +3,11 @@ import Body from '../physics/Body';
 import { CircleShape, PolygonShape } from '../physics/Shape';
 import { Circle } from './circle';
 import { ContactManifold } from './contact';
-import { Edge } from './edge';
+import { Edge } from './edge_adapted';
 // import { Vector2 } from './vector2';
-import { Polygon } from './polygon';
+// import { Polygon } from './polygon';
 import { ClosestEdgeInfo, Polytope } from './polytope_adapted';
-import { RigidBody } from './rigidbody';
+// import { RigidBody } from './rigidbody';
 import { Settings } from './settings';
 import { Simplex } from './simplex_adapted';
 import * as Util from './util';
@@ -140,41 +140,40 @@ export function epa_adapted(b1: Body, b2: Body, gjkResult: Simplex): EPAResult {
     };
 }
 
-// const TANGENT_MIN_LENGTH = 0.01;
+const TANGENT_MIN_LENGTH = 0.01;
 
-// function findFarthestEdge(b: RigidBody, dir: Vector2): Edge {
-//     const localDir = b.globalToLocal.mulVector2(dir, 0);
-//     const farthest = support_adapted(b, localDir);
-//     let curr = farthest.vertex;
-//     const idx = farthest.index;
+export function findFarthestEdge_adapted(b: Body, dir: Vec2): Edge {
+    const localDir = b.worldDirToLocal(dir);
+    const farthest = support_adapted(b, localDir);
+    let curr = farthest.vertex;
+    const idx = farthest.index;
 
-//     const localToGlobal = b.localToGlobal;
+    if (b.shape instanceof CircleShape) {
+        curr = b.localPointToWorld(curr);
+        const tangent = Vec2.cross(1, dir).scaleNew(TANGENT_MIN_LENGTH);
 
-//     if (b instanceof Circle) {
-//         curr = localToGlobal.mulVector2(curr, 1);
-//         const tangent = Util.cross(1, dir).mulNew(TANGENT_MIN_LENGTH);
+        return new Edge(curr, curr.addNew(tangent), -1);
+    } else if (b.shape instanceof PolygonShape) {
+        const p = b.shape as PolygonShape;
 
-//         return new Edge(curr, curr.addNew(tangent), -1);
-//     } else if (b instanceof Polygon) {
-//         const p = b as Polygon;
+        const count = p.localVertices.length;
+        const prev = p.localVertices[(idx - 1 + count) % count];
+        const next = p.localVertices[(idx + 1) % count];
 
-//         const prev = p.vertices[(idx - 1 + p.count) % p.count];
-//         const next = p.vertices[(idx + 1) % p.count];
+        const e1 = curr.subNew(prev).normalizeNew();
+        const e2 = curr.subNew(next).normalizeNew();
 
-//         const e1 = curr.subNew(prev).normalized();
-//         const e2 = curr.subNew(next).normalized();
+        const w = Math.abs(e1.dot(localDir)) <= Math.abs(e2.dot(localDir));
 
-//         const w = Math.abs(e1.dot(localDir)) <= Math.abs(e2.dot(localDir));
+        curr = b.localPointToWorld(curr);
 
-//         curr = localToGlobal.mulVector2(curr, 1);
-
-//         return w
-//             ? new Edge(localToGlobal.mulVector2(prev, 1), curr, (idx - 1 + p.count) % p.count, idx)
-//             : new Edge(curr, localToGlobal.mulVector2(next, 1), idx, (idx + 1) % p.count);
-//     } else {
-//         throw 'Not a supported shape';
-//     }
-// }
+        return w
+            ? new Edge(b.localPointToWorld(prev), curr, (idx - 1 + count) % count, idx)
+            : new Edge(curr, b.localPointToWorld(next), idx, (idx + 1) % count);
+    } else {
+        throw 'Not a supported shape';
+    }
+}
 
 // function clipEdge(edge: Edge, p: Vector2, dir: Vector2, remove: boolean = false) {
 //     const d1 = edge.p1.subNew(p).dot(dir);
