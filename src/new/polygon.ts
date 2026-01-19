@@ -1,4 +1,4 @@
-import { Vector2 } from './math/vector2';
+import { Vector2 } from './vector2';
 import { RigidBody, Type } from './rigidbody';
 import { Settings } from './settings';
 import * as Util from './util';

@@ -1,5 +1,5 @@
 import { AABB, createAABB, detectCollisionAABB, fix, testPointInside, union } from './aabb';
-import { Vector2 } from './math/vector2';
+import { Vector2 } from './vector2';
 import { RigidBody, Type } from './rigidbody';
 import { Pair, make_pair_natural } from './util';
 

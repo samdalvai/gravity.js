@@ -1,11 +1,11 @@
 import { AABB, containsAABB, createAABB, toRigidBody } from './aabb';
 import { AABBTree } from './aabbtree';
-import { ContactManifold } from './constraint/contact';
-import { GrabJoint } from './constraint/grab';
-import { Joint } from './constraint/joint';
+import { ContactManifold } from './contact';
+import { GrabJoint } from './grab';
+import { Joint } from './joint';
 import { detectCollision, testPointInside } from './detection';
 import { Island } from './island';
-import { Vector2 } from './math/vector2';
+import { Vector2 } from './vector2';
 import { RigidBody, Type } from './rigidbody';
 import { Settings } from './settings';
 import * as Util from './util';

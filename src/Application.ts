@@ -4,7 +4,7 @@ import InputManager, { MouseButton } from './InputManager';
 import Vec2 from './math/Vec2';
 import { Box } from './new/box';
 import { Circle } from './new/circle';
-import { Vector2 } from './new/math/vector2';
+import { Vector2 } from './new/vector2';
 import { Type } from './new/rigidbody';
 import Body from './physics/Body';
 import { GRAVITY, MAX_BODIES } from './physics/Constants';
