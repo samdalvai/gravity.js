@@ -1,5 +1,5 @@
 import { Joint } from './joint';
-import { Matrix2 } from '../math/matrix2';
+import { Matrix2 } from '../math/Mat2';
 import { Vector2 } from '../math/vector2';
 import { RigidBody, Type } from '../rigidbody';
 import { Settings } from '../settings';
