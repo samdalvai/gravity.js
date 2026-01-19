@@ -144,6 +144,26 @@ describe('Performance', () => {
         expect(epa1.contactNormal.y).toBe(epa2.contactNormal.y);
     });
 
+    test('epa, simplex should be a triangle', () => {
+        // const b1 = new Box(50);
+        // b1.position = new Vector2(100, 100);
+        // const b2 = new Box(50);
+        // b2.position = new Vector2(125, 125);
+        // const result1 = gjk(b1, b2);
+        // const epa1 = epa(b1, b2, result1.simplex);
+
+        const b3 = new Body(new BoxShape(50, 50), 100, 100, 1);
+        const b4 = new Body(new BoxShape(50, 50), 100, 125, 1);
+        const result2 = gjk_adapted(b3, b4);
+        // console.log(result2);
+        // const epa2 = epa_adapted(b3, b4, result2.simplex);
+        expect(result2.simplex.vertices.length).toBe(3)
+
+        // expect(epa1.penetrationDepth).toBe(epa2.penetrationDepth);
+        // expect(epa1.contactNormal.x).toBe(epa2.contactNormal.x);
+        // expect(epa1.contactNormal.y).toBe(epa2.contactNormal.y);
+    });
+
     test('findFarthestEdge', () => {
         const b1 = new Box(50);
         b1.position = new Vector2(100, 100);
