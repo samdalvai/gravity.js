@@ -62,8 +62,8 @@ export default class Demo {
 
         const b = new Body(new BoxShape(100, 100), Graphics.width() / 2, 500, 0);
         b.rotation = 2;
+        b.setTexture('crate');
         world.addBody(b);
-        console.log(b.rotation);
     };
 
     static demo2 = (world: World) => {
