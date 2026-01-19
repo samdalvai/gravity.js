@@ -2,6 +2,7 @@
 // import { Vector3 } from './vector3';
 // import { RigidBody } from './rigidbody';
 import Vec2 from '../math/Vec2';
+import Body from '../physics/Body';
 
 // Children: ContactManifold, Joint
 export abstract class Constraint {
