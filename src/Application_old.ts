@@ -46,10 +46,10 @@ export default class Application {
         this.running = Graphics.openWindow();
         Demo.demo1(this.world);
 
-        const b = new Body(new BoxShape(100, 100), Graphics.width() / 2, 500, 0);
-        b.rotation = 1.5;
-        this.world.addBody(b);
-        console.log(b.rotation);
+        // const b = new Body(new BoxShape(100, 100), Graphics.width() / 2, 500, 0);
+        // b.rotation = 1.5;
+        // this.world.addBody(b);
+        // console.log(b.rotation);
 
         this.bgTexture = AssetStore.getTexture('background');
     };
