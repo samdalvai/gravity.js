@@ -1,3 +1,5 @@
+import * as Util from '../new/util_adapted';
+
 export default class Vec2 {
     x: number;
     y: number;
@@ -170,6 +172,11 @@ export default class Vec2 {
         result.x = -this.x;
         result.y = -this.y;
         return result;
+    }
+
+    fix(limit = 1e-13): void {
+        this.x = Util.toFixed(this.x, limit);
+        this.y = Util.toFixed(this.y, limit);
     }
 
     static squaredDistance(a: Vec2, b: Vec2): number {
