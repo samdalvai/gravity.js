@@ -1,8 +1,14 @@
 import Vec2 from '../../src/math/Vec2';
 import { Box } from '../../src/new/box';
 import { Circle } from '../../src/new/circle';
-import { csoSupport, epa, gjk, support } from '../../src/new/detection';
-import { csoSupport_adapted, epa_adapted, gjk_adapted, support_adapted } from '../../src/new/detection_adapted';
+import { csoSupport, epa, findFarthestEdge, gjk, support } from '../../src/new/detection';
+import {
+    csoSupport_adapted,
+    epa_adapted,
+    findFarthestEdge_adapted,
+    gjk_adapted,
+    support_adapted,
+} from '../../src/new/detection_adapted';
 import { RigidBody } from '../../src/new/rigidbody';
 import { Vector2 } from '../../src/new/vector2';
 import Body from '../../src/physics/Body';
@@ -126,5 +132,34 @@ describe('Performance', () => {
         expect(epa1.penetrationDepth).toBe(epa2.penetrationDepth);
         expect(epa1.contactNormal.x).toBe(epa2.contactNormal.x);
         expect(epa1.contactNormal.y).toBe(epa2.contactNormal.y);
+    });
+
+    test('findFarthestEdge', () => {
+        console.log("*** findFarthestEdge 1 ***");
+        const b1 = new Box(50);
+        const c1 = new Circle(25)
+        const dir1 = new Vector2(1, 0);
+
+        // const edge1a = findFarthestEdge(b1, dir1);
+        const edge1b = findFarthestEdge(c1, dir1);
+
+        console.log("*** findFarthestEdge 2 ***");
+        const b2 = new Body(new BoxShape(50, 50), 100, 100, 1);
+        const c2 = new Body(new CircleShape(25), 100, 100, 1);
+        const dir2 = new Vec2(1, 0);
+
+        // const edge2a = findFarthestEdge_adapted(b2, dir2);
+        const edge2b = findFarthestEdge_adapted(c2, dir2);
+
+        // public p1: Vector2;
+        // public p2: Vector2;
+        // public dir: Vector2;
+
+        // public id1: number;
+        // public id2: number;
+
+        // expect(edge1.p1.x).toBe(edge2.p1.x)
+        console.log("edge1: ", edge1b);
+        console.log("edge2: ", edge2b);
     });
 });
