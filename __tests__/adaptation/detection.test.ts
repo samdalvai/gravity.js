@@ -1,9 +1,18 @@
 import Vec2 from '../../src/math/Vec2';
 import { Box } from '../../src/new/box';
 import { Circle } from '../../src/new/circle';
-import { csoSupport, epa, findContactPoints, findFarthestEdge, gjk, support } from '../../src/new/detection';
+import {
+    csoSupport,
+    detectCollision,
+    epa,
+    findContactPoints,
+    findFarthestEdge,
+    gjk,
+    support,
+} from '../../src/new/detection';
 import {
     csoSupport_adapted,
+    detectCollision_adapted,
     epa_adapted,
     findContactPoints_adapted,
     findFarthestEdge_adapted,
@@ -220,5 +229,44 @@ describe('Performance', () => {
             expect(contact1.point.y).toBe(contact2.point.y);
             expect(contact1.id).toBe(contact2.id);
         }
+    });
+
+    test('detectCollision boxes', () => {
+        const b1 = new Box(50);
+        b1.position = new Vector2(100, 100);
+        const b2 = new Box(50);
+        b2.position = new Vector2(125, 125);
+        const manifold1 = detectCollision(b1, b2)!;
+
+        const b3 = new Body(new BoxShape(50, 50), 100, 100, 1);
+        const b4 = new Body(new BoxShape(50, 50), 125, 125, 1);
+        const manifold2 = detectCollision_adapted(b3, b4)!;
+
+        expect(manifold1.penetrationDepth).toBe(manifold2.penetrationDepth);
+        // expect(manifold1.contactNormal.x).toBe(manifold2.contactNormal.x);
+        // expect(manifold1.contactNormal.y).toBe(manifold2.contactNormal.y);
+
+        expect(manifold1.featureFlipped).toBe(manifold2.featureFlipped);
+
+        // public readonly penetrationDepth: number;
+        // public readonly contactNormal: Vec2;
+        // public readonly contactTangent: Vec2;
+        // public readonly contactPoints: ContactPoint[];
+
+        // private readonly normalContacts: ContactSolver[] = [];
+        // private readonly tangentContacts: ContactSolver[] = [];
+        // private readonly blockSolver!: BlockSolver;
+
+        // private readonly featureFlipped;
+    });
+
+    test('detectCollision circles', () => {
+        const b1 = new Circle(50);
+        b1.position = new Vector2(100, 100);
+        const b2 = new Circle(50);
+        b2.position = new Vector2(125, 125);
+
+        const b3 = new Body(new CircleShape(50), 100, 100, 1);
+        const b4 = new Body(new CircleShape(50), 125, 125, 1);
     });
 });
