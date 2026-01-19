@@ -1,5 +1,6 @@
 import Vec2 from '../math/Vec2';
 import { ContactManifold } from '../new/contact_adapted';
+import { findContactPoints_adapted } from '../new/detection_adapted';
 import Body from './Body';
 import { ContactConstraint } from './Constraint';
 import { CircleShape, PolygonShape, ShapeType } from './Shape';
@@ -16,9 +17,9 @@ export default class CollisionDetection {
         const aIsPolygon = a.shapeType === ShapeType.POLYGON;
         const bIsPolygon = b.shapeType === ShapeType.POLYGON;
 
-        // if (aIsPolygon && bIsPolygon) {
-        //     return this.detectCollisionPolygonPolygon(a, b, contacts);
-        // }
+        if (aIsPolygon && bIsPolygon) {
+            return this.detectCollisionPolygonPolygon(a, b);
+        }
 
         // if (aIsPolygon && bIsCircle) {
         //     return this.detectCollisionPolygonCircle(a, b, contacts);
@@ -51,30 +52,23 @@ export default class CollisionDetection {
         const end = a.position.addNew(normal.scaleNew(aCircleShape.radius));
         const depth = end.subNew(start).magnitude();
 
-        const contact = new ContactManifold(
-            a,
-            b,
-            [{ point: start, id: -1 }],
-            depth,
-            normal,
-            false,
-        );
+        const contact = new ContactManifold(a, b, [{ point: start, id: -1 }], depth, normal, false);
 
         return contact;
     };
 
-    static detectCollisionPolygonPolygon = (a: Body, b: Body, contacts: ContactConstraint[]): boolean => {
+    static detectCollisionPolygonPolygon = (a: Body, b: Body): ContactManifold | null => {
         const aPolygonShape = a.shape as PolygonShape;
         const bPolygonShape = b.shape as PolygonShape;
 
         const [abSeparation, aIndexReferenceEdge] = aPolygonShape.findMinSeparation(bPolygonShape);
         if (abSeparation >= 0) {
-            return false;
+            return null;
         }
 
         const [baSeparation, bIndexReferenceEdge] = bPolygonShape.findMinSeparation(aPolygonShape);
         if (baSeparation >= 0) {
-            return false;
+            return null;
         }
 
         // Determine reference and incident polygons
@@ -142,11 +136,17 @@ export default class CollisionDetection {
                     normal.scale(-1);
                 }
 
-                contacts.push(new ContactConstraint(a, b, start, end, normal, end.subNew(start).magnitude()));
+                const depth = end.subNew(start).magnitude();
+
+                // TODO: check the clipped points, this should be ran once
+                const contactPoints = findContactPoints_adapted(normal, a, b);
+                const contact = new ContactManifold(a, b, contactPoints, depth, normal, false);
+
+                return contact;
             }
         }
 
-        return true;
+        return null;
     };
 
     static detectCollisionPolygonCircle = (polygon: Body, circle: Body, contacts: ContactConstraint[]): boolean => {
