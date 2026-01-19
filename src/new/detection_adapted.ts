@@ -144,11 +144,9 @@ const TANGENT_MIN_LENGTH = 0.01;
 
 export function findFarthestEdge_adapted(b: Body, dir: Vec2): Edge {
     const localDir = b.worldDirToLocal(dir);
-    console.log("localDir: ", localDir);
     const farthest = support_adapted(b, localDir);
     let curr = farthest.vertex;
     const idx = farthest.index;
-    console.log("farthest: ", farthest);
 
     if (b.shape instanceof CircleShape) {
         curr = b.localPointToWorld(curr);

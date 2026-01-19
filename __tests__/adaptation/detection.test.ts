@@ -135,31 +135,39 @@ describe('Performance', () => {
     });
 
     test('findFarthestEdge', () => {
-        console.log("*** findFarthestEdge 1 ***");
         const b1 = new Box(50);
-        const c1 = new Circle(25)
+        b1.position = new Vector2(100, 100);
+
+        const c1 = new Circle(25);
+        c1.position = new Vector2(100, 100);
         const dir1 = new Vector2(1, 0);
 
-        // const edge1a = findFarthestEdge(b1, dir1);
-        const edge1b = findFarthestEdge(c1, dir1);
+        const edgeBox1 = findFarthestEdge(b1, dir1);
+        const edgeCircle1 = findFarthestEdge(c1, dir1);
 
-        console.log("*** findFarthestEdge 2 ***");
         const b2 = new Body(new BoxShape(50, 50), 100, 100, 1);
         const c2 = new Body(new CircleShape(25), 100, 100, 1);
         const dir2 = new Vec2(1, 0);
 
-        // const edge2a = findFarthestEdge_adapted(b2, dir2);
-        const edge2b = findFarthestEdge_adapted(c2, dir2);
+        const edgeBox2 = findFarthestEdge_adapted(b2, dir2);
+        const edgeCircle2 = findFarthestEdge_adapted(c2, dir2);
 
-        // public p1: Vector2;
-        // public p2: Vector2;
-        // public dir: Vector2;
+        expect(edgeBox1.p1.x).toBe(edgeBox2.p1.x);
+        expect(edgeBox1.p1.y).toBe(edgeBox2.p1.y);
+        expect(edgeBox1.p2.x).toBe(edgeBox2.p2.x);
+        expect(edgeBox1.p2.y).toBe(edgeBox2.p2.y);
+        expect(edgeBox1.dir.x).toBe(edgeBox2.dir.x);
+        expect(edgeBox1.dir.y).toBe(edgeBox2.dir.y);
+        expect(edgeBox1.id1).toBe(edgeBox2.id1);
+        expect(edgeBox1.id2).toBe(edgeBox2.id2);
 
-        // public id1: number;
-        // public id2: number;
-
-        // expect(edge1.p1.x).toBe(edge2.p1.x)
-        console.log("edge1: ", edge1b);
-        console.log("edge2: ", edge2b);
+        expect(edgeCircle1.p1.x).toBe(edgeCircle2.p1.x);
+        expect(edgeCircle1.p1.y).toBe(edgeCircle2.p1.y);
+        expect(edgeCircle1.p2.x).toBe(edgeCircle2.p2.x);
+        expect(edgeCircle1.p2.y).toBe(edgeCircle2.p2.y);
+        expect(edgeCircle1.dir.x).toBe(edgeCircle2.dir.x);
+        expect(edgeCircle1.dir.y).toBe(edgeCircle2.dir.y);
+        expect(edgeCircle1.id1).toBe(edgeCircle2.id1);
+        expect(edgeCircle1.id2).toBe(edgeCircle2.id2);
     });
 });
