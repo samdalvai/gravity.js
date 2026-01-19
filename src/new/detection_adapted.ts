@@ -246,104 +246,104 @@ export function findContactPoints_adapted(n: Vec2, a: Body, b: Body): ContactPoi
     return contactPoints;
 }
 
-// // Returns contact data if collide, otherwise returns null
-// export function detectCollision(a: RigidBody, b: RigidBody): ContactManifold | null {
-//     // Circle vs. Circle collision
-//     if (a instanceof Circle && b instanceof Circle) {
-//         let d = Util.squared_distance(a.position, b.position);
-//         const r2 = a.radius + b.radius;
+// Returns contact data if collide, otherwise returns null
+export function detectCollision_adapted(a: Body, b: Body): ContactManifold | null {
+    // Circle vs. Circle collision
+    if (a.shape instanceof CircleShape && b.shape instanceof CircleShape) {
+        let d = Vec2.squaredDistance(a.position, b.position);
+        const r2 = a.shape.radius + b.shape.radius;
 
-//         if (d > r2 * r2) {
-//             return null;
-//         } else {
-//             d = Math.sqrt(d);
+        if (d > r2 * r2) {
+            return null;
+        } else {
+            d = Math.sqrt(d);
 
-//             const contactNormal = b.position.subNew(a.position).normalized();
-//             const contactPoint = a.position.addNew(contactNormal.mulNew(a.radius));
-//             const penetrationDepth = r2 - d;
+            const contactNormal = b.position.subNew(a.position).normalizeNew();
+            const contactPoint = a.position.addNew(contactNormal.scaleNew(a.shape.radius));
+            const penetrationDepth = r2 - d;
 
-//             let flipped = false;
-//             if (contactNormal.dot(new Vector2(0, -1)) < 0) {
-//                 const tmp = a;
-//                 a = b;
-//                 b = tmp;
-//                 contactNormal.invert();
-//                 flipped = true;
-//             }
+            let flipped = false;
+            if (contactNormal.dot(new Vec2(0, -1)) < 0) {
+                const tmp = a;
+                a = b;
+                b = tmp;
+                contactNormal.negate();
+                flipped = true;
+            }
 
-//             const contact = new ContactManifold(
-//                 a,
-//                 b,
-//                 [{ point: contactPoint, id: -1 }],
-//                 penetrationDepth,
-//                 contactNormal,
-//                 flipped,
-//             );
+            const contact = new ContactManifold(
+                a,
+                b,
+                [{ point: contactPoint, id: -1 }],
+                penetrationDepth,
+                contactNormal,
+                flipped,
+            );
 
-//             return contact;
-//         }
-//     }
+            return contact;
+        }
+    }
 
-//     const gjkResult = gjk(a, b);
+    const gjkResult = gjk_adapted(a, b);
 
-//     if (!gjkResult.collide) {
-//         return null;
-//     } else {
-//         // If the gjk termination simplex has vertices less than 3, expand to full simplex
-//         // Because EPA needs a full n-simplex to get started
-//         const simplex = gjkResult.simplex;
+    if (!gjkResult.collide) {
+        return null;
+    } else {
+        // If the gjk termination simplex has vertices less than 3, expand to full simplex
+        // Because EPA needs a full n-simplex to get started
+        const simplex = gjkResult.simplex;
 
-//         switch (simplex.count) {
-//             case 1:
-//                 {
-//                     const v = simplex.vertices[0];
-//                     let randomSupport = csoSupport(a, b, new Vector2(1, 0));
+        switch (simplex.count) {
+            case 1:
+                {
+                    const v = simplex.vertices[0];
+                    let randomSupport = csoSupport_adapted(a, b, new Vec2(1, 0));
 
-//                     if (randomSupport.equals(v)) randomSupport = csoSupport(a, b, new Vector2(-1, 0));
+                    if (randomSupport.equals(v)) randomSupport = csoSupport_adapted(a, b, new Vec2(-1, 0));
 
-//                     simplex.addVertex(randomSupport);
-//                 }
-//                 break;
-//             case 2:
-//                 {
-//                     const e = new Edge(simplex.vertices[0], simplex.vertices[1]);
-//                     const normalSupport = csoSupport(a, b, e.normal);
+                    simplex.addVertex(randomSupport);
+                }
+                break;
+            case 2:
+                {
+                    const e = new Edge(simplex.vertices[0], simplex.vertices[1]);
+                    const normalSupport = csoSupport_adapted(a, b, e.normal);
 
-//                     if (simplex.containsVertex(normalSupport)) simplex.addVertex(csoSupport(a, b, e.normal.inverted()));
-//                     else simplex.addVertex(normalSupport);
-//                 }
-//                 break;
-//         }
+                    if (simplex.containsVertex(normalSupport)) simplex.addVertex(csoSupport_adapted(a, b, e.normal.negate()));
+                    else simplex.addVertex(normalSupport);
+                }
+                break;
+        }
 
-//         const epaResult: EPAResult = epa(a, b, gjkResult.simplex);
+        const epaResult: EPAResult = epa_adapted(a, b, gjkResult.simplex);
 
-//         let flipped = false;
-//         // Apply axis weight to improve coherence
-//         if (epaResult.contactNormal.dot(new Vector2(0, -1)) < 0) {
-//             const tmp = a;
-//             a = b;
-//             b = tmp;
-//             epaResult.contactNormal.invert();
-//             flipped = true;
-//         }
+        let flipped = false;
+        // Apply axis weight to improve coherence
+        if (epaResult.contactNormal.dot(new Vec2(0, -1)) < 0) {
+            const tmp = a;
+            a = b;
+            b = tmp;
+            epaResult.contactNormal.negate();
+            flipped = true;
+        }
 
-//         // Remove floating point error
-//         epaResult.contactNormal.fix(Settings.EPA_TOLERANCE);
+        // Remove floating point error
+        epaResult.contactNormal.fix(Settings.EPA_TOLERANCE);
 
-//         const contactPoints = findContactPoints(epaResult.contactNormal, a, b);
+        const contactPoints = findContactPoints_adapted(epaResult.contactNormal, a, b);
 
-//         const contact = new ContactManifold(
-//             a,
-//             b,
-//             contactPoints,
-//             epaResult.penetrationDepth,
-//             epaResult.contactNormal,
-//             flipped,
-//         );
+        const contact = new ContactManifold(
+            a,
+            b,
+            contactPoints,
+            epaResult.penetrationDepth,
+            epaResult.contactNormal,
+            flipped,
+        );
 
-//         return contact;
-//     }
-// }
+        return contact;
+    }
+}
 
 // export function testPointInside(body: RigidBody, point: Vector2): boolean {
 //     const localP = body.globalToLocal.mulVector2(point, 1);
