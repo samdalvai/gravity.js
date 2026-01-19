@@ -111,7 +111,7 @@ interface EPAResult {
     contactNormal: Vector2;
 }
 
-function epa(b1: RigidBody, b2: RigidBody, gjkResult: Simplex): EPAResult {
+export function epa(b1: RigidBody, b2: RigidBody, gjkResult: Simplex): EPAResult {
     const polytope: Polytope = new Polytope(gjkResult);
 
     let closestEdge: ClosestEdgeInfo = { index: 0, distance: Infinity, normal: new Vector2(0, 0) };
