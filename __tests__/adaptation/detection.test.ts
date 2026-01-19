@@ -232,37 +232,36 @@ describe('Performance', () => {
     });
 
     test('detectCollision boxes', () => {
-        console.log('**** detectCollision 1 ****');
         const b1 = new Box(50);
         b1.position = new Vector2(100, 100);
         const b2 = new Box(50);
         b2.position = new Vector2(125, 125);
         const manifold1 = detectCollision(b1, b2)!;
 
-        console.log('**** detectCollision 2 ****');
         const b3 = new Body(new BoxShape(50, 50), 100, 100, 1);
         const b4 = new Body(new BoxShape(50, 50), 125, 125, 1);
         const manifold2 = detectCollision_adapted(b3, b4)!;
 
-        console.log(manifold1.contactNormal);
-        console.log(manifold2.contactNormal);
-
         expect(manifold1.penetrationDepth).toBe(manifold2.penetrationDepth);
         expect(manifold1.contactNormal.x).toBe(manifold2.contactNormal.x);
         expect(manifold1.contactNormal.y).toBe(manifold2.contactNormal.y);
+        expect(manifold1.contactTangent.x).toBe(manifold2.contactTangent.x);
+        expect(manifold1.contactTangent.y).toBe(manifold2.contactTangent.y);
+
+        expect(manifold1.contactPoints.length).toBe(manifold2.contactPoints.length);
+
+        for (let i = 0; i < manifold1.contactPoints.length; i++) {
+            const contact1 = manifold1.contactPoints[i];
+            const contact2 = manifold2.contactPoints[i];
+
+            expect(contact1.point.x).toBe(contact2.point.x);
+            expect(contact1.point.y).toBe(contact2.point.y);
+        }
+
+        expect(manifold1.normalContacts.length).toBe(manifold2.normalContacts.length);
+        expect(manifold1.tangentContacts.length).toBe(manifold2.tangentContacts.length);
 
         expect(manifold1.featureFlipped).toBe(manifold2.featureFlipped);
-
-        // public readonly penetrationDepth: number;
-        // public readonly contactNormal: Vec2;
-        // public readonly contactTangent: Vec2;
-        // public readonly contactPoints: ContactPoint[];
-
-        // private readonly normalContacts: ContactSolver[] = [];
-        // private readonly tangentContacts: ContactSolver[] = [];
-        // private readonly blockSolver!: BlockSolver;
-
-        // private readonly featureFlipped;
     });
 
     test('detectCollision circles', () => {
@@ -270,8 +269,31 @@ describe('Performance', () => {
         b1.position = new Vector2(100, 100);
         const b2 = new Circle(50);
         b2.position = new Vector2(125, 125);
+        const manifold1 = detectCollision(b1, b2)!;
 
         const b3 = new Body(new CircleShape(50), 100, 100, 1);
         const b4 = new Body(new CircleShape(50), 125, 125, 1);
+        const manifold2 = detectCollision_adapted(b3, b4)!;
+
+        expect(manifold1.penetrationDepth).toBe(manifold2.penetrationDepth);
+        expect(manifold1.contactNormal.x).toBe(manifold2.contactNormal.x);
+        expect(manifold1.contactNormal.y).toBe(manifold2.contactNormal.y);
+        expect(manifold1.contactTangent.x).toBe(manifold2.contactTangent.x);
+        expect(manifold1.contactTangent.y).toBe(manifold2.contactTangent.y);
+
+        expect(manifold1.contactPoints.length).toBe(manifold2.contactPoints.length);
+
+        for (let i = 0; i < manifold1.contactPoints.length; i++) {
+            const contact1 = manifold1.contactPoints[i];
+            const contact2 = manifold2.contactPoints[i];
+
+            expect(contact1.point.x).toBe(contact2.point.x);
+            expect(contact1.point.y).toBe(contact2.point.y);
+        }
+
+        expect(manifold1.normalContacts.length).toBe(manifold2.normalContacts.length);
+        expect(manifold1.tangentContacts.length).toBe(manifold2.tangentContacts.length);
+
+        expect(manifold1.featureFlipped).toBe(manifold2.featureFlipped);
     });
 });
