@@ -223,7 +223,7 @@ export function epa_adapted(b1: Body, b2: Body, gjkResult: Simplex): EPAResult {
     };
 }
 
-const TANGENT_MIN_LENGTH = 0.01 * PIXELS_PER_METER;
+const TANGENT_MIN_LENGTH = 0.01// * PIXELS_PER_METER;
 
 export function findFarthestEdge_adapted(b: Body, dir: Vec2): Edge {
     const localDir = b.worldDirToLocal(dir);
