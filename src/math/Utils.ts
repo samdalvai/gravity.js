@@ -20,4 +20,8 @@ export default class Utils {
     static clamp = (value: number, low: number, high: number): number => {
         return Math.max(low, Math.min(value, high));
     };
+
+    static assert = (...test: boolean[]): void => {
+        for (let i = 0; i < test.length; i++) if (!test[i]) throw new Error('Assertion failed');
+    };
 }
