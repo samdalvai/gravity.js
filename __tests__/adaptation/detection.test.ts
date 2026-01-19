@@ -3,7 +3,7 @@ import { Box } from '../../src/new/box';
 import { Circle } from '../../src/new/circle';
 import { csoSupport, support } from '../../src/new/detection';
 import { csoSupport_adapted, support_adapted } from '../../src/new/detection_adapted';
-import { Vector2 } from '../../src/new/math/vector2';
+import { Vector2 } from '../../src/new/vector2';
 import { RigidBody } from '../../src/new/rigidbody';
 import Body from '../../src/physics/Body';
 import { BoxShape, CircleShape, PolygonShape } from '../../src/physics/Shape';

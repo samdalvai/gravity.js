@@ -1,5 +1,5 @@
 import Vec2 from '../math/Vec2';
-import { Vector2 } from '../new/math/vector2';
+import { Vector2 } from '../new/vector2';
 import { RigidBody } from '../new/rigidbody';
 import Body from './Body';
 import { PIXELS_PER_METER } from './Constants';

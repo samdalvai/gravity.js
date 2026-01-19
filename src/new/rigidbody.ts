@@ -1,7 +1,7 @@
 import { Node } from './aabbtree';
-import { ContactInfo } from './constraint/contact';
+import { ContactInfo } from './contact';
 import { Entity } from './entity';
-import { Vector2 } from './math/vector2';
+import { Vector2 } from './vector2';
 import { Settings } from './settings';
 import * as Util from './util';
 

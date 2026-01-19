@@ -1,21 +1,21 @@
 import { AABB } from './aabb';
 import { Circle } from './circle';
-import { DistanceJoint } from './constraint/distance';
-import { GrabJoint } from './constraint/grab';
-import { Joint } from './constraint/joint';
-import { LineJoint } from './constraint/line';
+import { DistanceJoint } from './distance';
+import { GrabJoint } from './grab';
+import { Joint } from './joint';
+import { LineJoint } from './line';
 import { Matrix3 } from './math/matrix3';
-import { Vector2 } from './math/vector2';
-import { MaxDistanceJoint } from './constraint/maxdistance';
-import { MotorJoint } from './constraint/motor';
+import { Vector2 } from './vector2';
+import { MaxDistanceJoint } from './maxdistance';
+import { MotorJoint } from './motor';
 import { Polygon } from './polygon';
-import { PrismaticJoint } from './constraint/prismatic';
-import { RevoluteJoint } from './constraint/revolute';
+import { PrismaticJoint } from './prismatic';
+import { RevoluteJoint } from './revolute';
 import { RigidBody } from './rigidbody';
 import { Settings } from './settings';
 import { Simplex } from './simplex';
 import * as Util from './util';
-import { WeldJoint } from './constraint/weld';
+import { WeldJoint } from './weld';
 
 export class Renderer {
     private gfx: CanvasRenderingContext2D;
