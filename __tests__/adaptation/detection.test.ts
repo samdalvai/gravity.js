@@ -172,7 +172,7 @@ describe('Performance', () => {
         expect(edgeCircle1.id2).toBe(edgeCircle2.id2);
     });
 
-    test('findContactPoints', () => {
+    test('findContactPoints boxes', () => {
         const b1 = new Box(50);
         b1.position = new Vector2(100, 100);
         const b2 = new Box(50);
@@ -183,6 +183,31 @@ describe('Performance', () => {
 
         const b3 = new Body(new BoxShape(50, 50), 100, 100, 1);
         const b4 = new Body(new BoxShape(50, 50), 125, 125, 1);
+        const result2 = gjk_adapted(b3, b4);
+        const epa2 = epa_adapted(b3, b4, result2.simplex);
+        const contacts2 = findContactPoints_adapted(epa2.contactNormal, b3, b4);
+
+        expect(contacts1.length).toBe(contacts2.length);
+        for (let i = 0; i < contacts1.length; i++) {
+            const contact1 = contacts1[i];
+            const contact2 = contacts2[i];
+            expect(contact1.point.x).toBe(contact2.point.x);
+            expect(contact1.point.y).toBe(contact2.point.y);
+            expect(contact1.id).toBe(contact2.id);
+        }
+    });
+
+    test('findContactPoints circles', () => {
+        const b1 = new Circle(50);
+        b1.position = new Vector2(100, 100);
+        const b2 = new Circle(50);
+        b2.position = new Vector2(125, 125);
+        const result1 = gjk(b1, b2);
+        const epa1 = epa(b1, b2, result1.simplex);
+        const contacts1 = findContactPoints(epa1.contactNormal, b1, b2);
+
+        const b3 = new Body(new CircleShape(50), 100, 100, 1);
+        const b4 = new Body(new CircleShape(50), 125, 125, 1);
         const result2 = gjk_adapted(b3, b4);
         const epa2 = epa_adapted(b3, b4, result2.simplex);
         const contacts2 = findContactPoints_adapted(epa2.contactNormal, b3, b4);
