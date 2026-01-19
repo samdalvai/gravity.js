@@ -1,13 +1,14 @@
-import { Vector2 } from './vector2';
-import { getUV, lerpVector } from './util';
+// import { Vector2 } from './vector2';
+import Vec2 from '../math/Vec2';
+import { getUV, lerpVector } from './util_adapted';
 
 interface ClosestResult {
-    result: Vector2;
+    result: Vec2;
     contributors: number[]; // Vertex indices that contributed to calculating the closest point
 }
 
 export class Simplex {
-    public vertices: Vector2[];
+    public vertices: Vec2[];
 
     constructor() {
         this.vertices = [];
@@ -22,7 +23,7 @@ export class Simplex {
     }
 
     // Returns the closest point to the input q
-    getClosest(q: Vector2): ClosestResult {
+    getClosest(q: Vec2): ClosestResult {
         switch (this.count) {
             case 1: // 0-Simplex: Point
                 return { result: this.vertices[0], contributors: [0] };
@@ -91,14 +92,14 @@ export class Simplex {
         }
     }
 
-    addVertex(vertex: Vector2): void {
+    addVertex(vertex: Vec2): void {
         if (this.count >= 3) throw '2-simplex can have verticies less than 4';
 
         this.vertices.push(vertex);
     }
 
     // Return true if this simplex contains input vertex
-    containsVertex(vertex: Vector2): boolean {
+    containsVertex(vertex: Vec2): boolean {
         for (let i = 0; i < this.count; i++) {
             if (vertex.equals(this.vertices[i])) return true;
         }
@@ -107,7 +108,7 @@ export class Simplex {
     }
 
     shrink(indices: number[]) {
-        const res: Vector2[] = [];
+        const res: Vec2[] = [];
 
         for (let i = 0; i < indices.length; i++) res.push(this.vertices[indices[i]]);
 
