@@ -46,10 +46,12 @@ export default class Application {
         this.running = Graphics.openWindow();
         Demo.demo1(this.world);
 
-        // const b = new Body(new BoxShape(100, 100), Graphics.width() / 2, 500, 0);
-        // b.rotation = 1.5;
-        // this.world.addBody(b);
-        // console.log(b.rotation);
+        const b = new Body(new BoxShape(100, 100), Graphics.width() / 2, 500, 0);
+        b.rotation = 0.5;
+        this.world.addBody(b);
+
+        this.testBody = new Body(new BoxShape(50, 50), Graphics.width() / 2, 500, 0);
+        this.world.addBody(this.testBody);
 
         this.bgTexture = AssetStore.getTexture('background');
     };
@@ -152,9 +154,10 @@ export default class Application {
             }
 
             // Test for body collision
-            // this.world.getBodies()[4].position.x = inputEvent.x;
-            // this.world.getBodies()[4].position.y = inputEvent.y;
-            // this.world.getBodies()[4].shape.updateVertices(0, this.world.getBodies()[4].position);
+            if (this.testBody) {
+                this.testBody.position.x = inputEvent.x;
+                this.testBody.position.y = inputEvent.y;
+            }
         }
 
         // Handle mouse click events
