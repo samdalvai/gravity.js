@@ -2,7 +2,6 @@ import Vec2 from '../math/Vec2';
 import { ContactManifold } from '../new/contact_adapted';
 import { findContactPoints_adapted } from '../new/detection_adapted';
 import Body from './Body';
-import { ContactConstraint } from './Constraint';
 import { CircleShape, PolygonShape, ShapeType } from './Shape';
 
 export default class CollisionDetection {
@@ -206,8 +205,6 @@ export default class CollisionDetection {
                     const b = circle;
                     const depth = circleShape.radius - v1.magnitude();
                     const normal = v1.normalize();
-                    const start = circle.position.addNew(normal.scaleNew(-circleShape.radius));
-                    const end = start.addNew(normal.scaleNew(depth));
 
                     const contactPoints = findContactPoints_adapted(normal, a, b);
                     const contact = new ContactManifold(a, b, contactPoints, depth, normal, false);
@@ -229,8 +226,6 @@ export default class CollisionDetection {
                         const b = circle;
                         const depth = circleShape.radius - v1.magnitude();
                         const normal = v1.normalize();
-                        const start = circle.position.addNew(normal.scaleNew(-circleShape.radius));
-                        const end = start.addNew(normal.scaleNew(depth));
 
                         const contactPoints = findContactPoints_adapted(normal, a, b);
                         const contact = new ContactManifold(a, b, contactPoints, depth, normal, false);
@@ -248,10 +243,7 @@ export default class CollisionDetection {
                         const a = polygon;
                         const b = circle;
                         const depth = circleShape.radius - distanceCircleEdge;
-
                         const normal = minNextVertex.subNew(minCurrVertex).normal();
-                        const start = circle.position.subNew(normal.scaleNew(circleShape.radius));
-                        const end = start.addNew(normal.scaleNew(depth));
 
                         const contactPoints = findContactPoints_adapted(normal, a, b);
                         const contact = new ContactManifold(a, b, contactPoints, depth, normal, false);
@@ -264,10 +256,7 @@ export default class CollisionDetection {
             const a = polygon;
             const b = circle;
             const depth = circleShape.radius - distanceCircleEdge;
-
             const normal = minNextVertex.subNew(minCurrVertex).normal();
-            const start = circle.position.subNew(normal.scaleNew(circleShape.radius));
-            const end = start.addNew(normal.scaleNew(depth));
 
             const contactPoints = findContactPoints_adapted(normal, a, b);
             const contact = new ContactManifold(a, b, contactPoints, depth, normal, false);
