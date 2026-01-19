@@ -369,11 +369,18 @@ export class ContactManifold extends Constraint {
     public readonly contactTangent: Vector2;
     public readonly contactPoints: ContactPoint[];
 
-    private readonly normalContacts: ContactSolver[] = [];
-    private readonly tangentContacts: ContactSolver[] = [];
-    private readonly blockSolver!: BlockSolver;
+    // TODO: to be made private
+    public readonly normalContacts: ContactSolver[] = [];
+    public readonly tangentContacts: ContactSolver[] = [];
+    public readonly blockSolver!: BlockSolver;
 
-    private readonly featureFlipped;
+    public readonly featureFlipped;
+
+    // private readonly normalContacts: ContactSolver[] = [];
+    // private readonly tangentContacts: ContactSolver[] = [];
+    // private readonly blockSolver!: BlockSolver;
+
+    // private readonly featureFlipped;
     public persistent = false;
 
     constructor(
