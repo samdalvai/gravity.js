@@ -43,6 +43,10 @@ export default class World {
         return this.contacts;
     };
 
+    getManifolds = (): ContactManifold[] => {
+        return this.manifolds;
+    };
+
     addJoint = (constraint: JointConstraint): void => {
         this.joints.push(constraint);
     };
@@ -116,7 +120,7 @@ export default class World {
         // Narrow phase check, potential pairs may still not collide
         for (const [a, b] of potentialPairs) {
             // CollisionDetection.detectCollision(a, b, this.contacts);
-            if (a.isStatic() && b.isStatic()) continue;
+            // if (a.isStatic() && b.isStatic()) continue;
 
             // const newManifold = detectCollision_adapted(a, b);
             const newManifold = CollisionDetection.detectCollision(a, b);
