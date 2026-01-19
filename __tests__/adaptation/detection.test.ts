@@ -1,10 +1,10 @@
 import Vec2 from '../../src/math/Vec2';
 import { Box } from '../../src/new/box';
 import { Circle } from '../../src/new/circle';
-import { csoSupport, support } from '../../src/new/detection';
-import { csoSupport_adapted, support_adapted } from '../../src/new/detection_adapted';
-import { Vector2 } from '../../src/new/vector2';
+import { csoSupport, gjk, support } from '../../src/new/detection';
+import { csoSupport_adapted, gjk_adapted, support_adapted } from '../../src/new/detection_adapted';
 import { RigidBody } from '../../src/new/rigidbody';
+import { Vector2 } from '../../src/new/vector2';
 import Body from '../../src/physics/Body';
 import { BoxShape, CircleShape, PolygonShape } from '../../src/physics/Shape';
 
@@ -85,5 +85,28 @@ describe('Performance', () => {
 
         expect(cso1.x).toBe(cso2.x);
         expect(cso1.y).toBe(cso2.y);
+    });
+
+    test('gjk', () => {
+        const b1 = new Box(50);
+        b1.position = new Vector2(100, 100);
+        const b2 = new Box(50);
+        b2.position = new Vector2(125, 100);
+        const result1 = gjk(b1, b2);
+
+        const b3 = new Body(new BoxShape(50, 50), 100, 100, 1);
+        const b4 = new Body(new BoxShape(50, 50), 125, 100, 1);
+        const result2 = gjk_adapted(b3, b4);
+
+        expect(result1.collide).toBe(result2.collide);
+
+        const vertices1 = result1.simplex.vertices;
+        const vertices2 = result2.simplex.vertices;
+        for (let i = 0; i < vertices1.length; i++) {
+            const vertex1 = vertices1[i];
+            const vertex2 = vertices2[i];
+            expect(vertex1.x).toBe(vertex2.x);
+            expect(vertex1.y).toBe(vertex2.y);
+        }
     });
 });
