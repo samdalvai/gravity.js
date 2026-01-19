@@ -6,6 +6,7 @@ import { Matrix3 } from './matrix3';
 import { Vector2 } from './vector2';
 import { RigidBody, Type } from './rigidbody';
 import { Settings } from './settings';
+import { Circle } from './circle';
 
 export interface Pair<A, B> {
     p1: A;
