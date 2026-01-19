@@ -60,7 +60,7 @@ interface GJKResult {
     simplex: Simplex;
 }
 
-function gjk(b1: RigidBody, b2: RigidBody): GJKResult {
+export function gjk(b1: RigidBody, b2: RigidBody): GJKResult {
     const origin = new Vector2(0, 0);
     const simplex: Simplex = new Simplex();
     let dir = new Vector2(1, 0); // Random initial direction

@@ -64,10 +64,10 @@ interface GJKResult {
     simplex: Simplex;
 }
 
-// function gjk(b1: RigidBody, b2: RigidBody): GJKResult {
-//     const origin = new Vector2(0, 0);
+// export function gjk(b1: Body, b2: Body): GJKResult {
+//     const origin = new Vec2(0, 0);
 //     const simplex: Simplex = new Simplex();
-//     let dir = new Vector2(1, 0); // Random initial direction
+//     let dir = new Vec2(1, 0); // Random initial direction
 
 //     const result: GJKResult = { collide: false, simplex: simplex };
 
@@ -77,7 +77,7 @@ interface GJKResult {
 //     for (let k = 0; k < Settings.GJK_MAX_ITERATION; k++) {
 //         const closest = simplex.getClosest(origin);
 
-//         if (Util.squared_distance(closest.result, origin) < Settings.GJK_TOLERANCE) {
+//         if (Vec2.squaredDistance(closest.result, origin) < Settings.GJK_TOLERANCE) {
 //             result.collide = true;
 //             break;
 //         }
@@ -92,7 +92,7 @@ interface GJKResult {
 
 //         // If the new support point is not further along the search direction than the closest point,
 //         // two objects are not colliding so you can early return here.
-//         if (dir.length > dir.normalized().dot(supportPoint.subNew(closest.result))) {
+//         if (dir.magnitude() > dir.normalizeNew().dot(supportPoint.subNew(closest.result))) {
 //             result.collide = false;
 //             break;
 //         }
