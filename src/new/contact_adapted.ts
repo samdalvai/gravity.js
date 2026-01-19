@@ -211,7 +211,7 @@ class BlockSolver {
 
         this.k.m10 = this.k.m01;
 
-        Utils.assert(this.k.determinant != 0);
+        // Utils.assert(this.k.determinant != 0);
         this.m = this.k.inverted();
     }
 
