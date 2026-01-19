@@ -64,51 +64,51 @@ interface GJKResult {
     simplex: Simplex;
 }
 
-// export function gjk(b1: Body, b2: Body): GJKResult {
-//     const origin = new Vec2(0, 0);
-//     const simplex: Simplex = new Simplex();
-//     let dir = new Vec2(1, 0); // Random initial direction
+export function gjk_adapted(b1: Body, b2: Body): GJKResult {
+    const origin = new Vec2(0, 0);
+    const simplex: Simplex = new Simplex();
+    let dir = new Vec2(1, 0); // Random initial direction
 
-//     const result: GJKResult = { collide: false, simplex: simplex };
+    const result: GJKResult = { collide: false, simplex: simplex };
 
-//     let supportPoint = csoSupport(b1, b2, dir);
-//     simplex.addVertex(supportPoint);
+    let supportPoint = csoSupport_adapted(b1, b2, dir);
+    simplex.addVertex(supportPoint);
 
-//     for (let k = 0; k < Settings.GJK_MAX_ITERATION; k++) {
-//         const closest = simplex.getClosest(origin);
+    for (let k = 0; k < Settings.GJK_MAX_ITERATION; k++) {
+        const closest = simplex.getClosest(origin);
 
-//         if (Vec2.squaredDistance(closest.result, origin) < Settings.GJK_TOLERANCE) {
-//             result.collide = true;
-//             break;
-//         }
+        if (Vec2.squaredDistance(closest.result, origin) < Settings.GJK_TOLERANCE) {
+            result.collide = true;
+            break;
+        }
 
-//         if (simplex.count != 1) {
-//             // Rebuild the simplex with vertices that are used(involved) to calculate closest distance
-//             simplex.shrink(closest.contributors);
-//         }
+        if (simplex.count != 1) {
+            // Rebuild the simplex with vertices that are used(involved) to calculate closest distance
+            simplex.shrink(closest.contributors);
+        }
 
-//         dir = origin.subNew(closest.result);
-//         supportPoint = csoSupport(b1, b2, dir);
+        dir = origin.subNew(closest.result);
+        supportPoint = csoSupport_adapted(b1, b2, dir);
 
-//         // If the new support point is not further along the search direction than the closest point,
-//         // two objects are not colliding so you can early return here.
-//         if (dir.magnitude() > dir.normalizeNew().dot(supportPoint.subNew(closest.result))) {
-//             result.collide = false;
-//             break;
-//         }
+        // If the new support point is not further along the search direction than the closest point,
+        // two objects are not colliding so you can early return here.
+        if (dir.magnitude() > dir.normalizeNew().dot(supportPoint.subNew(closest.result))) {
+            result.collide = false;
+            break;
+        }
 
-//         if (simplex.containsVertex(supportPoint)) {
-//             result.collide = false;
-//             break;
-//         } else {
-//             simplex.addVertex(supportPoint);
-//         }
-//     }
+        if (simplex.containsVertex(supportPoint)) {
+            result.collide = false;
+            break;
+        } else {
+            simplex.addVertex(supportPoint);
+        }
+    }
 
-//     result.simplex = simplex;
+    result.simplex = simplex;
 
-//     return result;
-// }
+    return result;
+}
 
 // interface EPAResult {
 //     penetrationDepth: number;
