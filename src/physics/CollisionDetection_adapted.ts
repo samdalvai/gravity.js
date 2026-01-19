@@ -57,97 +57,32 @@ export default class CollisionDetection {
     };
 
     static detectCollisionPolygonPolygon = (a: Body, b: Body): ContactManifold | null => {
-        const aPolygonShape = a.shape as PolygonShape;
-        const bPolygonShape = b.shape as PolygonShape;
+        const aPoly = a.shape as PolygonShape;
+        const bPoly = b.shape as PolygonShape;
 
-        const [abSeparation, aIndexReferenceEdge] = aPolygonShape.findMinSeparation(bPolygonShape);
-        if (abSeparation >= 0) {
-            return null;
-        }
+        const [abSep, aEdge] = aPoly.findMinSeparation(bPoly);
+        if (abSep >= 0) return null;
 
-        const [baSeparation, bIndexReferenceEdge] = bPolygonShape.findMinSeparation(aPolygonShape);
-        if (baSeparation >= 0) {
-            return null;
-        }
+        const [baSep, bEdge] = bPoly.findMinSeparation(aPoly);
+        if (baSep >= 0) return null;
 
-        // Determine reference and incident polygons
-        let referenceShape: PolygonShape;
-        let incidentShape: PolygonShape;
-        let indexReferenceEdge: number;
+        let normal: Vec2;
+        let penetrationDepth: number;
+        let flipped = false;
 
-        if (abSeparation > baSeparation) {
-            referenceShape = aPolygonShape;
-            incidentShape = bPolygonShape;
-            indexReferenceEdge = aIndexReferenceEdge;
+        if (abSep > baSep) {
+            normal = aPoly.edgeAt(aEdge).normal();
+            penetrationDepth = -abSep;
         } else {
-            referenceShape = bPolygonShape;
-            incidentShape = aPolygonShape;
-            indexReferenceEdge = bIndexReferenceEdge;
+            normal = bPoly.edgeAt(bEdge).normal().negated();
+            penetrationDepth = -baSep;
+            flipped = true;
         }
 
-        // Find the reference edge based on the index that returned from the function
-        const referenceEdge = referenceShape.edgeAt(indexReferenceEdge);
+        const contactPoints = findContactPoints_adapted(normal, a, b);
+        if (contactPoints.length === 0) return null;
 
-        /////////////////////////////////////
-        // Clipping
-        /////////////////////////////////////
-        const referenceEdgeNormal = referenceEdge.normal();
-        const incidentIndex = incidentShape.findIncidentEdge(referenceEdgeNormal);
-        const incidentNextIndex = (incidentIndex + 1) % incidentShape.worldVertices.length;
-
-        let contactPoints = [
-            incidentShape.worldVertices[incidentIndex],
-            incidentShape.worldVertices[incidentNextIndex],
-        ];
-        const clippedPoints = [...contactPoints];
-
-        // Loop through reference polygon edges and clip the incident segment
-        for (let i = 0; i < referenceShape.worldVertices.length; i++) {
-            if (i === indexReferenceEdge) continue;
-
-            const c0 = referenceShape.worldVertices[i];
-            const c1 = referenceShape.worldVertices[(i + 1) % referenceShape.worldVertices.length];
-
-            // Clip the segment to this edge
-            const numClipped = referenceShape.clipSegmentToLine(contactPoints, clippedPoints, c0, c1);
-
-            // If less than 2 points, exit
-            if (numClipped < 2) break;
-
-            // Make the next contact points the ones that were just clipped
-            contactPoints = [...clippedPoints];
-        }
-
-        const vref = referenceShape.worldVertices[indexReferenceEdge];
-
-        // Loop all clipped points, but only consider those where separation is negative (objects are penetrating each other)
-        for (const vclip of clippedPoints) {
-            const separation = vclip.subNew(vref).dot(referenceEdgeNormal);
-            if (separation <= 0) {
-                let start = vclip;
-                let end = vclip.addNew(referenceEdgeNormal.scaleNew(-separation));
-                const normal = referenceEdgeNormal.clone();
-
-                let flipped = false;
-                // Ensure the start-end points are always from "a" to "b"
-                if (baSeparation >= abSeparation) {
-                    [start, end] = [end, start];
-                    // The collision normal is always from "a" to "b"
-                    normal.scale(-1);
-                    flipped = true;
-                }
-
-                const depth = end.subNew(start).magnitude();
-
-                // TODO: check the clipped points, this should be ran once
-                const contactPoints = findContactPoints_adapted(normal, a, b);
-                const contact = new ContactManifold(a, b, contactPoints, depth, normal, flipped);
-
-                return contact;
-            }
-        }
-
-        return null;
+        return new ContactManifold(a, b, contactPoints, penetrationDepth, normal, flipped);
     };
 
     static detectCollisionPolygonCircle = (polygon: Body, circle: Body): ContactManifold | null => {
