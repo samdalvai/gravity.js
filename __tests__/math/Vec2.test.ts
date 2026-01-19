@@ -178,9 +178,16 @@ describe('Vec2', () => {
         expect(v.y).toBe(3);
     });
 
-    test('negate() returns vector with inverted signs', () => {
+    test('negate() invertes vector in place', () => {
         const v = new Vec2(3, -4);
-        const result = v.negate();
+        v.negate();
+        expect(v.x).toBe(-3);
+        expect(v.y).toBe(4);
+    });
+
+    test('negated() returns vector with inverted signs', () => {
+        const v = new Vec2(3, -4);
+        const result = v.negated();
         expect(result.x).toBe(-3);
         expect(result.y).toBe(4);
     });

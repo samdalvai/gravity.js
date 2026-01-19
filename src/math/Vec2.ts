@@ -167,7 +167,13 @@ export default class Vec2 {
     }
 
     /** operator - (unary negation) */
-    negate(): Vec2 {
+    negate(): void {
+        this.x *= -1;
+        this.y *= -1;
+    }
+
+    /** operator - (unary negation) */
+    negated(): Vec2 {
         const result = new Vec2();
         result.x = -this.x;
         result.y = -this.y;
