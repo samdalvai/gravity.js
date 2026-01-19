@@ -114,9 +114,9 @@ export function clamp(value: number, min: number, max: number): number {
     else return value;
 }
 
-export function cross(scalar: number, vector: Vector2): Vector2 {
-    return new Vector2(-scalar * vector.y, scalar * vector.x);
-}
+// export function cross(scalar: number, vector: Vector2): Vector2 {
+//     return new Vector2(-scalar * vector.y, scalar * vector.x);
+// }
 
 export function calculateBoxInertia(width: number, height: number, mass: number): number {
     return ((width * width + height * height) * mass) / 12.0;
