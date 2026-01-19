@@ -4,7 +4,7 @@ import { ContactManifold } from '../new/contact_adapted';
 import { detectCollision_adapted } from '../new/detection_adapted';
 import { Settings } from '../new/settings';
 import Body from './Body';
-import CollisionDetection from './CollisionDetection';
+import CollisionDetection from './CollisionDetection_adapted';
 import { ContactConstraint, JointConstraint } from './Constraint';
 import Force from './Force';
 
@@ -117,7 +117,8 @@ export default class World {
             // CollisionDetection.detectCollision(a, b, this.contacts);
             if (a.isStatic() && b.isStatic()) continue;
 
-            const newManifold = detectCollision_adapted(a, b);
+            // const newManifold = detectCollision_adapted(a, b);
+            const newManifold = CollisionDetection.detectCollision(a, b);
             if (newManifold == null) continue;
 
             const key = Body.pairKey(a, b);
