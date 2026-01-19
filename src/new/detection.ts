@@ -140,9 +140,11 @@ const TANGENT_MIN_LENGTH = 0.01;
 
 export function findFarthestEdge(b: RigidBody, dir: Vector2): Edge {
     const localDir = b.globalToLocal.mulVector2(dir, 0);
+    console.log("localDir: ", localDir);
     const farthest = support(b, localDir);
     let curr = farthest.vertex;
     const idx = farthest.index;
+    console.log("farthest: ", farthest);
 
     const localToGlobal = b.localToGlobal;
 
