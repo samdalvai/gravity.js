@@ -1,5 +1,6 @@
 import Vec2 from '../math/Vec2';
 import Body from '../physics/Body';
+import { PIXELS_PER_METER } from '../physics/Constants';
 import { CircleShape, PolygonShape } from '../physics/Shape';
 import { Circle } from './circle';
 import { ContactManifold } from './contact';
@@ -140,7 +141,7 @@ export function epa_adapted(b1: Body, b2: Body, gjkResult: Simplex): EPAResult {
     };
 }
 
-const TANGENT_MIN_LENGTH = 0.01;
+const TANGENT_MIN_LENGTH = 0.01 * PIXELS_PER_METER;
 
 export function findFarthestEdge_adapted(b: Body, dir: Vec2): Edge {
     const localDir = b.worldDirToLocal(dir);
@@ -175,30 +176,30 @@ export function findFarthestEdge_adapted(b: Body, dir: Vec2): Edge {
     }
 }
 
-// function clipEdge(edge: Edge, p: Vector2, dir: Vector2, remove: boolean = false) {
-//     const d1 = edge.p1.subNew(p).dot(dir);
-//     const d2 = edge.p2.subNew(p).dot(dir);
+export function clipEdge(edge: Edge, p: Vec2, dir: Vec2, remove: boolean = false) {
+    const d1 = edge.p1.subNew(p).dot(dir);
+    const d2 = edge.p2.subNew(p).dot(dir);
 
-//     if (d1 >= 0 && d2 >= 0) return;
+    if (d1 >= 0 && d2 >= 0) return;
 
-//     const per = Math.abs(d1) + Math.abs(d2);
+    const per = Math.abs(d1) + Math.abs(d2);
 
-//     if (d1 < 0) {
-//         if (remove) {
-//             edge.p1 = edge.p2;
-//             edge.id1 = edge.id2;
-//         } else {
-//             edge.p1 = edge.p1.addNew(edge.p2.subNew(edge.p1).mulNew(-d1 / per));
-//         }
-//     } else if (d2 < 0) {
-//         if (remove) {
-//             edge.p2 = edge.p1;
-//             edge.id2 = edge.id1;
-//         } else {
-//             edge.p2 = edge.p2.addNew(edge.p1.subNew(edge.p2).mulNew(-d2 / per));
-//         }
-//     }
-// }
+    if (d1 < 0) {
+        if (remove) {
+            edge.p1 = edge.p2;
+            edge.id1 = edge.id2;
+        } else {
+            edge.p1 = edge.p1.addNew(edge.p2.subNew(edge.p1).scaleNew(-d1 / per));
+        }
+    } else if (d2 < 0) {
+        if (remove) {
+            edge.p2 = edge.p1;
+            edge.id2 = edge.id1;
+        } else {
+            edge.p2 = edge.p2.addNew(edge.p1.subNew(edge.p2).scaleNew(-d2 / per));
+        }
+    }
+}
 
 // export interface ContactPoint {
 //     point: Vector2;
