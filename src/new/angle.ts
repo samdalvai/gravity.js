@@ -1,6 +1,6 @@
 import { Joint } from './joint';
-import { RigidBody } from '../rigidbody';
-import { Settings } from '../settings';
+import { RigidBody } from './rigidbody';
+import { Settings } from './settings';
 
 export class AngleJoint extends Joint {
     public initialAngleOffset: number;
