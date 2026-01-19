@@ -4,9 +4,9 @@ import { CircleShape, PolygonShape } from '../physics/Shape';
 import { Circle } from './circle';
 import { ContactManifold } from './contact';
 import { Edge } from './edge';
-import { Vector2 } from './vector2';
+// import { Vector2 } from './vector2';
 import { Polygon } from './polygon';
-import { ClosestEdgeInfo, Polytope } from './polytope';
+import { ClosestEdgeInfo, Polytope } from './polytope_adapted';
 import { RigidBody } from './rigidbody';
 import { Settings } from './settings';
 import { Simplex } from './simplex_adapted';
@@ -110,35 +110,35 @@ export function gjk_adapted(b1: Body, b2: Body): GJKResult {
     return result;
 }
 
-// interface EPAResult {
-//     penetrationDepth: number;
-//     contactNormal: Vector2;
-// }
+interface EPAResult {
+    penetrationDepth: number;
+    contactNormal: Vec2;
+}
 
-// function epa(b1: RigidBody, b2: RigidBody, gjkResult: Simplex): EPAResult {
-//     const polytope: Polytope = new Polytope(gjkResult);
+export function epa(b1: Body, b2: Body, gjkResult: Simplex): EPAResult {
+    const polytope: Polytope = new Polytope(gjkResult);
 
-//     let closestEdge: ClosestEdgeInfo = { index: 0, distance: Infinity, normal: new Vector2(0, 0) };
+    let closestEdge: ClosestEdgeInfo = { index: 0, distance: Infinity, normal: new Vec2(0, 0) };
 
-//     for (let i = 0; i < Settings.EPA_MAX_ITERATION; i++) {
-//         closestEdge = polytope.getClosestEdge();
-//         const supportPoint = csoSupport(b1, b2, closestEdge.normal);
-//         const newDistance = closestEdge.normal.dot(supportPoint);
+    for (let i = 0; i < Settings.EPA_MAX_ITERATION; i++) {
+        closestEdge = polytope.getClosestEdge();
+        const supportPoint = csoSupport_adapted(b1, b2, closestEdge.normal);
+        const newDistance = closestEdge.normal.dot(supportPoint);
 
-//         if (Math.abs(closestEdge.distance - newDistance) > Settings.EPA_TOLERANCE) {
-//             // Insert the support vertex so that it expands our polytope
-//             polytope.vertices.splice(closestEdge.index + 1, 0, supportPoint);
-//         } else {
-//             // If you didn't expand edge, it means you reached the closest outer edge
-//             break;
-//         }
-//     }
+        if (Math.abs(closestEdge.distance - newDistance) > Settings.EPA_TOLERANCE) {
+            // Insert the support vertex so that it expands our polytope
+            polytope.vertices.splice(closestEdge.index + 1, 0, supportPoint);
+        } else {
+            // If you didn't expand edge, it means you reached the closest outer edge
+            break;
+        }
+    }
 
-//     return {
-//         penetrationDepth: closestEdge.distance,
-//         contactNormal: closestEdge.normal,
-//     };
-// }
+    return {
+        penetrationDepth: closestEdge.distance,
+        contactNormal: closestEdge.normal,
+    };
+}
 
 // const TANGENT_MIN_LENGTH = 0.01;
 
