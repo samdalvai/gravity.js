@@ -1,6 +1,6 @@
 import { Box } from './box';
 import { Circle } from './circle';
-import { Vector2 } from './math/vector2';
+import { Vector2 } from './vector2';
 import { Polygon } from './polygon';
 import { RigidBody } from './rigidbody';
 

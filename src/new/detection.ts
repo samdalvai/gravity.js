@@ -1,7 +1,7 @@
 import { Circle } from './circle';
-import { ContactManifold } from './constraint/contact';
+import { ContactManifold } from './contact';
 import { Edge } from './edge';
-import { Vector2 } from './math/vector2';
+import { Vector2 } from './vector2';
 import { Polygon } from './polygon';
 import { ClosestEdgeInfo, Polytope } from './polytope';
 import { RigidBody } from './rigidbody';

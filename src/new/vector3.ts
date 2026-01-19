@@ -1,4 +1,4 @@
-import * as Util from '../util';
+import * as Util from './util';
 
 export class Vector3 {
     x: number;

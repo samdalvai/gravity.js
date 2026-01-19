@@ -1,10 +1,10 @@
 import Graphics from '../Graphics';
 import Vec2 from '../math/Vec2';
 import { Box } from '../new/box';
-import { ContactManifold } from '../new/constraint/contact';
-import { Joint } from '../new/constraint/joint';
+import { ContactManifold } from '../new/contact';
+import { Joint } from '../new/joint';
 import { detectCollision } from '../new/detection';
-import { Vector2 } from '../new/math/vector2';
+import { Vector2 } from '../new/vector2';
 import { RigidBody, Type } from '../new/rigidbody';
 import { Settings } from '../new/settings';
 import * as Util from '../new/util';

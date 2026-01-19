@@ -1,7 +1,7 @@
-import { Constraint } from './constraint/constraint';
-import { ContactManifold } from './constraint/contact';
-import { Joint } from './constraint/joint';
-import { Vector2 } from './math/vector2';
+import { Constraint } from './constraint';
+import { ContactManifold } from './contact';
+import { Joint } from './joint';
+import { Vector2 } from './vector2';
 import { RigidBody } from './rigidbody';
 import { Settings } from './settings';
 import { World } from './world';
