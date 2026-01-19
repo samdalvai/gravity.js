@@ -64,7 +64,7 @@ class ContactSolver {
         this.rb = this.contactPoint.subNew(this.bodyB.position);
 
         this.jacobian = {
-            va: dir.negate(),
+            va: dir.negated(),
             wa: -this.ra!.cross(dir),
             vb: dir,
             wb: this.rb!.cross(dir),
@@ -285,7 +285,7 @@ class BlockSolver {
             //
             // x = - inv(A) * b'
             //
-            x = this.m.mulVector(b).negate();
+            x = this.m.mulVector(b).negated();
             if (x.x >= 0.0 && x.y >= 0.0) break;
 
             //
@@ -478,7 +478,7 @@ export class ContactManifold extends Constraint {
         const contactInfo: ContactInfo = {
             other: flip ? this.bodyB : this.bodyA,
             numContacts: this.numContacts,
-            contactDir: flip ? this.contactNormal.negate() : this.contactNormal.clone(),
+            contactDir: flip ? this.contactNormal.negated() : this.contactNormal.clone(),
             contactPoints: [],
             impulse: 0,
         };

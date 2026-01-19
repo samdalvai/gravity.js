@@ -39,7 +39,7 @@ export class Polytope {
 
             if (distance < 0) {
                 distance *= -1;
-                normal.negate();
+                normal.negated();
             }
 
             if (distance < minDistance) {
