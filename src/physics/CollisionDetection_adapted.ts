@@ -38,22 +38,17 @@ export default class CollisionDetection {
         const ab = b.position.subNew(a.position);
         const radiusSum = aCircleShape.radius + bCircleShape.radius;
 
-        const isColliding = ab.magnitudeSquared() <= radiusSum * radiusSum;
-
-        if (!isColliding) {
+        if (ab.magnitudeSquared() > radiusSum * radiusSum) {
             return null;
         }
 
-        const normal = ab;
-        normal.normalize();
+        const normal = ab.normalizeNew();
 
-        const start = b.position.subNew(normal.scaleNew(bCircleShape.radius));
-        const end = a.position.addNew(normal.scaleNew(aCircleShape.radius));
-        const depth = end.subNew(start).magnitude();
+        const contactPoint = a.position.addNew(normal.scaleNew(aCircleShape.radius));
 
-        const contact = new ContactManifold(a, b, [{ point: start, id: -1 }], depth, normal, false);
+        const penetrationDepth = radiusSum - ab.magnitude();
 
-        return contact;
+        return new ContactManifold(a, b, [{ point: contactPoint, id: -1 }], penetrationDepth, normal, false);
     };
 
     static detectCollisionPolygonPolygon = (a: Body, b: Body): ContactManifold | null => {
