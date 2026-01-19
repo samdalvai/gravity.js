@@ -11,7 +11,8 @@ export default class Body {
     velocity: Vec2;
     acceleration: Vec2;
 
-    // // Angular motion
+    // Angular motion
+    /** Attention: rotation should be set using setRotation */
     rotation: number;
     angularVelocity: number;
     angularAcceleration: number;
@@ -91,6 +92,12 @@ export default class Body {
 
     setTexture = (texture: keyof typeof TEXTURES): void => {
         this.texture = AssetStore.getTexture(texture);
+    };
+
+    setRotation = (rotation: number): void => {
+        this.rotation = rotation;
+        this.shape.updateVertices(this.rotation, this.position);
+        this.updateAABB();
     };
 
     isStatic = (): boolean => {
@@ -208,6 +215,9 @@ export default class Body {
 
     integrateVelocities = (dt: number): void => {
         if (this.isStatic()) {
+            // TODO: this is needed because otherwise AABB is not correctly set for static objects with rotation
+            this.shape.updateVertices(this.rotation, this.position);
+            this.updateAABB();
             return;
         }
 
