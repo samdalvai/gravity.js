@@ -6,7 +6,7 @@ import { Type } from '../new/rigidbody';
 import Body from '../physics/Body';
 import { JointConstraint } from '../physics/Constraint';
 import { BoxShape, CircleShape, PolygonShape } from '../physics/Shape';
-import World from '../physics/World';
+import World from '../physics/World_new';
 
 export default class Demo {
     static demoStrings = [
