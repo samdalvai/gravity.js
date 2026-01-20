@@ -108,7 +108,12 @@ export default class World {
         this.contacts.length = 0;
 
         // Narrow phase check, potential pairs may still not collide
-        for (const [a, b] of potentialPairs) {
+        for (let [a, b] of potentialPairs) {
+            // Improve coherence
+            if (a.id > b.id) {
+                [a, b] = [b, a];
+            }
+
             CollisionDetection.detectCollision(a, b, this.contacts);
         }
 
