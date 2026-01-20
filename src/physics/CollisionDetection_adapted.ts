@@ -1,6 +1,6 @@
 import Vec2 from '../math/Vec2';
 import { ContactManifold } from '../new/contact_adapted';
-import { findContactPoints_adapted } from '../new/detection_adapted';
+import { ContactPoint, findContactPoints_adapted } from '../new/detection_adapted';
 import Body from './Body';
 import { CircleShape, PolygonShape, ShapeType } from './Shape';
 
@@ -79,6 +79,100 @@ export default class CollisionDetection {
 
         return new ContactManifold(a, b, contactPoints, penetrationDepth, normal, flipped);
     };
+    
+    // static detectCollisionPolygonPolygon = (a: Body, b: Body): ContactManifold | null => {
+    //     const aPolygonShape = a.shape as PolygonShape;
+    //     const bPolygonShape = b.shape as PolygonShape;
+
+    //     const [abSeparation, aIndexReferenceEdge] = aPolygonShape.findMinSeparation(bPolygonShape);
+    //     if (abSeparation >= 0) {
+    //         return null;
+    //     }
+
+    //     const [baSeparation, bIndexReferenceEdge] = bPolygonShape.findMinSeparation(aPolygonShape);
+    //     if (baSeparation >= 0) {
+    //         return null;
+    //     }
+
+    //     // Determine reference and incident polygons
+    //     let referenceShape: PolygonShape;
+    //     let incidentShape: PolygonShape;
+    //     let indexReferenceEdge: number;
+
+    //     if (abSeparation > baSeparation) {
+    //         referenceShape = aPolygonShape;
+    //         incidentShape = bPolygonShape;
+    //         indexReferenceEdge = aIndexReferenceEdge;
+    //     } else {
+    //         referenceShape = bPolygonShape;
+    //         incidentShape = aPolygonShape;
+    //         indexReferenceEdge = bIndexReferenceEdge;
+    //     }
+
+    //     // Find the reference edge based on the index that returned from the function
+    //     const referenceEdge = referenceShape.edgeAt(indexReferenceEdge);
+
+    //     /////////////////////////////////////
+    //     // Clipping
+    //     /////////////////////////////////////
+    //     const referenceEdgeNormal = referenceEdge.normal();
+    //     const incidentIndex = incidentShape.findIncidentEdge(referenceEdgeNormal);
+    //     const incidentNextIndex = (incidentIndex + 1) % incidentShape.worldVertices.length;
+
+    //     let contactPoints = [
+    //         incidentShape.worldVertices[incidentIndex],
+    //         incidentShape.worldVertices[incidentNextIndex],
+    //     ];
+    //     const clippedPoints = [...contactPoints];
+
+    //     // Loop through reference polygon edges and clip the incident segment
+    //     for (let i = 0; i < referenceShape.worldVertices.length; i++) {
+    //         if (i === indexReferenceEdge) continue;
+
+    //         const c0 = referenceShape.worldVertices[i];
+    //         const c1 = referenceShape.worldVertices[(i + 1) % referenceShape.worldVertices.length];
+
+    //         // Clip the segment to this edge
+    //         const numClipped = referenceShape.clipSegmentToLine(contactPoints, clippedPoints, c0, c1);
+
+    //         // If less than 2 points, exit
+    //         if (numClipped < 2) break;
+
+    //         // Make the next contact points the ones that were just clipped
+    //         contactPoints = [...clippedPoints];
+    //     }
+
+    //     const vref = referenceShape.worldVertices[indexReferenceEdge];
+
+    //     const manifoldContactPoints: ContactPoint[] = [];
+
+    //     // Loop all clipped points, but only consider those where separation is negative (objects are penetrating each other)
+    //     for (const vclip of clippedPoints) {
+    //         const separation = vclip.subNew(vref).dot(referenceEdgeNormal);
+    //         if (separation <= 0) {
+    //             const contact = vclip.addNew(referenceEdgeNormal.scaleNew(-separation));
+
+    //             const contactPoint = { point: contact, id: indexReferenceEdge };
+    //             manifoldContactPoints.push(contactPoint);
+    //         }
+    //     }
+
+    //     let normal: Vec2;
+    //     let penetrationDepth: number;
+    //     let flipped = false;
+
+    //     if (abSeparation > baSeparation) {
+    //         normal = aPolygonShape.edgeAt(aIndexReferenceEdge).normal();
+    //         penetrationDepth = -abSeparation;
+    //     } else {
+    //         normal = bPolygonShape.edgeAt(bIndexReferenceEdge).normal().negated();
+    //         penetrationDepth = -baSeparation;
+    //         flipped = true;
+    //     }
+
+    //     const contact = new ContactManifold(a, b, manifoldContactPoints, penetrationDepth, normal, flipped);
+    //     return contact;
+    // };
 
     static detectCollisionPolygonCircle = (polygon: Body, circle: Body): ContactManifold | null => {
         const polygonShape = polygon.shape as PolygonShape;
