@@ -2,12 +2,12 @@ import Graphics from '../Graphics';
 import Vec2 from '../math/Vec2';
 import { Box } from '../new/box';
 import { ContactManifold } from '../new/contact';
-import { Joint } from '../new/joint';
 import { detectCollision } from '../new/detection';
-import { Vector2 } from '../new/vector2';
+import { Joint } from '../new/joint';
 import { RigidBody, Type } from '../new/rigidbody';
 import { Settings } from '../new/settings';
 import * as Util from '../new/util';
+import { Vector2 } from '../new/vector2';
 import Body from './Body';
 import CollisionDetection from './CollisionDetection';
 import { PIXELS_PER_METER } from './Constants';
@@ -50,6 +50,10 @@ export default class World {
         }
     };
 
+    getManifolds = (): ContactManifold[] => {
+        return this.manifolds;
+    };
+
     update = (deltaTime: number): void => {
         const inverseDeltaTime = deltaTime > 0.0 ? 1.0 / deltaTime : 0.0;
         const newManifolds: ContactManifold[] = [];
@@ -67,7 +71,7 @@ export default class World {
                     b = this.bodies[i];
                 }
 
-                if (a.type == Type.Static && b.type == Type.Static) continue;
+                // if (a.type == Type.Static && b.type == Type.Static) continue;
 
                 const key = Util.make_pair_natural(a.id, b.id);
                 // if (this.passTestSet.has(key)) continue;
@@ -102,15 +106,33 @@ export default class World {
                 b.linearVelocity.y += gravity.y;
             }
         }
-
+        //if (a.type == Type.Static && b.type == Type.Static) continue;
         // Prepare for solving
-        for (let i = 0; i < this.manifolds.length; i++) this.manifolds[i].prepare(inverseDeltaTime);
+        for (let i = 0; i < this.manifolds.length; i++) {
+            const m = this.manifolds[i];
+
+            // TODO: move this to main loop after tests are finished
+            if (m.bodyA.type == Type.Static && m.bodyB.type == Type.Static) {
+                continue;
+            }
+
+            this.manifolds[i].prepare(inverseDeltaTime);
+        }
 
         for (let i = 0; i < this.joints.length; i++) this.joints[i].prepare(inverseDeltaTime);
 
         // Iteratively solve the violated velocity constraint
         for (let i = 0; i < this.iterations; i++) {
-            for (let j = 0; j < this.manifolds.length; j++) this.manifolds[j].solve();
+            for (let j = 0; j < this.manifolds.length; j++) {
+                const m = this.manifolds[j];
+
+                // TODO: move this to main loop after tests are finished
+                if (m.bodyA.type == Type.Static && m.bodyB.type == Type.Static) {
+                    continue;
+                }
+
+                this.manifolds[j].solve();
+            }
 
             for (let j = 0; j < this.joints.length; j++) this.joints[j].solve();
         }
