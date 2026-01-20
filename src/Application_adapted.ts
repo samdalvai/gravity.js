@@ -7,8 +7,8 @@ import Body from './physics/Body';
 import { GRAVITY, MAX_BODIES } from './physics/Constants';
 import Force from './physics/Force';
 import { BoxShape, CircleShape } from './physics/Shape';
-import World from './physics/World_old';
-import Demo from './samples/Demo_old';
+import World from './physics/World_adapted';
+import Demo from './samples/Demo_adapted';
 
 export default class Application {
     private running = false;
@@ -51,8 +51,8 @@ export default class Application {
         b.rotation = 0.5;
         this.world.addBody(b);
 
-        this.testBody = new Body(new CircleShape(25), Graphics.width() / 2, 500, 0);
-        // this.testBody = new Body(new BoxShape(50, 50), Graphics.width() / 2, 500, 0);
+        // this.testBody = new Body(new CircleShape(25), Graphics.width() / 2, 500, 0);
+        this.testBody = new Body(new BoxShape(50, 50), Graphics.width() / 2, 500, 0);
         this.world.addBody(this.testBody);
 
         this.bgTexture = AssetStore.getTexture('background');

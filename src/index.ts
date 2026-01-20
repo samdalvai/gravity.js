@@ -1,5 +1,5 @@
-import Application from './Application_new'; // Full new implementation using new rigidbody
-// import Application from './Application_old'; // New implementation of contacts applied to current bodies
+// import Application from './Application_new'; // Full new implementation using new rigidbody
+import Application from './Application_adapted'; // New implementation of contacts applied to current bodies
 // import Application from './Application_current'; // standard implementation
 
 const run = async () => {
