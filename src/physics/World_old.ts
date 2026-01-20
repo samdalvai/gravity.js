@@ -149,9 +149,11 @@ export default class World {
             const m = this.manifolds[i];
 
             // TODO: move this to main loop after tests are finished
-            if (!m.bodyA.isStatic() && !m.bodyB.isStatic()) {
-                this.manifolds[i].prepare(invDt);
+            if (m.bodyA.isStatic() && m.bodyB.isStatic()) {
+                continue;
             }
+
+            this.manifolds[i].prepare(invDt);
         }
 
         // for (let i = 0; i < this.joints.length; i++) this.joints[i].prepare(invDt);
@@ -161,9 +163,10 @@ export default class World {
             for (let j = 0; j < this.manifolds.length; j++) {
                 const m = this.manifolds[j];
 
-                if (!m.bodyA.isStatic() && !m.bodyB.isStatic()) {
-                    this.manifolds[j].solve();
+                if (m.bodyA.isStatic() && m.bodyB.isStatic()) {
+                    continue;
                 }
+                this.manifolds[j].solve();
             }
 
             // for (let j = 0; j < this.joints.length; j++) this.joints[j].solve();
