@@ -46,8 +46,8 @@ export default class Application {
         this.running = Graphics.openWindow();
         Demo.demo1(this.world);
 
-        // const b = new Body(new BoxShape(100, 100), Graphics.width() / 2, 500, 0);
-        const b = new Body(new CircleShape(50), Graphics.width() / 2, 500, 0);
+        const b = new Body(new BoxShape(100, 100), Graphics.width() / 2, 500, 0);
+        // const b = new Body(new CircleShape(50), Graphics.width() / 2, 500, 0);
         b.rotation = 0.5;
         this.world.addBody(b);
 

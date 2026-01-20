@@ -51,8 +51,8 @@ export default class Application {
         b.rotation = 0.5;
         this.world.addBody(b);
 
-        // this.testBody = new Body(new CircleShape(25), Graphics.width() / 2, 500, 0);
-        this.testBody = new Body(new BoxShape(50, 50), Graphics.width() / 2, 500, 0);
+        this.testBody = new Body(new CircleShape(25), Graphics.width() / 2, 500, 0);
+        // this.testBody = new Body(new BoxShape(50, 50), Graphics.width() / 2, 500, 0);
         this.world.addBody(this.testBody);
 
         this.bgTexture = AssetStore.getTexture('background');

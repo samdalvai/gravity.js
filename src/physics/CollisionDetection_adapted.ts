@@ -135,9 +135,14 @@ export default class CollisionDetection {
                     const b = circle;
                     const depth = circleShape.radius - v1.magnitude();
                     const normal = v1.normalize();
+                    const start = circle.position.addNew(normal.scaleNew(-circleShape.radius));
+                    const end = start.addNew(normal.scaleNew(depth));
+                    const contactPoint = start.addNew(end).scaleNew(0.5);
 
+                    console.log('REGION A');
                     const contactPoints = findContactPoints_adapted(normal, a, b);
-                    const contact = new ContactManifold(a, b, contactPoints, depth, normal, false);
+                    const contact = new ContactManifold(a, b, [{ point: end, id: -1 }], depth, normal, false);
+                    // const contact = new ContactManifold(a, b, contactPoints, depth, normal, false);
                     return contact;
                 }
             } else {
@@ -156,7 +161,10 @@ export default class CollisionDetection {
                         const b = circle;
                         const depth = circleShape.radius - v1.magnitude();
                         const normal = v1.normalize();
+                        const start = circle.position.addNew(normal.scaleNew(-circleShape.radius));
+                        const end = start.addNew(normal.scaleNew(depth));
 
+                        console.log('REGION B');
                         const contactPoints = findContactPoints_adapted(normal, a, b);
                         const contact = new ContactManifold(a, b, contactPoints, depth, normal, false);
                         return contact;
@@ -174,9 +182,14 @@ export default class CollisionDetection {
                         const b = circle;
                         const depth = circleShape.radius - distanceCircleEdge;
                         const normal = minNextVertex.subNew(minCurrVertex).normal();
+                        const start = circle.position.subNew(normal.scaleNew(circleShape.radius));
+                        const end = start.addNew(normal.scaleNew(depth));
 
+                        console.log('REGION C');
                         const contactPoints = findContactPoints_adapted(normal, a, b);
+                        // const contact = new ContactManifold(a, b, contactPoints, depth, normal, false);
                         const contact = new ContactManifold(a, b, contactPoints, depth, normal, false);
+
                         return contact;
                     }
                 }
@@ -187,7 +200,10 @@ export default class CollisionDetection {
             const b = circle;
             const depth = circleShape.radius - distanceCircleEdge;
             const normal = minNextVertex.subNew(minCurrVertex).normal();
+            const start = circle.position.subNew(normal.scaleNew(circleShape.radius));
+            const end = start.addNew(normal.scaleNew(depth));
 
+            console.log('INSIDE POLYGON');
             const contactPoints = findContactPoints_adapted(normal, a, b);
             const contact = new ContactManifold(a, b, contactPoints, depth, normal, false);
             return contact;
