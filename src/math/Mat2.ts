@@ -84,9 +84,7 @@ export class Mat2 {
         const res = new Mat2();
         let det = this.determinant;
 
-        // if (det == 0) throw 'Determinant 0';
-        // TODO: don't know if this is correct
-        det = 1;
+        if (det == 0) throw 'Determinant 0';
 
         det = 1.0 / det;
         res.m00 = det * this.m11;
