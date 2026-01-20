@@ -163,6 +163,7 @@ export default class World {
             for (let j = 0; j < this.manifolds.length; j++) {
                 const m = this.manifolds[j];
 
+                // TODO: move this to main loop after tests are finished
                 if (m.bodyA.isStatic() && m.bodyB.isStatic()) {
                     continue;
                 }
