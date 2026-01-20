@@ -4,9 +4,9 @@ import InputManager, { MouseButton } from './InputManager';
 import Vec2 from './math/Vec2';
 import { Box } from './new/box';
 import { Circle } from './new/circle';
+import { RigidBody, Type } from './new/rigidbody';
 import { Vector2 } from './new/vector2';
-import { Type } from './new/rigidbody';
-import Body from './physics/Body';
+// import Body from './physics/Body';
 import { GRAVITY, MAX_BODIES } from './physics/Constants';
 import Force from './physics/Force';
 import { BoxShape, CircleShape } from './physics/Shape';
@@ -22,6 +22,7 @@ export default class Application {
     // private showContacts = true;
     private demoIndex = 1;
     // private bomb: Body | null = null;
+    private testBody: RigidBody | null = null;
 
     // Debug related properties
     private debug = true;
@@ -92,6 +93,20 @@ export default class Application {
         //         this.world.addBody(b);
         //     }
         // }
+
+        const b = new Box(100, 100, Type.Static);
+        // const b = new Circle(50, Type.Static);
+        b.position = new Vector2(0, 0);
+        b.rotation = 0.5;
+        this.world.addBody(b);
+
+        this.testBody = new Box(50, 50, Type.Static);
+        //  this.testBody = new Circle(25, Type.Static);
+        this.testBody.position = new Vector2(0, 0);
+
+        if (this.testBody) {
+            this.world.addBody(this.testBody);
+        }
     };
 
     input = (): void => {
@@ -193,6 +208,12 @@ export default class Application {
             // this.world.getBodies()[4].position.x = inputEvent.x;
             // this.world.getBodies()[4].position.y = inputEvent.y;
             // this.world.getBodies()[4].shape.updateVertices(0, this.world.getBodies()[4].position);
+            if (this.testBody) {
+                const x = inputEvent.x - Graphics.width() / 2;
+                const y = -(inputEvent.y - Graphics.height() / 2);
+                this.testBody.position.x = x;
+                this.testBody.position.y = y;
+            }
         }
 
         // Handle mouse click events
