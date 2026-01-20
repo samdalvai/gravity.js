@@ -117,6 +117,7 @@ export default class World {
 
         this.contacts.length = 0;
 
+        // console.time('collision');
         // Narrow phase check, potential pairs may still not collide
         for (let [a, b] of potentialPairs) {
             // CollisionDetection.detectCollision(a, b, this.contacts);
@@ -140,6 +141,7 @@ export default class World {
             newManifoldMap.set(key, newManifold);
             newManifolds.push(newManifold);
         }
+        // console.timeEnd('collision');
 
         this.manifoldMap = newManifoldMap;
         this.manifolds = newManifolds;
