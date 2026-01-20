@@ -274,7 +274,7 @@ export default class Application {
                 //     Graphics.drawLine(aW.x, aW.y, bW.x, bW.y, 'red');
                 // }
                 for (const manifold of this.world.getManifolds()) {
-                    console.log('ma: ', manifold);
+                    // console.log('ma: ', manifold);
                     for (const contact of manifold.contactPoints) {
                         Graphics.drawFillCircle(contact.point.x, contact.point.y, 5, 'red');
                     }
