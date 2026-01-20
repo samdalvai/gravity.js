@@ -10,8 +10,8 @@ import { Vector2 } from './new/vector2';
 import { GRAVITY, MAX_BODIES } from './physics/Constants';
 import Force from './physics/Force';
 import { BoxShape, CircleShape } from './physics/Shape';
-import World from './physics/World';
-import Demo from './samples/Demo';
+import World from './physics/World_new';
+import Demo from './samples/Demo_new';
 
 export default class Application {
     private running = false;
@@ -344,6 +344,17 @@ export default class Application {
             //         Graphics.drawLine(aW.x, aW.y, bW.x, bW.y, 'red');
             //     }
             // }
+            for (const manifold of this.world.getManifolds()) {
+                // console.log('ma: ', manifold);
+                for (const contact of manifold.contactPoints) {
+                    const startPoint = contact.point;
+                    const endPoint = contact.point.subNew(manifold.contactNormal.mulNew(manifold.penetrationDepth));
+
+                    Graphics.drawFillCircle(startPoint.x, startPoint.y, 5, 'red');
+                    Graphics.drawFillCircle(endPoint.x, endPoint.y, 3, 'red');
+                    Graphics.drawLine(startPoint.x, startPoint.y, endPoint.x, endPoint.y, 'red');
+                }
+            }
         }
 
         Graphics.endWorld();
