@@ -3,7 +3,7 @@ import Vec2 from '../math/Vec2';
 import Body from '../physics/Body';
 import { JointConstraint } from '../physics/Constraint';
 import { BoxShape, CircleShape, PolygonShape } from '../physics/Shape';
-import World from '../physics/World_old';
+import World from '../physics/World_adapted';
 
 export default class Demo {
     static demoStrings = [
