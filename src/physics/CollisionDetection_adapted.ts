@@ -166,7 +166,8 @@ export default class CollisionDetection {
 
                         console.log('REGION B');
                         const contactPoints = findContactPoints_adapted(normal, a, b);
-                        const contact = new ContactManifold(a, b, contactPoints, depth, normal, false);
+                        // const contact = new ContactManifold(a, b, contactPoints, depth, normal, false);
+                        const contact = new ContactManifold(a, b, [{ point: end, id: -1 }], depth, normal, false);
                         return contact;
                     }
                 } else {
@@ -188,7 +189,7 @@ export default class CollisionDetection {
                         console.log('REGION C');
                         const contactPoints = findContactPoints_adapted(normal, a, b);
                         // const contact = new ContactManifold(a, b, contactPoints, depth, normal, false);
-                        const contact = new ContactManifold(a, b, contactPoints, depth, normal, false);
+                        const contact = new ContactManifold(a, b, [{ point: end, id: -1 }], depth, normal, false);
 
                         return contact;
                     }
