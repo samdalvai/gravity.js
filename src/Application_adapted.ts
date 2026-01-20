@@ -304,6 +304,12 @@ export default class Application {
             }
         }
 
+        let numContacts = 0;
+
+        for (const manifold of this.world.getManifolds()) {
+            numContacts += manifold.numContacts;
+        }
+
         const debugText = [
             // General info
             'Keys: 1-9 Demos, Left Mouse to generate circles, Right Mouse to generate boxes, Space to drop bomb',
@@ -315,7 +321,7 @@ export default class Application {
             // Debut related info
             `FPS: ${this.FPS.toFixed(2)}`,
             `Num objects: ${this.world.getBodies().length}`,
-            `Num contacts: ${this.world.getContacts().length}`,
+            `Num contacts: ${numContacts}`,
         ];
 
         for (let i = 0; i < debugText.length - (this.debug ? 0 : 4); i++) {
