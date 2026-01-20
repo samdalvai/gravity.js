@@ -55,7 +55,7 @@ export default class Demo {
     static demo1 = (world: World) => {
         // Demo 1: Single box demo
         this.generateFloor(world);
-        this.generateFences(world);
+        // this.generateFences(world);
         // const box = new Body(new BoxShape(60, 60), Graphics.width() / 2.0, Graphics.height() - 300, 10);
         // box.setTexture('crate');
         // world.addBody(box)
