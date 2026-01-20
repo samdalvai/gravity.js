@@ -121,7 +121,7 @@ export default class World {
         for (let [a, b] of potentialPairs) {
             // CollisionDetection.detectCollision(a, b, this.contacts);
             // if (a.isStatic() && b.isStatic()) continue;
-            
+
             // Improve coherence
             if (a.id > b.id) {
                 [a, b] = [b, a];
@@ -145,13 +145,26 @@ export default class World {
         this.manifolds = newManifolds;
 
         // Prepare for solving
-        for (let i = 0; i < this.manifolds.length; i++) this.manifolds[i].prepare(invDt);
+        for (let i = 0; i < this.manifolds.length; i++) {
+            const m = this.manifolds[i];
+
+            // TODO: move this to main loop after tests are finished
+            if (!m.bodyA.isStatic() && !m.bodyB.isStatic()) {
+                this.manifolds[i].prepare(invDt);
+            }
+        }
 
         // for (let i = 0; i < this.joints.length; i++) this.joints[i].prepare(invDt);
 
         // Iteratively solve the violated velocity constraint
         for (let i = 0; i < this.iterations; i++) {
-            for (let j = 0; j < this.manifolds.length; j++) this.manifolds[j].solve();
+            for (let j = 0; j < this.manifolds.length; j++) {
+                const m = this.manifolds[j];
+
+                if (!m.bodyA.isStatic() && !m.bodyB.isStatic()) {
+                    this.manifolds[j].solve();
+                }
+            }
 
             // for (let j = 0; j < this.joints.length; j++) this.joints[j].solve();
         }
