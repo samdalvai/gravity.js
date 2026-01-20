@@ -276,7 +276,14 @@ export default class Application {
                 for (const manifold of this.world.getManifolds()) {
                     // console.log('ma: ', manifold);
                     for (const contact of manifold.contactPoints) {
-                        Graphics.drawFillCircle(contact.point.x, contact.point.y, 5, 'red');
+                        const startPoint = contact.point;
+                        const endPoint = contact.point.subNew(
+                            manifold.contactNormal.scaleNew(manifold.penetrationDepth),
+                        );
+
+                        Graphics.drawFillCircle(startPoint.x, startPoint.y, 5, 'red');
+                        Graphics.drawFillCircle(endPoint.x, endPoint.y, 3, 'red');
+                        Graphics.drawLine(startPoint.x, startPoint.y, endPoint.x, endPoint.y, 'red');
                     }
                 }
             }
