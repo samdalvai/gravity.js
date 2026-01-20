@@ -17,6 +17,7 @@ export default class Application {
     private generateParticle = false;
     private generateCircles = true;
     private showContacts = true;
+    private showAABB = false;
     private demoIndex = 1;
     private bomb: Body | null = null;
     private testBody: Body | null = null;
@@ -117,6 +118,10 @@ export default class Application {
 
                     if (inputEvent.key === 'c') {
                         this.generateCircles = !this.generateCircles;
+                    }
+
+                    if (inputEvent.key === 'a') {
+                        this.showAABB = !this.showAABB;
                     }
 
                     if (inputEvent.key === 's') {
@@ -251,6 +256,16 @@ export default class Application {
 
         // Draw all joints anchor points and debug properties
         if (this.debug) {
+            if (this.showAABB) {
+                for (const body of this.world.getBodies()) {
+                    const centerX = body.minX + (body.maxX - body.minX) / 2;
+                    const centerY = body.minY + (body.maxY - body.minY) / 2;
+                    const width = body.maxX - body.minX;
+                    const height = body.maxY - body.minY;
+                    Graphics.drawRect(centerX, centerY, width, height, 'gray');
+                }
+            }
+
             if (this.showContacts) {
                 // for (const joint of this.world.getJoints()) {
                 //     // TODO: this is just a simple draw method, we need to consider local anchors rather than just
@@ -293,9 +308,10 @@ export default class Application {
             // General info
             'Keys: 1-9 Demos, Left Mouse to generate circles, Right Mouse to generate boxes, Space to drop bomb',
             `${Demo.demoStrings[this.demoIndex]}`,
-            `(D)ebug mode: ${this.debug ? 'ON' : 'OFF'}`,
-            `(C)hosen particle: ${this.generateCircles ? 'Circle' : 'Box'}`,
-            `(S)how contacts and joints: ${this.showContacts ? 'ON' : 'OFF'}`,
+            `(D) debug mode: ${this.debug ? 'ON' : 'OFF'}`,
+            `(C) chosen particle: ${this.generateCircles ? 'Circle' : 'Box'}`,
+            `(A) show AABB: ${this.showAABB ? 'ON' : 'OFF'}`,
+            `(S) show contacts and joints: ${this.showContacts ? 'ON' : 'OFF'}`,
             // Debut related info
             `FPS: ${this.FPS.toFixed(2)}`,
             `Num objects: ${this.world.getBodies().length}`,
