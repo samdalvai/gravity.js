@@ -1,7 +1,7 @@
 import Vec2 from '../../src/math/Vec2';
 import Body from '../../src/physics/Body';
 import CollisionDetection from '../../src/physics/CollisionDetection';
-import { ContactConstraint, JointConstraint } from '../../src/physics/Constraint';
+import { JointConstraint } from '../../src/physics/Constraint';
 import { CircleShape } from '../../src/physics/Shape';
 
 describe('Constraint', () => {
@@ -53,7 +53,7 @@ describe('Constraint', () => {
 
         const deltaTime = 1 / 60;
         for (let i = 0; i < numFrames; i++) {
-            manifold.prepare(1 / deltaTime);
+            manifold.preSolve(1 / deltaTime);
 
             for (let j = 0; j < solverIterations; j++) {
                 manifold.solve();
