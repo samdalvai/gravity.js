@@ -7,16 +7,16 @@ import World from '../physics/World_adapted';
 
 export default class Demo {
     static demoStrings = [
-        'Demo 0: ....',
+        'Demo 0: A complex scene',
         'Demo 1: A single box',
-        'Demo 2: A pyramid of boxes',
-        'Demo 3: A suspension bridge',
-        'Demo 4: As simple whip',
-        'Demo 5: A skeleton ragdoll',
-        'Demo 6: A plank',
-        'Demo 7: ....',
-        'Demo 8: Stress test',
-        'Demo 9: A complex scene',
+        'Demo 2: A stack of boxes',
+        'Demo 3: A pyramid of boxes',
+        'Demo 4: A suspension bridge',
+        'Demo 5: As simple whip',
+        'Demo 6: A skeleton ragdoll',
+        'Demo 7: A plank',
+        'Demo 8: ....',
+        'Demo 9: Stress test',
     ];
 
     static generateFloor = (world: World): Body => {
@@ -48,27 +48,46 @@ export default class Demo {
         world.addBody(rightFence);
     };
 
-    static demo0 = (world: World) => {
-        // Demo 0: ....
-    };
-
     static demo1 = (world: World) => {
         // Demo 1: Single box demo
         this.generateFloor(world);
         this.generateFences(world);
 
-        const box = new Body(new BoxShape(60, 60), Graphics.width() / 2.0, Graphics.height() - 300, 10);
+        const box = new Body(new BoxShape(60, 60), Graphics.width() / 2.0, Graphics.height() - 300, 1);
         box.setTexture('crate');
         world.addBody(box);
     };
 
     static demo2 = (world: World) => {
-        // Demo 2: Pyramid of boxes
+        // Demo 2: Stack of boxes
+        this.generateFloor(world);
+        this.generateFences(world);
+
+        const numOfBoxes = 8;
+        const boxSize = 60;
+        const boxSpacing = 10;
+
+        for (let i = 0; i < numOfBoxes; i++) {
+            const box = new Body(
+                new BoxShape(boxSize, boxSize),
+                Graphics.width() / 2.0,
+                Graphics.height() - 300 - (boxSize + boxSpacing) * i,
+                1,
+            );
+            box.restitution = 0.1;
+            box.setTexture('crate');
+            world.addBody(box);
+        }
+    };
+
+    static demo3 = (world: World) => {
+        // Demo 3: Pyramid of boxes
         const floor = this.generateFloor(world);
         this.generateFences(world);
         const floorHeight = 200;
 
         const boxSize = 60;
+        const boxSpacing = 10;
         const rows = 10;
 
         const centerX = Graphics.width() / 2;
@@ -80,9 +99,10 @@ export default class Demo {
 
             for (let col = 0; col < boxesInRow; col++) {
                 const x = centerX - rowWidth / 2 + boxSize / 2 + col * boxSize;
-                const y = baseY - row * boxSize;
+                const y = baseY - row * (boxSize + boxSpacing);
 
-                const box = new Body(new BoxShape(boxSize, boxSize), x, y, 10);
+                const box = new Body(new BoxShape(boxSize, boxSize), x, y, 1);
+                box.restitution = 0.1;
                 box.setTexture('crate');
                 box.restitution = 0.001;
                 world.addBody(box);
@@ -90,8 +110,8 @@ export default class Demo {
         }
     };
 
-    static demo3 = (world: World) => {
-        // Demo 3: As suspension bridge
+    static demo4 = (world: World) => {
+        // Demo 4: As suspension bridge
         this.generateFloor(world);
         this.generateFences(world);
 
@@ -147,8 +167,8 @@ export default class Demo {
         world.addJoint(lastJoint);
     };
 
-    static demo4 = (world: World) => {
-        // Demo 4: A simple whip
+    static demo5 = (world: World) => {
+        // Demo 5: A simple whip
         this.generateFloor(world);
         this.generateFences(world);
 
@@ -173,8 +193,8 @@ export default class Demo {
         }
     };
 
-    static demo5 = (world: World) => {
-        // Demo 5: A skeleton ragdoll
+    static demo6 = (world: World) => {
+        // Demo 6: A skeleton ragdoll
         this.generateFloor(world);
         this.generateFences(world);
 
@@ -217,8 +237,8 @@ export default class Demo {
         world.addJoint(rightHip);
     };
 
-    static demo6 = (world: World) => {
-        // Demo 6: Debug demo
+    static demo7 = (world: World) => {
+        // Demo 7: A plank
         const floor = this.generateFloor(world);
         this.generateFences(world);
 
@@ -235,19 +255,19 @@ export default class Demo {
 
         const heavyBox = new Body(new BoxShape(50, 50), plank.position.x + 350, Graphics.height() - 750, 10);
         world.addBody(heavyBox);
-        
+
         const joint = new JointConstraint(floor, plank, plank.position);
         world.addJoint(joint);
     };
 
-    static demo7 = (world: World) => {
-        // Demo 7: ....
+    static demo8 = (world: World) => {
+        // Demo 8: ....
         this.generateFloor(world);
         this.generateFences(world);
     };
 
-    static demo8 = (world: World) => {
-        // Demo 8: stress test
+    static demo9 = (world: World) => {
+        // Demo 9: stress test
         this.generateFloor(world);
         this.generateFences(world);
 
@@ -339,8 +359,8 @@ export default class Demo {
         }
     };
 
-    static demo9 = (world: World) => {
-        // Demo 9: a complex scene
+    static demo0 = (world: World) => {
+        // Demo 0: a complex scene
 
         const floor = this.generateFloor(world);
         this.generateFences(world);
