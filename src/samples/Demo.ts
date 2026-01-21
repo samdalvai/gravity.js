@@ -1,7 +1,7 @@
 import Graphics from '../Graphics';
 import Vec2 from '../math/Vec2';
-import RigidBody from '../physics/RigidBody';
 import { JointConstraint } from '../physics/Joint';
+import RigidBody from '../physics/RigidBody';
 import { BoxShape, CircleShape, PolygonShape } from '../physics/Shape';
 import World from '../physics/World';
 
@@ -15,7 +15,7 @@ export default class Demo {
         'Demo 5: As simple whip',
         'Demo 6: A skeleton ragdoll',
         'Demo 7: A plank',
-        'Demo 8: ....',
+        'Demo 8: Cloth simulation',
         'Demo 9: Stress test',
     ];
 
@@ -125,7 +125,12 @@ export default class Demo {
         const bias = 0.1;
 
         // Start anchor (static)
-        const startAnchor = new RigidBody(new BoxShape(stepWidth * 2, stepWidth * 0.5), startX - stepWidth / 2, startY, 0.0);
+        const startAnchor = new RigidBody(
+            new BoxShape(stepWidth * 2, stepWidth * 0.5),
+            startX - stepWidth / 2,
+            startY,
+            0.0,
+        );
         startAnchor.setTexture('rockBridgeAnchor');
         world.addBody(startAnchor);
 
@@ -245,7 +250,7 @@ export default class Demo {
         const plank = new RigidBody(new BoxShape(750, 20), Graphics.width() / 2.0, Graphics.height() - 275, 10);
         plank.setTexture('woodPlankCracked');
         world.addBody(plank);
-        
+
         const triangleVertices = [new Vec2(30, 30), new Vec2(-30, 30), new Vec2(0, -33.5)];
         const triangle = new RigidBody(new PolygonShape(triangleVertices), floor.position.x, floor.position.y - 130, 0);
         triangle.setTexture('woodTriangle');
@@ -270,9 +275,55 @@ export default class Demo {
     };
 
     static demo8 = (world: World) => {
-        // Demo 8: ....
+        // Demo 8: Cloth simulation
         this.generateFloor(world);
         this.generateFences(world);
+
+        const anchor1 = new RigidBody(new CircleShape(5), 500, Graphics.height() / 2, 0);
+        const anchor2 = new RigidBody(new CircleShape(5), 550, Graphics.height() / 2, 0);
+        const anchor3 = new RigidBody(new CircleShape(5), 600, Graphics.height() / 2, 0);
+        const anchor4 = new RigidBody(new CircleShape(5), 650, Graphics.height() / 2, 0);
+
+        world.addBody(anchor1);
+        world.addBody(anchor2);
+        world.addBody(anchor3);
+        world.addBody(anchor4);
+
+        const particle1 = new RigidBody(new CircleShape(5), 500, Graphics.height() / 2 + 50, 1);
+        const particle2 = new RigidBody(new CircleShape(5), 550, Graphics.height() / 2 + 50, 1);
+        const particle3 = new RigidBody(new CircleShape(5), 600, Graphics.height() / 2 + 50, 1);
+        const particle4 = new RigidBody(new CircleShape(5), 650, Graphics.height() / 2 + 50, 1);
+
+        world.addBody(particle1);
+        world.addBody(particle2);
+        world.addBody(particle3);
+        world.addBody(particle4);
+
+        const jointAnchor1Particle1 = new JointConstraint(anchor1, particle1, anchor1.position);
+        const jointAnchor2Particle2 = new JointConstraint(anchor2, particle2, anchor2.position);
+        const jointAnchor3Particle3 = new JointConstraint(anchor3, particle3, anchor3.position);
+        const jointAnchor4Particle4 = new JointConstraint(anchor4, particle4, anchor4.position);
+
+        world.addJoint(jointAnchor1Particle1);
+        world.addJoint(jointAnchor2Particle2);
+        world.addJoint(jointAnchor3Particle3);
+        world.addJoint(jointAnchor4Particle4);
+
+        const jointParticle1Particle2 = new JointConstraint(particle1, particle2, particle1.position);
+        const jointParticle2Particle3 = new JointConstraint(particle2, particle3, particle2.position);
+        const jointParticle3Particle4 = new JointConstraint(particle3, particle4, particle3.position);
+
+        world.addJoint(jointParticle1Particle2);
+        world.addJoint(jointParticle2Particle3);
+        world.addJoint(jointParticle3Particle4);
+
+        // const circle1 = new RigidBody(new CircleShape(20), 500, Graphics.height() / 2 + 50, 1);
+        // const circle2 = new RigidBody(new CircleShape(20), 600, Graphics.height() / 2 + 50, 1);
+        // world.addBody(circle1);
+        // world.addBody(circle2);
+
+        // const joint = new JointConstraint(circle1, circle2, circle1.position);
+        // world.addJoint(joint);
     };
 
     static demo9 = (world: World) => {
@@ -290,7 +341,12 @@ export default class Demo {
         const bias = 0.1;
 
         // Start anchor (static)
-        const startAnchor = new RigidBody(new BoxShape(stepWidth * 2, stepWidth * 0.5), startX - stepWidth / 2, startY, 0.0);
+        const startAnchor = new RigidBody(
+            new BoxShape(stepWidth * 2, stepWidth * 0.5),
+            startX - stepWidth / 2,
+            startY,
+            0.0,
+        );
         startAnchor.setTexture('rockBridgeAnchor');
         world.addBody(startAnchor);
 
@@ -390,9 +446,24 @@ export default class Demo {
         }
 
         // Add structure with blocks
-        const plank1 = new RigidBody(new BoxShape(50, 150), Graphics.width() / 2.0 + 20, floor.position.y - 100 - 100, 5.0);
-        const plank2 = new RigidBody(new BoxShape(50, 150), Graphics.width() / 2.0 + 180, floor.position.y - 100 - 100, 5.0);
-        const plank3 = new RigidBody(new BoxShape(250, 25), Graphics.width() / 2.0 + 100, floor.position.y - 100 - 200, 2.0);
+        const plank1 = new RigidBody(
+            new BoxShape(50, 150),
+            Graphics.width() / 2.0 + 20,
+            floor.position.y - 100 - 100,
+            5.0,
+        );
+        const plank2 = new RigidBody(
+            new BoxShape(50, 150),
+            Graphics.width() / 2.0 + 180,
+            floor.position.y - 100 - 100,
+            5.0,
+        );
+        const plank3 = new RigidBody(
+            new BoxShape(250, 25),
+            Graphics.width() / 2.0 + 100,
+            floor.position.y - 100 - 200,
+            2.0,
+        );
         plank1.setTexture('woodPlankSolid');
         plank2.setTexture('woodPlankSolid');
         plank3.setTexture('woodPlankCracked');
@@ -402,7 +473,12 @@ export default class Demo {
 
         // Add a triangle polygon
         const triangleVertices = [new Vec2(30, 30), new Vec2(-30, 30), new Vec2(0, -30)];
-        const triangle = new RigidBody(new PolygonShape(triangleVertices), plank3.position.x, plank3.position.y - 50, 0.5);
+        const triangle = new RigidBody(
+            new PolygonShape(triangleVertices),
+            plank3.position.x,
+            plank3.position.y - 50,
+            0.5,
+        );
         triangle.setTexture('woodTriangle');
         world.addBody(triangle);
 
