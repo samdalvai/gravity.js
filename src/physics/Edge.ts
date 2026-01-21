@@ -23,7 +23,7 @@ export default class Edge {
         return this.p2.subNew(this.p1).magnitude();
     }
 
-    clipEdge = (p: Vec2, dir: Vec2, remove: boolean = false): void => {
+    clip = (p: Vec2, dir: Vec2, remove: boolean = false): void => {
         const d1 = this.p1.subNew(p).dot(dir);
         const d2 = this.p2.subNew(p).dot(dir);
 
