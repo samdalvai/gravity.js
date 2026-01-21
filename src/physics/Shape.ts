@@ -5,12 +5,18 @@ export enum ShapeType {
     POLYGON,
 }
 
+interface SupportResult {
+    vertex: Vec2;
+    index: number;
+}
+
 export abstract class Shape {
     radius: number = 0;
 
     abstract getType(): ShapeType;
     abstract getMomentOfInertia(): number;
     abstract updateVertices(angle: number, position: Vec2): void;
+    abstract support(dir: Vec2): SupportResult;
 }
 
 export class CircleShape extends Shape {
@@ -33,6 +39,10 @@ export class CircleShape extends Shape {
     updateVertices = (angle: number, position: Vec2): void => {
         return; // Circles don't have vertices... nothing to do here
     };
+
+    support(dir: Vec2): SupportResult {
+        return { vertex: dir.normalizeNew().scaleNew(this.radius), index: -1 };
+    }
 }
 
 export class PolygonShape extends Shape {
@@ -145,6 +155,21 @@ export class PolygonShape extends Shape {
         }
         return [separation, indexReferenceEdge];
     };
+
+    support(dir: Vec2): SupportResult {
+        let idx = 0;
+        let maxValue = dir.dot(this.localVertices[idx]);
+
+        for (let i = 1; i < this.localVertices.length; i++) {
+            const value = dir.dot(this.localVertices[i]);
+            if (value > maxValue) {
+                idx = i;
+                maxValue = value;
+            }
+        }
+
+        return { vertex: this.localVertices[idx], index: idx };
+    }
 }
 
 export class BoxShape extends PolygonShape {
