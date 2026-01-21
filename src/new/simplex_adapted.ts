@@ -1,4 +1,3 @@
-// import { Vector2 } from './vector2';
 import Vec2 from '../math/Vec2';
 import { getUV, lerpVector } from './util_adapted';
 
