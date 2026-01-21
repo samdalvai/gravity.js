@@ -1,4 +1,4 @@
-import * as Util from '../new/util_adapted';
+import * as Util from '../new/util';
 
 export default class Vec2 {
     x: number;
