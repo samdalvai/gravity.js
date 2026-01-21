@@ -1,5 +1,4 @@
 import Vec2 from '../src/math/Vec2';
-import { assert } from '../src/new/util';
 import Body from '../src/physics/Body';
 import CollisionDetection from '../src/physics/CollisionDetection';
 import { ContactConstraint, JointConstraint } from '../src/physics/Constraint';
