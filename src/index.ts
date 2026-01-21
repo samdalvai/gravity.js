@@ -1,6 +1,4 @@
-// import Application from './Application_new'; // Full new implementation using new rigidbody
-import Application from './Application_adapted'; // New implementation of contacts applied to current bodies
-// import Application from './Application_current'; // standard implementation
+import Application from './Application';
 
 const run = async () => {
     const app = new Application();
