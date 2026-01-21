@@ -1,4 +1,3 @@
-import Utils from '../math/Utils';
 import Vec2 from '../math/Vec2';
 import Body from './Body';
 
@@ -6,15 +5,9 @@ export abstract class Constraint {
     bodyA: Body;
     bodyB: Body;
 
-    aPointLocal: Vec2; // The constraint point in A's local space
-    bPointLocal: Vec2; // The constraint point in B's local space
-
-    constructor(a: Body, b: Body, aPointWorld: Vec2, bPointWorld: Vec2) {
+    constructor(a: Body, b: Body) {
         this.bodyA = a;
         this.bodyB = b;
-
-        this.aPointLocal = a.worldPointToLocal(aPointWorld);
-        this.bPointLocal = b.worldPointToLocal(bPointWorld);
     }
 
     abstract preSolve(dt: number): void;
@@ -23,6 +16,9 @@ export abstract class Constraint {
 
 // TODO: investigate separate velocity and position solver
 export class JointConstraint extends Constraint {
+    aPointLocal: Vec2; // The constraint point in A's local space
+    bPointLocal: Vec2; // The constraint point in B's local space
+
     // Elements of the 2x2 effective mass matrix (inverse of the constraint mass matrix) for x-x, x-y, and y-y components.
     private effectiveMassXX = 0;
     private effectiveMassXY = 0;
@@ -49,7 +45,10 @@ export class JointConstraint extends Constraint {
     private softness: number;
 
     constructor(bodyA: Body, bodyB: Body, worldAnchorPoint: Vec2, softness = 0.01, biasFactor = 0.2) {
-        super(bodyA, bodyB, worldAnchorPoint, worldAnchorPoint);
+        super(bodyA, bodyB);
+
+        this.aPointLocal = bodyA.worldPointToLocal(worldAnchorPoint);
+        this.bPointLocal = bodyB.worldPointToLocal(worldAnchorPoint);
 
         this.softness = softness;
         this.biasFactor = biasFactor;
