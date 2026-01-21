@@ -2,6 +2,7 @@ import Graphics from '../Graphics_old';
 import Vec2 from '../math/Vec2';
 import { ContactManifold } from '../new/contact_adapted';
 import { detectCollision_adapted } from '../new/detection_adapted';
+import { Joint } from '../new/joint_adapted';
 import { Settings } from '../new/settings';
 import Body from './Body';
 import CollisionDetection from './CollisionDetection_adapted';
@@ -14,14 +15,14 @@ export default class World {
 
     private bodies: Body[] = [];
     private contacts: ContactConstraint[] = [];
-    private joints: JointConstraint[] = [];
+    // private joints: JointConstraint[] = [];
 
     // Constraints to be solved
     public manifolds: ContactManifold[] = [];
-    // public joints: Joint[] = [];
+    public joints: Joint[] = [];
 
     public manifoldMap: Map<number, ContactManifold> = new Map();
-    // public jointMap: Map<number, Joint> = new Map();
+    public jointMap: Map<number, Joint> = new Map();
 
     private forces: Vec2[] = [];
     private torques: number[] = [];
@@ -47,11 +48,11 @@ export default class World {
         return this.manifolds;
     };
 
-    addJoint = (constraint: JointConstraint): void => {
+    addJoint = (constraint: Joint): void => {
         this.joints.push(constraint);
     };
 
-    getJoints = (): JointConstraint[] => {
+    getJoints = (): Joint[] => {
         return this.joints;
     };
 
@@ -158,7 +159,9 @@ export default class World {
             this.manifolds[i].prepare(invDt);
         }
 
-        // for (let i = 0; i < this.joints.length; i++) this.joints[i].prepare(invDt);
+        for (let i = 0; i < this.joints.length; i++) {
+            this.joints[i].prepare(invDt);
+        }
 
         // Iteratively solve the violated velocity constraint
         for (let i = 0; i < this.iterations; i++) {
@@ -172,7 +175,7 @@ export default class World {
                 this.manifolds[j].solve();
             }
 
-            // for (let j = 0; j < this.joints.length; j++) this.joints[j].solve();
+            for (let j = 0; j < this.joints.length; j++) this.joints[j].solve();
         }
 
         // console.timeEnd('contacts');

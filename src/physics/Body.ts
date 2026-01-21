@@ -134,7 +134,8 @@ export default class Body {
         return rotated;
     };
 
-    // Equivalent to b1.globalToLocal.mulVector2(dir, 0);
+    // Equivalent to b1.localToGlobal.mulVector2(dir, 0);
+    // !!! was // Equivalent to b1.globalToLocal.mulVector2(dir, 0); please check
     localDirToWorld = (dir: Vec2): Vec2 => {
         const cos = Math.cos(this.rotation);
         const sin = Math.sin(this.rotation);
@@ -142,7 +143,8 @@ export default class Body {
         return new Vec2(dir.x * cos - dir.y * sin, dir.x * sin + dir.y * cos);
     };
 
-    // Equivalent to b1.localToGlobal.mulVector2(supportP1, 1); Note the 1!!
+    // Equivalent to b1.globalToLocal.mulVector2(supportP1, 1); Note the 1!!
+    // !!! was // Equivalent to b1.localToGlobal.mulVector2(supportP1, 1); Note the 1!! please check
     worldPointToLocal = (point: Vec2): Vec2 => {
         const cos = Math.cos(-this.rotation);
         const sin = Math.sin(-this.rotation);
