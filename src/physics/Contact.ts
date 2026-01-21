@@ -85,9 +85,8 @@ class ContactSolver {
             // if (approachingVelocity + Settings.restitutionSlop < 0) this.bias += this.restitution * approachingVelocity;
         } else {
             // Bias for surface speed that enables the conveyor belt-like behavior
-            // TODO: handle surface speed
-            // this.bias = -(this.bodyB.surfaceSpeed - this.bodyA.surfaceSpeed);
-            // if (featureFlipped) this.bias *= -1;
+            this.bias = -(this.bodyB.surfaceSpeed - this.bodyA.surfaceSpeed);
+            if (featureFlipped) this.bias *= -1;
         }
 
         const k: number =
