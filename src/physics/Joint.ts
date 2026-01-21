@@ -1,18 +1,6 @@
 import Vec2 from '../math/Vec2';
+import { Constraint } from '../new/constraint';
 import Body from './Body';
-
-export abstract class Constraint {
-    bodyA: Body;
-    bodyB: Body;
-
-    constructor(a: Body, b: Body) {
-        this.bodyA = a;
-        this.bodyB = b;
-    }
-
-    abstract preSolve(dt: number): void;
-    abstract solve(): void;
-}
 
 // TODO: investigate separate velocity and position solver
 export class JointConstraint extends Constraint {
