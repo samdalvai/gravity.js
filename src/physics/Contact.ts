@@ -352,14 +352,6 @@ class BlockSolver {
     }
 }
 
-export interface ContactInfo {
-    other: RigidBody;
-    numContacts: number;
-    contactDir: Vec2;
-    contactPoints: Vec2[];
-    impulse: number;
-}
-
 export class ContactManifold extends Constraint {
     // Contact informations
     public readonly penetrationDepth: number;
