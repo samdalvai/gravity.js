@@ -186,7 +186,7 @@ export default class Application {
                         case MouseButton.LEFT:
                             {
                                 const ball = new Body(new CircleShape(30), inputEvent.x, inputEvent.y, 4.0);
-                                ball.restitution = 0.6;
+                                ball.restitution = 0.1;
                                 ball.friction = 0.5;
                                 ball.setTexture('basketball');
                                 this.world.addBody(ball);
@@ -195,7 +195,7 @@ export default class Application {
                         case MouseButton.RIGHT:
                             {
                                 const box = new Body(new BoxShape(60, 60), inputEvent.x, inputEvent.y, 6.0);
-                                box.restitution = 0.2;
+                                box.restitution = 0.1;
                                 box.friction = 0.7;
                                 box.setTexture('crate');
                                 this.world.addBody(box);
@@ -228,7 +228,7 @@ export default class Application {
                 const shape = this.generateCircles ? new CircleShape(5) : new BoxShape(10, 10);
                 const particle = new Body(shape, InputManager.mousePosition.x, InputManager.mousePosition.y, 1.0);
                 particle.restitution = 0.0;
-                particle.friction = 10;
+                particle.friction = 0.5;
                 particle.setTexture(this.generateCircles ? 'rockRound' : 'rockBox');
                 this.world.addBody(particle);
             }
