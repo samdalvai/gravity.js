@@ -13,7 +13,7 @@ export default class Demo {
         'Demo 3: A suspension bridge',
         'Demo 4: As simple whip',
         'Demo 5: A skeleton ragdoll',
-        'Demo 6: ....',
+        'Demo 6: A plank',
         'Demo 7: ....',
         'Demo 8: Stress test',
         'Demo 9: A complex scene',
@@ -56,9 +56,10 @@ export default class Demo {
         // Demo 1: Single box demo
         this.generateFloor(world);
         this.generateFences(world);
-        // const box = new Body(new BoxShape(60, 60), Graphics.width() / 2.0, Graphics.height() - 300, 10);
-        // box.setTexture('crate');
-        // world.addBody(box)
+
+        const box = new Body(new BoxShape(60, 60), Graphics.width() / 2.0, Graphics.height() - 300, 10);
+        box.setTexture('crate');
+        world.addBody(box);
     };
 
     static demo2 = (world: World) => {
@@ -218,12 +219,31 @@ export default class Demo {
 
     static demo6 = (world: World) => {
         // Demo 6: Debug demo
-        this.generateFloor(world);
+        const floor = this.generateFloor(world);
         this.generateFences(world);
+
+        const plank = new Body(new BoxShape(750, 20), Graphics.width() / 2.0, Graphics.height() - 275, 10);
+        plank.setTexture('metal');
+        world.addBody(plank);
+
+        const box1 = new Body(new BoxShape(25, 25), plank.position.x - 350, Graphics.height() - 400, 1);
+        const box2 = new Body(new BoxShape(25, 25), plank.position.x - 325, Graphics.height() - 400, 1);
+        const box3 = new Body(new BoxShape(25, 25), plank.position.x - 337.5, Graphics.height() - 425, 1);
+        world.addBody(box1);
+        world.addBody(box2);
+        world.addBody(box3);
+
+        const heavyBox = new Body(new BoxShape(50, 50), plank.position.x + 350, Graphics.height() - 750, 10);
+        world.addBody(heavyBox);
+        
+        const joint = new JointConstraint(floor, plank, plank.position);
+        world.addJoint(joint);
     };
 
     static demo7 = (world: World) => {
         // Demo 7: ....
+        this.generateFloor(world);
+        this.generateFences(world);
     };
 
     static demo8 = (world: World) => {
