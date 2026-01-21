@@ -92,9 +92,9 @@ function findContactPoints(n: Vec2, a: RigidBody, b: RigidBody): ContactPoint[] 
         flip = true;
     }
 
-    inc.clipEdge(ref.p1, ref.dir);
-    inc.clipEdge(ref.p2, ref.dir.negateNew());
-    inc.clipEdge(ref.p1, flip ? n : n.negateNew(), true);
+    inc.clip(ref.p1, ref.dir);
+    inc.clip(ref.p2, ref.dir.negateNew());
+    inc.clip(ref.p1, flip ? n : n.negateNew(), true);
 
     let contactPoints: ContactPoint[];
 
