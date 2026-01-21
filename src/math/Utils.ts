@@ -25,10 +25,6 @@ export default class Utils {
         for (let i = 0; i < test.length; i++) if (!test[i]) throw new Error('Assertion failed');
     };
 
-    static toFixed = (value: number, limit = 1e-13): number => {
-        return Math.round(value / limit) * limit;
-    };
-
     // Cantor pairing function, ((N, N) -> N) mapping function
     // https://en.wikipedia.org/wiki/Pairing_function#Cantor_pairing_function
     // TODO: check if it is better than Body pair method

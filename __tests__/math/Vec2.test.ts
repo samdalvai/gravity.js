@@ -187,7 +187,9 @@ describe('Vec2', () => {
 
     test('negated() returns vector with inverted signs', () => {
         const v = new Vec2(3, -4);
-        const result = v.negated();
+        const result = v.negateNew();
+        expect(v.x).toBe(3);
+        expect(v.y).toBe(-4);
         expect(result.x).toBe(-3);
         expect(result.y).toBe(4);
     });
