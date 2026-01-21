@@ -1,9 +1,9 @@
 import Graphics from '../Graphics';
 import Vec2 from '../math/Vec2';
 import { ContactManifold } from '../new/contact';
-import { Settings } from '../new/settings';
 import Body from './Body';
 import CollisionDetection from './CollisionDetection';
+import { SETTINGS } from './Constants';
 import { JointConstraint } from './Constraint';
 import Force from './Force';
 
@@ -121,7 +121,7 @@ export default class World {
             if (newManifold == null) continue;
 
             const key = Body.pairKey(a, b);
-            if (Settings.warmStarting && this.manifoldMap.has(key)) {
+            if (SETTINGS.warmStarting && this.manifoldMap.has(key)) {
                 const oldManifold = this.manifoldMap.get(key)!;
                 newManifold.tryWarmStart(oldManifold);
             }
