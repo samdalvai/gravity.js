@@ -1,11 +1,10 @@
 import Graphics from '../Graphics_old';
 import Vec2 from '../math/Vec2';
 import { ContactManifold } from '../new/contact_adapted';
-import { detectCollision_adapted } from '../new/detection_adapted';
 import { Settings } from '../new/settings';
 import Body from './Body';
 import CollisionDetection from './CollisionDetection_adapted';
-import { ContactConstraint, JointConstraint } from './Constraint';
+import { JointConstraint } from './Constraint';
 import Force from './Force';
 
 export default class World {
@@ -13,8 +12,6 @@ export default class World {
     private iterations: number;
 
     private bodies: Body[] = [];
-    private contacts: ContactConstraint[] = [];
-    // private joints: JointConstraint[] = [];
 
     // Constraints to be solved
     public manifolds: ContactManifold[] = [];
@@ -39,10 +36,6 @@ export default class World {
         return this.bodies;
     };
 
-    getContacts = (): ContactConstraint[] => {
-        return this.contacts;
-    };
-
     getManifolds = (): ContactManifold[] => {
         return this.manifolds;
     };
@@ -64,7 +57,6 @@ export default class World {
     };
 
     update = (dt: number): void => {
-        // console.time('update');
         const invDt = dt > 0.0 ? 1.0 / dt : 0.0;
         const newManifolds: ContactManifold[] = [];
         const newManifoldMap: Map<number, ContactManifold> = new Map();
@@ -115,12 +107,9 @@ export default class World {
             }
         }
 
-        this.contacts.length = 0;
-
-        // console.time('collision');
         // Narrow phase check, potential pairs may still not collide
         for (let [a, b] of potentialPairs) {
-            // CollisionDetection.detectCollision(a, b, this.contacts);
+            // TODO: enable this when testing is over
             // if (a.isStatic() && b.isStatic()) continue;
 
             // Improve coherence
@@ -128,7 +117,6 @@ export default class World {
                 [a, b] = [b, a];
             }
 
-            // const newManifold = detectCollision_adapted(a, b);
             const newManifold = CollisionDetection.detectCollision(a, b);
             if (newManifold == null) continue;
 
@@ -177,44 +165,10 @@ export default class World {
             for (let j = 0; j < this.joints.length; j++) this.joints[j].solve();
         }
 
-        // console.timeEnd('contacts');
-        // console.time('solver');
-
-        // Solve all constraints
-        // for (const joint of this.joints) {
-        //     joint.preSolve(invDt);
-        // }
-
-        // for (const contact of this.contacts) {
-        //     contact.preSolve(invDt);
-        // }
-
-        // for (let i = 0; i < this.iterations; i++) {
-        //     for (const joint of this.joints) {
-        //         joint.solve();
-        //     }
-
-        //     for (const contact of this.contacts) {
-        //         contact.solve();
-        //     }
-        // }
-
-        // for (const joint of this.joints) {
-        //     joint.postSolve();
-        // }
-
-        // for (const contact of this.contacts) {
-        //     contact.postSolve();
-        // }
-
-        // console.timeEnd('solver');
-        // console.time('Integrate');
-
         // Integrate all the velocities
         for (const body of this.bodies) {
             body.integrateVelocities(dt);
         }
-        // console.timeEnd('Integrate');
 
         // Kill objects that went out of the screen
         for (let i = 0; i < this.bodies.length; i++) {
@@ -226,8 +180,6 @@ export default class World {
                 this.bodies.pop();
             }
         }
-
-        // console.timeEnd('update');
     };
 
     clear = () => {
