@@ -5,7 +5,7 @@ import Edge from './Edge';
 import RigidBody from './RigidBody';
 import { CircleShape, PolygonShape, ShapeType } from './Shape';
 
-function findFarthestEdge(b: RigidBody, dir: Vec2): Edge {
+const findFarthestEdge = (b: RigidBody, dir: Vec2): Edge => {
     const localDir = b.worldDirToLocal(dir);
     const farthest = b.shape.support(localDir);
     let curr = farthest.vertex;
@@ -36,14 +36,14 @@ function findFarthestEdge(b: RigidBody, dir: Vec2): Edge {
     } else {
         throw 'Not a supported shape';
     }
-}
+};
 
 export interface ContactPoint {
     point: Vec2;
     id: number;
 }
 
-function findContactPoints(n: Vec2, a: RigidBody, b: RigidBody): ContactPoint[] {
+const findContactPoints = (n: Vec2, a: RigidBody, b: RigidBody): ContactPoint[] => {
     const edgeA = findFarthestEdge(a, n);
     const edgeB = findFarthestEdge(b, n.negateNew());
 
@@ -77,7 +77,7 @@ function findContactPoints(n: Vec2, a: RigidBody, b: RigidBody): ContactPoint[] 
     }
 
     return contactPoints;
-}
+};
 
 export default class CollisionDetection {
     static detectCollision = (a: RigidBody, b: RigidBody): ContactManifold | null => {
