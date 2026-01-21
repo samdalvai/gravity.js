@@ -1,7 +1,7 @@
 import Vec2 from '../math/Vec2';
-import RigidBody from './RigidBody';
 import { TANGENT_MIN_LENGTH } from './Constants';
 import { ContactManifold } from './Contact';
+import RigidBody from './RigidBody';
 import { CircleShape, PolygonShape, ShapeType } from './Shape';
 
 class Edge {
@@ -25,10 +25,6 @@ class Edge {
 
     get length() {
         return this.p2.subNew(this.p1).magnitude();
-    }
-
-    get normal() {
-        return Vec2.cross(1, this.dir);
     }
 }
 
@@ -68,7 +64,7 @@ function findFarthestEdge(b: RigidBody, dir: Vec2): Edge {
 
     if (b.shape instanceof CircleShape) {
         curr = b.localPointToWorld(curr);
-        const tangent = Vec2.cross(1, dir).scaleNew(TANGENT_MIN_LENGTH);
+        const tangent = dir.crossScalar(1).scaleNew(TANGENT_MIN_LENGTH);
 
         return new Edge(curr, curr.addNew(tangent), -1);
     } else if (b.shape instanceof PolygonShape) {
@@ -129,7 +125,7 @@ const CONTACT_MERGE_THRESHOLD = 1.415 * TANGENT_MIN_LENGTH;
 
 function findContactPoints(n: Vec2, a: RigidBody, b: RigidBody): ContactPoint[] {
     const edgeA = findFarthestEdge(a, n);
-    const edgeB = findFarthestEdge(b, n.negated());
+    const edgeB = findFarthestEdge(b, n.negateNew());
 
     let ref = edgeA; // Reference edge
     let inc = edgeB; // Incidence edge
@@ -145,8 +141,8 @@ function findContactPoints(n: Vec2, a: RigidBody, b: RigidBody): ContactPoint[] 
     }
 
     clipEdge(inc, ref.p1, ref.dir);
-    clipEdge(inc, ref.p2, ref.dir.negated());
-    clipEdge(inc, ref.p1, flip ? n : n.negated(), true);
+    clipEdge(inc, ref.p2, ref.dir.negateNew());
+    clipEdge(inc, ref.p1, flip ? n : n.negateNew(), true);
 
     let contactPoints: ContactPoint[];
 
@@ -228,7 +224,7 @@ export default class CollisionDetection {
             normal = aPoly.edgeAt(aEdge).normal();
             penetrationDepth = -abSep;
         } else {
-            normal = bPoly.edgeAt(bEdge).normal().negated();
+            normal = bPoly.edgeAt(bEdge).normal().negateNew();
             penetrationDepth = -baSep;
             flipped = true;
         }
