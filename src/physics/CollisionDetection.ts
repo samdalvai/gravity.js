@@ -1,32 +1,9 @@
 import Vec2 from '../math/Vec2';
 import { TANGENT_MIN_LENGTH } from './Constants';
 import { ContactManifold } from './Contact';
+import Edge from './Edge';
 import RigidBody from './RigidBody';
 import { CircleShape, PolygonShape, ShapeType } from './Shape';
-
-class Edge {
-    public p1: Vec2;
-    public p2: Vec2;
-    public dir: Vec2;
-
-    public id1: number;
-    public id2: number;
-
-    constructor(p1: Vec2, p2: Vec2, id1: number = -1, id2: number = -1) {
-        this.p1 = p1.clone();
-        this.p2 = p2.clone();
-
-        if (this.p1.equals(this.p2)) this.dir = new Vec2(0, 0);
-        else this.dir = p2.subNew(p1).normalizeNew();
-
-        this.id1 = id1;
-        this.id2 = id2;
-    }
-
-    get length() {
-        return this.p2.subNew(this.p1).magnitude();
-    }
-}
 
 interface SupportResult {
     vertex: Vec2;
@@ -89,31 +66,6 @@ function findFarthestEdge(b: RigidBody, dir: Vec2): Edge {
     }
 }
 
-function clipEdge(edge: Edge, p: Vec2, dir: Vec2, remove: boolean = false) {
-    const d1 = edge.p1.subNew(p).dot(dir);
-    const d2 = edge.p2.subNew(p).dot(dir);
-
-    if (d1 >= 0 && d2 >= 0) return;
-
-    const per = Math.abs(d1) + Math.abs(d2);
-
-    if (d1 < 0) {
-        if (remove) {
-            edge.p1 = edge.p2;
-            edge.id1 = edge.id2;
-        } else {
-            edge.p1 = edge.p1.addNew(edge.p2.subNew(edge.p1).scaleNew(-d1 / per));
-        }
-    } else if (d2 < 0) {
-        if (remove) {
-            edge.p2 = edge.p1;
-            edge.id2 = edge.id1;
-        } else {
-            edge.p2 = edge.p2.addNew(edge.p1.subNew(edge.p2).scaleNew(-d2 / per));
-        }
-    }
-}
-
 export interface ContactPoint {
     point: Vec2;
     id: number;
@@ -140,9 +92,9 @@ function findContactPoints(n: Vec2, a: RigidBody, b: RigidBody): ContactPoint[] 
         flip = true;
     }
 
-    clipEdge(inc, ref.p1, ref.dir);
-    clipEdge(inc, ref.p2, ref.dir.negateNew());
-    clipEdge(inc, ref.p1, flip ? n : n.negateNew(), true);
+    inc.clipEdge(ref.p1, ref.dir);
+    inc.clipEdge(ref.p2, ref.dir.negateNew());
+    inc.clipEdge(ref.p1, flip ? n : n.negateNew(), true);
 
     let contactPoints: ContactPoint[];
 
