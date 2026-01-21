@@ -1,4 +1,4 @@
-import * as Util from '../new/util';
+import Utils from './Utils';
 
 export default class Vec2 {
     x: number;
@@ -181,8 +181,8 @@ export default class Vec2 {
     }
 
     fix(limit = 1e-13): void {
-        this.x = Util.toFixed(this.x, limit);
-        this.y = Util.toFixed(this.y, limit);
+        this.x = Utils.toFixed(this.x, limit);
+        this.y = Utils.toFixed(this.y, limit);
     }
 
     static squaredDistance(a: Vec2, b: Vec2): number {
