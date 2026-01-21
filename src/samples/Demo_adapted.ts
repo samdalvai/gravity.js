@@ -95,6 +95,17 @@ export default class Demo {
         this.generateFloor(world);
         this.generateFences(world);
 
+        const a = new Body(new CircleShape(25), 500, 300, 3);
+        const b = new Body(new CircleShape(25), 600, 300, 3);
+        const anchorA = a.position.addNew(new Vec2(0, 0));
+        const anchorB = b.position.subNew(new Vec2(0, 0));
+
+        const joint = new DistanceJoint(a, b, anchorA, anchorB, -1, 10, 1);
+
+        world.addBody(a);
+        world.addBody(b);
+        world.addJoint(joint);
+
         // Suspension Bridge Creation
         // const numSteps = 10;
         // const stepWidth = 40;

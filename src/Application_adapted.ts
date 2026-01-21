@@ -3,6 +3,7 @@ import Graphics from './Graphics_old';
 import InputManager, { MouseButton } from './InputManager';
 import Utils from './math/Utils';
 import Vec2 from './math/Vec2';
+import { DistanceJoint } from './new/distance_adapted';
 import Body from './physics/Body';
 import { GRAVITY, MAX_BODIES } from './physics/Constants';
 import Force from './physics/Force';
@@ -267,17 +268,26 @@ export default class Application {
             }
 
             if (this.showContacts) {
-                // for (const joint of this.world.getJoints()) {
-                //     // TODO: this is just a simple draw method, we need to consider local anchors rather than just
-                //     // bodies position
-                //     Graphics.drawLine(
-                //         joint.bodyA.position.x,
-                //         joint.bodyA.position.y,
-                //         joint.bodyB.position.x,
-                //         joint.bodyB.position.y,
-                //         'blue',
-                //     );
-                // }
+                for (const joint of this.world.getJoints()) {
+                    // TODO: this is just a simple draw method, we need to consider local anchors rather than just
+                    // bodies position
+                    Graphics.drawLine(
+                        joint.bodyA.position.x,
+                        joint.bodyA.position.y,
+                        joint.bodyB.position.x,
+                        joint.bodyB.position.y,
+                        'blue',
+                    );
+
+                    if (joint instanceof DistanceJoint) {
+                        const anchorA = joint.localAnchorA;
+                        const anchorB = joint.localAnchorB;
+                        const worldA = joint.bodyA.localPointToWorld(anchorA);
+                        const worldB = joint.bodyB.localPointToWorld(anchorB);
+                        Graphics.drawFillCircle(worldA.x, worldA.y, 5, 'blue');
+                        Graphics.drawFillCircle(worldB.x, worldB.y, 5, 'blue');
+                    }
+                }
 
                 // for (const contact of this.world.getContacts()) {
                 //     const aW = contact.bodyA.localPointToWorld(contact.aPointLocal);
