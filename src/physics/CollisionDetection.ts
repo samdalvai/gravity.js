@@ -1,5 +1,5 @@
 import Vec2 from '../math/Vec2';
-import { TANGENT_MIN_LENGTH } from './Constants';
+import { CONTACT_MERGE_THRESHOLD, TANGENT_MIN_LENGTH } from './Constants';
 import { ContactManifold } from './Contact';
 import Edge from './Edge';
 import RigidBody from './RigidBody';
@@ -70,10 +70,6 @@ export interface ContactPoint {
     point: Vec2;
     id: number;
 }
-
-// Since the findFarthestEdge function returns a edge with a minimum length of 0.01 for circle,
-// merging threshold should be greater than sqrt(2) * minimum edge length
-const CONTACT_MERGE_THRESHOLD = 1.415 * TANGENT_MIN_LENGTH;
 
 function findContactPoints(n: Vec2, a: RigidBody, b: RigidBody): ContactPoint[] {
     const edgeA = findFarthestEdge(a, n);
