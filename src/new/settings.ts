@@ -1,5 +1,5 @@
 import { PIXELS_PER_METER } from '../physics/Constants';
-import * as Util from './util_adapted';
+import * as Util from './util';
 
 export enum GenerationShape {
     Box = 0,
