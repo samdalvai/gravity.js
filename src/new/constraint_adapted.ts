@@ -1,6 +1,3 @@
-// import { Vector2 } from './vector2';
-// import { Vector3 } from './vector3';
-// import { RigidBody } from './rigidbody';
 import Vec2 from '../math/Vec2';
 import Body from '../physics/Body';
 

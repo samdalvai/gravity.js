@@ -4,11 +4,7 @@ import Vec2 from '../math/Vec2';
 import Body from '../physics/Body';
 import { Constraint } from './constraint_adapted';
 import { ContactPoint } from './detection_adapted';
-// import { Matrix2 } from './matrix2';
-// import { Vec2 } from './vector2';
-// import { RigidBody } from './rigidbody';
 import { Settings } from './settings';
-// import * as Util from './util_adapted';
 
 enum ContactType {
     Normal,

@@ -2,16 +2,11 @@ import Vec2 from '../math/Vec2';
 import Body from '../physics/Body';
 import { PIXELS_PER_METER } from '../physics/Constants';
 import { CircleShape, PolygonShape } from '../physics/Shape';
-import { Circle } from './circle';
 import { ContactManifold } from './contact_adapted';
 import { Edge } from './edge_adapted';
-// import { Vector2 } from './vector2';
-// import { Polygon } from './polygon';
 import { ClosestEdgeInfo, Polytope } from './polytope_adapted';
-// import { RigidBody } from './rigidbody';
 import { Settings } from './settings';
 import { Simplex } from './simplex_adapted';
-import * as Util from './util';
 
 interface SupportResult {
     vertex: Vec2;
