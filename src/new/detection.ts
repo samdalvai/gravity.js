@@ -14,7 +14,7 @@ interface SupportResult {
 }
 
 // Returns the fardest vertex in the 'dir' direction
-export function support_adapted(b: Body, dir: Vec2): SupportResult {
+export function support(b: Body, dir: Vec2): SupportResult {
     const shape = b.shape;
     if (shape instanceof PolygonShape) {
         let idx = 0;
@@ -42,12 +42,12 @@ export function support_adapted(b: Body, dir: Vec2): SupportResult {
  * Minkowski Difference : A ⊖ B = {Pa - Pb| Pa ∈ A, Pb ∈ B}
  * CSO stands for Configuration Space Object
  */
-export function csoSupport_adapted(b1: Body, b2: Body, dir: Vec2): Vec2 {
+export function csoSupport(b1: Body, b2: Body, dir: Vec2): Vec2 {
     const localDirP1 = b1.worldDirToLocal(dir);
     const localDirP2 = b2.worldDirToLocal(dir.negated());
 
-    let supportP1 = support_adapted(b1, localDirP1).vertex;
-    let supportP2 = support_adapted(b2, localDirP2).vertex;
+    let supportP1 = support(b1, localDirP1).vertex;
+    let supportP2 = support(b2, localDirP2).vertex;
 
     supportP1 = b1.localPointToWorld(supportP1);
     supportP2 = b2.localPointToWorld(supportP2);
@@ -60,14 +60,14 @@ interface GJKResult {
     simplex: Simplex;
 }
 
-export function gjk_adapted(b1: Body, b2: Body): GJKResult {
+export function gjk(b1: Body, b2: Body): GJKResult {
     const origin = new Vec2(0, 0);
     const simplex: Simplex = new Simplex();
     let dir = new Vec2(1, 0); // Random initial direction
 
     const result: GJKResult = { collide: false, simplex: simplex };
 
-    let supportPoint = csoSupport_adapted(b1, b2, dir);
+    let supportPoint = csoSupport(b1, b2, dir);
     simplex.addVertex(supportPoint);
 
     for (let k = 0; k < Settings.GJK_MAX_ITERATION; k++) {
@@ -84,7 +84,7 @@ export function gjk_adapted(b1: Body, b2: Body): GJKResult {
         }
 
         dir = origin.subNew(closest.result);
-        supportPoint = csoSupport_adapted(b1, b2, dir);
+        supportPoint = csoSupport(b1, b2, dir);
 
         // If the new support point is not further along the search direction than the closest point,
         // two objects are not colliding so you can early return here.
@@ -128,7 +128,7 @@ export function expandSimplexForEPA(simplex: Simplex, b1: Body, b2: Body): void 
         const dirs = [new Vec2(1, 0), new Vec2(0, 1)];
 
         for (const d of dirs) {
-            const sp = csoSupport_adapted(b1, b2, d);
+            const sp = csoSupport(b1, b2, d);
             if (!simplex.containsVertex(sp)) {
                 simplex.addVertex(sp);
             }
@@ -153,17 +153,17 @@ export function expandSimplexForEPA(simplex: Simplex, b1: Body, b2: Body): void 
         }
 
         // Try primary normal
-        let c = csoSupport_adapted(b1, b2, normal);
+        let c = csoSupport(b1, b2, normal);
 
         // If degenerate, try opposite direction
         if (Math.abs(ab.cross(c.subNew(a))) < EPS || simplex.containsVertex(c)) {
-            c = csoSupport_adapted(b1, b2, normal.negated());
+            c = csoSupport(b1, b2, normal.negated());
         }
 
         // Still degenerate? Rotate slightly
         if (Math.abs(ab.cross(c.subNew(a))) < EPS || simplex.containsVertex(c)) {
             const rotated = new Vec2(normal.x * 0.707 - normal.y * 0.707, normal.x * 0.707 + normal.y * 0.707);
-            c = csoSupport_adapted(b1, b2, rotated);
+            c = csoSupport(b1, b2, rotated);
         }
 
         simplex.addVertex(c);
@@ -193,14 +193,14 @@ interface EPAResult {
     contactNormal: Vec2;
 }
 
-export function epa_adapted(b1: Body, b2: Body, gjkResult: Simplex): EPAResult {
+export function epa(b1: Body, b2: Body, gjkResult: Simplex): EPAResult {
     const polytope: Polytope = new Polytope(gjkResult);
 
     let closestEdge: ClosestEdgeInfo = { index: 0, distance: Infinity, normal: new Vec2(0, 0) };
 
     for (let i = 0; i < Settings.EPA_MAX_ITERATION; i++) {
         closestEdge = polytope.getClosestEdge();
-        const supportPoint = csoSupport_adapted(b1, b2, closestEdge.normal);
+        const supportPoint = csoSupport(b1, b2, closestEdge.normal);
         const newDistance = closestEdge.normal.dot(supportPoint);
 
         if (Math.abs(closestEdge.distance - newDistance) > Settings.EPA_TOLERANCE) {
@@ -220,9 +220,9 @@ export function epa_adapted(b1: Body, b2: Body, gjkResult: Simplex): EPAResult {
 
 const TANGENT_MIN_LENGTH = 0.01 * PIXELS_PER_METER;
 
-export function findFarthestEdge_adapted(b: Body, dir: Vec2): Edge {
+export function findFarthestEdge(b: Body, dir: Vec2): Edge {
     const localDir = b.worldDirToLocal(dir);
-    const farthest = support_adapted(b, localDir);
+    const farthest = support(b, localDir);
     let curr = farthest.vertex;
     const idx = farthest.index;
 
@@ -287,9 +287,9 @@ export interface ContactPoint {
 // merging threshold should be greater than sqrt(2) * minimum edge length
 const CONTACT_MERGE_THRESHOLD = 1.415 * TANGENT_MIN_LENGTH;
 
-export function findContactPoints_adapted(n: Vec2, a: Body, b: Body): ContactPoint[] {
-    const edgeA = findFarthestEdge_adapted(a, n);
-    const edgeB = findFarthestEdge_adapted(b, n.negated());
+export function findContactPoints(n: Vec2, a: Body, b: Body): ContactPoint[] {
+    const edgeA = findFarthestEdge(a, n);
+    const edgeB = findFarthestEdge(b, n.negated());
 
     let ref = edgeA; // Reference edge
     let inc = edgeB; // Incidence edge
@@ -324,7 +324,7 @@ export function findContactPoints_adapted(n: Vec2, a: Body, b: Body): ContactPoi
 }
 
 // Returns contact data if collide, otherwise returns null
-export function detectCollision_adapted(a: Body, b: Body): ContactManifold | null {
+export function detectCollision(a: Body, b: Body): ContactManifold | null {
     // Circle vs. Circle collision
     if (a.shape instanceof CircleShape && b.shape instanceof CircleShape) {
         let d = Vec2.squaredDistance(a.position, b.position);
@@ -361,7 +361,7 @@ export function detectCollision_adapted(a: Body, b: Body): ContactManifold | nul
         }
     }
 
-    const gjkResult = gjk_adapted(a, b);
+    const gjkResult = gjk(a, b);
 
     if (!gjkResult.collide) {
         return null;
@@ -374,9 +374,9 @@ export function detectCollision_adapted(a: Body, b: Body): ContactManifold | nul
             case 1:
                 {
                     const v = simplex.vertices[0];
-                    let randomSupport = csoSupport_adapted(a, b, new Vec2(1, 0));
+                    let randomSupport = csoSupport(a, b, new Vec2(1, 0));
 
-                    if (randomSupport.equals(v)) randomSupport = csoSupport_adapted(a, b, new Vec2(-1, 0));
+                    if (randomSupport.equals(v)) randomSupport = csoSupport(a, b, new Vec2(-1, 0));
 
                     simplex.addVertex(randomSupport);
                 }
@@ -384,16 +384,16 @@ export function detectCollision_adapted(a: Body, b: Body): ContactManifold | nul
             case 2:
                 {
                     const e = new Edge(simplex.vertices[0], simplex.vertices[1]);
-                    const normalSupport = csoSupport_adapted(a, b, e.normal);
+                    const normalSupport = csoSupport(a, b, e.normal);
 
                     if (simplex.containsVertex(normalSupport))
-                        simplex.addVertex(csoSupport_adapted(a, b, e.normal.negated()));
+                        simplex.addVertex(csoSupport(a, b, e.normal.negated()));
                     else simplex.addVertex(normalSupport);
                 }
                 break;
         }
 
-        const epaResult: EPAResult = epa_adapted(a, b, gjkResult.simplex);
+        const epaResult: EPAResult = epa(a, b, gjkResult.simplex);
 
         let flipped = false;
         // Apply axis weight to improve coherence
@@ -408,7 +408,7 @@ export function detectCollision_adapted(a: Body, b: Body): ContactManifold | nul
         // Remove floating point error
         epaResult.contactNormal.fix(Settings.EPA_TOLERANCE);
 
-        const contactPoints = findContactPoints_adapted(epaResult.contactNormal, a, b);
+        const contactPoints = findContactPoints(epaResult.contactNormal, a, b);
 
         const contact = new ContactManifold(
             a,
