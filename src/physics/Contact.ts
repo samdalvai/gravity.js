@@ -471,20 +471,4 @@ export class ContactManifold extends Constraint {
         return this.contactPoints.length;
     }
 
-    getContactInfo(flip: boolean): ContactInfo {
-        const contactInfo: ContactInfo = {
-            other: flip ? this.bodyB : this.bodyA,
-            numContacts: this.numContacts,
-            contactDir: flip ? this.contactNormal.negated() : this.contactNormal.clone(),
-            contactPoints: [],
-            impulse: 0,
-        };
-
-        for (let i = 0; i < this.numContacts; i++) {
-            contactInfo.contactPoints.push(this.contactPoints[i].point.clone());
-            contactInfo.impulse += this.normalContacts[i].impulseSum;
-        }
-
-        return contactInfo;
-    }
 }

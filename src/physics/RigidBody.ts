@@ -121,7 +121,6 @@ export default class RigidBody {
         this.sumTorque = 0.0;
     };
 
-    // Equivalent to b1.localToGlobal.mulVector2(supportP1, 1); Note the 1!!
     localPointToWorld = (point: Vec2): Vec2 => {
         const cos = Math.cos(this.rotation);
         const sin = Math.sin(this.rotation);
@@ -134,8 +133,6 @@ export default class RigidBody {
         return rotated;
     };
 
-    // Equivalent to b1.globalToLocal.mulVector2(supportP1, 1); Note the 1!!
-    // !!! was // Equivalent to b1.localToGlobal.mulVector2(supportP1, 1); Note the 1!! please check
     worldPointToLocal = (point: Vec2): Vec2 => {
         const cos = Math.cos(-this.rotation);
         const sin = Math.sin(-this.rotation);
@@ -148,7 +145,6 @@ export default class RigidBody {
         return new Vec2(rotatedX, rotatedY);
     };
 
-    // Equivalent to b1.globalToLocal.mulVector2(dir, 0);
     worldDirToLocal = (dir: Vec2): Vec2 => {
         const cos = Math.cos(-this.rotation);
         const sin = Math.sin(-this.rotation);
