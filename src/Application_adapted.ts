@@ -48,14 +48,14 @@ export default class Application {
         this.running = Graphics.openWindow();
         Demo.demo1(this.world);
 
-        const b = new Body(new BoxShape(100, 100), Graphics.width() / 2, 500, 0);
-        // const b = new Body(new CircleShape(50), Graphics.width() / 2, 500, 0);
-        b.rotation = 0.5;
-        this.world.addBody(b);
+        // const b = new Body(new BoxShape(100, 100), Graphics.width() / 2, 500, 0);
+        // // const b = new Body(new CircleShape(50), Graphics.width() / 2, 500, 0);
+        // b.rotation = 0.5;
+        // this.world.addBody(b);
 
-        // this.testBody = new Body(new CircleShape(25), Graphics.width() / 2, 500, 0);
-        this.testBody = new Body(new BoxShape(50, 50), Graphics.width() / 2, 500, 0);
-        this.world.addBody(this.testBody);
+        // // this.testBody = new Body(new CircleShape(25), Graphics.width() / 2, 500, 0);
+        // this.testBody = new Body(new BoxShape(50, 50), Graphics.width() / 2, 500, 0);
+        // this.world.addBody(this.testBody);
 
         this.bgTexture = AssetStore.getTexture('background');
     };
@@ -279,27 +279,14 @@ export default class Application {
                         'blue',
                     );
 
-                    if (joint instanceof DistanceJoint) {
-                        const anchorA = joint.localAnchorA;
-                        const anchorB = joint.localAnchorB;
-                        const worldA = joint.bodyA.localPointToWorld(anchorA);
-                        const worldB = joint.bodyB.localPointToWorld(anchorB);
-                        Graphics.drawFillCircle(worldA.x, worldA.y, 5, 'blue');
-                        Graphics.drawFillCircle(worldB.x, worldB.y, 5, 'blue');
-                    }
+                    const anchorA = joint.aPointLocal;
+                    const anchorB = joint.bPointLocal;
+                    const worldA = joint.bodyA.localPointToWorld(anchorA);
+                    const worldB = joint.bodyB.localPointToWorld(anchorB);
+                    Graphics.drawFillCircle(worldA.x, worldA.y, 5, 'blue');
+                    Graphics.drawFillCircle(worldB.x, worldB.y, 5, 'blue');
                 }
-
-                // for (const contact of this.world.getContacts()) {
-                //     const aW = contact.bodyA.localPointToWorld(contact.aPointLocal);
-                //     const bW = contact.bodyB.localPointToWorld(contact.bPointLocal);
-                //     // const aW = contact.start;
-                //     // const bW = contact.end;
-                //     Graphics.drawFillCircle(aW.x, aW.y, 5, 'red');
-                //     Graphics.drawFillCircle(bW.x, bW.y, 2, 'red');
-                //     Graphics.drawLine(aW.x, aW.y, bW.x, bW.y, 'red');
-                // }
                 for (const manifold of this.world.getManifolds()) {
-                    // console.log('ma: ', manifold);
                     for (const contact of manifold.contactPoints) {
                         const startPoint = contact.point;
                         const endPoint = contact.point.subNew(
@@ -320,22 +307,28 @@ export default class Application {
             numContacts += manifold.numContacts;
         }
 
-        const debugText = [
+        const defaultText = [
             // General info
             'Keys: 1-9 Demos, Left Mouse to generate circles, Right Mouse to generate boxes, Space to drop bomb',
             `${Demo.demoStrings[this.demoIndex]}`,
             `(D) debug mode: ${this.debug ? 'ON' : 'OFF'}`,
             `(C) chosen particle: ${this.generateCircles ? 'Circle' : 'Box'}`,
+        ];
+
+        const debugText = [
+            // Debug related info
             `(A) show AABB: ${this.showAABB ? 'ON' : 'OFF'}`,
             `(S) show contacts and joints: ${this.showContacts ? 'ON' : 'OFF'}`,
-            // Debut related info
             `FPS: ${this.FPS.toFixed(2)}`,
+            `Mouse position: {${InputManager.mousePosition.x}, ${InputManager.mousePosition.y}}`,
             `Num objects: ${this.world.getBodies().length}`,
             `Num contacts: ${numContacts}`,
         ];
 
-        for (let i = 0; i < debugText.length - (this.debug ? 0 : 4); i++) {
-            Graphics.drawText(debugText[i], 50, 50 + i * 25, 18, 'arial', this.debug ? 'orange' : 'black');
+        const text = [...defaultText, ...(this.debug ? debugText : [])];
+
+        for (let i = 0; i < text.length; i++) {
+            Graphics.drawText(text[i], 50, 50 + i * 25, 18, 'arial', this.debug ? 'orange' : 'black');
         }
     };
 }
