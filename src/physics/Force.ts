@@ -1,6 +1,4 @@
 import Vec2 from '../math/Vec2';
-import { Vector2 } from '../new/vector2';
-import { RigidBody } from '../new/rigidbody';
 import Body from './Body';
 import { PIXELS_PER_METER } from './Constants';
 
@@ -8,11 +6,6 @@ export default class Force {
     static generateWeightForce = (body: Body, G: number): Vec2 => {
         const weightForce = new Vec2(0.0, body.mass * G * PIXELS_PER_METER);
 
-        return weightForce;
-    };
-
-    static generateWeightForceRigid = (body: RigidBody, G: number): Vector2 => {
-        const weightForce = new Vector2(0.0, body.mass * G * PIXELS_PER_METER);
         return weightForce;
     };
 

@@ -1,5 +1,3 @@
-// import { Vector2 } from './vector2';
-// import * as Util from './util';
 import Vec2 from '../math/Vec2';
 
 export class Edge {
