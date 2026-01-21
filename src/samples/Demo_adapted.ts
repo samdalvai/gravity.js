@@ -243,17 +243,26 @@ export default class Demo {
         this.generateFences(world);
 
         const plank = new Body(new BoxShape(750, 20), Graphics.width() / 2.0, Graphics.height() - 275, 10);
-        plank.setTexture('metal');
+        plank.setTexture('woodPlankCracked');
         world.addBody(plank);
+        
+        const triangleVertices = [new Vec2(30, 30), new Vec2(-30, 30), new Vec2(0, -33.5)];
+        const triangle = new Body(new PolygonShape(triangleVertices), floor.position.x, floor.position.y - 130, 0);
+        triangle.setTexture('woodTriangle');
+        world.addBody(triangle);
 
         const box1 = new Body(new BoxShape(25, 25), plank.position.x - 350, Graphics.height() - 400, 1);
         const box2 = new Body(new BoxShape(25, 25), plank.position.x - 325, Graphics.height() - 400, 1);
         const box3 = new Body(new BoxShape(25, 25), plank.position.x - 337.5, Graphics.height() - 425, 1);
+        box1.setTexture('crate');
+        box2.setTexture('crate');
+        box3.setTexture('crate');
         world.addBody(box1);
         world.addBody(box2);
         world.addBody(box3);
 
         const heavyBox = new Body(new BoxShape(50, 50), plank.position.x + 350, Graphics.height() - 750, 10);
+        heavyBox.setTexture('metal');
         world.addBody(heavyBox);
 
         const joint = new JointConstraint(floor, plank, plank.position);
