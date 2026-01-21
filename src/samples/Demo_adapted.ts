@@ -1,6 +1,5 @@
 import Graphics from '../Graphics_old';
 import Vec2 from '../math/Vec2';
-import { DistanceJoint } from '../new/distance_adapted';
 import Body from '../physics/Body';
 import { JointConstraint } from '../physics/Constraint';
 import { BoxShape, CircleShape, PolygonShape } from '../physics/Shape';
@@ -95,18 +94,7 @@ export default class Demo {
         this.generateFloor(world);
         this.generateFences(world);
 
-        const a = new Body(new CircleShape(25), 500, 300, 3);
-        const b = new Body(new CircleShape(25), 600, 300, 3);
-        const anchorA = a.position.addNew(new Vec2(0, 0));
-        const anchorB = b.position.subNew(new Vec2(0, 0));
-
-        const joint = new DistanceJoint(a, b, anchorA, anchorB, -1, 10, 1);
-
-        world.addBody(a);
-        world.addBody(b);
-        world.addJoint(joint);
-
-        //Suspension Bridge Creation
+        // Suspension Bridge Creation
         const numSteps = 10;
         const stepWidth = 40;
         const spacing = stepWidth + 2.5; // distance between centers
@@ -135,10 +123,9 @@ export default class Demo {
             world.addBody(step);
 
             // Joint anchor at left edge of this step
-
-            // const joint = new JointConstraint(lastStep, step, anchor, softness, bias);
-
-            // world.addJoint(joint);
+            const anchor = step.position.subNew(new Vec2(stepWidth / 2, 0));
+            const joint = new JointConstraint(lastStep, step, anchor, softness, bias);
+            world.addJoint(joint);
 
             lastStep = step;
         }
@@ -153,14 +140,10 @@ export default class Demo {
         endAnchor.setTexture('rockBridgeAnchor');
         world.addBody(endAnchor);
 
-        // // Final joint anchor at right edge of last step
-        // // const finalAnchor = lastStep.position.addNew(new Vec2(stepWidth / 2, 0));
-        // const anchorA = lastStep.position.addNew(new Vec2(stepWidth / 2, 0));
-        // const anchorB = endAnchor.position.subNew(new Vec2(stepWidth / 2, 0));
-        // const lastJoint = new DistanceJoint(lastStep, endAnchor, anchorA, anchorB, -1, 10, 1);
-
-        // // const lastJoint = new JointConstraint(lastStep, endAnchor, finalAnchor, softness, bias);
-        // world.addJoint(lastJoint);
+        // Final joint anchor at right edge of last step
+        const finalAnchor = lastStep.position.addNew(new Vec2(stepWidth / 2, 0));
+        const lastJoint = new JointConstraint(lastStep, endAnchor, finalAnchor, softness, bias);
+        world.addJoint(lastJoint);
     };
 
     static demo4 = (world: World) => {
