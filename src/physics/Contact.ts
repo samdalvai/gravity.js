@@ -2,9 +2,9 @@ import { Mat2 } from '../math/Mat2';
 import Utils from '../math/Utils';
 import Vec2 from '../math/Vec2';
 import Body from './Body';
+import { ContactPoint } from './CollisionDetection';
 import { SETTINGS } from './Constants';
 import { Constraint } from './Constraint';
-import { ContactPoint } from '../new/detection';
 
 enum ContactType {
     Normal,
