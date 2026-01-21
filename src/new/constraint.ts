@@ -36,15 +36,4 @@ export abstract class Constraint {
      * https://pybullet.org/Bullet/phpBB3/viewtopic.php?f=4&t=1354
      */
     public abstract solve(): void;
-
-    /*
-     * Apply impulse
-     * V2 = V2' + M^-1 ⋅ Pc
-     * Pc = J^t ⋅ λ
-     *
-     * More reading:
-     * https://box2d.org/files/ErinCatto_ModelingAndSolvingConstraints_GDC2009.pdf
-     */
-    // protected abstract applyImpulse(impulse: number | Vector2 | Vector3, impulse2?: number): void;
-    protected abstract applyImpulse(impulse: number | Vec2, impulse2?: number): void;
 }

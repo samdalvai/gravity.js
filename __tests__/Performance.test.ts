@@ -1,7 +1,6 @@
 import Vec2 from '../src/math/Vec2';
 import Body from '../src/physics/Body';
 import CollisionDetection from '../src/physics/CollisionDetection';
-import { JointConstraint } from '../src/physics/Constraint';
 import { BoxShape, CircleShape } from '../src/physics/Shape';
 
 describe('Performance', () => {
