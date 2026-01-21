@@ -1,13 +1,13 @@
 import Vec2 from '../../src/math/Vec2';
-import Body from '../../src/physics/Body';
+import RigidBody from '../../src/physics/RigidBody';
 import CollisionDetection from '../../src/physics/CollisionDetection';
 import { JointConstraint } from '../../src/physics/Joint';
 import { CircleShape } from '../../src/physics/Shape';
 
 describe('Constraint', () => {
     test('Joint constraint solving should apply impulses to correct position of bodies', () => {
-        const a = new Body(new CircleShape(60), 100, 100, 5);
-        const b = new Body(new CircleShape(60), 100, 200, 5);
+        const a = new RigidBody(new CircleShape(60), 100, 100, 5);
+        const b = new RigidBody(new CircleShape(60), 100, 200, 5);
         const joint = new JointConstraint(a, b, new Vec2(100, 150));
 
         // Move bodies apart
@@ -42,8 +42,8 @@ describe('Constraint', () => {
     });
 
     test('Penetration constraint solving should apply impulses to correct position of bodies', () => {
-        const a = new Body(new CircleShape(60), 100, 100, 5);
-        const b = new Body(new CircleShape(60), 200, 100, 5);
+        const a = new RigidBody(new CircleShape(60), 100, 100, 5);
+        const b = new RigidBody(new CircleShape(60), 200, 100, 5);
 
         // Move bodies apart
         const numFrames = 60;

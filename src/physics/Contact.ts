@@ -1,7 +1,7 @@
 import { Mat2 } from '../math/Mat2';
 import Utils from '../math/Utils';
 import Vec2 from '../math/Vec2';
-import Body from './Body';
+import RigidBody from './RigidBody';
 import { ContactPoint } from './CollisionDetection';
 import { SETTINGS } from './Constants';
 import { Constraint } from './Constraint';
@@ -21,8 +21,8 @@ interface Jacobian {
 class ContactSolver {
     private manifold: ContactManifold;
 
-    private bodyA: Body;
-    private bodyB: Body;
+    private bodyA: RigidBody;
+    private bodyB: RigidBody;
     private contactPoint: Vec2;
     private contactType!: ContactType;
 
@@ -151,8 +151,8 @@ class ContactSolver {
 }
 
 class BlockSolver {
-    private bodyA: Body;
-    private bodyB: Body;
+    private bodyA: RigidBody;
+    private bodyB: RigidBody;
 
     // Normal contacts
     private nc1!: ContactSolver;
@@ -353,7 +353,7 @@ class BlockSolver {
 }
 
 export interface ContactInfo {
-    other: Body;
+    other: RigidBody;
     numContacts: number;
     contactDir: Vec2;
     contactPoints: Vec2[];
@@ -377,8 +377,8 @@ export class ContactManifold extends Constraint {
     public persistent = false;
 
     constructor(
-        bodyA: Body,
-        bodyB: Body,
+        bodyA: RigidBody,
+        bodyB: RigidBody,
         contactPoints: ContactPoint[],
         penetrationDepth: number,
         contactNormal: Vec2,

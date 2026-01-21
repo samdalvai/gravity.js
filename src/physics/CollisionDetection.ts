@@ -1,5 +1,5 @@
 import Vec2 from '../math/Vec2';
-import Body from './Body';
+import RigidBody from './RigidBody';
 import { TANGENT_MIN_LENGTH } from './Constants';
 import { ContactManifold } from './Contact';
 import { CircleShape, PolygonShape, ShapeType } from './Shape';
@@ -38,7 +38,7 @@ interface SupportResult {
 }
 
 // Returns the farthest vertex in the 'dir' direction
-function support(b: Body, dir: Vec2): SupportResult {
+function support(b: RigidBody, dir: Vec2): SupportResult {
     const shape = b.shape;
     if (shape instanceof PolygonShape) {
         let idx = 0;
@@ -60,7 +60,7 @@ function support(b: Body, dir: Vec2): SupportResult {
     }
 }
 
-function findFarthestEdge(b: Body, dir: Vec2): Edge {
+function findFarthestEdge(b: RigidBody, dir: Vec2): Edge {
     const localDir = b.worldDirToLocal(dir);
     const farthest = support(b, localDir);
     let curr = farthest.vertex;
@@ -127,7 +127,7 @@ export interface ContactPoint {
 // merging threshold should be greater than sqrt(2) * minimum edge length
 const CONTACT_MERGE_THRESHOLD = 1.415 * TANGENT_MIN_LENGTH;
 
-function findContactPoints(n: Vec2, a: Body, b: Body): ContactPoint[] {
+function findContactPoints(n: Vec2, a: RigidBody, b: RigidBody): ContactPoint[] {
     const edgeA = findFarthestEdge(a, n);
     const edgeB = findFarthestEdge(b, n.negated());
 
@@ -164,7 +164,7 @@ function findContactPoints(n: Vec2, a: Body, b: Body): ContactPoint[] {
 }
 
 export default class CollisionDetection {
-    static detectCollision = (a: Body, b: Body): ContactManifold | null => {
+    static detectCollision = (a: RigidBody, b: RigidBody): ContactManifold | null => {
         const aIsCircle = a.shapeType === ShapeType.CIRCLE;
         const bIsCircle = b.shapeType === ShapeType.CIRCLE;
 
@@ -190,7 +190,7 @@ export default class CollisionDetection {
         return null;
     };
 
-    static detectCollisionCircleCircle = (a: Body, b: Body): ContactManifold | null => {
+    static detectCollisionCircleCircle = (a: RigidBody, b: RigidBody): ContactManifold | null => {
         const aCircleShape = a.shape as CircleShape;
         const bCircleShape = b.shape as CircleShape;
 
@@ -210,7 +210,7 @@ export default class CollisionDetection {
         return new ContactManifold(a, b, [{ point: contactPoint, id: -1 }], penetrationDepth, normal, false);
     };
 
-    static detectCollisionPolygonPolygon = (a: Body, b: Body): ContactManifold | null => {
+    static detectCollisionPolygonPolygon = (a: RigidBody, b: RigidBody): ContactManifold | null => {
         const aPoly = a.shape as PolygonShape;
         const bPoly = b.shape as PolygonShape;
 
@@ -239,7 +239,7 @@ export default class CollisionDetection {
         return new ContactManifold(a, b, contactPoints, penetrationDepth, normal, flipped);
     };
 
-    static detectCollisionPolygonCircle = (polygon: Body, circle: Body): ContactManifold | null => {
+    static detectCollisionPolygonCircle = (polygon: RigidBody, circle: RigidBody): ContactManifold | null => {
         const polygonShape = polygon.shape as PolygonShape;
         const circleShape = circle.shape as CircleShape;
         const polygonVertices = polygonShape.worldVertices;

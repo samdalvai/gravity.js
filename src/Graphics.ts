@@ -1,5 +1,5 @@
 import Vec2 from './math/Vec2';
-import Body from './physics/Body';
+import RigidBody from './physics/RigidBody';
 import { BoxShape, CircleShape, PolygonShape, ShapeType } from './physics/Shape';
 
 export default class Graphics {
@@ -170,7 +170,7 @@ export default class Graphics {
         this.ctx.restore();
     };
 
-    static drawBody = (body: Body, debug = false): void => {
+    static drawBody = (body: RigidBody, debug = false): void => {
         switch (body.shape.getType()) {
             case ShapeType.CIRCLE:
                 {

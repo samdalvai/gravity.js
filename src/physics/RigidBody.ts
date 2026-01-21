@@ -2,7 +2,7 @@ import AssetStore, { TEXTURES } from '../AssetStore';
 import Vec2 from '../math/Vec2';
 import { PolygonShape, Shape, ShapeType } from './Shape';
 
-export default class Body {
+export default class RigidBody {
     static _nextId = 0;
     id: number;
 
@@ -44,7 +44,7 @@ export default class Body {
 
     // Body(const Shape& shape, float x, float y, float mass);
     constructor(shape: Shape, x: number, y: number, mass: number) {
-        this.id = Body._nextId++;
+        this.id = RigidBody._nextId++;
 
         this.shape = shape;
         this.shapeType = shape.getType();
@@ -82,7 +82,7 @@ export default class Body {
     // a.id << 16 → shifts a.id into the upper 16 bits of a 32-bit integer
     // b.id & 0xffff → ensures that only the lower 16 bits of b.id are used
     // | -> bitwise OR combines them into a single 32-bit integer
-    static pairKey = (a: Body, b: Body): number => {
+    static pairKey = (a: RigidBody, b: RigidBody): number => {
         if (a.id < b.id) {
             return (a.id << 16) | (b.id & 0xffff);
         } else {
