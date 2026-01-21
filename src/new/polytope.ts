@@ -1,5 +1,5 @@
 import Vec2 from '../math/Vec2';
-import { Simplex } from './simplex_adapted';
+import { Simplex } from './simplex';
 
 export interface ClosestEdgeInfo {
     index: number;

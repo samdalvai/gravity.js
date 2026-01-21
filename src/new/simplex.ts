@@ -1,5 +1,5 @@
 import Vec2 from '../math/Vec2';
-import { getUV, lerpVector } from './util_adapted';
+import { getUV, lerpVector } from './util';
 
 interface ClosestResult {
     result: Vec2;
