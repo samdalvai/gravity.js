@@ -1,9 +1,4 @@
 import Vec2 from './math/Vec2';
-import { Circle } from './new/circle';
-import { Vector2 } from './new/vector2';
-import { Vector3 } from './new/vector3';
-import { Polygon } from './new/polygon';
-import { RigidBody } from './new/rigidbody';
 import Body from './physics/Body';
 import { BoxShape, CircleShape, PolygonShape, ShapeType } from './physics/Shape';
 
@@ -12,9 +7,6 @@ export default class Graphics {
     static windowHeight: number;
     static canvas: HTMLCanvasElement;
     static ctx: CanvasRenderingContext2D;
-
-    static zoom: number;
-    static pan = new Vec2(0, 0);
 
     static width = (): number => {
         return this.windowWidth;
@@ -40,7 +32,6 @@ export default class Graphics {
         this.ctx = ctx;
         this.windowWidth = window.innerWidth;
         this.windowHeight = window.innerHeight;
-        this.zoom = 1;
 
         return true;
     };
@@ -48,34 +39,6 @@ export default class Graphics {
     static clearScreen = (): void => {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     };
-
-    /**
-     * Start world coordinates to screen conversion.
-     *
-     * This is used because box 2d uses a standard coordinate system for objects
-     * positions and dimensions
-     */
-    static beginWorld(): void {
-        const ctx = this.ctx;
-
-        ctx.save();
-
-        // Move origin to screen center
-        ctx.translate(this.windowWidth / 2, this.windowHeight / 2);
-
-        // Flip Y axis (world Y up, canvas Y down)
-        ctx.scale(this.zoom, -this.zoom);
-
-        // Apply camera pan
-        ctx.translate(-this.pan.x, -this.pan.y);
-
-        ctx.lineWidth = 1 / this.zoom;
-    }
-
-    /** Restore coordinates to screen conversion */
-    static endWorld(): void {
-        this.ctx.restore();
-    }
 
     static drawLine = (x0: number, y0: number, x1: number, y1: number, color: string): void => {
         this.ctx.strokeStyle = color;
@@ -207,67 +170,49 @@ export default class Graphics {
         this.ctx.restore();
     };
 
-    static drawBody = (b: RigidBody): void => {
-        if (b instanceof Polygon) {
-            const color = 'white';
-            this.ctx.strokeStyle = color;
-            this.ctx.beginPath();
+    static drawBody = (body: Body, debug = false): void => {
+        switch (body.shape.getType()) {
+            case ShapeType.CIRCLE:
+                {
+                    const circleShape = body.shape as CircleShape;
 
-            const vertices = b.vertices;
-            const cos = Math.cos(b.rotation);
-            const sin = Math.sin(b.rotation);
-            const x = b.position.x;
-            const y = b.position.y;
-
-            // TODO: to be improved, maybe we can use a transform for this,
-            // see drawBody of renderer.ts
-            if (vertices.length > 0) {
-                const rotated = new Vector2(
-                    vertices[0].x * cos - vertices[0].y * sin + x,
-                    vertices[0].x * sin + vertices[0].y * cos + y,
-                );
-                this.ctx.moveTo(rotated.x, rotated.y);
-                for (let i = 1; i < vertices.length; i++) {
-                    const rotated = new Vector2(
-                        vertices[i].x * cos - vertices[i].y * sin + x,
-                        vertices[i].x * sin + vertices[i].y * cos + y,
-                    );
-                    this.ctx.lineTo(rotated.x, rotated.y);
+                    if (!debug && body.texture) {
+                        Graphics.drawTexture(
+                            body.position.x,
+                            body.position.y,
+                            circleShape.radius * 2,
+                            circleShape.radius * 2,
+                            body.rotation,
+                            body.texture,
+                        );
+                    } else if (debug) {
+                        Graphics.drawCircle(
+                            body.position.x,
+                            body.position.y,
+                            circleShape.radius,
+                            body.rotation,
+                            'white',
+                        );
+                    }
                 }
-                this.ctx.closePath();
-            }
-
-            this.ctx.stroke();
-
-            // draw the 1px center point like filledCircleColor(..., radius=1)
-            this.ctx.fillStyle = color;
-            this.ctx.beginPath();
-            this.ctx.arc(x, y, 1, 0, Math.PI * 2);
-            this.ctx.fill();
-        }
-
-        if (b instanceof Circle) {
-            const color = 'white';
-            const x = b.position.x;
-            const y = b.position.y;
-            const radius = b.radius;
-            const angle = b.rotation;
-
-            // Draw the circle
-            this.ctx.beginPath();
-            this.ctx.arc(x, y, radius, 0, Math.PI * 2);
-            this.ctx.strokeStyle = color;
-            this.ctx.stroke();
-
-            // Draw the line from center to circle edge at given angle
-            const endX = x + Math.cos(angle) * radius;
-            const endY = y + Math.sin(angle) * radius;
-
-            this.ctx.beginPath();
-            this.ctx.moveTo(x, y);
-            this.ctx.lineTo(endX, endY);
-            this.ctx.strokeStyle = color;
-            this.ctx.stroke();
+                break;
+            case ShapeType.POLYGON:
+                {
+                    const polygonShape = body.shape as PolygonShape;
+                    if (!debug && body.texture) {
+                        Graphics.drawTexture(
+                            body.position.x,
+                            body.position.y,
+                            polygonShape.width,
+                            polygonShape.height,
+                            body.rotation,
+                            body.texture,
+                        );
+                    } else if (debug) {
+                        Graphics.drawPolygon(body.position.x, body.position.y, polygonShape.worldVertices, 'white');
+                    }
+                }
+                break;
         }
     };
 }

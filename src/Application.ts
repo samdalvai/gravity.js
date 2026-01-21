@@ -1,5 +1,5 @@
 import AssetStore from './AssetStore';
-import Graphics from './Graphics_old';
+import Graphics from './Graphics';
 import InputManager, { MouseButton } from './InputManager';
 import Utils from './math/Utils';
 import Vec2 from './math/Vec2';
@@ -7,8 +7,8 @@ import Body from './physics/Body';
 import { GRAVITY, MAX_BODIES } from './physics/Constants';
 import Force from './physics/Force';
 import { BoxShape, CircleShape } from './physics/Shape';
-import World from './physics/World_adapted';
-import Demo from './samples/Demo_adapted';
+import World from './physics/World';
+import Demo from './samples/Demo';
 
 export default class Application {
     private running = false;
