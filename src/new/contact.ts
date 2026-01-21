@@ -2,9 +2,9 @@ import { Mat2 } from '../math/Mat2';
 import Utils from '../math/Utils';
 import Vec2 from '../math/Vec2';
 import Body from '../physics/Body';
+import { SETTINGS } from '../physics/Constants';
 import { Constraint } from './constraint';
 import { ContactPoint } from './detection';
-import { Settings } from './settings';
 
 enum ContactType {
     Normal,
@@ -45,7 +45,7 @@ class ContactSolver {
         this.bodyB = manifold.bodyB;
         this.contactPoint = contactPoint;
 
-        this.beta = Settings.positionCorrectionBeta;
+        this.beta = SETTINGS.positionCorrectionBeta;
         this.restitution = this.bodyA.restitution * this.bodyB.restitution;
         this.friction = this.bodyA.friction * this.bodyB.friction;
     }
@@ -75,13 +75,13 @@ class ContactSolver {
                 .subNew(this.bodyA.velocity.addNew(Vec2.cross(this.bodyA.angularVelocity, this.ra)));
             const normalVelocity = this.manifold.contactNormal.dot(relativeVelocity);
 
-            if (Settings.positionCorrection) {
+            if (SETTINGS.positionCorrection) {
                 this.bias =
                     -(this.beta * inverseDeltaTime) *
-                    Math.max(this.manifold.penetrationDepth! - Settings.penetrationSlop, 0.0);
+                    Math.max(this.manifold.penetrationDepth! - SETTINGS.penetrationSlop, 0.0);
             }
 
-            this.bias += this.restitution * Math.min(normalVelocity + Settings.restitutionSlop, 0.0);
+            this.bias += this.restitution * Math.min(normalVelocity + SETTINGS.restitutionSlop, 0.0);
             // if (approachingVelocity + Settings.restitutionSlop < 0) this.bias += this.restitution * approachingVelocity;
         } else {
             // Bias for surface speed that enables the conveyor belt-like behavior
@@ -99,7 +99,7 @@ class ContactSolver {
         this.effectiveMass = k > 0.0 ? 1.0 / k : 0.0;
 
         // Apply the old impulse calculated in the previous time step
-        if (Settings.warmStarting) this.applyImpulse(this.impulseSum);
+        if (SETTINGS.warmStarting) this.applyImpulse(this.impulseSum);
     }
 
     solve(normalContact?: ContactSolver) {
@@ -119,20 +119,20 @@ class ContactSolver {
         const oldImpulseSum = this.impulseSum;
         switch (this.contactType) {
             case ContactType.Normal: {
-                if (Settings.impulseAccumulation) this.impulseSum = Math.max(0.0, this.impulseSum + lambda);
+                if (SETTINGS.impulseAccumulation) this.impulseSum = Math.max(0.0, this.impulseSum + lambda);
                 else this.impulseSum = Math.max(0.0, lambda);
                 break;
             }
             case ContactType.Tangent: {
                 const maxFriction = this.friction * normalContact!.impulseSum;
-                if (Settings.impulseAccumulation)
+                if (SETTINGS.impulseAccumulation)
                     this.impulseSum = Utils.clamp(this.impulseSum + lambda, -maxFriction, maxFriction);
                 else this.impulseSum = Utils.clamp(lambda, -maxFriction, maxFriction);
                 break;
             }
         }
 
-        if (Settings.impulseAccumulation) lambda = this.impulseSum - oldImpulseSum;
+        if (SETTINGS.impulseAccumulation) lambda = this.impulseSum - oldImpulseSum;
         else lambda = this.impulseSum;
 
         // Apply impulse
@@ -401,7 +401,7 @@ export class ContactManifold extends Constraint {
             this.tangentContacts.push(new ContactSolver(this, contactPoints[i].point));
         }
 
-        if (this.numContacts == 2 && Settings.blockSolve) {
+        if (this.numContacts == 2 && SETTINGS.blockSolve) {
             this.blockSolver = new BlockSolver(this);
         }
     }
@@ -423,7 +423,7 @@ export class ContactManifold extends Constraint {
         }
 
         // If we have two contact points, then preSolve the block solver.
-        if (this.numContacts == 2 && Settings.blockSolve) {
+        if (this.numContacts == 2 && SETTINGS.blockSolve) {
             this.blockSolver.preSolve(this.normalContacts);
         }
     }
@@ -434,7 +434,7 @@ export class ContactManifold extends Constraint {
             this.tangentContacts[i].solve(this.normalContacts[i]);
         }
 
-        if (this.numContacts == 1 || !Settings.blockSolve) {
+        if (this.numContacts == 1 || !SETTINGS.blockSolve) {
             for (let i = 0; i < this.numContacts; i++) {
                 this.normalContacts[i].solve();
             }
@@ -451,14 +451,14 @@ export class ContactManifold extends Constraint {
             let o = 0;
             for (; o < oldManifold.numContacts; o++) {
                 if (this.contactPoints[n].id == oldManifold.contactPoints[o].id) {
-                    if (Settings.applyWarmStartingThreshold) {
+                    if (SETTINGS.applyWarmStartingThreshold) {
                         const dist = Vec2.squaredDistance(
                             this.contactPoints[n].point,
                             oldManifold.contactPoints[o].point,
                         );
                         // If contact points are close enough, warm start.
                         // Otherwise, it means it's penetrating too deeply, skip the warm starting to prevent the overshoot
-                        if (dist < Settings.warmStartingThreshold) break;
+                        if (dist < SETTINGS.warmStartingThreshold) break;
                     } else {
                         break;
                     }
