@@ -1,11 +1,11 @@
-import Body from './Body';
+import RigidBody from './RigidBody';
 
 // Children: ContactManifold, Joint
 export abstract class Constraint {
-    public readonly bodyA: Body;
-    public readonly bodyB: Body;
+    public readonly bodyA: RigidBody;
+    public readonly bodyB: RigidBody;
     
-    constructor(bodyA: Body, bodyB: Body) {
+    constructor(bodyA: RigidBody, bodyB: RigidBody) {
         this.bodyA = bodyA;
         this.bodyB = bodyB;
     }
