@@ -1,6 +1,6 @@
 import Vec2 from '../math/Vec2';
 import Body from './Body';
-import { PIXELS_PER_METER } from './Constants';
+import { TANGENT_MIN_LENGTH } from './Constants';
 import { ContactManifold } from './Contact';
 import { CircleShape, PolygonShape, ShapeType } from './Shape';
 
@@ -37,7 +37,7 @@ interface SupportResult {
     index: number;
 }
 
-// Returns the fardest vertex in the 'dir' direction
+// Returns the farthest vertex in the 'dir' direction
 function support(b: Body, dir: Vec2): SupportResult {
     const shape = b.shape;
     if (shape instanceof PolygonShape) {
@@ -59,8 +59,6 @@ function support(b: Body, dir: Vec2): SupportResult {
         throw 'Not a supported shape';
     }
 }
-
-const TANGENT_MIN_LENGTH = 0.01 * PIXELS_PER_METER;
 
 function findFarthestEdge(b: Body, dir: Vec2): Edge {
     const localDir = b.worldDirToLocal(dir);
