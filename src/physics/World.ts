@@ -134,7 +134,7 @@ export default class World {
         this.manifoldMap = newManifoldMap;
         this.manifolds = newManifolds;
 
-        // Prepare for solving
+        // preSolve for solving
         for (let i = 0; i < this.manifolds.length; i++) {
             const m = this.manifolds[i];
 
@@ -143,7 +143,7 @@ export default class World {
                 continue;
             }
 
-            this.manifolds[i].prepare(invDt);
+            this.manifolds[i].preSolve(invDt);
         }
 
         for (let i = 0; i < this.joints.length; i++) {

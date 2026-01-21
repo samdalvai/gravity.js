@@ -50,7 +50,7 @@ class ContactSolver {
         this.friction = this.bodyA.friction * this.bodyB.friction;
     }
 
-    prepare(dir: Vec2, contactType: ContactType, featureFlipped: boolean, inverseDeltaTime: number) {
+    preSolve(dir: Vec2, contactType: ContactType, featureFlipped: boolean, inverseDeltaTime: number) {
         // Calculate Jacobian J and effective mass M
         // J = [-dir, -ra × dir, dir, rb × dir] (dir: Contact vector, normal or tangent)
         // M = (J · M^-1 · J^t)^-1
@@ -172,7 +172,7 @@ class BlockSolver {
         this.bodyB = manifold.bodyB;
     }
 
-    prepare(normalContacts: ContactSolver[]) {
+    preSolve(normalContacts: ContactSolver[]) {
         // Calculate Jacobian J and effective mass M
         // J = [-n, -ra1 × n, n, rb1 × n
         //      -n, -ra2 × n, n, rb2 × n]
@@ -409,15 +409,15 @@ export class ContactManifold extends Constraint {
         }
     }
 
-    override prepare(inverseDeltaTime: number): void {
+    override preSolve(inverseDeltaTime: number): void {
         for (let i = 0; i < this.numContacts; i++) {
-            this.normalContacts[i].prepare(this.contactNormal, ContactType.Normal, this.featureFlipped, inverseDeltaTime);
-            this.tangentContacts[i].prepare(this.contactTangent, ContactType.Tangent, this.featureFlipped, inverseDeltaTime);
+            this.normalContacts[i].preSolve(this.contactNormal, ContactType.Normal, this.featureFlipped, inverseDeltaTime);
+            this.tangentContacts[i].preSolve(this.contactTangent, ContactType.Tangent, this.featureFlipped, inverseDeltaTime);
         }
 
-        // If we have two contact points, then prepare the block solver.
+        // If we have two contact points, then preSolve the block solver.
         if (this.numContacts == 2 && Settings.blockSolve) {
-            this.blockSolver.prepare(this.normalContacts);
+            this.blockSolver.preSolve(this.normalContacts);
         }
     }
 
