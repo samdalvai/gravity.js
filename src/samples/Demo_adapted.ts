@@ -106,56 +106,52 @@ export default class Demo {
         world.addBody(b);
         world.addJoint(joint);
 
-        // Suspension Bridge Creation
-        // const numSteps = 10;
-        // const stepWidth = 40;
-        // const spacing = stepWidth + 2.5; // distance between centers
-        // const startX = Graphics.width() / 2 - (numSteps * spacing) / 2;
-        // const startY = Graphics.height() / 2;
-        // const softness = 0.02;
-        // const bias = 0.1;
+        //Suspension Bridge Creation
+        const numSteps = 10;
+        const stepWidth = 40;
+        const spacing = stepWidth + 2.5; // distance between centers
+        const startX = Graphics.width() / 2 - (numSteps * spacing) / 2;
+        const startY = Graphics.height() / 2;
+        const softness = 0.02;
+        const bias = 0.1;
 
-        // // Start anchor (static)
-        // const startAnchor = new Body(new BoxShape(stepWidth * 2, stepWidth * 0.5), startX - stepWidth / 2, startY, 0.0);
-        // startAnchor.setTexture('rockBridgeAnchor');
-        // world.addBody(startAnchor);
+        // Start anchor (static)
+        const startAnchor = new Body(new BoxShape(stepWidth * 2, stepWidth * 0.5), startX - stepWidth / 2, startY, 0.0);
+        startAnchor.setTexture('rockBridgeAnchor');
+        world.addBody(startAnchor);
 
-        // // First connection uses the start anchor
-        // let lastStep = startAnchor;
+        // First connection uses the start anchor
+        let lastStep = startAnchor;
 
-        // // Create steps
-        // for (let i = 1; i <= numSteps; i++) {
-        //     const x = startX + i * spacing;
+        // Create steps
+        for (let i = 1; i <= numSteps; i++) {
+            const x = startX + i * spacing;
 
-        //     // Optional sag: small vertical sinusoidal displacement
-        //     const y = startY + Math.sin((i / numSteps) * Math.PI) * 10;
+            // Optional sag: small vertical sinusoidal displacement
+            const y = startY + Math.sin((i / numSteps) * Math.PI) * 10;
 
-        //     const step = new Body(new CircleShape(stepWidth * 0.5), x, y, 3);
-        //     step.setTexture('woodBridgeStep');
-        //     world.addBody(step);
+            const step = new Body(new CircleShape(stepWidth * 0.5), x, y, 3);
+            step.setTexture('woodBridgeStep');
+            world.addBody(step);
 
-        //     // Joint anchor at left edge of this step
-        //     // const anchor = step.position.subNew(new Vec2(stepWidth / 2, 0));
-        //     // const joint = new JointConstraint(lastStep, step, anchor, softness, bias);
-        //     const anchorA = lastStep.position.addNew(new Vec2(stepWidth / 2, 0));
-        //     const anchorB = step.position.subNew(new Vec2(stepWidth / 2, 0));
-        //     // const joint = new JointConstraint(lastStep, step, anchor, softness, bias);
-        //     const joint = new DistanceJoint(lastStep, step, anchorA, anchorB, -1, 10, 1);
+            // Joint anchor at left edge of this step
 
-        //     world.addJoint(joint);
+            // const joint = new JointConstraint(lastStep, step, anchor, softness, bias);
 
-        //     lastStep = step;
-        // }
+            // world.addJoint(joint);
 
-        // // End anchor (static)
-        // const endAnchor = new Body(
-        //     new BoxShape(stepWidth * 2, stepWidth * 0.5),
-        //     lastStep.position.x + spacing + stepWidth / 2,
-        //     startY,
-        //     0.0,
-        // );
-        // endAnchor.setTexture('rockBridgeAnchor');
-        // world.addBody(endAnchor);
+            lastStep = step;
+        }
+
+        // End anchor (static)
+        const endAnchor = new Body(
+            new BoxShape(stepWidth * 2, stepWidth * 0.5),
+            lastStep.position.x + spacing + stepWidth / 2,
+            startY,
+            0.0,
+        );
+        endAnchor.setTexture('rockBridgeAnchor');
+        world.addBody(endAnchor);
 
         // // Final joint anchor at right edge of last step
         // // const finalAnchor = lastStep.position.addNew(new Vec2(stepWidth / 2, 0));
