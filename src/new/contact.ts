@@ -75,10 +75,11 @@ class ContactSolver {
                 .subNew(this.bodyA.velocity.addNew(Vec2.cross(this.bodyA.angularVelocity, this.ra)));
             const normalVelocity = this.manifold.contactNormal.dot(relativeVelocity);
 
-            if (Settings.positionCorrection)
+            if (Settings.positionCorrection) {
                 this.bias =
                     -(this.beta * inverseDeltaTime) *
                     Math.max(this.manifold.penetrationDepth! - Settings.penetrationSlop, 0.0);
+            }
 
             this.bias += this.restitution * Math.min(normalVelocity + Settings.restitutionSlop, 0.0);
             // if (approachingVelocity + Settings.restitutionSlop < 0) this.bias += this.restitution * approachingVelocity;
@@ -142,13 +143,9 @@ class ContactSolver {
         // V2 = V2' + M^-1 ⋅ Pc
         // Pc = J^t ⋅ λ
 
-        this.bodyA.velocity = this.bodyA.velocity.addNew(
-            this.jacobian.va.scaleNew(this.bodyA.invMass * lambda),
-        );
+        this.bodyA.velocity = this.bodyA.velocity.addNew(this.jacobian.va.scaleNew(this.bodyA.invMass * lambda));
         this.bodyA.angularVelocity = this.bodyA.angularVelocity + this.bodyA.invI * this.jacobian.wa * lambda;
-        this.bodyB.velocity = this.bodyB.velocity.addNew(
-            this.jacobian.vb.scaleNew(this.bodyB.invMass * lambda),
-        );
+        this.bodyB.velocity = this.bodyB.velocity.addNew(this.jacobian.vb.scaleNew(this.bodyB.invMass * lambda));
         this.bodyB.angularVelocity = this.bodyB.angularVelocity + this.bodyB.invI * this.jacobian.wb * lambda;
     }
 }
@@ -411,8 +408,18 @@ export class ContactManifold extends Constraint {
 
     override preSolve(inverseDeltaTime: number): void {
         for (let i = 0; i < this.numContacts; i++) {
-            this.normalContacts[i].preSolve(this.contactNormal, ContactType.Normal, this.featureFlipped, inverseDeltaTime);
-            this.tangentContacts[i].preSolve(this.contactTangent, ContactType.Tangent, this.featureFlipped, inverseDeltaTime);
+            this.normalContacts[i].preSolve(
+                this.contactNormal,
+                ContactType.Normal,
+                this.featureFlipped,
+                inverseDeltaTime,
+            );
+            this.tangentContacts[i].preSolve(
+                this.contactTangent,
+                ContactType.Tangent,
+                this.featureFlipped,
+                inverseDeltaTime,
+            );
         }
 
         // If we have two contact points, then preSolve the block solver.
@@ -431,8 +438,8 @@ export class ContactManifold extends Constraint {
             for (let i = 0; i < this.numContacts; i++) {
                 this.normalContacts[i].solve();
             }
-        } else // Solve two contact constraint in one shot using block solver
-        {
+        } // Solve two contact constraint in one shot using block solver
+        else {
             this.blockSolver.solve();
         }
     }
