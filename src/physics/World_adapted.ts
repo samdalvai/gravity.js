@@ -2,7 +2,6 @@ import Graphics from '../Graphics_old';
 import Vec2 from '../math/Vec2';
 import { ContactManifold } from '../new/contact_adapted';
 import { detectCollision_adapted } from '../new/detection_adapted';
-import { Joint } from '../new/joint_adapted';
 import { Settings } from '../new/settings';
 import Body from './Body';
 import CollisionDetection from './CollisionDetection_adapted';
@@ -19,10 +18,10 @@ export default class World {
 
     // Constraints to be solved
     public manifolds: ContactManifold[] = [];
-    public joints: Joint[] = [];
+    public joints: JointConstraint[] = [];
 
     public manifoldMap: Map<number, ContactManifold> = new Map();
-    public jointMap: Map<number, Joint> = new Map();
+    public jointMap: Map<number, JointConstraint> = new Map();
 
     private forces: Vec2[] = [];
     private torques: number[] = [];
@@ -48,11 +47,11 @@ export default class World {
         return this.manifolds;
     };
 
-    addJoint = (constraint: Joint): void => {
+    addJoint = (constraint: JointConstraint): void => {
         this.joints.push(constraint);
     };
 
-    getJoints = (): Joint[] => {
+    getJoints = (): JointConstraint[] => {
         return this.joints;
     };
 
@@ -160,7 +159,7 @@ export default class World {
         }
 
         for (let i = 0; i < this.joints.length; i++) {
-            this.joints[i].prepare(invDt);
+            this.joints[i].preSolve(invDt);
         }
 
         // Iteratively solve the violated velocity constraint
