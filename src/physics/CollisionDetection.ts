@@ -5,37 +5,9 @@ import Edge from './Edge';
 import RigidBody from './RigidBody';
 import { CircleShape, PolygonShape, ShapeType } from './Shape';
 
-interface SupportResult {
-    vertex: Vec2;
-    index: number;
-}
-
-// Returns the farthest vertex in the 'dir' direction
-function support(b: RigidBody, dir: Vec2): SupportResult {
-    const shape = b.shape;
-    if (shape instanceof PolygonShape) {
-        let idx = 0;
-        let maxValue = dir.dot(shape.localVertices[idx]);
-
-        for (let i = 1; i < shape.localVertices.length; i++) {
-            const value = dir.dot(shape.localVertices[i]);
-            if (value > maxValue) {
-                idx = i;
-                maxValue = value;
-            }
-        }
-
-        return { vertex: shape.localVertices[idx], index: idx };
-    } else if (shape instanceof CircleShape) {
-        return { vertex: dir.normalizeNew().scaleNew(shape.radius), index: -1 };
-    } else {
-        throw 'Not a supported shape';
-    }
-}
-
 function findFarthestEdge(b: RigidBody, dir: Vec2): Edge {
     const localDir = b.worldDirToLocal(dir);
-    const farthest = support(b, localDir);
+    const farthest = b.shape.support(localDir);
     let curr = farthest.vertex;
     const idx = farthest.index;
 
