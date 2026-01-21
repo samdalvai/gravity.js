@@ -41,36 +41,35 @@ describe('Constraint', () => {
         expect(Math.abs(b.velocity.y + 1200)).toBeLessThan(0.005);
     });
 
-    // test('Penetration constraint solving should apply impulses to correct position of bodies', () => {
-    //     const a = new Body(new CircleShape(60), 100, 100, 5);
-    //     const b = new Body(new CircleShape(60), 217.5, 100, 5);
+    test('Penetration constraint solving should apply impulses to correct position of bodies', () => {
+        const a = new Body(new CircleShape(60), 100, 100, 5);
+        const b = new Body(new CircleShape(60), 200, 100, 5);
 
-    //     // Move bodies apart
-    //     const numFrames = 60;
-    //     const solverIterations = 20;
+        // Move bodies apart
+        const numFrames = 60;
+        const solverIterations = 20;
 
-    //     const contacts: ContactConstraint[] = [];
-    //     CollisionDetection.detectCollisionCircleCircle(a, b, contacts);
-    //     const contact = contacts![0];
+        const manifold = CollisionDetection.detectCollisionCircleCircle(a, b)!;
 
-    //     const deltaTime = 1 / 60;
-    //     for (let i = 0; i < numFrames; i++) {
-    //         contact.preSolve(1 / deltaTime);
+        const deltaTime = 1 / 60;
+        for (let i = 0; i < numFrames; i++) {
+            manifold.prepare(1 / deltaTime);
 
-    //         for (let j = 0; j < solverIterations; j++) {
-    //             contact.solve();
-    //         }
-    //     }
+            for (let j = 0; j < solverIterations; j++) {
+                manifold.solve();
+            }
+        }
 
-    //     a.integrateVelocities(deltaTime);
-    //     b.integrateVelocities(deltaTime);
+        a.integrateVelocities(deltaTime);
+        b.integrateVelocities(deltaTime);
 
-    //     expect(a.position.y).toBe(100);
-    //     expect(b.position.y).toBe(100);
+        expect(a.position.y).toBe(100);
+        expect(b.position.y).toBe(100);
 
-    //     // Check that the solver approximation is "good enough"
-    //     expect(Math.abs(a.position.x - b.position.x) - 200).toBeLessThan(0.005);
-    //     expect(a.velocity.x + 15).toBeLessThan(0.1);
-    //     expect(b.velocity.x - 15).toBeLessThan(0.1);
-    // });
+        // Check that the solver moved the objects apart
+        expect(a.position.x).toBeLessThan(100);
+        expect(b.position.x).toBeGreaterThan(200);
+        expect(a.velocity.x).toBeLessThan(0);
+        expect(b.velocity.x).toBeGreaterThan(0);
+    });
 });
