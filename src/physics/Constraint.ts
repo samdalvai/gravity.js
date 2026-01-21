@@ -1,5 +1,4 @@
-import Vec2 from '../math/Vec2';
-import Body from '../physics/Body';
+import Body from './Body';
 
 // Children: ContactManifold, Joint
 export abstract class Constraint {

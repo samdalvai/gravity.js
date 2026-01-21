@@ -1,9 +1,9 @@
 import Graphics from '../Graphics';
 import Vec2 from '../math/Vec2';
-import { ContactManifold } from '../new/contact';
 import Body from './Body';
 import CollisionDetection from './CollisionDetection';
 import { SETTINGS } from './Constants';
+import { ContactManifold } from './Contact';
 import Force from './Force';
 import { JointConstraint } from './Joint';
 

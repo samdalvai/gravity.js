@@ -1,5 +1,5 @@
 import Vec2 from '../math/Vec2';
-import { Constraint } from '../new/constraint';
+import { Constraint } from './Constraint';
 import Body from './Body';
 
 // TODO: investigate separate velocity and position solver
