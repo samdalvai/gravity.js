@@ -12,7 +12,6 @@ export default class RigidBody {
     acceleration: Vec2;
 
     // Angular motion
-    /** Attention: rotation should be set using setRotation */
     rotation: number;
     angularVelocity: number;
     angularAcceleration: number;
@@ -30,6 +29,7 @@ export default class RigidBody {
     // Coefficient of restitution (elasticity)
     restitution: number;
     friction: number;
+    surfaceSpeed: number;
 
     // Pointer to the shape/geometry of this rigid body
     shape: Shape;
@@ -57,8 +57,11 @@ export default class RigidBody {
         this.angularAcceleration = 0.0;
         this.sumForces = new Vec2(0, 0);
         this.sumTorque = 0.0;
+
         this.restitution = 0.2;
         this.friction = 0.7;
+        this.surfaceSpeed = 0;
+
         this.mass = mass;
 
         if (mass != 0.0) {
@@ -92,12 +95,6 @@ export default class RigidBody {
 
     setTexture = (texture: keyof typeof TEXTURES): void => {
         this.texture = AssetStore.getTexture(texture);
-    };
-
-    setRotation = (rotation: number): void => {
-        this.rotation = rotation;
-        this.shape.updateVertices(this.rotation, this.position);
-        this.updateAABB();
     };
 
     isStatic = (): boolean => {
