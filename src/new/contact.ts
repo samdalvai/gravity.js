@@ -374,11 +374,6 @@ export class ContactManifold extends Constraint {
 
     public readonly featureFlipped;
 
-    // private readonly normalContacts: ContactSolver[] = [];
-    // private readonly tangentContacts: ContactSolver[] = [];
-    // private readonly blockSolver!: BlockSolver;
-
-    // private readonly featureFlipped;
     public persistent = false;
 
     constructor(
