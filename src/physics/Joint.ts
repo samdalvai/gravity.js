@@ -4,8 +4,8 @@ import RigidBody from './RigidBody';
 
 // TODO: investigate separate velocity and position solver
 export class JointConstraint extends Constraint {
-    aPointLocal: Vec2; // The constraint point in A's local space
-    bPointLocal: Vec2; // The constraint point in B's local space
+    public readonly aPointLocal: Vec2; // The constraint point in A's local space
+    public readonly bPointLocal: Vec2; // The constraint point in B's local space
 
     // Elements of the 2x2 effective mass matrix (inverse of the constraint mass matrix) for x-x, x-y, and y-y components.
     private effectiveMassXX = 0;

@@ -367,14 +367,11 @@ export class ContactManifold extends Constraint {
     public readonly contactTangent: Vec2;
     public readonly contactPoints: ContactPoint[];
 
-    // TODO: to be made private
-    public readonly normalContacts: ContactSolver[] = [];
-    public readonly tangentContacts: ContactSolver[] = [];
-    public readonly blockSolver!: BlockSolver;
+    private readonly normalContacts: ContactSolver[] = [];
+    private readonly tangentContacts: ContactSolver[] = [];
+    private readonly blockSolver!: BlockSolver;
 
-    public readonly featureFlipped;
-
-    public persistent = false;
+    private readonly featureFlipped;
 
     constructor(
         bodyA: RigidBody,
@@ -459,8 +456,6 @@ export class ContactManifold extends Constraint {
             if (o < oldManifold.numContacts) {
                 this.normalContacts[n].impulseSum = oldManifold.normalContacts[o].impulseSum;
                 this.tangentContacts[n].impulseSum = oldManifold.tangentContacts[o].impulseSum;
-
-                this.persistent = true;
             }
         }
     }
