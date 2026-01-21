@@ -1,10 +1,10 @@
 import { Mat2 } from '../math/Mat2';
 import Utils from '../math/Utils';
 import Vec2 from '../math/Vec2';
-import RigidBody from './RigidBody';
 import { ContactPoint } from './CollisionDetection';
 import { SETTINGS } from './Constants';
 import { Constraint } from './Constraint';
+import RigidBody from './RigidBody';
 
 enum ContactType {
     Normal,
@@ -61,7 +61,7 @@ class ContactSolver {
         this.rb = this.contactPoint.subNew(this.bodyB.position);
 
         this.jacobian = {
-            va: dir.negated(),
+            va: dir.negateNew(),
             wa: -this.ra!.cross(dir),
             vb: dir,
             wb: this.rb!.cross(dir),
@@ -71,8 +71,8 @@ class ContactSolver {
         if (this.contactType == ContactType.Normal) {
             // Relative velocity at contact point
             const relativeVelocity = this.bodyB.velocity
-                .addNew(Vec2.cross(this.bodyB.angularVelocity, this.rb))
-                .subNew(this.bodyA.velocity.addNew(Vec2.cross(this.bodyA.angularVelocity, this.ra)));
+                .addNew(this.rb.crossScalar(this.bodyB.angularVelocity))
+                .subNew(this.bodyA.velocity.addNew(this.ra.crossScalar(this.bodyA.angularVelocity)));
             const normalVelocity = this.manifold.contactNormal.dot(relativeVelocity);
 
             if (SETTINGS.positionCorrection) {
@@ -279,7 +279,7 @@ class BlockSolver {
             //
             // x = - inv(A) * b'
             //
-            x = this.m.mulVector(b).negated();
+            x = this.m.mulVector(b).negateNew();
             if (x.x >= 0.0 && x.y >= 0.0) break;
 
             //
@@ -445,10 +445,8 @@ export class ContactManifold extends Constraint {
             for (; o < oldManifold.numContacts; o++) {
                 if (this.contactPoints[n].id == oldManifold.contactPoints[o].id) {
                     if (SETTINGS.applyWarmStartingThreshold) {
-                        const dist = Vec2.squaredDistance(
-                            this.contactPoints[n].point,
-                            oldManifold.contactPoints[o].point,
-                        );
+                        const dist = this.contactPoints[n].point.squaredDistance(oldManifold.contactPoints[o].point);
+
                         // If contact points are close enough, warm start.
                         // Otherwise, it means it's penetrating too deeply, skip the warm starting to prevent the overshoot
                         if (dist < SETTINGS.warmStartingThreshold) break;
@@ -470,5 +468,4 @@ export class ContactManifold extends Constraint {
     get numContacts() {
         return this.contactPoints.length;
     }
-
 }

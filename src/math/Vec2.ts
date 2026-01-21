@@ -60,6 +60,10 @@ export default class Vec2 {
         return this;
     }
 
+    normal(): Vec2 {
+        return new Vec2(this.y, -this.x).normalize();
+    }
+
     unitVector(): Vec2 {
         const result = new Vec2(0, 0);
         const length = this.magnitude();
@@ -68,10 +72,6 @@ export default class Vec2 {
             result.y = this.y / length;
         }
         return result;
-    }
-
-    normal(): Vec2 {
-        return new Vec2(this.y, -this.x).normalize();
     }
 
     /** Perpendicular (clockwise), NOT normalized */
@@ -173,23 +173,14 @@ export default class Vec2 {
     }
 
     /** operator - (unary negation) */
-    negated(): Vec2 {
+    negateNew(): Vec2 {
         const result = new Vec2();
         result.x = -this.x;
         result.y = -this.y;
         return result;
     }
 
-    fix(limit = 1e-13): void {
-        this.x = Utils.toFixed(this.x, limit);
-        this.y = Utils.toFixed(this.y, limit);
-    }
-
-    static squaredDistance(a: Vec2, b: Vec2): number {
-        return (a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y);
-    }
-
-    static cross(scalar: number, vector: Vec2): Vec2 {
-        return new Vec2(-scalar * vector.y, scalar * vector.x);
-    }
+    squaredDistance = (b: Vec2): number => {
+        return (this.x - b.x) * (this.x - b.x) + (this.y - b.y) * (this.y - b.y);
+    };
 }
