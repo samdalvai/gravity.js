@@ -3,7 +3,6 @@ import Graphics from './Graphics_old';
 import InputManager, { MouseButton } from './InputManager';
 import Utils from './math/Utils';
 import Vec2 from './math/Vec2';
-import { DistanceJoint } from './new/distance_adapted';
 import Body from './physics/Body';
 import { GRAVITY, MAX_BODIES } from './physics/Constants';
 import Force from './physics/Force';
