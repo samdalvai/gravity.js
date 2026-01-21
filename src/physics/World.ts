@@ -1,6 +1,6 @@
 import Graphics from '../Graphics';
 import Vec2 from '../math/Vec2';
-import Body from './Body';
+import RigidBody from './RigidBody';
 import CollisionDetection from './CollisionDetection';
 import { SETTINGS } from './Constants';
 import { ContactManifold } from './Contact';
@@ -11,7 +11,7 @@ export default class World {
     private G: number;
     private iterations: number;
 
-    private bodies: Body[] = [];
+    private bodies: RigidBody[] = [];
 
     // Constraints to be solved
     public manifolds: ContactManifold[] = [];
@@ -28,11 +28,11 @@ export default class World {
         this.iterations = iterations;
     }
 
-    addBody = (body: Body): void => {
+    addBody = (body: RigidBody): void => {
         this.bodies.push(body);
     };
 
-    getBodies = (): Body[] => {
+    getBodies = (): RigidBody[] => {
         return this.bodies;
     };
 
@@ -85,7 +85,7 @@ export default class World {
 
         // console.time('contacts');
         this.bodies.sort((a, b) => a.minX - b.minX);
-        const potentialPairs: [Body, Body][] = [];
+        const potentialPairs: [RigidBody, RigidBody][] = [];
 
         // Broad phase check with prune & sweep algorithm
         for (let i = 0; i < this.bodies.length; i++) {
@@ -120,7 +120,7 @@ export default class World {
             const newManifold = CollisionDetection.detectCollision(a, b);
             if (newManifold == null) continue;
 
-            const key = Body.pairKey(a, b);
+            const key = RigidBody.pairKey(a, b);
             if (SETTINGS.warmStarting && this.manifoldMap.has(key)) {
                 const oldManifold = this.manifoldMap.get(key)!;
                 newManifold.tryWarmStart(oldManifold);

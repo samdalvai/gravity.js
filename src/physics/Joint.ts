@@ -1,6 +1,6 @@
 import Vec2 from '../math/Vec2';
 import { Constraint } from './Constraint';
-import Body from './Body';
+import RigidBody from './RigidBody';
 
 // TODO: investigate separate velocity and position solver
 export class JointConstraint extends Constraint {
@@ -32,7 +32,7 @@ export class JointConstraint extends Constraint {
     // Softness parameter allowing some constraint compliance (for stability in soft constraints).
     private softness: number;
 
-    constructor(bodyA: Body, bodyB: Body, worldAnchorPoint: Vec2, softness = 0.01, biasFactor = 0.2) {
+    constructor(bodyA: RigidBody, bodyB: RigidBody, worldAnchorPoint: Vec2, softness = 0.01, biasFactor = 0.2) {
         super(bodyA, bodyB);
 
         this.aPointLocal = bodyA.worldPointToLocal(worldAnchorPoint);
