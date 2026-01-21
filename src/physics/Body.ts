@@ -134,15 +134,6 @@ export default class Body {
         return rotated;
     };
 
-    // Equivalent to b1.localToGlobal.mulVector2(dir, 0);
-    // !!! was // Equivalent to b1.globalToLocal.mulVector2(dir, 0); please check
-    localDirToWorld = (dir: Vec2): Vec2 => {
-        const cos = Math.cos(this.rotation);
-        const sin = Math.sin(this.rotation);
-
-        return new Vec2(dir.x * cos - dir.y * sin, dir.x * sin + dir.y * cos);
-    };
-
     // Equivalent to b1.globalToLocal.mulVector2(supportP1, 1); Note the 1!!
     // !!! was // Equivalent to b1.localToGlobal.mulVector2(supportP1, 1); Note the 1!! please check
     worldPointToLocal = (point: Vec2): Vec2 => {
@@ -200,7 +191,6 @@ export default class Body {
         this.acceleration.y = this.sumForces.y * this.invMass;
 
         // Integrate the acceleration to find the new velocity
-
         this.velocity.x += this.acceleration.x * dt;
         this.velocity.y += this.acceleration.y * dt;
 
