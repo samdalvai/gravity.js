@@ -1,6 +1,7 @@
 export const PIXELS_PER_METER = 100;
 export const MAX_BODIES = 5000;
 export const GRAVITY = 9.8;
+export const TANGENT_MIN_LENGTH = 0.01 * PIXELS_PER_METER;
 
 export const SETTINGS = {
     positionCorrection: true,
