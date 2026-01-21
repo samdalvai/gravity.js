@@ -1,6 +1,6 @@
 import Graphics from '../Graphics';
 import Vec2 from '../math/Vec2';
-import { ContactManifold } from '../new/contact_adapted';
+import { ContactManifold } from '../new/contact';
 import { Settings } from '../new/settings';
 import Body from './Body';
 import CollisionDetection from './CollisionDetection';

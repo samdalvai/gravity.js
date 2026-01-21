@@ -1,6 +1,6 @@
 import Vec2 from '../math/Vec2';
-import { ContactManifold } from '../new/contact_adapted';
-import { findContactPoints_adapted } from '../new/detection_adapted';
+import { ContactManifold } from '../new/contact';
+import { findContactPoints_adapted } from '../new/detection';
 import Body from './Body';
 import { CircleShape, PolygonShape, ShapeType } from './Shape';
 

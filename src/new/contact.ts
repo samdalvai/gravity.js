@@ -2,8 +2,8 @@ import { Mat2 } from '../math/Mat2';
 import Utils from '../math/Utils';
 import Vec2 from '../math/Vec2';
 import Body from '../physics/Body';
-import { Constraint } from './constraint_adapted';
-import { ContactPoint } from './detection_adapted';
+import { Constraint } from './constraint';
+import { ContactPoint } from './detection';
 import { Settings } from './settings';
 
 enum ContactType {
