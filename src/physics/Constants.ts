@@ -1,7 +1,11 @@
 export const PIXELS_PER_METER = 100;
 export const MAX_BODIES = 5000;
 export const GRAVITY = 9.8;
+
+// Since the findFarthestEdge function returns a edge with a minimum length of 0.01 for circle,
+// merging threshold should be greater than sqrt(2) * minimum edge length
 export const TANGENT_MIN_LENGTH = 0.01 * PIXELS_PER_METER;
+export const CONTACT_MERGE_THRESHOLD = 1.415 * TANGENT_MIN_LENGTH;
 
 export const SETTINGS = {
     positionCorrection: true,
