@@ -439,8 +439,6 @@ export class ContactManifold extends Constraint {
         }
     }
 
-    protected override applyImpulse(): void {}
-
     tryWarmStart(oldManifold: ContactManifold) {
         for (let n = 0; n < this.numContacts; n++) {
             let o = 0;
