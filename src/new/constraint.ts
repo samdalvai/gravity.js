@@ -22,7 +22,7 @@ export abstract class Constraint {
      * Calculate Jacobian J and effective mass M
      * M = K^-1 = (J · M^-1 · J^t)^-1
      */
-    public abstract prepare(inverseDeltaTime: number): void;
+    public abstract preSolve(inverseDeltaTime: number): void;
 
     /*
      * Solve velocity constraint, calculate corrective impulse for current iteration
