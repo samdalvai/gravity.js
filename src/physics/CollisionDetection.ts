@@ -1,7 +1,7 @@
 import Vec2 from '../math/Vec2';
-import { ContactManifold } from '../new/contact';
 import { findContactPoints } from '../new/detection';
 import Body from './Body';
+import { ContactManifold } from './Contact';
 import { CircleShape, PolygonShape, ShapeType } from './Shape';
 
 export default class CollisionDetection {
