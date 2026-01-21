@@ -1,6 +1,6 @@
 import Vec2 from '../math/Vec2';
 import { ContactManifold } from '../new/contact';
-import { findContactPoints_adapted } from '../new/detection';
+import { findContactPoints } from '../new/detection';
 import Body from './Body';
 import { CircleShape, PolygonShape, ShapeType } from './Shape';
 
@@ -74,7 +74,7 @@ export default class CollisionDetection {
             flipped = true;
         }
 
-        const contactPoints = findContactPoints_adapted(normal, a, b);
+        const contactPoints = findContactPoints(normal, a, b);
         if (contactPoints.length === 0) return null;
 
         return new ContactManifold(a, b, contactPoints, penetrationDepth, normal, flipped);
