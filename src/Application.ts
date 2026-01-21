@@ -3,7 +3,7 @@ import Graphics from './Graphics';
 import InputManager, { MouseButton } from './InputManager';
 import Utils from './math/Utils';
 import Vec2 from './math/Vec2';
-import Body from './physics/Body';
+import RigidBody from './physics/RigidBody';
 import { GRAVITY, MAX_BODIES } from './physics/Constants';
 import Force from './physics/Force';
 import { BoxShape, CircleShape } from './physics/Shape';
@@ -19,8 +19,8 @@ export default class Application {
     private showContacts = true;
     private showAABB = false;
     private demoIndex = 1;
-    private bomb: Body | null = null;
-    private testBody: Body | null = null;
+    private bomb: RigidBody | null = null;
+    private testBody: RigidBody | null = null;
 
     // Debug related properties
     private debug = true;
@@ -95,7 +95,7 @@ export default class Application {
                     if (inputEvent.code === 'Space') {
                         // Drop bomb
                         if (!this.bomb) {
-                            const bomb = new Body(new CircleShape(30), Graphics.width() / 2, 0, 10);
+                            const bomb = new RigidBody(new CircleShape(30), Graphics.width() / 2, 0, 10);
                             bomb.friction = 0.2;
                             this.bomb = bomb;
                             this.bomb.setTexture('rockRound');
@@ -184,7 +184,7 @@ export default class Application {
                     switch (inputEvent.button) {
                         case MouseButton.LEFT:
                             {
-                                const ball = new Body(new CircleShape(30), inputEvent.x, inputEvent.y, 4.0);
+                                const ball = new RigidBody(new CircleShape(30), inputEvent.x, inputEvent.y, 4.0);
                                 ball.restitution = 0.1;
                                 ball.friction = 0.5;
                                 ball.setTexture('basketball');
@@ -193,7 +193,7 @@ export default class Application {
                             break;
                         case MouseButton.RIGHT:
                             {
-                                const box = new Body(new BoxShape(60, 60), inputEvent.x, inputEvent.y, 6.0);
+                                const box = new RigidBody(new BoxShape(60, 60), inputEvent.x, inputEvent.y, 6.0);
                                 box.restitution = 0.1;
                                 box.friction = 0.7;
                                 box.setTexture('crate');
@@ -225,7 +225,7 @@ export default class Application {
                 }
 
                 const shape = this.generateCircles ? new CircleShape(5) : new BoxShape(10, 10);
-                const particle = new Body(shape, InputManager.mousePosition.x, InputManager.mousePosition.y, 1.0);
+                const particle = new RigidBody(shape, InputManager.mousePosition.x, InputManager.mousePosition.y, 1.0);
                 particle.restitution = 0.0;
                 particle.friction = 0.5;
                 particle.setTexture(this.generateCircles ? 'rockRound' : 'rockBox');

@@ -1,15 +1,15 @@
 import Vec2 from '../math/Vec2';
-import Body from './Body';
+import RigidBody from './RigidBody';
 import { PIXELS_PER_METER } from './Constants';
 
 export default class Force {
-    static generateWeightForce = (body: Body, G: number): Vec2 => {
+    static generateWeightForce = (body: RigidBody, G: number): Vec2 => {
         const weightForce = new Vec2(0.0, body.mass * G * PIXELS_PER_METER);
 
         return weightForce;
     };
 
-    static generateDragForce = (body: Body, k: number): Vec2 => {
+    static generateDragForce = (body: RigidBody, k: number): Vec2 => {
         let dragForce = new Vec2(0, 0);
 
         if (body.velocity.magnitudeSquared() > 0) {
@@ -26,7 +26,7 @@ export default class Force {
         return dragForce;
     };
 
-    static generateFrictionForce = (body: Body, k: number): Vec2 => {
+    static generateFrictionForce = (body: RigidBody, k: number): Vec2 => {
         // Calculate the friction direction (inverse of velocity unit vector)
         const frictionDirection = body.velocity.unitVector().scaleNew(-1);
 
@@ -38,8 +38,8 @@ export default class Force {
     };
 
     static generateGravitationalForce = (
-        a: Body,
-        b: Body,
+        a: RigidBody,
+        b: RigidBody,
         G: number,
         minDistance: number,
         maxDistance: number,
@@ -62,7 +62,7 @@ export default class Force {
         return attractionDirection.scaleNew(attractionMagnitude);
     };
 
-    static generateSpringForceBodyAnchor = (body: Body, anchor: Vec2, restLength: number, k: number): Vec2 => {
+    static generateSpringForceBodyAnchor = (body: RigidBody, anchor: Vec2, restLength: number, k: number): Vec2 => {
         // Calculate the distance between the anchor and the object
         const d = body.position.subNew(anchor);
 
@@ -79,7 +79,7 @@ export default class Force {
         return springDirection.scaleNew(sprintMagnitude);
     };
 
-    static generateSpringForceBodyBody = (a: Body, b: Body, restLength: number, k: number): Vec2 => {
+    static generateSpringForceBodyBody = (a: RigidBody, b: RigidBody, restLength: number, k: number): Vec2 => {
         // Calculate the distance between the two bodys
         const d = a.position.subNew(b.position);
 
@@ -96,7 +96,7 @@ export default class Force {
         return springDirection.scaleNew(sprintMagnitude);
     };
 
-    static generateExplosionForce = (body: Body, explosionSource: Vec2, radius: number, strength: number): Vec2 => {
+    static generateExplosionForce = (body: RigidBody, explosionSource: Vec2, radius: number, strength: number): Vec2 => {
         // Static bodies don't explode
         if (body.invMass === 0) return new Vec2();
 
