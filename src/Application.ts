@@ -321,7 +321,7 @@ export default class Application {
         ];
 
         const x = InputManager.mousePosition.x - Graphics.width() / 2;
-        const y = InputManager.mousePosition.y - Graphics.height() / 2;
+        const y = -(InputManager.mousePosition.y - Graphics.height() / 2);
 
         const debugText = [
             // Debug related info
