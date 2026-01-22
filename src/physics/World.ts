@@ -5,7 +5,7 @@ import CollisionDetection from './CollisionDetection';
 import { SETTINGS } from './Constants';
 import { ContactManifold } from './Contact';
 import Force from './Force';
-import { JointConstraint } from './Joint';
+import { JointConstraint } from './JointConstraint';
 
 export default class World {
     private G: number;
