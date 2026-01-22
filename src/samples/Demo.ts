@@ -1,6 +1,7 @@
 import Graphics from '../Graphics';
 import Vec2 from '../math/Vec2';
 import { DistanceJoint } from '../physics/DistanceJoint';
+import { Joint } from '../physics/Joint';
 // import { JointConstraint } from '../physics/JointConstraint';
 import RigidBody from '../physics/RigidBody';
 import { BoxShape, CircleShape, PolygonShape } from '../physics/Shape';
@@ -113,64 +114,152 @@ export default class Demo {
 
     static demo4 = (world: World) => {
         // Demo 4: As suspension bridge
-        this.generateFloor(world);
+        const floor = this.generateFloor(world);
         this.generateFences(world);
 
-        // Suspension Bridge Creation
-        const numSteps = 10;
-        const stepWidth = 40;
-        const spacing = stepWidth + 2.5; // distance between centers
-        const startX = Graphics.width() / 2 - (numSteps * spacing) / 2;
-        const startY = Graphics.height() / 2;
-        const softness = 0.02;
-        const bias = 0.1;
+        // // Suspension Bridge Creation
+        // const numSteps = 10;
+        // const stepWidth = 40;
+        // const spacing = stepWidth + 2.5; // distance between centers
+        // const startX = Graphics.width() / 2 - (numSteps * spacing) / 2;
+        // const startY = Graphics.height() / 2;
+        // const softness = 0.02;
+        // const bias = 0.1;
 
-        // Start anchor (static)
-        const startAnchor = new RigidBody(
-            new BoxShape(stepWidth * 2, stepWidth * 0.5),
-            startX - stepWidth / 2,
-            startY,
-            0.0,
+        // // Start anchor (static)
+        // const startAnchor = new RigidBody(
+        //     new BoxShape(stepWidth * 2, stepWidth * 0.5),
+        //     startX - stepWidth / 2,
+        //     startY,
+        //     0.0,
+        // );
+        // startAnchor.setTexture('rockBridgeAnchor');
+        // world.addBody(startAnchor);
+
+        // // First connection uses the start anchor
+        // let lastStep = startAnchor;
+
+        // // Create steps
+        // for (let i = 1; i <= numSteps; i++) {
+        //     const x = startX + i * spacing;
+
+        //     // Optional sag: small vertical sinusoidal displacement
+        //     const y = startY + Math.sin((i / numSteps) * Math.PI) * 10;
+
+        //     const step = new RigidBody(new CircleShape(stepWidth * 0.5), x, y, 3);
+        //     step.setTexture('woodBridgeStep');
+        //     world.addBody(step);
+
+        //     // Joint anchor at left edge of this step
+        //     const anchor = step.position.subNew(new Vec2(stepWidth / 2, 0));
+        //     const joint = new JointConstraint(lastStep, step, anchor, softness, bias);
+        //     world.addJoint(joint);
+
+        //     lastStep = step;
+        // }
+
+        // // End anchor (static)
+        // const endAnchor = new RigidBody(
+        //     new BoxShape(stepWidth * 2, stepWidth * 0.5),
+        //     lastStep.position.x + spacing + stepWidth / 2,
+        //     startY,
+        //     0.0,
+        // );
+        // endAnchor.setTexture('rockBridgeAnchor');
+        // world.addBody(endAnchor);
+
+        // // Final joint anchor at right edge of last step
+        // const finalAnchor = lastStep.position.addNew(new Vec2(stepWidth / 2, 0));
+        // const lastJoint = new JointConstraint(lastStep, endAnchor, finalAnchor, softness, bias);
+        // world.addJoint(lastJoint);
+
+        const groundStart = 0.2;
+
+        const xStart = 250;
+        const yStart = 1200;
+        const gap = 0.1;
+
+        const pillarWidth = 25;
+        const pillarHeight = pillarWidth * 15
+        const sizeX = 0.5;
+        const sizeY = sizeX * 0.25;
+
+        // let pillar = new Box(pillarWidth, yStart, Type.Static);
+        let pillar = new RigidBody(new BoxShape(pillarWidth, pillarHeight), xStart, yStart / 2 + 0.2, 0)
+        pillar.position = new Vec2(xStart, yStart / 2 + 0.2);
+        world.addBody(pillar);
+
+        return
+
+        const b1 = new Box(sizeX, sizeY);
+        b1.mass = 10;
+        b1.position = new Vec2(xStart + sizeX / 2 + pillarWidth / 2 + gap, yStart + groundStart);
+        world.addBody(b1);
+
+        let j!: Joint;
+
+        const frequecy = 7;
+
+        j = new DistanceJoint(
+            pillar,
+            b1,
+            pillar.position.addNew(new Vec2(pillarWidth / 2, yStart / 2)),
+            b1.position.addNew(new Vec2(-sizeX / 2, 0.03)),
+            -1,
+            frequecy,
+            1.0,
         );
-        startAnchor.setTexture('rockBridgeAnchor');
-        world.addBody(startAnchor);
+        j.drawAnchor = false;
+        world.addJoint(j);
 
-        // First connection uses the start anchor
-        let lastStep = startAnchor;
+        j = new DistanceJoint(
+            pillar,
+            b1,
+            pillar.position.addNew(new Vec2(pillarWidth / 2, yStart / 2)),
+            b1.position.addNew(new Vec2(-sizeX / 2, -0.03)),
+            -1,
+            frequecy,
+            1.0,
+        );
+        j.drawAnchor = false;
+        world.addJoint(j);
 
-        // Create steps
-        for (let i = 1; i <= numSteps; i++) {
-            const x = startX + i * spacing;
+        pillar = new Box(pillarWidth, yStart, Type.Static);
+        pillar.position = new Vec2(-xStart, yStart / 2 + 0.2);
+        world.addBody(pillar);
 
-            // Optional sag: small vertical sinusoidal displacement
-            const y = startY + Math.sin((i / numSteps) * Math.PI) * 10;
+        for (let i = 1; i + 1 < (xStart * -2) / (sizeX + gap); i++) {
+            const b2 = new Box(sizeX, sizeY);
+            b2.mass = 10;
+            b2.position = new Vec2(
+                xStart + sizeX / 2 + pillarWidth / 2 + gap + (gap + sizeX) * i,
+                yStart + groundStart,
+            );
+            world.addBody(b2);
 
-            const step = new RigidBody(new CircleShape(stepWidth * 0.5), x, y, 3);
-            step.setTexture('woodBridgeStep');
-            world.addBody(step);
-
-            // Joint anchor at left edge of this step
-            const anchor = step.position.subNew(new Vec2(stepWidth / 2, 0));
-            const joint = new JointConstraint(lastStep, step, anchor, softness, bias);
-            world.addJoint(joint);
-
-            lastStep = step;
+            j = new DistanceJoint(
+                b1,
+                b2,
+                b1.position.addNew(new Vec2(sizeX / 2, 0.03)),
+                b2.position.addNew(new Vec2(-sizeX / 2, 0.03)),
+                -1,
+                frequecy,
+                1.0,
+            );
+            j.drawAnchor = false;
+            world.addJoint(j);
+            j = new DistanceJoint(
+                b1,
+                b2,
+                b1.position.addNew(new Vec2(sizeX / 2, -0.03)),
+                b2.position.addNew(new Vec2(-sizeX / 2, -0.03)),
+                -1,
+                frequecy,
+                1.0,
+            );
+            j.drawAnchor = false;
+            world.addJoint(j);
         }
-
-        // End anchor (static)
-        const endAnchor = new RigidBody(
-            new BoxShape(stepWidth * 2, stepWidth * 0.5),
-            lastStep.position.x + spacing + stepWidth / 2,
-            startY,
-            0.0,
-        );
-        endAnchor.setTexture('rockBridgeAnchor');
-        world.addBody(endAnchor);
-
-        // Final joint anchor at right edge of last step
-        const finalAnchor = lastStep.position.addNew(new Vec2(stepWidth / 2, 0));
-        const lastJoint = new JointConstraint(lastStep, endAnchor, finalAnchor, softness, bias);
-        world.addJoint(lastJoint);
     };
 
     static demo5 = (world: World) => {
@@ -178,25 +267,25 @@ export default class Demo {
         this.generateFloor(world);
         this.generateFences(world);
 
-        const whipAnchor = new RigidBody(new BoxShape(40, 20), Graphics.width() / 2, 100, 0);
-        whipAnchor.setTexture('rockBridgeAnchor');
-        world.addBody(whipAnchor);
+        // const whipAnchor = new RigidBody(new BoxShape(40, 20), Graphics.width() / 2, 100, 0);
+        // whipAnchor.setTexture('rockBridgeAnchor');
+        // world.addBody(whipAnchor);
 
-        let last = whipAnchor;
+        // let last = whipAnchor;
 
-        for (let i = 0; i < 10; i++) {
-            const x = whipAnchor.position.x;
-            const y = i === 0 ? whipAnchor.position.y + 40 : whipAnchor.position.y + 40 + 60 * i;
-            const whipElement = new RigidBody(new BoxShape(10, 50), x, y, 1);
-            whipElement.setTexture('crate');
-            world.addBody(whipElement);
+        // for (let i = 0; i < 10; i++) {
+        //     const x = whipAnchor.position.x;
+        //     const y = i === 0 ? whipAnchor.position.y + 40 : whipAnchor.position.y + 40 + 60 * i;
+        //     const whipElement = new RigidBody(new BoxShape(10, 50), x, y, 1);
+        //     whipElement.setTexture('crate');
+        //     world.addBody(whipElement);
 
-            const anchor = whipElement.position.subNew(new Vec2(0, 25));
-            const j = new JointConstraint(last, whipElement, anchor);
-            world.addJoint(j);
+        //     const anchor = whipElement.position.subNew(new Vec2(0, 25));
+        //     const j = new JointConstraint(last, whipElement, anchor);
+        //     world.addJoint(j);
 
-            last = whipElement;
-        }
+        //     last = whipElement;
+        // }
     };
 
     static demo6 = (world: World) => {
