@@ -1,6 +1,6 @@
 import Graphics from '../Graphics';
 import Vec2 from '../math/Vec2';
-import { JointConstraint } from '../physics/Joint';
+import { JointConstraint } from '../physics/JointConstraint';
 import RigidBody from '../physics/RigidBody';
 import { BoxShape, CircleShape, PolygonShape } from '../physics/Shape';
 import World from '../physics/World';
