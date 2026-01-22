@@ -8,7 +8,7 @@ export default class Graphics {
     static canvas: HTMLCanvasElement;
     static ctx: CanvasRenderingContext2D;
 
-    static zoom: number;
+    static zoom = 1;
     static pan = new Vec2(0, 0);
 
     static width = (): number => {
