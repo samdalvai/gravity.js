@@ -64,8 +64,11 @@ export class DistanceJoint extends Joint {
 
         const error = u.magnitude() - this._length;
 
-        if (SETTINGS.positionCorrection) this.bias = error * this.beta * inverseDeltaTime;
-        else this.bias = 0.0;
+        if (SETTINGS.positionCorrection) {
+            this.bias = error * this.beta * inverseDeltaTime;
+        } else {
+            this.bias = 0.0;
+        }
 
         if (SETTINGS.warmStarting) this.applyImpulse(this.impulseSum);
     }

@@ -3,9 +3,10 @@ import Graphics from './Graphics';
 import InputManager, { MouseButton } from './InputManager';
 import Utils from './math/Utils';
 import Vec2 from './math/Vec2';
-import RigidBody from './physics/RigidBody';
 import { GRAVITY, MAX_BODIES } from './physics/Constants';
+import { DistanceJoint } from './physics/DistanceJoint';
 import Force from './physics/Force';
+import RigidBody from './physics/RigidBody';
 import { BoxShape, CircleShape } from './physics/Shape';
 import World from './physics/World';
 import Demo from './samples/Demo';
@@ -278,12 +279,14 @@ export default class Application {
                         'blue',
                     );
 
-                    const anchorA = joint.aPointLocal;
-                    const anchorB = joint.bPointLocal;
-                    const worldA = joint.bodyA.localPointToWorld(anchorA);
-                    const worldB = joint.bodyB.localPointToWorld(anchorB);
-                    Graphics.drawFillCircle(worldA.x, worldA.y, 5, 'blue');
-                    Graphics.drawFillCircle(worldB.x, worldB.y, 5, 'blue');
+                    if (joint instanceof DistanceJoint) {
+                        const anchorA = joint.localAnchorA;
+                        const anchorB = joint.localAnchorB;
+                        const worldA = joint.bodyA.localPointToWorld(anchorA);
+                        const worldB = joint.bodyB.localPointToWorld(anchorB);
+                        Graphics.drawFillCircle(worldA.x, worldA.y, 5, 'blue');
+                        Graphics.drawFillCircle(worldB.x, worldB.y, 5, 'blue');
+                    }
                 }
                 for (const manifold of this.world.getManifolds()) {
                     for (const contact of manifold.contactPoints) {
