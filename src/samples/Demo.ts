@@ -22,28 +22,32 @@ export default class Demo {
     ];
 
     static generateFloor = (world: World): RigidBody => {
-        const floor = new RigidBody(
-            new BoxShape(Graphics.width(), 200),
-            0,
-            -500,
-            0.0,
-        );
+        const floorWidth = Graphics.width();
+        const floorHeight = 50;
+        const floorPositionY = -400;
+        const floor = new RigidBody(new BoxShape(floorWidth, floorHeight), 0, floorPositionY, 0.0);
         world.addBody(floor);
         return floor;
     };
 
     static generateFences = (world: World): void => {
+        const floorHeight = 50;
+        const floorWidth = Graphics.width();
+        const floorPositionY = -400;
+
         const fenceWidth = 50;
+        const fenceHeight = 900;
         const leftFence = new RigidBody(
-            new BoxShape(fenceWidth, Graphics.height() - 200),
-            -(fenceWidth / 2),
-            Graphics.height() / 2.0 - 100,
+            new BoxShape(fenceWidth, fenceHeight),
+            -(floorWidth / 2 + fenceWidth / 2) + fenceWidth,
+            floorPositionY + floorHeight / 2 + fenceHeight / 2,
             0.0,
         );
+
         const rightFence = new RigidBody(
-            new BoxShape(fenceWidth, Graphics.height() - 200),
-            Graphics.width() + fenceWidth / 2,
-            Graphics.height() / 2.0 - 100,
+            new BoxShape(fenceWidth, fenceHeight),
+            (floorWidth / 2 + fenceWidth / 2) - fenceWidth,
+            floorPositionY + floorHeight / 2 + fenceHeight / 2,
             0.0,
         );
         world.addBody(leftFence);
