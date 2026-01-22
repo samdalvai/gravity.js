@@ -130,6 +130,13 @@ export default class RigidBody {
         return rotated;
     };
 
+    localDirToWorld = (dir: Vec2): Vec2 => {
+        const cos = Math.cos(this.rotation);
+        const sin = Math.sin(this.rotation);
+
+        return new Vec2(dir.x * cos - dir.y * sin, dir.x * sin + dir.y * cos);
+    };
+
     worldPointToLocal = (point: Vec2): Vec2 => {
         const cos = Math.cos(-this.rotation);
         const sin = Math.sin(-this.rotation);
