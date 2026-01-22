@@ -24,8 +24,8 @@ export default class Demo {
     static generateFloor = (world: World): RigidBody => {
         const floor = new RigidBody(
             new BoxShape(Graphics.width(), 200),
-            Graphics.width() / 2.0,
-            Graphics.height() - 100,
+            0,
+            -100,
             0.0,
         );
         world.addBody(floor);
