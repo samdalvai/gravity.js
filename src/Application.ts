@@ -272,16 +272,6 @@ export default class Application {
 
             if (this.showContacts) {
                 for (const joint of this.world.getJoints()) {
-                    // TODO: this is just a simple draw method, we need to consider local anchors rather than just
-                    // bodies position
-                    Graphics.drawLine(
-                        joint.bodyA.position.x,
-                        joint.bodyA.position.y,
-                        joint.bodyB.position.x,
-                        joint.bodyB.position.y,
-                        'blue',
-                    );
-
                     if (joint instanceof DistanceJoint) {
                         const anchorA = joint.localAnchorA;
                         const anchorB = joint.localAnchorB;
@@ -289,6 +279,14 @@ export default class Application {
                         const worldB = joint.bodyB.localPointToWorld(anchorB);
                         Graphics.drawFillCircle(worldA.x, worldA.y, 5, 'blue');
                         Graphics.drawFillCircle(worldB.x, worldB.y, 5, 'blue');
+
+                        Graphics.drawLine(
+                            worldA.x,
+                            worldA.y,
+                            worldB.x,
+                            worldB.y,
+                            'blue',
+                        );
                     }
                 }
                 for (const manifold of this.world.getManifolds()) {

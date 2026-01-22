@@ -83,9 +83,8 @@ export default class Demo {
 
     static demo3 = (world: World) => {
         // Demo 3: Pyramid of boxes
-        const floor = this.generateFloor(world);
+        this.generateFloor(world);
         this.generateFences(world);
-        const floorHeight = 200;
 
         const boxSize = 60;
         const boxSpacing = 10;
@@ -116,8 +115,8 @@ export default class Demo {
         this.generateFloor(world);
         this.generateFences(world);
 
-        const c = new RigidBody(new CircleShape(25), 100, Graphics.height() / 2 - 100, 1);
-        const d = new RigidBody(new CircleShape(25), 0, Graphics.height() / 2 - 100, 1);
+        const c = new RigidBody(new CircleShape(25), 100, 0, 1);
+        const d = new RigidBody(new CircleShape(25), 0, 0, 1);
 
         world.addBody(c);
         world.addBody(d);
@@ -125,10 +124,12 @@ export default class Demo {
         const distance = 100;
         const jointCD = new DistanceJoint(c, d, c.position, d.position, distance);
 
-        world.addJoint(jointCD);
+        // world.addJoint(jointCD);
 
-        const leftAnchor = new RigidBody(new BoxShape(50, 50), -100, Graphics.height() / 2 - 200, 0);
-        const rightAnchor = new RigidBody(new BoxShape(50, 50), 200, Graphics.height() / 2 - 200, 0);
+        const leftAnchor = new RigidBody(new BoxShape(50, 50), -100, 0, 0);
+        const rightAnchor = new RigidBody(new BoxShape(50, 50), 200, 0, 0);
+        world.addBody(leftAnchor);
+        world.addBody(rightAnchor);
 
         const frequency = 15;
         const dampingRadio = 0;
@@ -147,7 +148,7 @@ export default class Demo {
         const rightJoint = new DistanceJoint(
             rightAnchor,
             c,
-            rightAnchor.position,
+            rightAnchor.position.subNew(new Vec2(25, 0)),
             c.position,
             distance,
             frequency,
