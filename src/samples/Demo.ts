@@ -25,7 +25,7 @@ export default class Demo {
         const floor = new RigidBody(
             new BoxShape(Graphics.width(), 200),
             0,
-            -100,
+            -250,
             0.0,
         );
         world.addBody(floor);
