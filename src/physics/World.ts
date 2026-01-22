@@ -5,7 +5,6 @@ import { SETTINGS } from './Constants';
 import { ContactManifold } from './Contact';
 import Force from './Force';
 import { Joint } from './Joint';
-import { JointConstraint } from './JointConstraint';
 import RigidBody from './RigidBody';
 
 export default class World {
