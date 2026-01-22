@@ -114,7 +114,7 @@ export default class Demo {
 
     static demo4 = (world: World) => {
         // Demo 4: As suspension bridge
-        const floor = this.generateFloor(world);
+        this.generateFloor(world);
         this.generateFences(world);
 
         // // Suspension Bridge Creation
@@ -172,94 +172,6 @@ export default class Demo {
         // const finalAnchor = lastStep.position.addNew(new Vec2(stepWidth / 2, 0));
         // const lastJoint = new JointConstraint(lastStep, endAnchor, finalAnchor, softness, bias);
         // world.addJoint(lastJoint);
-
-        const groundStart = 0.2;
-
-        const xStart = 250;
-        const yStart = 1200;
-        const gap = 0.1;
-
-        const pillarWidth = 25;
-        const pillarHeight = pillarWidth * 15
-        const sizeX = 0.5;
-        const sizeY = sizeX * 0.25;
-
-        // let pillar = new Box(pillarWidth, yStart, Type.Static);
-        let pillar = new RigidBody(new BoxShape(pillarWidth, pillarHeight), xStart, yStart / 2 + 0.2, 0)
-        pillar.position = new Vec2(xStart, yStart / 2 + 0.2);
-        world.addBody(pillar);
-
-        return
-
-        const b1 = new Box(sizeX, sizeY);
-        b1.mass = 10;
-        b1.position = new Vec2(xStart + sizeX / 2 + pillarWidth / 2 + gap, yStart + groundStart);
-        world.addBody(b1);
-
-        let j!: Joint;
-
-        const frequecy = 7;
-
-        j = new DistanceJoint(
-            pillar,
-            b1,
-            pillar.position.addNew(new Vec2(pillarWidth / 2, yStart / 2)),
-            b1.position.addNew(new Vec2(-sizeX / 2, 0.03)),
-            -1,
-            frequecy,
-            1.0,
-        );
-        j.drawAnchor = false;
-        world.addJoint(j);
-
-        j = new DistanceJoint(
-            pillar,
-            b1,
-            pillar.position.addNew(new Vec2(pillarWidth / 2, yStart / 2)),
-            b1.position.addNew(new Vec2(-sizeX / 2, -0.03)),
-            -1,
-            frequecy,
-            1.0,
-        );
-        j.drawAnchor = false;
-        world.addJoint(j);
-
-        pillar = new Box(pillarWidth, yStart, Type.Static);
-        pillar.position = new Vec2(-xStart, yStart / 2 + 0.2);
-        world.addBody(pillar);
-
-        for (let i = 1; i + 1 < (xStart * -2) / (sizeX + gap); i++) {
-            const b2 = new Box(sizeX, sizeY);
-            b2.mass = 10;
-            b2.position = new Vec2(
-                xStart + sizeX / 2 + pillarWidth / 2 + gap + (gap + sizeX) * i,
-                yStart + groundStart,
-            );
-            world.addBody(b2);
-
-            j = new DistanceJoint(
-                b1,
-                b2,
-                b1.position.addNew(new Vec2(sizeX / 2, 0.03)),
-                b2.position.addNew(new Vec2(-sizeX / 2, 0.03)),
-                -1,
-                frequecy,
-                1.0,
-            );
-            j.drawAnchor = false;
-            world.addJoint(j);
-            j = new DistanceJoint(
-                b1,
-                b2,
-                b1.position.addNew(new Vec2(sizeX / 2, -0.03)),
-                b2.position.addNew(new Vec2(-sizeX / 2, -0.03)),
-                -1,
-                frequecy,
-                1.0,
-            );
-            j.drawAnchor = false;
-            world.addJoint(j);
-        }
     };
 
     static demo5 = (world: World) => {
@@ -379,7 +291,7 @@ export default class Demo {
         world.addBody(c);
         world.addBody(d);
 
-        const distance = 50;
+        const distance = -1;
 
         const jointAB = new DistanceJoint(a, b, a.position, b.position, distance);
         const jointBC = new DistanceJoint(b, c, b.position, c.position, distance);
@@ -397,6 +309,16 @@ export default class Demo {
 
         world.addJoint(jointAC);
         world.addJoint(jointBD);
+
+        const leftAnchor = new RigidBody(new BoxShape(50, 50), 400, Graphics.height() / 2 - 200, 0);
+        const rightAnchor = new RigidBody(new BoxShape(50, 50), 700, Graphics.height() / 2 - 200, 0);
+        world.addBody(leftAnchor);
+        world.addBody(rightAnchor);
+
+        const leftJoint = new DistanceJoint(leftAnchor, d, leftAnchor.position, d.position, distance);
+        const rightJoint = new DistanceJoint(rightAnchor, c, rightAnchor.position, c.position, distance);
+        world.addJoint(leftJoint);
+        world.addJoint(rightJoint);
 
         // const anchor1 = new RigidBody(new CircleShape(5), 500, Graphics.height() / 2, 0);
         // const anchor2 = new RigidBody(new CircleShape(5), 550, Graphics.height() / 2, 0);
@@ -545,7 +467,6 @@ export default class Demo {
 
     static demo0 = (world: World) => {
         // Demo 0: a complex scene
-
         const floor = this.generateFloor(world);
         this.generateFences(world);
 
