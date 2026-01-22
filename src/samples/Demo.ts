@@ -117,61 +117,46 @@ export default class Demo {
         this.generateFloor(world);
         this.generateFences(world);
 
-        // // Suspension Bridge Creation
-        // const numSteps = 10;
-        // const stepWidth = 40;
-        // const spacing = stepWidth + 2.5; // distance between centers
-        // const startX = Graphics.width() / 2 - (numSteps * spacing) / 2;
-        // const startY = Graphics.height() / 2;
-        // const softness = 0.02;
-        // const bias = 0.1;
+        const c = new RigidBody(new CircleShape(25), 600, Graphics.height() / 2 - 100, 1);
+        const d = new RigidBody(new CircleShape(25), 500, Graphics.height() / 2 - 100, 1);
 
-        // // Start anchor (static)
-        // const startAnchor = new RigidBody(
-        //     new BoxShape(stepWidth * 2, stepWidth * 0.5),
-        //     startX - stepWidth / 2,
-        //     startY,
-        //     0.0,
-        // );
-        // startAnchor.setTexture('rockBridgeAnchor');
-        // world.addBody(startAnchor);
+        world.addBody(c);
+        world.addBody(d);
 
-        // // First connection uses the start anchor
-        // let lastStep = startAnchor;
+        const distance = 100;
+        const jointCD = new DistanceJoint(c, d, c.position, d.position, distance);
 
-        // // Create steps
-        // for (let i = 1; i <= numSteps; i++) {
-        //     const x = startX + i * spacing;
+        world.addJoint(jointCD);
 
-        //     // Optional sag: small vertical sinusoidal displacement
-        //     const y = startY + Math.sin((i / numSteps) * Math.PI) * 10;
+        const leftAnchor = new RigidBody(new BoxShape(50, 50), 400, Graphics.height() / 2 - 200, 0);
+        const rightAnchor = new RigidBody(new BoxShape(50, 50), 700, Graphics.height() / 2 - 200, 0);
 
-        //     const step = new RigidBody(new CircleShape(stepWidth * 0.5), x, y, 3);
-        //     step.setTexture('woodBridgeStep');
-        //     world.addBody(step);
+        const frequency = 15;
+        const dampingRadio = 0;
+        const jointMass = 1;
 
-        //     // Joint anchor at left edge of this step
-        //     const anchor = step.position.subNew(new Vec2(stepWidth / 2, 0));
-        //     const joint = new JointConstraint(lastStep, step, anchor, softness, bias);
-        //     world.addJoint(joint);
-
-        //     lastStep = step;
-        // }
-
-        // // End anchor (static)
-        // const endAnchor = new RigidBody(
-        //     new BoxShape(stepWidth * 2, stepWidth * 0.5),
-        //     lastStep.position.x + spacing + stepWidth / 2,
-        //     startY,
-        //     0.0,
-        // );
-        // endAnchor.setTexture('rockBridgeAnchor');
-        // world.addBody(endAnchor);
-
-        // // Final joint anchor at right edge of last step
-        // const finalAnchor = lastStep.position.addNew(new Vec2(stepWidth / 2, 0));
-        // const lastJoint = new JointConstraint(lastStep, endAnchor, finalAnchor, softness, bias);
-        // world.addJoint(lastJoint);
+        const leftJoint = new DistanceJoint(
+            leftAnchor,
+            d,
+            leftAnchor.position,
+            d.position,
+            distance,
+            frequency,
+            dampingRadio,
+            jointMass,
+        );
+        const rightJoint = new DistanceJoint(
+            rightAnchor,
+            c,
+            rightAnchor.position,
+            c.position,
+            distance,
+            frequency,
+            dampingRadio,
+            jointMass,
+        );
+        world.addJoint(leftJoint);
+        world.addJoint(rightJoint);
     };
 
     static demo5 = (world: World) => {
@@ -281,42 +266,64 @@ export default class Demo {
         this.generateFloor(world);
         this.generateFences(world);
 
-        const a = new RigidBody(new CircleShape(25), 500, Graphics.height() / 2, 1);
-        const b = new RigidBody(new CircleShape(25), 600, Graphics.height() / 2, 1);
+        // const a = new RigidBody(new CircleShape(25), 500, Graphics.height() / 2, 1);
+        // const b = new RigidBody(new CircleShape(25), 600, Graphics.height() / 2, 1);
         const c = new RigidBody(new CircleShape(25), 600, Graphics.height() / 2 - 100, 1);
         const d = new RigidBody(new CircleShape(25), 500, Graphics.height() / 2 - 100, 1);
 
-        world.addBody(a);
-        world.addBody(b);
+        // world.addBody(a);
+        // world.addBody(b);
         world.addBody(c);
         world.addBody(d);
 
-        const distance = -1;
+        const distance = 100;
 
-        const jointAB = new DistanceJoint(a, b, a.position, b.position, distance);
-        const jointBC = new DistanceJoint(b, c, b.position, c.position, distance);
+        // const jointAB = new DistanceJoint(a, b, a.position, b.position, distance);
+        // const jointBC = new DistanceJoint(b, c, b.position, c.position, distance);
         const jointCD = new DistanceJoint(c, d, c.position, d.position, distance);
-        const jointDA = new DistanceJoint(d, a, d.position, a.position, distance);
+        // const jointDA = new DistanceJoint(d, a, d.position, a.position, distance);
 
         const diagonalDist = Math.sqrt(100 ** 2 + 100 ** 2);
-        const jointAC = new DistanceJoint(a, c, a.position, c.position, diagonalDist);
-        const jointBD = new DistanceJoint(b, d, b.position, d.position, diagonalDist);
+        // const jointAC = new DistanceJoint(a, c, a.position, c.position, diagonalDist);
+        // const jointBD = new DistanceJoint(b, d, b.position, d.position, diagonalDist);
 
-        world.addJoint(jointAB);
-        world.addJoint(jointBC);
+        // world.addJoint(jointAB);
+        // world.addJoint(jointBC);
         world.addJoint(jointCD);
-        world.addJoint(jointDA);
+        // world.addJoint(jointDA);
 
-        world.addJoint(jointAC);
-        world.addJoint(jointBD);
+        // world.addJoint(jointAC);
+        // world.addJoint(jointBD);
 
         const leftAnchor = new RigidBody(new BoxShape(50, 50), 400, Graphics.height() / 2 - 200, 0);
         const rightAnchor = new RigidBody(new BoxShape(50, 50), 700, Graphics.height() / 2 - 200, 0);
         world.addBody(leftAnchor);
         world.addBody(rightAnchor);
 
-        const leftJoint = new DistanceJoint(leftAnchor, d, leftAnchor.position, d.position, distance);
-        const rightJoint = new DistanceJoint(rightAnchor, c, rightAnchor.position, c.position, distance);
+        const frequency = 15;
+        const dampingRadio = 0;
+        const jointMass = 1;
+
+        const leftJoint = new DistanceJoint(
+            leftAnchor,
+            d,
+            leftAnchor.position,
+            d.position,
+            distance,
+            frequency,
+            dampingRadio,
+            jointMass,
+        );
+        const rightJoint = new DistanceJoint(
+            rightAnchor,
+            c,
+            rightAnchor.position,
+            c.position,
+            distance,
+            frequency,
+            dampingRadio,
+            jointMass,
+        );
         world.addJoint(leftJoint);
         world.addJoint(rightJoint);
 
