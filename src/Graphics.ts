@@ -178,6 +178,8 @@ export default class Graphics {
         this.ctx.save();
         this.ctx.translate(x, y);
         this.ctx.rotate(rotation);
+        // This is needed because we flip the canvas with beginWorld()
+        this.ctx.scale(1, -1);
         this.ctx.drawImage(texture, -width / 2, -height / 2, width, height);
         this.ctx.restore();
     };
