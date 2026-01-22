@@ -1,7 +1,7 @@
 import Graphics from '../Graphics';
 import Vec2 from '../math/Vec2';
 import { DistanceJoint } from '../physics/DistanceJoint';
-import { JointConstraint } from '../physics/JointConstraint';
+// import { JointConstraint } from '../physics/JointConstraint';
 import RigidBody from '../physics/RigidBody';
 import { BoxShape, CircleShape, PolygonShape } from '../physics/Shape';
 import World from '../physics/World';
