@@ -46,7 +46,7 @@ export default class Demo {
 
         const rightFence = new RigidBody(
             new BoxShape(fenceWidth, fenceHeight),
-            (floorWidth / 2 + fenceWidth / 2) - fenceWidth,
+            floorWidth / 2 + fenceWidth / 2 - fenceWidth,
             floorPositionY + floorHeight / 2 + fenceHeight / 2,
             0.0,
         );
@@ -59,7 +59,8 @@ export default class Demo {
         this.generateFloor(world);
         this.generateFences(world);
 
-        const box = new RigidBody(new BoxShape(60, 60), Graphics.width() / 2.0, Graphics.height() - 300, 1);
+        const box = new RigidBody(new BoxShape(60, 60), 0, 0, 1);
+        box.rotation = 0.5;
         box.setTexture('crate');
         world.addBody(box);
     };
@@ -74,12 +75,7 @@ export default class Demo {
         const boxSpacing = 10;
 
         for (let i = 0; i < numOfBoxes; i++) {
-            const box = new RigidBody(
-                new BoxShape(boxSize, boxSize),
-                Graphics.width() / 2.0,
-                Graphics.height() - 300 - (boxSize + boxSpacing) * i,
-                1,
-            );
+            const box = new RigidBody(new BoxShape(boxSize, boxSize), 0, 200 - (boxSize + boxSpacing) * i, 1);
             box.restitution = 0.1;
             box.setTexture('crate');
             world.addBody(box);
@@ -96,8 +92,8 @@ export default class Demo {
         const boxSpacing = 10;
         const rows = 10;
 
-        const centerX = Graphics.width() / 2;
-        const baseY = floor.position.y - floorHeight / 2 - 100;
+        const centerX = 0;
+        const baseY = 250;
 
         for (let row = 0; row < rows; row++) {
             const boxesInRow = rows - row;
@@ -107,7 +103,7 @@ export default class Demo {
                 const x = centerX - rowWidth / 2 + boxSize / 2 + col * boxSize;
                 const y = baseY - row * (boxSize + boxSpacing);
 
-                const box = new RigidBody(new BoxShape(boxSize, boxSize), x, y, 1);
+                const box = new RigidBody(new BoxShape(boxSize, boxSize), x, -y, 1);
                 box.restitution = 0.1;
                 box.setTexture('crate');
                 box.restitution = 0.001;
