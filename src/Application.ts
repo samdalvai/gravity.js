@@ -237,6 +237,7 @@ export default class Application {
 
     render = (): void => {
         Graphics.clearScreen();
+        Graphics.beginWorld();
 
         // Draw background texture
         if (this.bgTexture && !this.debug) {
@@ -303,6 +304,8 @@ export default class Application {
             }
         }
 
+        Graphics.endWorld();
+
         let numContacts = 0;
 
         for (const manifold of this.world.getManifolds()) {
@@ -317,12 +320,15 @@ export default class Application {
             `(C) chosen particle: ${this.generateCircles ? 'Circle' : 'Box'}`,
         ];
 
+        const x = InputManager.mousePosition.x - Graphics.width();
+        const y = InputManager.mousePosition.y - Graphics.width();
+
         const debugText = [
             // Debug related info
             `(A) show AABB: ${this.showAABB ? 'ON' : 'OFF'}`,
             `(S) show contacts and joints: ${this.showContacts ? 'ON' : 'OFF'}`,
             `FPS: ${this.FPS.toFixed(2)}`,
-            `Mouse position: {${InputManager.mousePosition.x}, ${InputManager.mousePosition.y}}`,
+            `Mouse position: {${x}, ${y}}`,
             `Num objects: ${this.world.getBodies().length}`,
             `Num contacts: ${numContacts}`,
         ];
