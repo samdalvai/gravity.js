@@ -242,8 +242,8 @@ export default class Application {
         // Draw background texture
         if (this.bgTexture && !this.debug) {
             Graphics.drawTexture(
-                Graphics.width() / 2.0,
-                Graphics.height() / 2.0,
+                0,
+                0,
                 Graphics.width(),
                 Graphics.height(),
                 0.0,
