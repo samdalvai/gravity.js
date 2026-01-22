@@ -1,27 +1,27 @@
-import { Joint } from './JointConstraint';
-import { Vector2 } from '../math/vector2';
-import { RigidBody } from '../rigidbody';
-import { Settings } from '../settings';
-import * as Util from '../util';
+import Utils from '../math/Utils';
+import Vec2 from '../math/Vec2';
+import { SETTINGS } from './Constants';
+import { Joint } from './Joint';
+import RigidBody from './RigidBody';
 
 export class DistanceJoint extends Joint {
-    public localAnchorA: Vector2;
-    public localAnchorB: Vector2;
+    public localAnchorA: Vec2;
+    public localAnchorB: Vec2;
 
     private _length: number;
 
-    private ra!: Vector2;
-    private rb!: Vector2;
+    private ra!: Vec2;
+    private rb!: Vec2;
     private m!: number;
-    private n!: Vector2;
+    private n!: Vec2;
     private bias!: number;
     private impulseSum: number = 0.0;
 
     constructor(
         bodyA: RigidBody,
         bodyB: RigidBody,
-        anchorA: Vector2 = bodyA.position,
-        anchorB: Vector2 = bodyB.position,
+        anchorA: Vec2 = bodyA.position,
+        anchorB: Vec2 = bodyB.position,
         length: number = -1,
         frequency = 15,
         dampingRatio = 1.0,
@@ -29,41 +29,45 @@ export class DistanceJoint extends Joint {
     ) {
         super(bodyA, bodyB, frequency, dampingRatio, jointMass);
 
-        this.localAnchorA = this.bodyA.globalToLocal.mulVector2(anchorA, 1);
-        this.localAnchorB = this.bodyB.globalToLocal.mulVector2(anchorB, 1);
-        this._length = length <= 0 ? anchorB.subNew(anchorA).length : length;
+        // this.localAnchorA = this.bodyA.globalToLocal.mulVec2(anchorA, 1);
+        this.localAnchorA = this.bodyA.worldPointToLocal(anchorA);
+        // this.localAnchorB = this.bodyB.globalToLocal.mulVec2(anchorB, 1);
+        this.localAnchorB = this.bodyB.worldPointToLocal(anchorB);
+        this._length = length <= 0 ? anchorB.subNew(anchorA).magnitude() : length;
     }
 
-    override prepare(inverseDeltaTime: number): void {
+    override preSolve(inverseDeltaTime: number): void {
         // Calculate Jacobian J and effective mass M
         // J = [-n, -n·cross(ra), n, n·cross(rb)] ( n = (anchorB-anchorA) / ||anchorB-anchorA|| )
         // M = (J · M^-1 · J^t)^-1
 
-        this.ra = this.bodyA.localToGlobal.mulVector2(this.localAnchorA, 0);
-        this.rb = this.bodyB.localToGlobal.mulVector2(this.localAnchorB, 0);
+        // this.ra = this.bodyA.localToGlobal.mulVec2(this.localAnchorA, 0);
+        this.ra = this.bodyA.localDirToWorld(this.localAnchorA);
+        // this.rb = this.bodyB.localToGlobal.mulVec2(this.localAnchorB, 0);
+        this.rb = this.bodyB.localDirToWorld(this.localAnchorB);
 
         const pa = this.bodyA.position.addNew(this.ra);
         const pb = this.bodyB.position.addNew(this.rb);
 
         const u = pb.subNew(pa);
 
-        this.n = u.normalized();
+        this.n = u.normalizeNew();
 
         const k =
-            this.bodyA.inverseMass +
-            this.bodyB.inverseMass +
-            this.bodyA.inverseInertia * this.n.cross(this.ra) * this.n.cross(this.ra) +
-            this.bodyB.inverseInertia * this.n.cross(this.rb) * this.n.cross(this.rb) +
+            this.bodyA.invMass +
+            this.bodyB.invMass +
+            this.bodyA.invI * this.n.cross(this.ra) * this.n.cross(this.ra) +
+            this.bodyB.invI * this.n.cross(this.rb) * this.n.cross(this.rb) +
             this.gamma;
 
         this.m = 1.0 / k;
 
-        const error = u.length - this._length;
+        const error = u.magnitude() - this._length;
 
-        if (Settings.positionCorrection) this.bias = error * this.beta * inverseDeltaTime;
+        if (SETTINGS.positionCorrection) this.bias = error * this.beta * inverseDeltaTime;
         else this.bias = 0.0;
 
-        if (Settings.warmStarting) this.applyImpulse(this.impulseSum);
+        if (SETTINGS.warmStarting) this.applyImpulse(this.impulseSum);
     }
 
     override solve(): void {
@@ -71,9 +75,9 @@ export class DistanceJoint extends Joint {
         // Pc = J^t · λ (λ: lagrangian multiplier)
         // λ = (J · M^-1 · J^t)^-1 ⋅ -(J·v+b)
 
-        const jv = this.bodyB.linearVelocity
-            .addNew(Util.cross(this.bodyB.angularVelocity, this.rb))
-            .subNew(this.bodyA.linearVelocity.addNew(Util.cross(this.bodyA.angularVelocity, this.ra)))
+        const jv = this.bodyB.velocity
+            .addNew(this.rb.crossScalar(this.bodyB.angularVelocity))
+            .subNew(this.bodyA.velocity.addNew(this.ra.crossScalar(this.bodyA.angularVelocity)))
             .dot(this.n);
 
         // Check out below for the reason why the (accumulated impulse * gamma) term is on the right hand side
@@ -82,19 +86,19 @@ export class DistanceJoint extends Joint {
 
         this.applyImpulse(lambda);
 
-        if (Settings.warmStarting) this.impulseSum += lambda;
+        if (SETTINGS.warmStarting) this.impulseSum += lambda;
     }
 
-    protected override applyImpulse(lambda: number): void {
+    private applyImpulse(lambda: number): void {
         // V2 = V2' + M^-1 ⋅ Pc
         // Pc = J^t ⋅ λ
 
-        this.bodyA.linearVelocity = this.bodyA.linearVelocity.subNew(this.n.mulNew(lambda * this.bodyA.inverseMass));
+        this.bodyA.velocity = this.bodyA.velocity.subNew(this.n.scaleNew(lambda * this.bodyA.invMass));
         this.bodyA.angularVelocity =
-            this.bodyA.angularVelocity - this.n.dot(Util.cross(lambda, this.ra)) * this.bodyA.inverseInertia;
-        this.bodyB.linearVelocity = this.bodyB.linearVelocity.addNew(this.n.mulNew(lambda * this.bodyB.inverseMass));
+            this.bodyA.angularVelocity - this.n.dot(this.ra.crossScalar(lambda)) * this.bodyA.invI;
+        this.bodyB.velocity = this.bodyB.velocity.addNew(this.n.scaleNew(lambda * this.bodyB.invMass));
         this.bodyB.angularVelocity =
-            this.bodyB.angularVelocity + this.n.dot(Util.cross(lambda, this.rb)) * this.bodyB.inverseInertia;
+            this.bodyB.angularVelocity + this.n.dot(this.rb.crossScalar(lambda)) * this.bodyB.invI;
     }
 
     get length(): number {
@@ -102,6 +106,6 @@ export class DistanceJoint extends Joint {
     }
 
     set length(length: number) {
-        this._length = Util.clamp(length, 0, Number.MAX_VALUE);
+        this._length = Utils.clamp(length, 0, Number.MAX_VALUE);
     }
 }
