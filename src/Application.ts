@@ -29,7 +29,7 @@ export default class Application {
     private lastFPSUpdate = 0;
 
     constructor() {
-        this.world = new World(-GRAVITY);
+        this.world = new World(GRAVITY);
     }
 
     isRunning = (): boolean => {
