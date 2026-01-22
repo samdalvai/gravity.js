@@ -117,8 +117,8 @@ export default class Demo {
         this.generateFloor(world);
         this.generateFences(world);
 
-        const c = new RigidBody(new CircleShape(25), 600, Graphics.height() / 2 - 100, 1);
-        const d = new RigidBody(new CircleShape(25), 500, Graphics.height() / 2 - 100, 1);
+        const c = new RigidBody(new CircleShape(25), 100, Graphics.height() / 2 - 100, 1);
+        const d = new RigidBody(new CircleShape(25), 0, Graphics.height() / 2 - 100, 1);
 
         world.addBody(c);
         world.addBody(d);
@@ -128,8 +128,8 @@ export default class Demo {
 
         world.addJoint(jointCD);
 
-        const leftAnchor = new RigidBody(new BoxShape(50, 50), 400, Graphics.height() / 2 - 200, 0);
-        const rightAnchor = new RigidBody(new BoxShape(50, 50), 700, Graphics.height() / 2 - 200, 0);
+        const leftAnchor = new RigidBody(new BoxShape(50, 50), -100, Graphics.height() / 2 - 200, 0);
+        const rightAnchor = new RigidBody(new BoxShape(50, 50), 200, Graphics.height() / 2 - 200, 0);
 
         const frequency = 15;
         const dampingRadio = 0;
