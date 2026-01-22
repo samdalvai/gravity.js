@@ -1,4 +1,6 @@
-
+import Utils from '../math/Utils';
+import { Constraint } from './Constraint';
+import RigidBody from './RigidBody';
 
 // Children: Revolute, Prismatic, Distance, Max distance, Weld, Motor, Line, Angle, Grab
 export abstract class Joint extends Constraint {
@@ -60,7 +62,7 @@ export abstract class Joint extends Constraint {
     ): void {
         if (frequency > 0) {
             this._frequency = frequency;
-            this._dampingRatio = Util.clamp(dampingRatio, 0.0, 1.0);
+            this._dampingRatio = Utils.clamp(dampingRatio, 0.0, 1.0);
             this._jointMass = jointMass <= 0 ? this.bodyB.mass : jointMass;
 
             this.calculateBetaAndGamma();
