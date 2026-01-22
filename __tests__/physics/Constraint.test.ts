@@ -1,7 +1,7 @@
 import Vec2 from '../../src/math/Vec2';
 import RigidBody from '../../src/physics/RigidBody';
 import CollisionDetection from '../../src/physics/CollisionDetection';
-import { JointConstraint } from '../../src/physics/Joint';
+import { JointConstraint } from '../../src/physics/JointConstraint';
 import { CircleShape } from '../../src/physics/Shape';
 
 describe('Constraint', () => {
