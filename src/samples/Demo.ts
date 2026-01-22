@@ -2,7 +2,6 @@ import Graphics from '../Graphics';
 import Vec2 from '../math/Vec2';
 import { DistanceJoint } from '../physics/DistanceJoint';
 import { Joint } from '../physics/Joint';
-// import { JointConstraint } from '../physics/JointConstraint';
 import RigidBody from '../physics/RigidBody';
 import { BoxShape, CircleShape, PolygonShape } from '../physics/Shape';
 import World from '../physics/World';
@@ -214,19 +213,19 @@ export default class Demo {
         world.addBody(rightLeg);
 
         // Add joints between ragdoll parts (distance constraints with one anchor point)
-        const string = new JointConstraint(bob, head, bob.position);
-        const neck = new JointConstraint(head, torso, head.position.addNew(new Vec2(0, 25)));
-        const leftShoulder = new JointConstraint(torso, leftArm, torso.position.addNew(new Vec2(-28, -45)));
-        const rightShoulder = new JointConstraint(torso, rightArm, torso.position.addNew(new Vec2(+28, -45)));
-        const leftHip = new JointConstraint(torso, leftLeg, torso.position.addNew(new Vec2(-20, +50)));
-        const rightHip = new JointConstraint(torso, rightLeg, torso.position.addNew(new Vec2(+20, +50)));
+        // const string = new JointConstraint(bob, head, bob.position);
+        // const neck = new JointConstraint(head, torso, head.position.addNew(new Vec2(0, 25)));
+        // const leftShoulder = new JointConstraint(torso, leftArm, torso.position.addNew(new Vec2(-28, -45)));
+        // const rightShoulder = new JointConstraint(torso, rightArm, torso.position.addNew(new Vec2(+28, -45)));
+        // const leftHip = new JointConstraint(torso, leftLeg, torso.position.addNew(new Vec2(-20, +50)));
+        // const rightHip = new JointConstraint(torso, rightLeg, torso.position.addNew(new Vec2(+20, +50)));
 
-        world.addJoint(string);
-        world.addJoint(neck);
-        world.addJoint(leftShoulder);
-        world.addJoint(rightShoulder);
-        world.addJoint(leftHip);
-        world.addJoint(rightHip);
+        // world.addJoint(string);
+        // world.addJoint(neck);
+        // world.addJoint(leftShoulder);
+        // world.addJoint(rightShoulder);
+        // world.addJoint(leftHip);
+        // world.addJoint(rightHip);
     };
 
     static demo7 = (world: World) => {
@@ -257,8 +256,8 @@ export default class Demo {
         heavyBox.setTexture('metal');
         world.addBody(heavyBox);
 
-        const joint = new JointConstraint(floor, plank, plank.position);
-        world.addJoint(joint);
+        // const joint = new JointConstraint(floor, plank, plank.position);
+        // world.addJoint(joint);
     };
 
     static demo8 = (world: World) => {
@@ -414,8 +413,8 @@ export default class Demo {
 
             // Joint anchor at left edge of this step
             const anchor = step.position.subNew(new Vec2(stepWidth / 2, 0));
-            const joint = new JointConstraint(lastStep, step, anchor, softness, bias);
-            world.addJoint(joint);
+            // const joint = new JointConstraint(lastStep, step, anchor, softness, bias);
+            // world.addJoint(joint);
 
             lastStep = step;
         }
@@ -432,8 +431,8 @@ export default class Demo {
 
         // Final joint anchor at right edge of last step
         const finalAnchor = lastStep.position.addNew(new Vec2(stepWidth / 2, 0));
-        const lastJoint = new JointConstraint(lastStep, endAnchor, finalAnchor, softness, bias);
-        world.addJoint(lastJoint);
+        // const lastJoint = new JointConstraint(lastStep, endAnchor, finalAnchor, softness, bias);
+        // world.addJoint(lastJoint);
 
         const boxSizeLarge = 40;
         const numBoxLargeHorizontal = 10;
@@ -567,8 +566,8 @@ export default class Demo {
             world.addBody(step);
 
             // Connect previous link to this link
-            const joint = new JointConstraint(last, step, step.position);
-            world.addJoint(joint);
+            // const joint = new JointConstraint(last, step, step.position);
+            // world.addJoint(joint);
 
             last = step;
         }
@@ -578,8 +577,8 @@ export default class Demo {
         endStep.setTexture('rockBridgeAnchor');
         world.addBody(endStep);
 
-        const lastJoint = new JointConstraint(last, endStep, endStep.position.addNew(new Vec2(15, 0)));
-        world.addJoint(lastJoint);
+        // const lastJoint = new JointConstraint(last, endStep, endStep.position.addNew(new Vec2(15, 0)));
+        // world.addJoint(lastJoint);
 
         // Add pigs
         const pig1 = new RigidBody(new CircleShape(30), plank1.position.x + 80, floor.position.y - 100 - 50, 3.0);
