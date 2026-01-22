@@ -1,152 +1,117 @@
-import Vec2 from '../math/Vec2';
-import { Constraint } from './Constraint';
-import RigidBody from './RigidBody';
 
-// TODO: investigate separate velocity and position solver
-export class JointConstraint extends Constraint {
-    public readonly aPointLocal: Vec2; // The constraint point in A's local space
-    public readonly bPointLocal: Vec2; // The constraint point in B's local space
 
-    // Elements of the 2x2 effective mass matrix (inverse of the constraint mass matrix) for x-x, x-y, and y-y components.
-    private effectiveMassXX = 0;
-    private effectiveMassXY = 0;
-    private effectiveMassYY = 0;
+// Children: Revolute, Prismatic, Distance, Max distance, Weld, Motor, Line, Angle, Grab
+export abstract class Joint extends Constraint {
+    public drawAnchor = true;
+    public drawConnectionLine = true;
+    public id: number = -1;
 
-    // Lever arms (vectors from centers of mass to anchor points in world space)
-    private leverArmAX = 0;
-    private leverArmAY = 0;
-    private leverArmBX = 0;
-    private leverArmBY = 0;
+    private _frequency!: number;
+    private _dampingRatio!: number;
+    private _jointMass!: number;
 
-    // The position correction bias Baumgarte stabilization).
-    private positionBiasX = 0;
-    private positionBiasY = 0;
+    /*
+     * Equation of motion for the damped harmonic oscillator
+     * a = d²x/dt²
+     * v = dx/dt
+     *
+     * ma + cv + kx = 0
+     *
+     * c = damping coefficient for springy motion
+     * m = mass
+     * k = spring constant
+     *
+     * a + 2ζωv + ω²x = 0
+     *
+     * ζ = damping ratio
+     * ω = angular frequecy
+     *
+     * 2ζω = c / m
+     * ω² = k / m
+     *
+     * Constraint equation
+     * J·v + (β/h)·C(x) + (γ/h)·λ = 0
+     *
+     * h = dt
+     * C(x) = Posiitonal error
+     * λ = Corrective impulse
+     *
+     * β = hk / (c + hk)
+     * γ = 1 / (c + hk)
+     *
+     * More reading:
+     * https://box2d.org/files/ErinCatto_SoftConstraints_GDC2011.pdf
+     * https://pybullet.org/Bullet/phpBB3/viewtopic.php?f=4&t=1354
+     */
 
-    // The accumulated impulse for the x-direction (for warm starting and sequential solving).
-    private accumulatedImpulseX = 0;
-    private accumulatedImpulseY = 0;
-
-    // Strength of position correction (typically between 0 and 1)
-    private biasFactor: number;
-
-    // Softness parameter allowing some constraint compliance (for stability in soft constraints).
-    private softness: number;
-
-    constructor(bodyA: RigidBody, bodyB: RigidBody, worldAnchorPoint: Vec2, softness = 0.01, biasFactor = 0.2) {
+    // 0 < Frequency
+    // 0 <= Damping ratio <= 1
+    // 0 < Joint mass
+    constructor(bodyA: RigidBody, bodyB: RigidBody, frequency = 15, dampingRatio = 1.0, jointMass = -1) {
         super(bodyA, bodyB);
 
-        this.aPointLocal = bodyA.worldPointToLocal(worldAnchorPoint);
-        this.bPointLocal = bodyB.worldPointToLocal(worldAnchorPoint);
-
-        this.softness = softness;
-        this.biasFactor = biasFactor;
+        this.setFDM(frequency, dampingRatio, jointMass);
     }
 
-    preSolve(inverseDeltaTime: number): void {
-        const bodyA = this.bodyA;
-        const bodyB = this.bodyB;
+    private setFDM(
+        frequency: number = this._frequency,
+        dampingRatio: number = this._dampingRatio,
+        jointMass: number = this._jointMass,
+    ): void {
+        if (frequency > 0) {
+            this._frequency = frequency;
+            this._dampingRatio = Util.clamp(dampingRatio, 0.0, 1.0);
+            this._jointMass = jointMass <= 0 ? this.bodyB.mass : jointMass;
 
-        // Transform local anchor points to world space using current rotation and position
-        const cosA = Math.cos(bodyA.rotation);
-        const sinA = Math.sin(bodyA.rotation);
-        const anchorWorldAX = this.aPointLocal.x * cosA - this.aPointLocal.y * sinA + bodyA.position.x;
-        const anchorWorldAY = this.aPointLocal.x * sinA + this.aPointLocal.y * cosA + bodyA.position.y;
+            this.calculateBetaAndGamma();
+        } else {
+            // If the frequency is less than or equal to zero, make this joint solid
+            this._frequency = -1;
+            this._dampingRatio = 1.0;
+            this._jointMass = -1;
 
-        const cosB = Math.cos(bodyB.rotation);
-        const sinB = Math.sin(bodyB.rotation);
-        const anchorWorldBX = this.bPointLocal.x * cosB - this.bPointLocal.y * sinB + bodyB.position.x;
-        const anchorWorldBY = this.bPointLocal.x * sinB + this.bPointLocal.y * cosB + bodyB.position.y;
-
-        // Compute lever arms (vectors from centers of mass to anchor points in world space)
-        this.leverArmAX = anchorWorldAX - bodyA.position.x;
-        this.leverArmAY = anchorWorldAY - bodyA.position.y;
-        this.leverArmBX = anchorWorldBX - bodyB.position.x;
-        this.leverArmBY = anchorWorldBY - bodyB.position.y;
-
-        // Compute the constraint mass matrix K (including softness on diagonal)
-        const massMatrixXX =
-            bodyA.invMass +
-            bodyB.invMass +
-            bodyA.invI * this.leverArmAY * this.leverArmAY +
-            bodyB.invI * this.leverArmBY * this.leverArmBY +
-            this.softness;
-        const massMatrixXY =
-            -bodyA.invI * this.leverArmAX * this.leverArmAY - bodyB.invI * this.leverArmBX * this.leverArmBY;
-        const massMatrixYY =
-            bodyA.invMass +
-            bodyB.invMass +
-            bodyA.invI * this.leverArmAX * this.leverArmAX +
-            bodyB.invI * this.leverArmBX * this.leverArmBX +
-            this.softness;
-
-        // Compute determinant for inverting the 2x2 matrix
-        const determinant = 1.0 / (massMatrixXX * massMatrixYY - massMatrixXY * massMatrixXY);
-
-        // Compute effective mass matrix as inverse of K
-        this.effectiveMassXX = determinant * massMatrixYY;
-        this.effectiveMassXY = -determinant * massMatrixXY;
-        this.effectiveMassYY = determinant * massMatrixXX;
-
-        // Compute current world positions of anchors (position correction)
-        const anchorPositionAX = bodyA.position.x + this.leverArmAX;
-        const anchorPositionAY = bodyA.position.y + this.leverArmAY;
-        const anchorPositionBX = bodyB.position.x + this.leverArmBX;
-        const anchorPositionBY = bodyB.position.y + this.leverArmBY;
-
-        // Compute relative position error (anchorB - anchorA)
-        const relativePositionX = anchorPositionBX - anchorPositionAX;
-        const relativePositionY = anchorPositionBY - anchorPositionAY;
-
-        // Compute position biases using Baumgarte stabilization
-        this.positionBiasX = relativePositionX * (-this.biasFactor * inverseDeltaTime);
-        this.positionBiasY = relativePositionY * (-this.biasFactor * inverseDeltaTime);
-
-        // Apply accumulated impulses from previous frame to velocities for faster convergence (Warm starting)
-        bodyA.velocity.x -= this.accumulatedImpulseX * bodyA.invMass;
-        bodyA.velocity.y -= this.accumulatedImpulseY * bodyA.invMass;
-        bodyA.angularVelocity -=
-            bodyA.invI * (this.leverArmAX * this.accumulatedImpulseY - this.leverArmAY * this.accumulatedImpulseX);
-
-        bodyB.velocity.x += this.accumulatedImpulseX * bodyB.invMass;
-        bodyB.velocity.y += this.accumulatedImpulseY * bodyB.invMass;
-        bodyB.angularVelocity +=
-            bodyB.invI * (this.leverArmBX * this.accumulatedImpulseY - this.leverArmBY * this.accumulatedImpulseX);
+            this.beta = 1.0;
+            this.gamma = 0.0;
+        }
     }
 
-    solve(): void {
-        const bodyA = this.bodyA;
-        const bodyB = this.bodyB;
+    private calculateBetaAndGamma() {
+        const omega = 2 * Math.PI * this._frequency;
+        const d = 2 * this._jointMass * this._dampingRatio * omega; // Damping coefficient
+        const k = this._jointMass * omega * omega; // Spring constant
+        // TODO: is fixed h fine? Previously was
+        // const h = Settings.dt;
+        const h = 1 / 60;
 
-        // Compute velocities at anchor points (linear velocity plus angular contribution)
-        const velocityAtAnchorAX = bodyA.velocity.x - bodyA.angularVelocity * this.leverArmAY;
-        const velocityAtAnchorAY = bodyA.velocity.y + bodyA.angularVelocity * this.leverArmAX;
+        this.beta = (h * k) / (d + h * k);
+        this.gamma = 1.0 / ((d + h * k) * h);
+    }
 
-        const velocityAtAnchorBX = bodyB.velocity.x - bodyB.angularVelocity * this.leverArmBY;
-        const velocityAtAnchorBY = bodyB.velocity.y + bodyB.angularVelocity * this.leverArmBX;
+    get frequency(): number {
+        return this._frequency;
+    }
 
-        // Compute relative velocities (B - A)
-        const relativeVelocityX = velocityAtAnchorBX - velocityAtAnchorAX;
-        const relativeVelocityY = velocityAtAnchorBY - velocityAtAnchorAY;
+    set frequency(frequency: number) {
+        this.setFDM(frequency, undefined, undefined);
+    }
 
-        // Compute the constraint violation vector (bias - relative velocity - softness * accumulated)
-        const constraintViolationX = this.positionBiasX - relativeVelocityX - this.accumulatedImpulseX * this.softness;
-        const constraintViolationY = this.positionBiasY - relativeVelocityY - this.accumulatedImpulseY * this.softness;
+    get dampingRatio(): number {
+        return this._frequency;
+    }
 
-        // Compute delta impulse using effective mass matrix
-        const deltaImpulseX = this.effectiveMassXX * constraintViolationX + this.effectiveMassXY * constraintViolationY;
-        const deltaImpulseY = this.effectiveMassXY * constraintViolationX + this.effectiveMassYY * constraintViolationY;
+    set dampingRatio(dampingRatio: number) {
+        this.setFDM(undefined, dampingRatio, undefined);
+    }
 
-        // Apply delta impulses to bodies (negative on A, positive on B)
-        bodyA.velocity.x -= deltaImpulseX * bodyA.invMass;
-        bodyA.velocity.y -= deltaImpulseY * bodyA.invMass;
-        bodyA.angularVelocity -= bodyA.invI * (this.leverArmAX * deltaImpulseY - this.leverArmAY * deltaImpulseX);
+    get jointMass(): number {
+        return this._frequency;
+    }
 
-        bodyB.velocity.x += deltaImpulseX * bodyB.invMass;
-        bodyB.velocity.y += deltaImpulseY * bodyB.invMass;
-        bodyB.angularVelocity += bodyB.invI * (this.leverArmBX * deltaImpulseY - this.leverArmBY * deltaImpulseX);
+    set jointMass(jointMass: number) {
+        this.setFDM(undefined, undefined, jointMass);
+    }
 
-        // Accumulate the delta impulses
-        this.accumulatedImpulseX += deltaImpulseX;
-        this.accumulatedImpulseY += deltaImpulseY;
+    get isSolid(): boolean {
+        return this._frequency <= 0;
     }
 }

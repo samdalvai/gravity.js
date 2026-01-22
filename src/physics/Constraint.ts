@@ -4,7 +4,10 @@ import RigidBody from './RigidBody';
 export abstract class Constraint {
     public readonly bodyA: RigidBody;
     public readonly bodyB: RigidBody;
-    
+
+    protected beta = 0.0; // Coefficient of position correction (Positional error feedback factor)
+    protected gamma = 0.0; // Coefficient of Softness (Force feedback factor)
+
     constructor(bodyA: RigidBody, bodyB: RigidBody) {
         this.bodyA = bodyA;
         this.bodyB = bodyB;
