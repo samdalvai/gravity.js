@@ -1,11 +1,12 @@
 import Graphics from '../Graphics';
 import Vec2 from '../math/Vec2';
-import RigidBody from './RigidBody';
 import CollisionDetection from './CollisionDetection';
 import { SETTINGS } from './Constants';
 import { ContactManifold } from './Contact';
 import Force from './Force';
+import { Joint } from './Joint';
 import { JointConstraint } from './JointConstraint';
+import RigidBody from './RigidBody';
 
 export default class World {
     private G: number;
@@ -14,11 +15,11 @@ export default class World {
     private bodies: RigidBody[] = [];
 
     // Constraints to be solved
+    // public joints: JointConstraint[] = [];
     public manifolds: ContactManifold[] = [];
-    public joints: JointConstraint[] = [];
+    public joints: Joint[] = [];
 
     public manifoldMap: Map<number, ContactManifold> = new Map();
-    public jointMap: Map<number, JointConstraint> = new Map();
 
     private forces: Vec2[] = [];
     private torques: number[] = [];
@@ -40,11 +41,11 @@ export default class World {
         return this.manifolds;
     };
 
-    addJoint = (constraint: JointConstraint): void => {
+    addJoint = (constraint: Joint): void => {
         this.joints.push(constraint);
     };
 
-    getJoints = (): JointConstraint[] => {
+    getJoints = (): Joint[] => {
         return this.joints;
     };
 

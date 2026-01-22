@@ -1,5 +1,6 @@
 import Graphics from '../Graphics';
 import Vec2 from '../math/Vec2';
+import { DistanceJoint } from '../physics/DistanceJoint';
 import { JointConstraint } from '../physics/JointConstraint';
 import RigidBody from '../physics/RigidBody';
 import { BoxShape, CircleShape, PolygonShape } from '../physics/Shape';
@@ -279,43 +280,72 @@ export default class Demo {
         this.generateFloor(world);
         this.generateFences(world);
 
-        const anchor1 = new RigidBody(new CircleShape(5), 500, Graphics.height() / 2, 0);
-        const anchor2 = new RigidBody(new CircleShape(5), 550, Graphics.height() / 2, 0);
-        const anchor3 = new RigidBody(new CircleShape(5), 600, Graphics.height() / 2, 0);
-        const anchor4 = new RigidBody(new CircleShape(5), 650, Graphics.height() / 2, 0);
+        const a = new RigidBody(new CircleShape(25), 500, Graphics.height() / 2, 1);
+        const b = new RigidBody(new CircleShape(25), 600, Graphics.height() / 2, 1);
+        const c = new RigidBody(new CircleShape(25), 600, Graphics.height() / 2 - 100, 1);
+        const d = new RigidBody(new CircleShape(25), 500, Graphics.height() / 2 - 100, 1);
 
-        world.addBody(anchor1);
-        world.addBody(anchor2);
-        world.addBody(anchor3);
-        world.addBody(anchor4);
+        world.addBody(a);
+        world.addBody(b);
+        world.addBody(c);
+        world.addBody(d);
 
-        const particle1 = new RigidBody(new CircleShape(5), 500, Graphics.height() / 2 + 50, 1);
-        const particle2 = new RigidBody(new CircleShape(5), 550, Graphics.height() / 2 + 50, 1);
-        const particle3 = new RigidBody(new CircleShape(5), 600, Graphics.height() / 2 + 50, 1);
-        const particle4 = new RigidBody(new CircleShape(5), 650, Graphics.height() / 2 + 50, 1);
+        const distance = 50;
 
-        world.addBody(particle1);
-        world.addBody(particle2);
-        world.addBody(particle3);
-        world.addBody(particle4);
+        const jointAB = new DistanceJoint(a, b, a.position, b.position, distance);
+        const jointBC = new DistanceJoint(b, c, b.position, c.position, distance);
+        const jointCD = new DistanceJoint(c, d, c.position, d.position, distance);
+        const jointDA = new DistanceJoint(d, a, d.position, a.position, distance);
 
-        const jointAnchor1Particle1 = new JointConstraint(anchor1, particle1, anchor1.position);
-        const jointAnchor2Particle2 = new JointConstraint(anchor2, particle2, anchor2.position);
-        const jointAnchor3Particle3 = new JointConstraint(anchor3, particle3, anchor3.position);
-        const jointAnchor4Particle4 = new JointConstraint(anchor4, particle4, anchor4.position);
+        const diagonalDist = Math.sqrt(100 ** 2 + 100 ** 2);
+        const jointAC = new DistanceJoint(a, c, a.position, c.position, diagonalDist);
+        const jointBD = new DistanceJoint(b, d, b.position, d.position, diagonalDist);
 
-        world.addJoint(jointAnchor1Particle1);
-        world.addJoint(jointAnchor2Particle2);
-        world.addJoint(jointAnchor3Particle3);
-        world.addJoint(jointAnchor4Particle4);
+        world.addJoint(jointAB);
+        world.addJoint(jointBC);
+        world.addJoint(jointCD);
+        world.addJoint(jointDA);
 
-        const jointParticle1Particle2 = new JointConstraint(particle1, particle2, particle1.position);
-        const jointParticle2Particle3 = new JointConstraint(particle2, particle3, particle2.position);
-        const jointParticle3Particle4 = new JointConstraint(particle3, particle4, particle3.position);
+        world.addJoint(jointAC);
+        world.addJoint(jointBD);
 
-        world.addJoint(jointParticle1Particle2);
-        world.addJoint(jointParticle2Particle3);
-        world.addJoint(jointParticle3Particle4);
+        // const anchor1 = new RigidBody(new CircleShape(5), 500, Graphics.height() / 2, 0);
+        // const anchor2 = new RigidBody(new CircleShape(5), 550, Graphics.height() / 2, 0);
+        // const anchor3 = new RigidBody(new CircleShape(5), 600, Graphics.height() / 2, 0);
+        // const anchor4 = new RigidBody(new CircleShape(5), 650, Graphics.height() / 2, 0);
+
+        // world.addBody(anchor1);
+        // world.addBody(anchor2);
+        // world.addBody(anchor3);
+        // world.addBody(anchor4);
+
+        // const particle1 = new RigidBody(new CircleShape(5), 500, Graphics.height() / 2 + 50, 1);
+        // const particle2 = new RigidBody(new CircleShape(5), 550, Graphics.height() / 2 + 50, 1);
+        // const particle3 = new RigidBody(new CircleShape(5), 600, Graphics.height() / 2 + 50, 1);
+        // const particle4 = new RigidBody(new CircleShape(5), 650, Graphics.height() / 2 + 50, 1);
+
+        // world.addBody(particle1);
+        // world.addBody(particle2);
+        // world.addBody(particle3);
+        // world.addBody(particle4);
+
+        // const jointAnchor1Particle1 = new JointConstraint(anchor1, particle1, anchor1.position);
+        // const jointAnchor2Particle2 = new JointConstraint(anchor2, particle2, anchor2.position);
+        // const jointAnchor3Particle3 = new JointConstraint(anchor3, particle3, anchor3.position);
+        // const jointAnchor4Particle4 = new JointConstraint(anchor4, particle4, anchor4.position);
+
+        // world.addJoint(jointAnchor1Particle1);
+        // world.addJoint(jointAnchor2Particle2);
+        // world.addJoint(jointAnchor3Particle3);
+        // world.addJoint(jointAnchor4Particle4);
+
+        // const jointParticle1Particle2 = new JointConstraint(particle1, particle2, particle1.position);
+        // const jointParticle2Particle3 = new JointConstraint(particle2, particle3, particle2.position);
+        // const jointParticle3Particle4 = new JointConstraint(particle3, particle4, particle3.position);
+
+        // world.addJoint(jointParticle1Particle2);
+        // world.addJoint(jointParticle2Particle3);
+        // world.addJoint(jointParticle3Particle4);
 
         // const circle1 = new RigidBody(new CircleShape(20), 500, Graphics.height() / 2 + 50, 1);
         // const circle2 = new RigidBody(new CircleShape(20), 600, Graphics.height() / 2 + 50, 1);
