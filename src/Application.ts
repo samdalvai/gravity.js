@@ -320,8 +320,8 @@ export default class Application {
             `(C) chosen particle: ${this.generateCircles ? 'Circle' : 'Box'}`,
         ];
 
-        const x = InputManager.mousePosition.x - Graphics.width();
-        const y = InputManager.mousePosition.y - Graphics.width();
+        const x = InputManager.mousePosition.x - Graphics.width() / 2;
+        const y = InputManager.mousePosition.y - Graphics.height() / 2;
 
         const debugText = [
             // Debug related info
