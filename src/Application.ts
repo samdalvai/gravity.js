@@ -77,7 +77,9 @@ export default class Application {
 
                     if (inputEvent.key === 'e') {
                         {
-                            const explosionPos = InputManager.mousePosition;
+                            const x = InputManager.mousePosition.x - Graphics.width() / 2;
+                            const y = -(InputManager.mousePosition.y - Graphics.height() / 2);
+                            const explosionPos = new Vec2(x, y);
                             const radius = 250; // pixels
                             const strength = 10000; // you can tune this
 
@@ -178,29 +180,34 @@ export default class Application {
 
             switch (inputEvent.type) {
                 case 'mousedown':
-                    if (this.world.getBodies().length >= MAX_BODIES) {
-                        continue;
-                    }
+                    {
+                        if (this.world.getBodies().length >= MAX_BODIES) {
+                            continue;
+                        }
 
-                    switch (inputEvent.button) {
-                        case MouseButton.LEFT:
-                            {
-                                const ball = new RigidBody(new CircleShape(30), inputEvent.x, inputEvent.y, 4.0);
-                                ball.restitution = 0.1;
-                                ball.friction = 0.5;
-                                ball.setTexture('basketball');
-                                this.world.addBody(ball);
-                            }
-                            break;
-                        case MouseButton.RIGHT:
-                            {
-                                const box = new RigidBody(new BoxShape(60, 60), inputEvent.x, inputEvent.y, 6.0);
-                                box.restitution = 0.1;
-                                box.friction = 0.7;
-                                box.setTexture('crate');
-                                this.world.addBody(box);
-                            }
-                            break;
+                        const x = InputManager.mousePosition.x - Graphics.width() / 2;
+                        const y = -(InputManager.mousePosition.y - Graphics.height() / 2);
+
+                        switch (inputEvent.button) {
+                            case MouseButton.LEFT:
+                                {
+                                    const ball = new RigidBody(new CircleShape(30), x, y, 4.0);
+                                    ball.restitution = 0.1;
+                                    ball.friction = 0.5;
+                                    ball.setTexture('basketball');
+                                    this.world.addBody(ball);
+                                }
+                                break;
+                            case MouseButton.RIGHT:
+                                {
+                                    const box = new RigidBody(new BoxShape(60, 60), x, y, 6.0);
+                                    box.restitution = 0.1;
+                                    box.friction = 0.7;
+                                    box.setTexture('crate');
+                                    this.world.addBody(box);
+                                }
+                                break;
+                        }
                     }
                     break;
                 case 'mouseup':
@@ -220,13 +227,15 @@ export default class Application {
         this.world.update(deltaTime);
 
         if (this.generateParticle) {
+            const x = InputManager.mousePosition.x - Graphics.width() / 2;
+            const y = -(InputManager.mousePosition.y - Graphics.height() / 2);
             for (let i = 0; i < 10; i++) {
                 if (this.world.getBodies().length >= MAX_BODIES) {
                     continue;
                 }
 
                 const shape = this.generateCircles ? new CircleShape(5) : new BoxShape(10, 10);
-                const particle = new RigidBody(shape, InputManager.mousePosition.x, InputManager.mousePosition.y, 1.0);
+                const particle = new RigidBody(shape, x, y, 1.0);
                 particle.restitution = 0.0;
                 particle.friction = 0.5;
                 particle.setTexture(this.generateCircles ? 'rockRound' : 'rockBox');
@@ -241,14 +250,7 @@ export default class Application {
 
         // Draw background texture
         if (this.bgTexture && !this.debug) {
-            Graphics.drawTexture(
-                0,
-                0,
-                Graphics.width(),
-                Graphics.height(),
-                0.0,
-                this.bgTexture,
-            );
+            Graphics.drawTexture(0, 0, Graphics.width(), Graphics.height(), 0.0, this.bgTexture);
         }
 
         // Draw all bodies
