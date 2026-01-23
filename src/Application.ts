@@ -20,7 +20,6 @@ export default class Application {
     private showContacts = true;
     private showAABB = false;
     private demoIndex = 1;
-    private bomb: RigidBody | null = null;
     private testBody: RigidBody | null = null;
 
     // Debug related properties
@@ -48,9 +47,10 @@ export default class Application {
         this.running = Graphics.openWindow();
         const demo = Demo.demoFunctions[this.demoIndex];
         this.world.clear();
-        this.bomb = null;
         demo(this.world);
 
+        // Test for collision, if you enable this you need to skip static objects from constraint solve
+        // otherwise determinant becomes 0
         // const b = new Body(new BoxShape(100, 100), Graphics.width() / 2, 500, 0);
         // // const b = new Body(new CircleShape(50), Graphics.width() / 2, 500, 0);
         // b.rotation = 0.5;
@@ -83,8 +83,8 @@ export default class Application {
                             const x = InputManager.mousePosition.x - Graphics.width() / 2;
                             const y = -(InputManager.mousePosition.y - Graphics.height() / 2);
                             const explosionPos = new Vec2(x, y);
-                            const radius = 250; // pixels
-                            const strength = 10000; // you can tune this
+                            const radius = 250;
+                            const strength = 10000;
 
                             for (const body of this.world.getBodies()) {
                                 const explosionImpulse = Force.generateExplosionForce(
@@ -96,26 +96,6 @@ export default class Application {
                                 body.applyImpulseLinear(explosionImpulse);
                             }
                         }
-                    }
-
-                    if (inputEvent.code === 'Space') {
-                        // Drop bomb
-                        if (!this.bomb) {
-                            const bomb = new RigidBody(new CircleShape(30), Graphics.width() / 2, 0, 10);
-                            bomb.friction = 0.2;
-                            this.bomb = bomb;
-                            this.bomb.setTexture('rockRound');
-
-                            this.world.addBody(bomb);
-                        }
-
-                        this.bomb.position = new Vec2(Graphics.width() / 2 + Utils.randomNumber(-500, 500), -50);
-                        const middleFloor = new Vec2(
-                            Graphics.width() / 2 + Utils.randomNumber(-100, 100),
-                            Graphics.height() - 300,
-                        );
-                        const vectorFromBombToFloor = middleFloor.subNew(this.bomb.position);
-                        this.bomb.velocity = vectorFromBombToFloor;
                     }
 
                     if (inputEvent.key === 'g') {
@@ -144,7 +124,6 @@ export default class Application {
                         }
 
                         this.world.clear();
-                        this.bomb = null;
                         demo(this.world);
                     }
 

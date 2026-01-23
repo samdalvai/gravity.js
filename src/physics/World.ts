@@ -14,7 +14,6 @@ export default class World {
     private bodies: RigidBody[] = [];
 
     // Constraints to be solved
-    // public joints: JointConstraint[] = [];
     public manifolds: ContactManifold[] = [];
     public joints: Joint[] = [];
 
@@ -56,8 +55,8 @@ export default class World {
         this.torques.push(torque);
     };
 
-    update = (dt: number): void => {
-        const invDt = dt > 0.0 ? 1.0 / dt : 0.0;
+    update = (deltaTime: number): void => {
+        const inverseDeltaTime = deltaTime > 0.0 ? 1.0 / deltaTime : 0.0;
         const newManifolds: ContactManifold[] = [];
         const newManifoldMap: Map<number, ContactManifold> = new Map();
 
@@ -80,10 +79,9 @@ export default class World {
 
         // Integrate all the forces
         for (const body of this.bodies) {
-            body.integrateForces(dt);
+            body.integrateForces(deltaTime);
         }
 
-        // console.time('contacts');
         this.bodies.sort((a, b) => a.minX - b.minX);
         const potentialPairs: [RigidBody, RigidBody][] = [];
 
@@ -109,8 +107,7 @@ export default class World {
 
         // Narrow phase check, potential pairs may still not collide
         for (let [a, b] of potentialPairs) {
-            // TODO: enable this when testing is over
-            // if (a.isStatic() && b.isStatic()) continue;
+            if (a.isStatic() && b.isStatic()) continue;
 
             // Improve coherence
             if (a.id > b.id) {
@@ -129,45 +126,25 @@ export default class World {
             newManifoldMap.set(key, newManifold);
             newManifolds.push(newManifold);
         }
-        // console.timeEnd('collision');
 
         this.manifoldMap = newManifoldMap;
         this.manifolds = newManifolds;
 
-        // preSolve for solving
-        for (let i = 0; i < this.manifolds.length; i++) {
-            const m = this.manifolds[i];
+        // Presolve constraints
+        for (let i = 0; i < this.manifolds.length; i++) this.manifolds[i].preSolve(inverseDeltaTime);
 
-            // TODO: move this to main loop after tests are finished
-            if (m.bodyA.isStatic() && m.bodyB.isStatic()) {
-                continue;
-            }
+        for (let i = 0; i < this.joints.length; i++) this.joints[i].preSolve(inverseDeltaTime);
 
-            this.manifolds[i].preSolve(invDt);
-        }
-
-        for (let i = 0; i < this.joints.length; i++) {
-            this.joints[i].preSolve(invDt);
-        }
-
-        // Iteratively solve the violated velocity constraint
+        // Solve constraints
         for (let i = 0; i < this.iterations; i++) {
-            for (let j = 0; j < this.manifolds.length; j++) {
-                const m = this.manifolds[j];
-
-                // TODO: move this to main loop after tests are finished
-                if (m.bodyA.isStatic() && m.bodyB.isStatic()) {
-                    continue;
-                }
-                this.manifolds[j].solve();
-            }
+            for (let j = 0; j < this.manifolds.length; j++) this.manifolds[j].solve();
 
             for (let j = 0; j < this.joints.length; j++) this.joints[j].solve();
         }
 
         // Integrate all the velocities
         for (const body of this.bodies) {
-            body.integrateVelocities(dt);
+            body.integrateVelocities(deltaTime);
         }
 
         // Kill objects that went out of the screen
