@@ -454,7 +454,7 @@ export default class Demo {
         world.addBody(endAnchor);
 
         // Final joint anchor at right edge of last step
-        const lastJoint = new DistanceJoint(endAnchor, lastStep);
+        const lastJoint = new DistanceJoint(lastStep, endAnchor);
         world.addJoint(lastJoint);
 
         // const boxSizeLarge = 40;
