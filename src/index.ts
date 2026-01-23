@@ -1,4 +1,5 @@
 import Application from './Application';
+import { DELTA_TIME } from './physics/Constants';
 
 const run = async () => {
     const app = new Application();
@@ -7,6 +8,7 @@ const run = async () => {
     console.log('Setup finished, starting loop');
 
     let timePreviousFrame = performance.now();
+    let accumulator = 0;
 
     document.addEventListener('visibilitychange', () => {
         app.setRunning(!document.hidden);
@@ -17,12 +19,36 @@ const run = async () => {
     });
 
     const loop = (now: number) => {
-        const deltaTime = (now - timePreviousFrame) / 1000;
+        let frameTime = (now - timePreviousFrame) / 1000;
         timePreviousFrame = now;
+
+        // Avoid spiral of death
+        frameTime = Math.min(frameTime, 0.25);
+
+        accumulator += frameTime;
 
         if (app.isRunning()) {
             app.input();
-            app.update(deltaTime);
+
+            while (accumulator >= DELTA_TIME) {
+                app.update(frameTime);
+                accumulator -= DELTA_TIME;
+            }
+
+            // Optional: interpolation (for buttery smooth rendering)
+            // TODO: to be implemented if appropriate
+            // Store previous position and current one and interpolate position and rotation, e.g.
+            // function lerp(a, b, t) {
+            //     return a + (b - a) * t;
+            // }
+
+            // function lerpVec2(a, b, t) {
+            //     return {
+            //         x: lerp(a.x, b.x, t),
+            //         y: lerp(a.y, b.y, t),
+            //     };
+            // }
+            // const alpha = accumulator / DELTA_TIME;
             app.render();
         }
 

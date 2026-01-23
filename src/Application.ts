@@ -3,7 +3,7 @@ import Graphics from './Graphics';
 import InputManager, { MouseButton } from './InputManager';
 import Utils from './math/Utils';
 import Vec2 from './math/Vec2';
-import { GRAVITY, MAX_BODIES } from './physics/Constants';
+import { DELTA_TIME, GRAVITY, MAX_BODIES } from './physics/Constants';
 import { DistanceJoint } from './physics/DistanceJoint';
 import Force from './physics/Force';
 import RigidBody from './physics/RigidBody';
@@ -198,15 +198,15 @@ export default class Application {
         }
     };
 
-    update = (deltaTime: number): void => {
+    update = (frameTime: number): void => {
         if (this.debug) {
             if (!this.lastFPSUpdate || performance.now() - this.lastFPSUpdate > 1000) {
                 this.lastFPSUpdate = performance.now();
-                this.FPS = 1 / deltaTime;
+                this.FPS = 1 / frameTime;
             }
         }
 
-        this.world.update(deltaTime);
+        this.world.update();
 
         if (this.generateParticle) {
             const x = InputManager.mousePosition.x - Graphics.width() / 2;
