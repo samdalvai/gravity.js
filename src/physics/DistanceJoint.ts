@@ -29,9 +29,7 @@ export class DistanceJoint extends Joint {
     ) {
         super(bodyA, bodyB, frequency, dampingRatio, jointMass);
 
-        // this.localAnchorA = this.bodyA.globalToLocal.mulVec2(anchorA, 1);
         this.localAnchorA = this.bodyA.worldPointToLocal(anchorA);
-        // this.localAnchorB = this.bodyB.globalToLocal.mulVec2(anchorB, 1);
         this.localAnchorB = this.bodyB.worldPointToLocal(anchorB);
         this._length = length <= 0 ? anchorB.subNew(anchorA).magnitude() : length;
     }
@@ -41,9 +39,7 @@ export class DistanceJoint extends Joint {
         // J = [-n, -n·cross(ra), n, n·cross(rb)] ( n = (anchorB-anchorA) / ||anchorB-anchorA|| )
         // M = (J · M^-1 · J^t)^-1
 
-        // this.ra = this.bodyA.localToGlobal.mulVec2(this.localAnchorA, 0);
         this.ra = this.bodyA.localDirToWorld(this.localAnchorA);
-        // this.rb = this.bodyB.localToGlobal.mulVec2(this.localAnchorB, 0);
         this.rb = this.bodyB.localDirToWorld(this.localAnchorB);
 
         const pa = this.bodyA.position.addNew(this.ra);

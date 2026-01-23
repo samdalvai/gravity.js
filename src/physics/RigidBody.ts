@@ -224,7 +224,6 @@ export default class RigidBody {
         this.shape.updateVertices(this.rotation, this.position);
 
         // Update AABB values based on new position
-        // TODO: add test and verify if performance is better/worst with this check
         if (this.angularVelocity !== 0 || this.velocity.x !== 0 || this.velocity.y !== 0) {
             this.updateAABB();
         }

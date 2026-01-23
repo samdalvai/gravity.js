@@ -1,7 +1,6 @@
 import Graphics from '../Graphics';
 import Vec2 from '../math/Vec2';
 import { DistanceJoint } from '../physics/DistanceJoint';
-import { Joint } from '../physics/Joint';
 import RigidBody from '../physics/RigidBody';
 import { BoxShape, CircleShape, PolygonShape } from '../physics/Shape';
 import World from '../physics/World';
@@ -59,7 +58,7 @@ export default class Demo {
         this.generateFences(world);
 
         const box = new RigidBody(new BoxShape(60, 60), 0, 0, 1);
-        box.angularVelocity = 5
+        box.angularVelocity = 5;
         box.setTexture('crate');
         world.addBody(box);
     };
@@ -351,12 +350,12 @@ export default class Demo {
         this.generateFloor(world);
         this.generateFences(world);
 
-        const rows = 25; // number of particles vertically
-        const cols = 30; // number of particles horizontally
-        const spacing = 25; // distance between particles
-        const particleRadius = 1; // visual radius
-        const startX = -((cols * spacing) / 2); // X coordinate of leftmost particle
-        const topY = 100 + (rows * spacing) / 2; // Y coordinate of top row
+        const rows = 25;
+        const cols = 30;
+        const spacing = 25;
+        const particleRadius = 1;
+        const startX = -((cols * spacing) / 2);
+        const topY = 100 + (rows * spacing) / 2;
 
         const particles: RigidBody[][] = [];
 
@@ -387,7 +386,7 @@ export default class Demo {
                     world.addJoint(joint);
                 }
 
-                // // Connect to particle to the right
+                // Connect to particle to the right
                 if (col < cols - 1 && row > 0) {
                     const right = particles[row][col + 1];
                     const joint = new DistanceJoint(p, right);
@@ -507,24 +506,9 @@ export default class Demo {
         }
 
         // Add structure with blocks
-        const plank1 = new RigidBody(
-            new BoxShape(50, 150),
-            -30,
-            floor.position.y + 100 + 100,
-            5.0,
-        );
-        const plank2 = new RigidBody(
-            new BoxShape(50, 150),
-            130,
-            floor.position.y + 100 + 100,
-            5.0,
-        );
-        const plank3 = new RigidBody(
-            new BoxShape(250, 25),
-            50,
-            floor.position.y + 100 + 200,
-            2.0,
-        );
+        const plank1 = new RigidBody(new BoxShape(50, 150), -30, floor.position.y + 100 + 100, 5.0);
+        const plank2 = new RigidBody(new BoxShape(50, 150), 130, floor.position.y + 100 + 100, 5.0);
+        const plank3 = new RigidBody(new BoxShape(250, 25), 50, floor.position.y + 100 + 200, 2.0);
         plank1.setTexture('woodPlankSolid');
         plank2.setTexture('woodPlankSolid');
         plank3.setTexture('woodPlankCracked');
@@ -559,7 +543,6 @@ export default class Demo {
         }
 
         // Add a bridge of connected steps and joints
-        // TODO: use bdirge from suspension bridge demo
         const numSteps = 10;
         const spacing = 33;
 
