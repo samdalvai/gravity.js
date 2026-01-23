@@ -251,13 +251,13 @@ export default class Demo {
         this.generateFences(world);
 
         // Add ragdoll parts (rigid bodies)
-        const bob = new RigidBody(new CircleShape(5), Graphics.width() / 2.0, Graphics.height() / 2.0 - 200, 0.0);
-        const head = new RigidBody(new CircleShape(25), bob.position.x, bob.position.y + 70, 5.0);
-        const torso = new RigidBody(new BoxShape(50, 100), head.position.x, head.position.y + 80, 3.0);
-        const leftArm = new RigidBody(new BoxShape(15, 70), torso.position.x - 32, torso.position.y - 10, 1.0);
-        const rightArm = new RigidBody(new BoxShape(15, 70), torso.position.x + 32, torso.position.y - 10, 1.0);
-        const leftLeg = new RigidBody(new BoxShape(20, 90), torso.position.x - 20, torso.position.y + 97, 1.0);
-        const rightLeg = new RigidBody(new BoxShape(20, 90), torso.position.x + 20, torso.position.y + 97, 1.0);
+        const bob = new RigidBody(new CircleShape(5), 0, 100, 0.0);
+        const head = new RigidBody(new CircleShape(25), bob.position.x, bob.position.y - 70, 5.0);
+        const torso = new RigidBody(new BoxShape(50, 100), head.position.x, head.position.y - 80, 3.0);
+        const leftArm = new RigidBody(new BoxShape(15, 70), torso.position.x - 32, torso.position.y + 10, 1.0);
+        const rightArm = new RigidBody(new BoxShape(15, 70), torso.position.x + 32, torso.position.y + 10, 1.0);
+        const leftLeg = new RigidBody(new BoxShape(20, 90), torso.position.x - 20, torso.position.y - 97, 1.0);
+        const rightLeg = new RigidBody(new BoxShape(20, 90), torso.position.x + 20, torso.position.y - 97, 1.0);
         bob.setTexture('bob');
         head.setTexture('head');
         torso.setTexture('torso');
@@ -270,21 +270,36 @@ export default class Demo {
         world.addBody(torso);
         world.addBody(leftArm);
         world.addBody(rightArm);
-        world.addBody(leftLeg);
-        world.addBody(rightLeg);
+        // world.addBody(leftLeg);
+        // world.addBody(rightLeg);
 
         // Add joints between ragdoll parts (distance constraints with one anchor point)
-        // const string = new JointConstraint(bob, head, bob.position);
-        // const neck = new JointConstraint(head, torso, head.position.addNew(new Vec2(0, 25)));
-        // const leftShoulder = new JointConstraint(torso, leftArm, torso.position.addNew(new Vec2(-28, -45)));
-        // const rightShoulder = new JointConstraint(torso, rightArm, torso.position.addNew(new Vec2(+28, -45)));
+        const string = new DistanceJoint(bob, head, bob.position, head.position);
+        const neck = new DistanceJoint(
+            head,
+            torso,
+            head.position.subNew(new Vec2(0, 25)),
+            torso.position.addNew(new Vec2(0, 50)),
+        );
+        const leftShoulder = new DistanceJoint(
+            torso,
+            leftArm,
+            torso.position.addNew(new Vec2(-28, 45)),
+            leftArm.position.addNew(new Vec2(0, 35)),
+        );
+        const rightShoulder = new DistanceJoint(
+            torso,
+            rightArm,
+            torso.position.addNew(new Vec2(28, 45)),
+            rightArm.position.addNew(new Vec2(0, 35)),
+        );
         // const leftHip = new JointConstraint(torso, leftLeg, torso.position.addNew(new Vec2(-20, +50)));
         // const rightHip = new JointConstraint(torso, rightLeg, torso.position.addNew(new Vec2(+20, +50)));
 
-        // world.addJoint(string);
-        // world.addJoint(neck);
-        // world.addJoint(leftShoulder);
-        // world.addJoint(rightShoulder);
+        world.addJoint(string);
+        world.addJoint(neck);
+        world.addJoint(leftShoulder);
+        world.addJoint(rightShoulder);
         // world.addJoint(leftHip);
         // world.addJoint(rightHip);
     };
