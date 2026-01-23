@@ -19,7 +19,7 @@ export default class Application {
     private generateCircles = true;
     private showContacts = true;
     private showAABB = false;
-    private demoIndex = 1;
+    private demoIndex = 4;
     private bomb: RigidBody | null = null;
     private testBody: RigidBody | null = null;
 
@@ -46,7 +46,10 @@ export default class Application {
         await AssetStore.loadTextures();
 
         this.running = Graphics.openWindow();
-        Demo.demo1(this.world);
+        const demo = Demo.demoFunctions[this.demoIndex];
+        this.world.clear();
+        this.bomb = null;
+        demo(this.world);
 
         // const b = new Body(new BoxShape(100, 100), Graphics.width() / 2, 500, 0);
         // // const b = new Body(new CircleShape(50), Graphics.width() / 2, 500, 0);
@@ -280,13 +283,7 @@ export default class Application {
                         Graphics.drawFillCircle(worldA.x, worldA.y, 5, 'blue');
                         Graphics.drawFillCircle(worldB.x, worldB.y, 5, 'blue');
 
-                        Graphics.drawLine(
-                            worldA.x,
-                            worldA.y,
-                            worldB.x,
-                            worldB.y,
-                            'blue',
-                        );
+                        Graphics.drawLine(worldA.x, worldA.y, worldB.x, worldB.y, 'blue');
                     }
                 }
                 for (const manifold of this.world.getManifolds()) {
