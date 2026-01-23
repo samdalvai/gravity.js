@@ -114,6 +114,16 @@ export default class Demo {
         // Demo 4: As suspension bridge
         this.generateFloor(world);
         this.generateFences(world);
+        const floorHeight = 50;
+
+        const pillarWidth = 50;
+        const pillarHeight = 400;
+        const pillarPositionX = 200;
+        const pillarPositionY = -pillarHeight / 2 + floorHeight / 2;
+        const pillarLeft = new RigidBody(new BoxShape(pillarWidth, pillarHeight), -pillarPositionX, pillarPositionY, 0);
+        const pillarRight = new RigidBody(new BoxShape(pillarWidth, pillarHeight), pillarPositionX, pillarPositionY, 0);
+        world.addBody(pillarLeft);
+        world.addBody(pillarRight);
 
         const c = new RigidBody(new CircleShape(25), 100, 0, 1);
         const d = new RigidBody(new CircleShape(25), 0, 0, 1);
@@ -121,24 +131,19 @@ export default class Demo {
         world.addBody(c);
         world.addBody(d);
 
-        const distance = 100;
+        const distance = -1; // -1 = the initial distance
         const jointCD = new DistanceJoint(c, d, c.position, d.position, distance);
 
-        // world.addJoint(jointCD);
-
-        const leftAnchor = new RigidBody(new BoxShape(50, 50), -100, 0, 0);
-        const rightAnchor = new RigidBody(new BoxShape(50, 50), 200, 0, 0);
-        world.addBody(leftAnchor);
-        world.addBody(rightAnchor);
+        world.addJoint(jointCD);
 
         const frequency = 15;
         const dampingRadio = 0;
         const jointMass = 1;
 
         const leftJoint = new DistanceJoint(
-            leftAnchor,
+            pillarLeft,
             d,
-            leftAnchor.position,
+            pillarLeft.position.addNew(new Vec2(25, 0)).addNew(new Vec2(0, pillarHeight / 2)),
             d.position,
             distance,
             frequency,
@@ -146,9 +151,9 @@ export default class Demo {
             jointMass,
         );
         const rightJoint = new DistanceJoint(
-            rightAnchor,
+            pillarRight,
             c,
-            rightAnchor.position.subNew(new Vec2(25, 0)),
+            pillarRight.position.subNew(new Vec2(25, 0)).addNew(new Vec2(0, pillarHeight / 2)),
             c.position,
             distance,
             frequency,
