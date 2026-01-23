@@ -19,7 +19,7 @@ export default class Application {
     private generateCircles = true;
     private showContacts = true;
     private showAABB = false;
-    private demoIndex = 8;
+    private demoIndex = 7;
     private bomb: RigidBody | null = null;
     private testBody: RigidBody | null = null;
 
