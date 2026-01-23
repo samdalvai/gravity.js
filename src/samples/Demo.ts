@@ -351,81 +351,51 @@ export default class Demo {
         this.generateFloor(world);
         this.generateFences(world);
 
-        const anchor1 = new RigidBody(new CircleShape(5), 0, 0, 0);
-        const anchor2 = new RigidBody(new CircleShape(5), 50, 0, 0);
-        const anchor3 = new RigidBody(new CircleShape(5), 100, 0, 0);
-        const anchor4 = new RigidBody(new CircleShape(5), 150, 0, 0);
+        const rows = 25; // number of particles vertically
+        const cols = 30; // number of particles horizontally
+        const spacing = 25; // distance between particles
+        const particleRadius = 1; // visual radius
+        const startX = -((cols * spacing) / 2); // X coordinate of leftmost particle
+        const topY = 100 + (rows * spacing) / 2; // Y coordinate of top row
 
-        world.addBody(anchor1);
-        world.addBody(anchor2);
-        world.addBody(anchor3);
-        world.addBody(anchor4);
+        const particles: RigidBody[][] = [];
 
-        const particle1 = new RigidBody(new CircleShape(5), 0, -50, 1);
-        const particle2 = new RigidBody(new CircleShape(5), 50, -50, 1);
-        const particle3 = new RigidBody(new CircleShape(5), 100, -50, 1);
-        const particle4 = new RigidBody(new CircleShape(5), 150, -50, 1);
+        // Generate particles
+        for (let row = 0; row < rows; row++) {
+            const rowParticles: RigidBody[] = [];
+            for (let col = 0; col < cols; col++) {
+                const x = startX + col * spacing;
+                const y = topY - row * spacing;
+                const mass = row === 0 ? 0 : 1; // top row can be anchors (mass=0)
+                const particle = new RigidBody(new CircleShape(particleRadius), x, y, mass);
+                world.addBody(particle);
+                rowParticles.push(particle);
+            }
+            particles.push(rowParticles);
+        }
 
-        world.addBody(particle1);
-        world.addBody(particle2);
-        world.addBody(particle3);
-        world.addBody(particle4);
+        // Create joints
+        for (let row = 0; row < rows; row++) {
+            for (let col = 0; col < cols; col++) {
+                const p = particles[row][col];
 
-        const jointAnchor1Particle1 = new DistanceJoint(anchor1, particle1);
-        const jointAnchor2Particle2 = new DistanceJoint(anchor2, particle2);
-        const jointAnchor3Particle3 = new DistanceJoint(anchor3, particle3);
-        const jointAnchor4Particle4 = new DistanceJoint(anchor4, particle4);
+                // Connect to particle above
+                if (row > 0) {
+                    const above = particles[row - 1][col];
+                    const joint = new DistanceJoint(above, p);
+                    joint.drawConnectionLine = true;
+                    world.addJoint(joint);
+                }
 
-        world.addJoint(jointAnchor1Particle1);
-        world.addJoint(jointAnchor2Particle2);
-        world.addJoint(jointAnchor3Particle3);
-        world.addJoint(jointAnchor4Particle4);
-
-        const jointParticle1Particle2 = new DistanceJoint(particle1, particle2);
-        const jointParticle2Particle3 = new DistanceJoint(particle2, particle3);
-        const jointParticle3Particle4 = new DistanceJoint(particle3, particle4);
-
-        world.addJoint(jointParticle1Particle2);
-        world.addJoint(jointParticle2Particle3);
-        world.addJoint(jointParticle3Particle4);
-
-        // -----
-
-        const particle1b = new RigidBody(new CircleShape(5), 0, -100, 1);
-        const particle2b = new RigidBody(new CircleShape(5), 50, -100, 1);
-        const particle3b = new RigidBody(new CircleShape(5), 100, -100, 1);
-        const particle4b = new RigidBody(new CircleShape(5), 150, -100, 1);
-
-        world.addBody(particle1b);
-        world.addBody(particle2b);
-        world.addBody(particle3b);
-        world.addBody(particle4b);
-
-        const jointAnchor1Particle1b = new DistanceJoint(particle1, particle1b);
-        const jointAnchor2Particle2b = new DistanceJoint(particle2, particle2b);
-        const jointAnchor3Particle3b = new DistanceJoint(particle3, particle3b);
-        const jointAnchor4Particle4b = new DistanceJoint(particle4, particle4b);
-
-        world.addJoint(jointAnchor1Particle1b);
-        world.addJoint(jointAnchor2Particle2b);
-        world.addJoint(jointAnchor3Particle3b);
-        world.addJoint(jointAnchor4Particle4b);
-
-        const jointParticle1Particle2b = new DistanceJoint(particle1b, particle2b);
-        const jointParticle2Particle3b = new DistanceJoint(particle2b, particle3b);
-        const jointParticle3Particle4b = new DistanceJoint(particle3b, particle4b);
-
-        world.addJoint(jointParticle1Particle2b);
-        world.addJoint(jointParticle2Particle3b);
-        world.addJoint(jointParticle3Particle4b);
-
-        // const circle1 = new RigidBody(new CircleShape(20), 500, Graphics.height() / 2 + 50, 1);
-        // const circle2 = new RigidBody(new CircleShape(20), 600, Graphics.height() / 2 + 50, 1);
-        // world.addBody(circle1);
-        // world.addBody(circle2);
-
-        // const joint = new JointConstraint(circle1, circle2, circle1.position);
-        // world.addJoint(joint);
+                // // Connect to particle to the right
+                if (col < cols - 1 && row > 0) {
+                    const right = particles[row][col + 1];
+                    const joint = new DistanceJoint(p, right);
+                    joint.drawConnectionLine = true;
+                    world.addJoint(joint);
+                }
+            }
+        }
     };
 
     static demo9 = (world: World) => {
