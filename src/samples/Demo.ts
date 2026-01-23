@@ -351,104 +351,43 @@ export default class Demo {
         this.generateFloor(world);
         this.generateFences(world);
 
-        // const a = new RigidBody(new CircleShape(25), 500, Graphics.height() / 2, 1);
-        // const b = new RigidBody(new CircleShape(25), 600, Graphics.height() / 2, 1);
-        const c = new RigidBody(new CircleShape(25), 600, Graphics.height() / 2 - 100, 1);
-        const d = new RigidBody(new CircleShape(25), 500, Graphics.height() / 2 - 100, 1);
+        const anchor1 = new RigidBody(new CircleShape(5), 0, 0, 0);
+        const anchor2 = new RigidBody(new CircleShape(5), 50, 0, 0);
+        const anchor3 = new RigidBody(new CircleShape(5), 100, 0, 0);
+        const anchor4 = new RigidBody(new CircleShape(5), 150, 0, 0);
 
-        // world.addBody(a);
-        // world.addBody(b);
-        world.addBody(c);
-        world.addBody(d);
+        world.addBody(anchor1);
+        world.addBody(anchor2);
+        world.addBody(anchor3);
+        world.addBody(anchor4);
 
-        const distance = 100;
+        const particle1 = new RigidBody(new CircleShape(5), 0, -50, 1);
+        const particle2 = new RigidBody(new CircleShape(5), 50, -50, 1);
+        const particle3 = new RigidBody(new CircleShape(5), 100, -50, 1);
+        const particle4 = new RigidBody(new CircleShape(5), 150, -50, 1);
 
-        // const jointAB = new DistanceJoint(a, b, a.position, b.position, distance);
-        // const jointBC = new DistanceJoint(b, c, b.position, c.position, distance);
-        const jointCD = new DistanceJoint(c, d, c.position, d.position, distance);
-        // const jointDA = new DistanceJoint(d, a, d.position, a.position, distance);
+        world.addBody(particle1);
+        world.addBody(particle2);
+        world.addBody(particle3);
+        world.addBody(particle4);
 
-        const diagonalDist = Math.sqrt(100 ** 2 + 100 ** 2);
-        // const jointAC = new DistanceJoint(a, c, a.position, c.position, diagonalDist);
-        // const jointBD = new DistanceJoint(b, d, b.position, d.position, diagonalDist);
+        const jointAnchor1Particle1 = new DistanceJoint(anchor1, particle1);
+        const jointAnchor2Particle2 = new DistanceJoint(anchor2, particle2);
+        const jointAnchor3Particle3 = new DistanceJoint(anchor3, particle3);
+        const jointAnchor4Particle4 = new DistanceJoint(anchor4, particle4);
 
-        // world.addJoint(jointAB);
-        // world.addJoint(jointBC);
-        world.addJoint(jointCD);
-        // world.addJoint(jointDA);
+        world.addJoint(jointAnchor1Particle1);
+        world.addJoint(jointAnchor2Particle2);
+        world.addJoint(jointAnchor3Particle3);
+        world.addJoint(jointAnchor4Particle4);
 
-        // world.addJoint(jointAC);
-        // world.addJoint(jointBD);
+        const jointParticle1Particle2 = new DistanceJoint(particle1, particle2);
+        const jointParticle2Particle3 = new DistanceJoint(particle2, particle3);
+        const jointParticle3Particle4 = new DistanceJoint(particle3, particle4);
 
-        const leftAnchor = new RigidBody(new BoxShape(50, 50), 400, Graphics.height() / 2 - 200, 0);
-        const rightAnchor = new RigidBody(new BoxShape(50, 50), 700, Graphics.height() / 2 - 200, 0);
-        world.addBody(leftAnchor);
-        world.addBody(rightAnchor);
-
-        const frequency = 15;
-        const dampingRadio = 0;
-        const jointMass = 1;
-
-        const leftJoint = new DistanceJoint(
-            leftAnchor,
-            d,
-            leftAnchor.position,
-            d.position,
-            distance,
-            frequency,
-            dampingRadio,
-            jointMass,
-        );
-        const rightJoint = new DistanceJoint(
-            rightAnchor,
-            c,
-            rightAnchor.position,
-            c.position,
-            distance,
-            frequency,
-            dampingRadio,
-            jointMass,
-        );
-        world.addJoint(leftJoint);
-        world.addJoint(rightJoint);
-
-        // const anchor1 = new RigidBody(new CircleShape(5), 500, Graphics.height() / 2, 0);
-        // const anchor2 = new RigidBody(new CircleShape(5), 550, Graphics.height() / 2, 0);
-        // const anchor3 = new RigidBody(new CircleShape(5), 600, Graphics.height() / 2, 0);
-        // const anchor4 = new RigidBody(new CircleShape(5), 650, Graphics.height() / 2, 0);
-
-        // world.addBody(anchor1);
-        // world.addBody(anchor2);
-        // world.addBody(anchor3);
-        // world.addBody(anchor4);
-
-        // const particle1 = new RigidBody(new CircleShape(5), 500, Graphics.height() / 2 + 50, 1);
-        // const particle2 = new RigidBody(new CircleShape(5), 550, Graphics.height() / 2 + 50, 1);
-        // const particle3 = new RigidBody(new CircleShape(5), 600, Graphics.height() / 2 + 50, 1);
-        // const particle4 = new RigidBody(new CircleShape(5), 650, Graphics.height() / 2 + 50, 1);
-
-        // world.addBody(particle1);
-        // world.addBody(particle2);
-        // world.addBody(particle3);
-        // world.addBody(particle4);
-
-        // const jointAnchor1Particle1 = new JointConstraint(anchor1, particle1, anchor1.position);
-        // const jointAnchor2Particle2 = new JointConstraint(anchor2, particle2, anchor2.position);
-        // const jointAnchor3Particle3 = new JointConstraint(anchor3, particle3, anchor3.position);
-        // const jointAnchor4Particle4 = new JointConstraint(anchor4, particle4, anchor4.position);
-
-        // world.addJoint(jointAnchor1Particle1);
-        // world.addJoint(jointAnchor2Particle2);
-        // world.addJoint(jointAnchor3Particle3);
-        // world.addJoint(jointAnchor4Particle4);
-
-        // const jointParticle1Particle2 = new JointConstraint(particle1, particle2, particle1.position);
-        // const jointParticle2Particle3 = new JointConstraint(particle2, particle3, particle2.position);
-        // const jointParticle3Particle4 = new JointConstraint(particle3, particle4, particle3.position);
-
-        // world.addJoint(jointParticle1Particle2);
-        // world.addJoint(jointParticle2Particle3);
-        // world.addJoint(jointParticle3Particle4);
+        world.addJoint(jointParticle1Particle2);
+        world.addJoint(jointParticle2Particle3);
+        world.addJoint(jointParticle3Particle4);
 
         // const circle1 = new RigidBody(new CircleShape(20), 500, Graphics.height() / 2 + 50, 1);
         // const circle2 = new RigidBody(new CircleShape(20), 600, Graphics.height() / 2 + 50, 1);
