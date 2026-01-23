@@ -4,6 +4,7 @@ export const TEXTURES = {
     bowlingball: 'assets/bowlingball.png',
     crate: 'assets/crate.png',
     metal: 'assets/metal.png',
+
     // Skeleton ragdoll
     bob: 'assets/ragdoll/bob.png',
     head: 'assets/ragdoll/head.png',
@@ -12,6 +13,7 @@ export const TEXTURES = {
     rightArm: 'assets/ragdoll/rightArm.png',
     rightLeg: 'assets/ragdoll/rightLeg.png',
     torso: 'assets/ragdoll/torso.png',
+
     // Angry birds sprites
     background: 'assets/angrybirds/background.png',
     birdRed: 'assets/angrybirds/bird-red.png',
