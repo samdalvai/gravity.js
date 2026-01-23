@@ -38,14 +38,14 @@ export default class Demo {
         const fenceHeight = 900;
         const leftFence = new RigidBody(
             new BoxShape(fenceWidth, fenceHeight),
-            -(floorWidth / 2 + fenceWidth / 2) + fenceWidth,
+            -(floorWidth / 2 + fenceWidth / 2),
             floorPositionY + floorHeight / 2 + fenceHeight / 2,
             0.0,
         );
 
         const rightFence = new RigidBody(
             new BoxShape(fenceWidth, fenceHeight),
-            floorWidth / 2 + fenceWidth / 2 - fenceWidth,
+            floorWidth / 2 + fenceWidth / 2,
             floorPositionY + floorHeight / 2 + fenceHeight / 2,
             0.0,
         );
@@ -494,14 +494,14 @@ export default class Demo {
         this.generateFences(world);
 
         // Add bird
-        const bird = new RigidBody(new CircleShape(45), 100, Graphics.height() / 2.0 + 220, 3.0);
+        const bird = new RigidBody(new CircleShape(45), -550, -200, 3.0);
         bird.setTexture('birdRed');
         world.addBody(bird);
 
         // Add a stack of boxes
         for (let i = 1; i <= 4; i++) {
             const mass = 10.0 / i;
-            const box = new RigidBody(new BoxShape(50, 50), 600, floor.position.y - 100 - i * 55, mass);
+            const box = new RigidBody(new BoxShape(50, 50), -300, floor.position.y + 100 + i * 55, mass);
             box.setTexture('woodBox');
             box.friction = 0.9;
             box.restitution = 0.1;
@@ -511,20 +511,20 @@ export default class Demo {
         // Add structure with blocks
         const plank1 = new RigidBody(
             new BoxShape(50, 150),
-            Graphics.width() / 2.0 + 20,
-            floor.position.y - 100 - 100,
+            -30,
+            floor.position.y + 100 + 100,
             5.0,
         );
         const plank2 = new RigidBody(
             new BoxShape(50, 150),
-            Graphics.width() / 2.0 + 180,
-            floor.position.y - 100 - 100,
+            130,
+            floor.position.y + 100 + 100,
             5.0,
         );
         const plank3 = new RigidBody(
             new BoxShape(250, 25),
-            Graphics.width() / 2.0 + 100,
-            floor.position.y - 100 - 200,
+            50,
+            floor.position.y + 100 + 200,
             2.0,
         );
         plank1.setTexture('woodPlankSolid');
@@ -535,11 +535,11 @@ export default class Demo {
         world.addBody(plank3);
 
         // Add a triangle polygon
-        const triangleVertices = [new Vec2(30, 30), new Vec2(-30, 30), new Vec2(0, -30)];
+        const triangleVertices = [new Vec2(-30, -30), new Vec2(30, -30), new Vec2(0, 30)];
         const triangle = new RigidBody(
             new PolygonShape(triangleVertices),
             plank3.position.x,
-            plank3.position.y - 50,
+            plank3.position.y + 50,
             0.5,
         );
         triangle.setTexture('woodTriangle');
@@ -550,7 +550,7 @@ export default class Demo {
         for (let col = 0; col < numRows; col++) {
             for (let row = 0; row < col; row++) {
                 const x = plank3.position.x + 200 + col * 50 - row * 25;
-                const y = floor.position.y - 100 - 50 - row * 52;
+                const y = floor.position.y + 100 + 50 + row * 52;
                 const mass = 5 / (row + 1);
                 const box = new RigidBody(new BoxShape(50, 50), x, y, mass);
                 box.friction = 0.9;
@@ -566,7 +566,7 @@ export default class Demo {
         const spacing = 33;
 
         // Start anchor (static)
-        const startStep = new RigidBody(new BoxShape(80, 20), 200, 200, 0.0);
+        const startStep = new RigidBody(new BoxShape(80, 20), -500, 200, 0.0);
         startStep.setTexture('rockBridgeAnchor');
         world.addBody(startStep);
 
@@ -583,8 +583,8 @@ export default class Demo {
             world.addBody(step);
 
             // Connect previous link to this link
-            // const joint = new JointConstraint(last, step, step.position);
-            // world.addJoint(joint);
+            const joint = new DistanceJoint(last, step);
+            world.addJoint(joint);
 
             last = step;
         }
@@ -594,13 +594,13 @@ export default class Demo {
         endStep.setTexture('rockBridgeAnchor');
         world.addBody(endStep);
 
-        // const lastJoint = new JointConstraint(last, endStep, endStep.position.addNew(new Vec2(15, 0)));
-        // world.addJoint(lastJoint);
+        const lastJoint = new DistanceJoint(last, endStep);
+        world.addJoint(lastJoint);
 
         // Add pigs
-        const pig1 = new RigidBody(new CircleShape(30), plank1.position.x + 80, floor.position.y - 100 - 50, 3.0);
-        const pig2 = new RigidBody(new CircleShape(30), plank2.position.x + 400, floor.position.y - 100 - 50, 3.0);
-        const pig3 = new RigidBody(new CircleShape(30), plank2.position.x + 460, floor.position.y - 100 - 50, 3.0);
+        const pig1 = new RigidBody(new CircleShape(30), plank1.position.x + 80, floor.position.y + 100 - 50, 3.0);
+        const pig2 = new RigidBody(new CircleShape(30), plank2.position.x + 400, floor.position.y + 100 - 50, 3.0);
+        const pig3 = new RigidBody(new CircleShape(30), plank2.position.x + 460, floor.position.y + 100 - 50, 3.0);
         const pig4 = new RigidBody(new CircleShape(30), 220, 130, 1.0);
         pig1.setTexture('pig1');
         pig2.setTexture('pig2');
