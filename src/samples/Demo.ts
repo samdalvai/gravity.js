@@ -404,60 +404,58 @@ export default class Demo {
         this.generateFences(world);
 
         // Suspension Bridge Creation
-        // const numSteps = 10;
-        // const stepWidth = 40;
-        // const spacing = stepWidth + 2.5; // distance between centers
-        // const startX = -(numSteps * spacing) / 2 - stepWidth / 2;
-        // const startY = 0;
-        // const softness = 0.002;
-        // const bias = 0.1;
+        const numSteps = 10;
+        const stepWidth = 40;
+        const spacing = stepWidth + 2.5; // distance between centers
+        const startX = -(numSteps * spacing) / 2 - stepWidth / 2;
+        const startY = 0;
+        const softness = 0.002;
+        const bias = 0.1;
 
-        // // Start anchor (static)
-        // const startAnchor = new RigidBody(
-        //     new BoxShape(stepWidth * 2, stepWidth * 0.5),
-        //     startX - stepWidth / 2,
-        //     startY,
-        //     0.0,
-        // );
-        // startAnchor.setTexture('rockBridgeAnchor');
-        // world.addBody(startAnchor);
+        // Start anchor (static)
+        const startAnchor = new RigidBody(
+            new BoxShape(stepWidth * 2, stepWidth * 0.5),
+            startX - stepWidth / 2,
+            startY,
+            0.0,
+        );
+        startAnchor.setTexture('rockBridgeAnchor');
+        world.addBody(startAnchor);
 
-        // // First connection uses the start anchor
-        // let lastStep = startAnchor;
+        // First connection uses the start anchor
+        let lastStep = startAnchor;
 
-        // // Create steps
-        // for (let i = 1; i <= numSteps; i++) {
-        //     const x = startX + i * spacing;
+        // Create steps
+        for (let i = 1; i <= numSteps; i++) {
+            const x = startX + i * spacing;
 
-        //     // Optional sag: small vertical sinusoidal displacement
-        //     const y = startY - Math.sin((i / numSteps) * Math.PI) * 50;
+            // Optional sag: small vertical sinusoidal displacement
+            const y = startY - Math.sin((i / numSteps) * Math.PI) * 10;
 
-        //     const step = new RigidBody(new CircleShape(stepWidth * 0.5), x, y, 3);
-        //     step.setTexture('woodBridgeStep');
-        //     world.addBody(step);
+            const step = new RigidBody(new CircleShape(stepWidth * 0.5), x, y, 3);
+            step.setTexture('woodBridgeStep');
+            world.addBody(step);
 
-        //     // Joint anchor at left edge of this step
-        //     const anchor = step.position.subNew(new Vec2(stepWidth / 2, 0));
-        //     // const joint = new JointConstraint(lastStep, step, anchor, softness, bias);
-        //     // world.addJoint(joint);
+            // Joint anchor at left edge of this step
+            const joint = new DistanceJoint(lastStep, step);
+            world.addJoint(joint);
 
-        //     lastStep = step;
-        // }
+            lastStep = step;
+        }
 
-        // // End anchor (static)
-        // const endAnchor = new RigidBody(
-        //     new BoxShape(stepWidth * 2, stepWidth * 0.5),
-        //     lastStep.position.x + spacing + stepWidth / 2,
-        //     startY,
-        //     0.0,
-        // );
-        // endAnchor.setTexture('rockBridgeAnchor');
-        // world.addBody(endAnchor);
+        // End anchor (static)
+        const endAnchor = new RigidBody(
+            new BoxShape(stepWidth * 2, stepWidth * 0.5),
+            lastStep.position.x + spacing + stepWidth / 2,
+            startY,
+            0.0,
+        );
+        endAnchor.setTexture('rockBridgeAnchor');
+        world.addBody(endAnchor);
 
-        // // Final joint anchor at right edge of last step
-        // const finalAnchor = lastStep.position.addNew(new Vec2(stepWidth / 2, 0));
-        // const lastJoint = new JointConstraint(lastStep, endAnchor, finalAnchor, softness, bias);
-        // world.addJoint(lastJoint);
+        // Final joint anchor at right edge of last step
+        const lastJoint = new DistanceJoint(endAnchor, lastStep);
+        world.addJoint(lastJoint);
 
         // const boxSizeLarge = 40;
         // const numBoxLargeHorizontal = 10;
