@@ -227,25 +227,42 @@ export default class Demo {
         this.generateFloor(world);
         this.generateFences(world);
 
-        // const whipAnchor = new RigidBody(new BoxShape(40, 20), Graphics.width() / 2, 100, 0);
-        // whipAnchor.setTexture('rockBridgeAnchor');
-        // world.addBody(whipAnchor);
+        const whipAnchor = new RigidBody(new BoxShape(60, 25), 0, 300, 0);
+        whipAnchor.setTexture('rockBridgeAnchor');
+        world.addBody(whipAnchor);
 
-        // let last = whipAnchor;
+        let last = whipAnchor;
+        const whipElementHeight = 50;
 
-        // for (let i = 0; i < 10; i++) {
-        //     const x = whipAnchor.position.x;
-        //     const y = i === 0 ? whipAnchor.position.y + 40 : whipAnchor.position.y + 40 + 60 * i;
-        //     const whipElement = new RigidBody(new BoxShape(10, 50), x, y, 1);
-        //     whipElement.setTexture('crate');
-        //     world.addBody(whipElement);
+        const distance = -1; // -1 = the initial distance
+        const frequency = 7;
+        const dampingRadio = 0.5;
+        const jointMass = 10;
 
-        //     const anchor = whipElement.position.subNew(new Vec2(0, 25));
-        //     const j = new JointConstraint(last, whipElement, anchor);
-        //     world.addJoint(j);
+        for (let i = 0; i < 10; i++) {
+            const x = whipAnchor.position.x;
+            const y =
+                i === 0
+                    ? whipAnchor.position.y - whipElementHeight
+                    : whipAnchor.position.y - (whipElementHeight + 60 * i);
+            const whipElement = new RigidBody(new BoxShape(10, 50), x, y, 1);
+            whipElement.setTexture('crate');
+            world.addBody(whipElement);
 
-        //     last = whipElement;
-        // }
+            const j = new DistanceJoint(
+                last,
+                whipElement,
+                last.position.subNew(new Vec2(0, whipElementHeight / 2)),
+                whipElement.position.addNew(new Vec2(0, whipElementHeight / 2)),
+                distance,
+                frequency,
+                dampingRadio,
+                jointMass,
+            );
+            world.addJoint(j);
+
+            last = whipElement;
+        }
     };
 
     static demo6 = (world: World) => {
