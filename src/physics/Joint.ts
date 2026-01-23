@@ -4,8 +4,8 @@ import RigidBody from './RigidBody';
 
 // Children: Revolute, Prismatic, Distance, Max distance, Weld, Motor, Line, Angle, Grab
 export abstract class Joint extends Constraint {
-    public drawAnchor = true;
-    public drawConnectionLine = true;
+    public drawAnchor = false;
+    public drawConnectionLine = false;
     public id: number = -1;
 
     private _frequency!: number;
