@@ -261,6 +261,25 @@ export default class Application {
             Graphics.drawBody(body, this.debug);
         }
 
+        // Draw all joints
+        for (const joint of this.world.getJoints()) {
+            if (joint instanceof DistanceJoint) {
+                const anchorA = joint.localAnchorA;
+                const anchorB = joint.localAnchorB;
+                const worldA = joint.bodyA.localPointToWorld(anchorA);
+                const worldB = joint.bodyB.localPointToWorld(anchorB);
+
+                if (joint.drawAnchor) {
+                    Graphics.drawFillCircle(worldA.x, worldA.y, 5, 'white');
+                    Graphics.drawFillCircle(worldB.x, worldB.y, 5, 'white');
+                }
+
+                if (joint.drawConnectionLine) {
+                    Graphics.drawLine(worldA.x, worldA.y, worldB.x, worldB.y, 'white');
+                }
+            }
+        }
+
         // Draw all joints anchor points and debug properties
         if (this.debug) {
             if (this.showAABB) {
