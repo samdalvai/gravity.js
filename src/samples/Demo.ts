@@ -389,6 +389,36 @@ export default class Demo {
         world.addJoint(jointParticle2Particle3);
         world.addJoint(jointParticle3Particle4);
 
+        // -----
+
+        const particle1b = new RigidBody(new CircleShape(5), 0, -100, 1);
+        const particle2b = new RigidBody(new CircleShape(5), 50, -100, 1);
+        const particle3b = new RigidBody(new CircleShape(5), 100, -100, 1);
+        const particle4b = new RigidBody(new CircleShape(5), 150, -100, 1);
+
+        world.addBody(particle1b);
+        world.addBody(particle2b);
+        world.addBody(particle3b);
+        world.addBody(particle4b);
+
+        const jointAnchor1Particle1b = new DistanceJoint(particle1, particle1b);
+        const jointAnchor2Particle2b = new DistanceJoint(particle2, particle2b);
+        const jointAnchor3Particle3b = new DistanceJoint(particle3, particle3b);
+        const jointAnchor4Particle4b = new DistanceJoint(particle4, particle4b);
+
+        world.addJoint(jointAnchor1Particle1b);
+        world.addJoint(jointAnchor2Particle2b);
+        world.addJoint(jointAnchor3Particle3b);
+        world.addJoint(jointAnchor4Particle4b);
+
+        const jointParticle1Particle2b = new DistanceJoint(particle1b, particle2b);
+        const jointParticle2Particle3b = new DistanceJoint(particle2b, particle3b);
+        const jointParticle3Particle4b = new DistanceJoint(particle3b, particle4b);
+
+        world.addJoint(jointParticle1Particle2b);
+        world.addJoint(jointParticle2Particle3b);
+        world.addJoint(jointParticle3Particle4b);
+
         // const circle1 = new RigidBody(new CircleShape(20), 500, Graphics.height() / 2 + 50, 1);
         // const circle2 = new RigidBody(new CircleShape(20), 600, Graphics.height() / 2 + 50, 1);
         // world.addBody(circle1);
