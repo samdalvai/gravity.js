@@ -457,41 +457,35 @@ export default class Demo {
         const lastJoint = new DistanceJoint(lastStep, endAnchor);
         world.addJoint(lastJoint);
 
-        // const boxSizeLarge = 40;
-        // const numBoxLargeHorizontal = 10;
+        const boxSizeLarge = 40;
+        const numBoxLargeHorizontal = 10;
 
-        // for (let i = 0; i < numBoxLargeHorizontal; i++) {
-        //     for (let j = 0; j < 10; j++) {
-        //         const box = new RigidBody(
-        //             new BoxShape(boxSizeLarge, boxSizeLarge),
-        //             Graphics.width() / 2 -
-        //                 (numBoxLargeHorizontal * boxSizeLarge) / 2 +
-        //                 boxSizeLarge / 2 +
-        //                 i * boxSizeLarge,
-        //             -500 + j * boxSizeLarge,
-        //             1,
-        //         );
-        //         world.addBody(box);
-        //     }
-        // }
+        for (let i = 0; i < numBoxLargeHorizontal; i++) {
+            for (let j = 0; j < 10; j++) {
+                const box = new RigidBody(
+                    new BoxShape(boxSizeLarge, boxSizeLarge),
+                    -(numBoxLargeHorizontal * boxSizeLarge) / 2 + boxSizeLarge / 2 + i * boxSizeLarge,
+                    500 + j * boxSizeLarge,
+                    1,
+                );
+                world.addBody(box);
+            }
+        }
 
-        // const boxSizeSmall = 20;
-        // const numBoxSmallHorizontal = 20;
+        const boxSizeSmall = 20;
+        const numBoxSmallHorizontal = 20;
 
-        // for (let i = 0; i < numBoxSmallHorizontal; i++) {
-        //     for (let j = 0; j < 10; j++) {
-        //         const box = new RigidBody(
-        //             new BoxShape(boxSizeSmall, boxSizeSmall),
-        //             Graphics.width() / 2 -
-        //                 (numBoxSmallHorizontal * boxSizeSmall) / 2 +
-        //                 boxSizeSmall / 2 +
-        //                 i * boxSizeSmall,
-        //             -2000 + j * boxSizeSmall,
-        //             1,
-        //         );
-        //         world.addBody(box);
-        //     }
-        // }
+        for (let i = 0; i < numBoxSmallHorizontal; i++) {
+            for (let j = 0; j < 10; j++) {
+                const box = new RigidBody(
+                    new BoxShape(boxSizeSmall, boxSizeSmall),
+                    -(numBoxSmallHorizontal * boxSizeSmall) / 2 + boxSizeSmall / 2 + i * boxSizeSmall,
+                    2000 + j * boxSizeSmall,
+                    1,
+                );
+                world.addBody(box);
+            }
+        }
     };
 
     static demo0 = (world: World) => {
