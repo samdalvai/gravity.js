@@ -116,108 +116,88 @@ export default class Demo {
         this.generateFences(world);
         const floorHeight = 50;
 
+        const stepCount = 8; // any number
+        const stepWidth = 90;
+        const stepHeight = stepWidth / 4;
+        const stepSpacing = 100;
+
+        const totalSpan = (stepCount - 1) * stepSpacing + stepWidth;
+        const pillarOffsetX = totalSpan / 2 + stepWidth / 2;
+
         const pillarWidth = 50;
         const pillarHeight = 400;
-        const pillarPositionX = 290;
         const pillarPositionY = -pillarHeight / 2 + floorHeight / 2;
-        const pillarLeft = new RigidBody(new BoxShape(pillarWidth, pillarHeight), -pillarPositionX, pillarPositionY, 0);
-        const pillarRight = new RigidBody(new BoxShape(pillarWidth, pillarHeight), pillarPositionX, pillarPositionY, 0);
+
+        const pillarLeft = new RigidBody(new BoxShape(pillarWidth, pillarHeight), -pillarOffsetX, pillarPositionY, 0);
+        const pillarRight = new RigidBody(new BoxShape(pillarWidth, pillarHeight), pillarOffsetX, pillarPositionY, 0);
+
         pillarLeft.setTexture('metal');
         pillarRight.setTexture('metal');
+
         world.addBody(pillarLeft);
         world.addBody(pillarRight);
 
-        const stepWidth = 90;
-        const stepHeight = stepWidth / 4;
         const stepPositionY = pillarPositionY + pillarHeight / 2;
-        const step1 = new RigidBody(new BoxShape(stepWidth, stepHeight), -200, stepPositionY, 1);
-        const step2 = new RigidBody(new BoxShape(stepWidth, stepHeight), -100, stepPositionY, 1);
-        const step3 = new RigidBody(new BoxShape(stepWidth, stepHeight), 0, stepPositionY, 1);
-        const step4 = new RigidBody(new BoxShape(stepWidth, stepHeight), 100, stepPositionY, 1);
-        const step5 = new RigidBody(new BoxShape(stepWidth, stepHeight), 200, stepPositionY, 1);
-        step1.setTexture('woodPlankSolid');
-        step2.setTexture('woodPlankSolid');
-        step3.setTexture('woodPlankSolid');
-        step4.setTexture('woodPlankSolid');
-        step5.setTexture('woodPlankSolid');
+        const steps: RigidBody[] = [];
 
-        world.addBody(step1);
-        world.addBody(step2);
-        world.addBody(step3);
-        world.addBody(step4);
-        world.addBody(step5);
+        for (let i = 0; i < stepCount; i++) {
+            const x = (i - (stepCount - 1) / 2) * stepSpacing;
 
-        const distance = -1; // -1 = the initial distance
-        const frequency = 7;
-        const dampingRadio = 0.9;
-        const jointMass = 10;
+            const step = new RigidBody(new BoxShape(stepWidth, stepHeight), x, stepPositionY, 5);
 
-        const joint12 = new DistanceJoint(
-            step1,
-            step2,
-            step1.position.addNew(new Vec2(stepWidth / 2, 0)),
-            step2.position.subNew(new Vec2(stepWidth / 2, 0)),
-            distance,
-            frequency,
-            dampingRadio,
-            jointMass,
-        );
-        const joint23 = new DistanceJoint(
-            step2,
-            step3,
-            step2.position.addNew(new Vec2(stepWidth / 2, 0)),
-            step3.position.subNew(new Vec2(stepWidth / 2, 0)),
-            distance,
-            frequency,
-            dampingRadio,
-            jointMass,
-        );
-        const joint34 = new DistanceJoint(
-            step3,
-            step4,
-            step3.position.addNew(new Vec2(stepWidth / 2, 0)),
-            step4.position.subNew(new Vec2(stepWidth / 2, 0)),
-            distance,
-            frequency,
-            dampingRadio,
-            jointMass,
-        );
-        const joint45 = new DistanceJoint(
-            step4,
-            step5,
-            step4.position.addNew(new Vec2(stepWidth / 2, 0)),
-            step5.position.subNew(new Vec2(stepWidth / 2, 0)),
-            distance,
-            frequency,
-            dampingRadio,
-            jointMass,
-        );
+            step.setTexture('woodPlankSolid');
+            world.addBody(step);
+            steps.push(step);
+        }
 
-        world.addJoint(joint12);
-        world.addJoint(joint23);
-        world.addJoint(joint34);
-        world.addJoint(joint45);
+        const distance = -1;
+        const frequency = 14;
+        const dampingRadio = 0.7;
+        const jointMass = -1;
 
+        // joints between steps
+        for (let i = 0; i < steps.length - 1; i++) {
+            const a = steps[i];
+            const b = steps[i + 1];
+
+            const joint = new DistanceJoint(
+                a,
+                b,
+                a.position.addNew(new Vec2(stepWidth / 2, 0)),
+                b.position.subNew(new Vec2(stepWidth / 2, 0)),
+                distance,
+                frequency,
+                dampingRadio,
+                jointMass,
+            );
+
+            world.addJoint(joint);
+        }
+
+        // left pillar → first step
         const leftJoint = new DistanceJoint(
             pillarLeft,
-            step1,
+            steps[0],
             pillarLeft.position.addNew(new Vec2(25, 0)).addNew(new Vec2(0, pillarHeight / 2)),
-            step1.position.subNew(new Vec2(stepWidth / 2, 0)),
+            steps[0].position.subNew(new Vec2(stepWidth / 2, 0)),
             distance,
             frequency,
             dampingRadio,
             jointMass,
         );
+
+        // right pillar → last step
         const rightJoint = new DistanceJoint(
             pillarRight,
-            step5,
+            steps[steps.length - 1],
             pillarRight.position.subNew(new Vec2(25, 0)).addNew(new Vec2(0, pillarHeight / 2)),
-            step5.position.addNew(new Vec2(stepWidth / 2, 0)),
+            steps[steps.length - 1].position.addNew(new Vec2(stepWidth / 2, 0)),
             distance,
             frequency,
             dampingRadio,
             jointMass,
         );
+
         world.addJoint(leftJoint);
         world.addJoint(rightJoint);
     };
@@ -236,8 +216,8 @@ export default class Demo {
 
         const distance = -1; // -1 = the initial distance
         const frequency = 7;
-        const dampingRadio = 0.5;
-        const jointMass = 10;
+        const dampingRadio = 1;
+        const jointMass = 5;
 
         for (let i = 0; i < 10; i++) {
             const x = whipAnchor.position.x;
