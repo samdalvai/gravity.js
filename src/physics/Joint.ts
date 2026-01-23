@@ -63,7 +63,9 @@ export abstract class Joint extends Constraint {
         if (frequency > 0) {
             this._frequency = frequency;
             this._dampingRatio = Utils.clamp(dampingRatio, 0.0, 1.0);
-            this._jointMass = jointMass <= 0 ? this.bodyB.mass : jointMass;
+            
+            Utils.assert(this.bodyA.mass > 0 || this.bodyB.mass > 0);
+            this._jointMass = jointMass <= 0 ? this.bodyA.mass > 0 ? this.bodyA.mass : this.bodyB.mass : jointMass;
 
             this.calculateBetaAndGamma();
         } else {
