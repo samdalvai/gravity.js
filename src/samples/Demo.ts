@@ -151,7 +151,7 @@ export default class Demo {
         }
 
         const distance = -1;
-        const frequency = 14;
+        const frequency = 7;
         const dampingRadio = 0.7;
         const jointMass = -1;
 
@@ -270,8 +270,8 @@ export default class Demo {
         world.addBody(torso);
         world.addBody(leftArm);
         world.addBody(rightArm);
-        // world.addBody(leftLeg);
-        // world.addBody(rightLeg);
+        world.addBody(leftLeg);
+        world.addBody(rightLeg);
 
         // Add joints between ragdoll parts (distance constraints with one anchor point)
         const string = new DistanceJoint(bob, head, bob.position, head.position);
@@ -293,15 +293,25 @@ export default class Demo {
             torso.position.addNew(new Vec2(28, 45)),
             rightArm.position.addNew(new Vec2(0, 35)),
         );
-        // const leftHip = new JointConstraint(torso, leftLeg, torso.position.addNew(new Vec2(-20, +50)));
-        // const rightHip = new JointConstraint(torso, rightLeg, torso.position.addNew(new Vec2(+20, +50)));
+        const leftHip = new DistanceJoint(
+            torso,
+            leftLeg,
+            torso.position.addNew(new Vec2(-20, -50)),
+            leftLeg.position.addNew(new Vec2(0, 45)),
+        );
+        const rightHip = new DistanceJoint(
+            torso,
+            rightLeg,
+            torso.position.addNew(new Vec2(+20, -50)),
+            rightLeg.position.addNew(new Vec2(0, 45)),
+        );
 
         world.addJoint(string);
         world.addJoint(neck);
         world.addJoint(leftShoulder);
         world.addJoint(rightShoulder);
-        // world.addJoint(leftHip);
-        // world.addJoint(rightHip);
+        world.addJoint(leftHip);
+        world.addJoint(rightHip);
     };
 
     static demo7 = (world: World) => {
