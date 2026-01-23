@@ -111,12 +111,12 @@ export default class Demo {
     };
 
     static demo4 = (world: World) => {
-        // Demo 4: As suspension bridge
+        // Demo 4: A suspension bridge
         this.generateFloor(world);
         this.generateFences(world);
         const floorHeight = 50;
 
-        const stepCount = 8; // any number
+        const stepCount = 8;
         const stepWidth = 90;
         const stepHeight = stepWidth / 4;
         const stepSpacing = 100;
@@ -409,8 +409,6 @@ export default class Demo {
         const spacing = stepWidth + 2.5; // distance between centers
         const startX = -(numSteps * spacing) / 2 - stepWidth / 2;
         const startY = 0;
-        const softness = 0.002;
-        const bias = 0.1;
 
         // Start anchor (static)
         const startAnchor = new RigidBody(
@@ -575,7 +573,7 @@ export default class Demo {
 
         for (let i = 1; i <= numSteps; i++) {
             const x = startStep.position.x + 30 + i * spacing;
-            const y = startStep.position.y + 20;
+            const y = startStep.position.y + 10 - Math.sin((i / numSteps) * Math.PI) * 10;
             const mass = 3;
 
             const step = new RigidBody(new CircleShape(15), x, y, mass);
@@ -590,7 +588,7 @@ export default class Demo {
         }
 
         // Final anchor
-        const endStep = new RigidBody(new BoxShape(80, 20), last.position.x + 60, last.position.y - 20, 0.0);
+        const endStep = new RigidBody(new BoxShape(80, 20), last.position.x + 60, startStep.position.y, 0.0);
         endStep.setTexture('rockBridgeAnchor');
         world.addBody(endStep);
 
