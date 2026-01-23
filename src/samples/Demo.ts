@@ -319,18 +319,21 @@ export default class Demo {
         const floor = this.generateFloor(world);
         this.generateFences(world);
 
-        const plank = new RigidBody(new BoxShape(750, 20), Graphics.width() / 2.0, Graphics.height() - 275, 10);
+        const plank = new RigidBody(new BoxShape(750, 20), 0, floor.position.y + 100, 10);
         plank.setTexture('woodPlankCracked');
         world.addBody(plank);
 
-        const triangleVertices = [new Vec2(30, 30), new Vec2(-30, 30), new Vec2(0, -33.5)];
-        const triangle = new RigidBody(new PolygonShape(triangleVertices), floor.position.x, floor.position.y - 130, 0);
+        const joint = new DistanceJoint(floor, plank, plank.position, plank.position);
+        world.addJoint(joint);
+
+        const triangleVertices = [new Vec2(-30, -30), new Vec2(30, -30), new Vec2(0, 33.5)];
+        const triangle = new RigidBody(new PolygonShape(triangleVertices), 0, floor.position.y + 55, 0);
         triangle.setTexture('woodTriangle');
         world.addBody(triangle);
 
-        const box1 = new RigidBody(new BoxShape(25, 25), plank.position.x - 350, Graphics.height() - 400, 1);
-        const box2 = new RigidBody(new BoxShape(25, 25), plank.position.x - 325, Graphics.height() - 400, 1);
-        const box3 = new RigidBody(new BoxShape(25, 25), plank.position.x - 337.5, Graphics.height() - 425, 1);
+        const box1 = new RigidBody(new BoxShape(25, 25), plank.position.x - 350, plank.position.y + 25, 1);
+        const box2 = new RigidBody(new BoxShape(25, 25), plank.position.x - 325, plank.position.y + 25, 1);
+        const box3 = new RigidBody(new BoxShape(25, 25), plank.position.x - 337.5,  plank.position.y + 50, 1);
         box1.setTexture('crate');
         box2.setTexture('crate');
         box3.setTexture('crate');
@@ -341,9 +344,6 @@ export default class Demo {
         const heavyBox = new RigidBody(new BoxShape(50, 50), plank.position.x + 350, Graphics.height() - 750, 10);
         heavyBox.setTexture('metal');
         world.addBody(heavyBox);
-
-        // const joint = new JointConstraint(floor, plank, plank.position);
-        // world.addJoint(joint);
     };
 
     static demo8 = (world: World) => {
