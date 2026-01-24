@@ -429,24 +429,14 @@ export class ContactManifold extends Constraint {
 
     tryWarmStart(oldManifold: ContactManifold) {
         for (let n = 0; n < this.numContacts; n++) {
-            let o = 0;
-            for (; o < oldManifold.numContacts; o++) {
-                if (this.contactPoints[n].id == oldManifold.contactPoints[o].id) {
-                    if (SETTINGS.applyWarmStartingThreshold) {
-                        const dist = this.contactPoints[n].point.squaredDistance(oldManifold.contactPoints[o].point);
+            const id = this.contactPoints[n].id;
 
-                        // If contact points are close enough, warm start.
-                        // Otherwise, it means it's penetrating too deeply, skip the warm starting to prevent the overshoot
-                        if (dist < SETTINGS.warmStartingThreshold) break;
-                    } else {
-                        break;
-                    }
+            for (let o = 0; o < oldManifold.numContacts; o++) {
+                if (oldManifold.contactPoints[o].id === id) {
+                    this.normalContacts[n].impulseSum = oldManifold.normalContacts[o].impulseSum;
+                    this.tangentContacts[n].impulseSum = oldManifold.tangentContacts[o].impulseSum;
+                    break;
                 }
-            }
-
-            if (o < oldManifold.numContacts) {
-                this.normalContacts[n].impulseSum = oldManifold.normalContacts[o].impulseSum;
-                this.tangentContacts[n].impulseSum = oldManifold.tangentContacts[o].impulseSum;
             }
         }
     }

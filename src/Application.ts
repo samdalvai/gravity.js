@@ -216,7 +216,7 @@ export default class Application {
                     continue;
                 }
 
-                const shape = this.generateCircles ? new CircleShape(5) : new BoxShape(10, 10);
+                const shape = this.generateCircles ? new CircleShape(20) : new BoxShape(10, 10);
                 const particle = new RigidBody(shape, x, y, 0.01);
                 particle.restitution = 0.0;
                 particle.friction = 0.5;
