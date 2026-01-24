@@ -74,7 +74,7 @@ export default class Demo {
 
         for (let i = 0; i < numOfBoxes; i++) {
             const box = new RigidBody(new BoxShape(boxSize, boxSize), 0, 200 - (boxSize + boxSpacing) * i, 1);
-            box.restitution = 0.1;
+            box.restitution = 0;
             box.setTexture('crate');
             world.addBody(box);
         }
