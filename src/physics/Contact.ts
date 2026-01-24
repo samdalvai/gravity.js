@@ -81,7 +81,6 @@ class ContactSolver {
                     Math.max(this.manifold.penetrationDepth! - SETTINGS.penetrationSlop, 0.0);
             }
 
-            console.log(normalVelocity);
             this.bias += this.restitution * Math.min(normalVelocity + SETTINGS.restitutionSlop, 0.0);
         } else {
             // Bias for surface speed that enables the conveyor belt-like behavior
