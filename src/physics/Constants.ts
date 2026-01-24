@@ -15,7 +15,7 @@ export const SETTINGS = {
     impulseAccumulation: true,
     warmStarting: true,
     blockSolve: true,
-    penetrationSlop: 0.005 * PIXELS_PER_METER,
+    penetrationSlop: 0.5,
     restitutionSlop: 0.5 * PIXELS_PER_METER,
     positionCorrectionBeta: 0.2,
 };
