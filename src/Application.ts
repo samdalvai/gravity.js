@@ -1,9 +1,8 @@
 import AssetStore from './AssetStore';
 import Graphics from './Graphics';
 import InputManager, { MouseButton } from './InputManager';
-import Utils from './math/Utils';
 import Vec2 from './math/Vec2';
-import { DELTA_TIME, GRAVITY, MAX_BODIES } from './physics/Constants';
+import { GRAVITY, MAX_BODIES, SETTINGS } from './physics/Constants';
 import { DistanceJoint } from './physics/DistanceJoint';
 import Force from './physics/Force';
 import RigidBody from './physics/RigidBody';
@@ -98,6 +97,16 @@ export default class Application {
                         }
                     }
 
+                    if (inputEvent.key === '+') {
+                        SETTINGS.restitutionSlop *= 1.1;
+                        console.log('restitutionSlop: ', SETTINGS.restitutionSlop);
+                    }
+
+                    if (inputEvent.key === '-') {
+                        SETTINGS.restitutionSlop *= 0.9
+                        console.log('restitutionSlop: ', SETTINGS.restitutionSlop);
+                    }
+
                     if (inputEvent.key === 'g') {
                         this.generateParticle = true;
                     }
@@ -174,7 +183,7 @@ export default class Application {
                             case MouseButton.LEFT:
                                 {
                                     const ball = new RigidBody(new CircleShape(30), x, y, 4.0);
-                                    ball.restitution = 0.1;
+                                    ball.restitution = 0.7;
                                     ball.friction = 0.5;
                                     ball.setTexture('basketball');
                                     this.world.addBody(ball);
@@ -183,7 +192,7 @@ export default class Application {
                             case MouseButton.RIGHT:
                                 {
                                     const box = new RigidBody(new BoxShape(60, 60), x, y, 6.0);
-                                    box.restitution = 0.1;
+                                    box.restitution = 0.3;
                                     box.friction = 0.7;
                                     box.setTexture('crate');
                                     this.world.addBody(box);
