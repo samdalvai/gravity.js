@@ -16,6 +16,6 @@ export const SETTINGS = {
     warmStarting: true,
     blockSolve: true,
     penetrationSlop: 0.5,
-    restitutionSlop: 0.5 * PIXELS_PER_METER,
+    restitutionSlop: 50,
     positionCorrectionBeta: 0.2,
 };
