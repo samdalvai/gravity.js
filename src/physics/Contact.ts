@@ -320,6 +320,7 @@ class BlockSolver {
             if (vn1 >= 0.0 && vn2 >= 0.0) break;
 
             // How did you reach here?! something went wrong!
+            // TODO: demo 0 fails here, investigate why
             Utils.assert(false);
             break;
         }
