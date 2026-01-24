@@ -17,5 +17,5 @@ export const SETTINGS = {
     blockSolve: true,
     penetrationSlop: 0.005 * PIXELS_PER_METER,
     restitutionSlop: 0.5 * PIXELS_PER_METER,
-    positionCorrectionBeta: 0.1,
+    positionCorrectionBeta: 0.2,
 };
