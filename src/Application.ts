@@ -50,13 +50,13 @@ export default class Application {
 
         // Test for collision, if you enable this you need to skip static objects from constraint solve
         // otherwise determinant becomes 0
-        // const b = new Body(new BoxShape(100, 100), Graphics.width() / 2, 500, 0);
-        // // const b = new Body(new CircleShape(50), Graphics.width() / 2, 500, 0);
+        // const b = new RigidBody(new BoxShape(100, 100), 0, 0, 0);
+        // const b = new RigidBody(new CircleShape(50), 0, 0, 0);
         // b.rotation = 0.5;
         // this.world.addBody(b);
 
-        // // this.testBody = new Body(new CircleShape(25), Graphics.width() / 2, 500, 0);
-        // this.testBody = new Body(new BoxShape(50, 50), Graphics.width() / 2, 500, 0);
+        // this.testBody = new RigidBody(new CircleShape(25), 0, 0, 0);
+        // this.testBody = new RigidBody(new BoxShape(50, 50), 0, 0, 0);
         // this.world.addBody(this.testBody);
 
         this.bgTexture = AssetStore.getTexture('background');
@@ -146,8 +146,10 @@ export default class Application {
 
             // Test for body collision
             if (this.testBody) {
-                this.testBody.position.x = inputEvent.x;
-                this.testBody.position.y = inputEvent.y;
+                const x = InputManager.mousePosition.x - Graphics.width() / 2;
+                const y = -(InputManager.mousePosition.y - Graphics.height() / 2);
+                this.testBody.position.x = x;
+                this.testBody.position.y = y;
             }
         }
 
@@ -173,7 +175,7 @@ export default class Application {
                             case MouseButton.LEFT:
                                 {
                                     const ball = new RigidBody(new CircleShape(30), x, y, 4.0);
-                                    ball.restitution = 0.7;
+                                    ball.restitution = 0.2;
                                     ball.friction = 0.5;
                                     ball.setTexture('basketball');
                                     this.world.addBody(ball);
