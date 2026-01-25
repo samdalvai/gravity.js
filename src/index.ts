@@ -35,7 +35,7 @@ const run = async () => {
                 accumulator -= DELTA_TIME;
             }
 
-            // Optional: interpolation (for buttery smooth rendering)
+            // Optional: interpolation (for smooth rendering)
             // TODO: to be implemented if appropriate
             // Store previous position and current one and interpolate position and rotation, e.g.
             // function lerp(a, b, t) {
