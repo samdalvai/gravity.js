@@ -39,11 +39,10 @@ export class DistanceJoint extends Joint {
         // J = [-n, -n·cross(ra), n, n·cross(rb)] ( n = (anchorB-anchorA) / ||anchorB-anchorA|| )
         // M = (J · M^-1 · J^t)^-1
 
-        this.ra = this.bodyA.localDirToWorld(this.localAnchorA);
-        this.rb = this.bodyB.localDirToWorld(this.localAnchorB);
-
-        const pa = this.bodyA.position.addNew(this.ra);
-        const pb = this.bodyB.position.addNew(this.rb);
+        const pa = this.bodyA.localPointToWorld(this.localAnchorA);
+        const pb = this.bodyB.localPointToWorld(this.localAnchorB);
+        this.ra = pa.subNew(this.bodyA.position);
+        this.rb = pb.subNew(this.bodyB.position);
 
         const u = pb.subNew(pa);
 
