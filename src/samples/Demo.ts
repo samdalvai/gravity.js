@@ -68,12 +68,12 @@ export default class Demo {
         this.generateFloor(world);
         this.generateFences(world);
 
-        const numOfBoxes = 8;
+        const numOfBoxes = 10;
         const boxSize = 60;
         const boxSpacing = 10;
 
         for (let i = 0; i < numOfBoxes; i++) {
-            const box = new RigidBody(new BoxShape(boxSize, boxSize), 0, 200 - (boxSize + boxSpacing) * i, 1);
+            const box = new RigidBody(new BoxShape(boxSize, boxSize), 0, -200 + (boxSize + boxSpacing) * i, 1);
             box.restitution = 0;
             box.setTexture('crate');
             world.addBody(box);
