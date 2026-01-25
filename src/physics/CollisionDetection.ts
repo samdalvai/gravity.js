@@ -1,5 +1,5 @@
 import Vec2 from '../math/Vec2';
-import { CONTACT_MERGE_THRESHOLD, TANGENT_MIN_LENGTH } from './Constants';
+import { CONTACT_MERGE_THRESHOLD } from './Constants';
 import { ContactManifold } from './Contact';
 import Edge from './Edge';
 import RigidBody from './RigidBody';
@@ -11,31 +11,22 @@ const findFarthestEdge = (b: RigidBody, dir: Vec2): Edge => {
     let curr = farthest.vertex;
     const idx = farthest.index;
 
-    if (b.shape instanceof CircleShape) {
-        curr = b.localPointToWorld(curr);
-        const tangent = dir.crossScalar(1).scaleNew(TANGENT_MIN_LENGTH);
+    const p = b.shape as PolygonShape;
 
-        return new Edge(curr, curr.addNew(tangent), -1);
-    } else if (b.shape instanceof PolygonShape) {
-        const p = b.shape as PolygonShape;
+    const count = p.localVertices.length;
+    const prev = p.localVertices[(idx - 1 + count) % count];
+    const next = p.localVertices[(idx + 1) % count];
 
-        const count = p.localVertices.length;
-        const prev = p.localVertices[(idx - 1 + count) % count];
-        const next = p.localVertices[(idx + 1) % count];
+    const e1 = curr.subNew(prev).normalizeNew();
+    const e2 = curr.subNew(next).normalizeNew();
 
-        const e1 = curr.subNew(prev).normalizeNew();
-        const e2 = curr.subNew(next).normalizeNew();
+    const w = Math.abs(e1.dot(localDir)) <= Math.abs(e2.dot(localDir));
 
-        const w = Math.abs(e1.dot(localDir)) <= Math.abs(e2.dot(localDir));
+    curr = b.localPointToWorld(curr);
 
-        curr = b.localPointToWorld(curr);
-
-        return w
-            ? new Edge(b.localPointToWorld(prev), curr, (idx - 1 + count) % count, idx)
-            : new Edge(curr, b.localPointToWorld(next), idx, (idx + 1) % count);
-    } else {
-        throw 'Not a supported shape';
-    }
+    return w
+        ? new Edge(b.localPointToWorld(prev), curr, (idx - 1 + count) % count, idx)
+        : new Edge(curr, b.localPointToWorld(next), idx, (idx + 1) % count);
 };
 
 export interface ContactPoint {
