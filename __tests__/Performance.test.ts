@@ -1,5 +1,5 @@
 import Vec2 from '../src/math/Vec2';
-import Body from '../src/physics/Body';
+import RigidBody from '../src/physics/RigidBody';
 import CollisionDetection from '../src/physics/CollisionDetection';
 import { BoxShape, CircleShape } from '../src/physics/Shape';
 
@@ -7,11 +7,11 @@ describe('Performance', () => {
     // test.each(Array.from({ length: 5 }))('Performance test', () => {
     //     // test('Performance test', () => {
     //     console.time('test');
-    //     const a = new Body(new BoxShape(20, 20), 100, 100, 5);
-    //     const b = new Body(new CircleShape(10), 100, 100, 10);
+    //     const a = new RigidBody(new BoxShape(20, 20), 100, 100, 5);
+    //     const b = new RigidBody(new CircleShape(10), 100, 100, 10);
 
-    //     // const a = new Body(new CircleShape(60), 100, 100, 5);
-    //     // const b = new Body(new CircleShape(60), 100, 200, 5);
+    //     // const a = new RigidBody(new CircleShape(60), 100, 100, 5);
+    //     // const b = new RigidBody(new CircleShape(60), 100, 200, 5);
     //     // const joint = new JointConstraint(a, b, new Vec2(100, 150));
     //     // a.position.x -= 100;
     //     // b.position.x += 100;
@@ -49,10 +49,10 @@ describe('Performance', () => {
     // });
 
     // test.each(Array.from({ length: 5 }))('Performance test', () => {
-    //     const boxA = new Body(new BoxShape(20, 20), 100, 100, 5);
-    //     const boxB = new Body(new BoxShape(20, 20), 110, 100, 5);
-    //     const circleA = new Body(new CircleShape(10), 100, 100, 5);
-    //     const circleB = new Body(new CircleShape(10), 105, 100, 5);
+    //     const boxA = new RigidBody(new BoxShape(20, 20), 100, 100, 5);
+    //     const boxB = new RigidBody(new BoxShape(20, 20), 110, 100, 5);
+    //     const circleA = new RigidBody(new CircleShape(10), 100, 100, 5);
+    //     const circleB = new RigidBody(new CircleShape(10), 105, 100, 5);
 
     //     const contacts: ContactConstraint[] = [];
 
@@ -91,7 +91,7 @@ describe('Performance', () => {
     // });
 
     // test('Performance test', () => {
-    //     const a = new Body(new BoxShape(20, 20), 100, 100, 5);
+    //     const a = new RigidBody(new BoxShape(20, 20), 100, 100, 5);
     //     a.rotation = 0.5;
     //     const point = new Vec2(200, 200);
 
