@@ -22,7 +22,7 @@ export default class Demo {
     static generateFloor = (world: World): RigidBody => {
         const floorWidth = Graphics.width();
         const floorHeight = 50;
-        const floorPositionY = -400;
+        const floorPositionY = -350;
         const floor = new RigidBody(new BoxShape(floorWidth, floorHeight), 0, floorPositionY, 0.0);
         world.addBody(floor);
         return floor;
@@ -31,7 +31,7 @@ export default class Demo {
     static generateFences = (world: World): void => {
         const floorHeight = 50;
         const floorWidth = Graphics.width();
-        const floorPositionY = -400;
+        const floorPositionY = -350;
 
         const fenceWidth = 50;
         const fenceHeight = 900;
@@ -465,6 +465,7 @@ export default class Demo {
                     500 + j * boxSizeLarge,
                     1,
                 );
+                box.setTexture('woodBox')
                 world.addBody(box);
             }
         }
@@ -480,6 +481,7 @@ export default class Demo {
                     2000 + j * boxSizeSmall,
                     1,
                 );
+                box.setTexture('metal')
                 world.addBody(box);
             }
         }
@@ -582,7 +584,7 @@ export default class Demo {
         const pig1 = new RigidBody(new CircleShape(30), plank1.position.x + 80, floor.position.y + 100 - 50, 3.0);
         const pig2 = new RigidBody(new CircleShape(30), plank2.position.x + 400, floor.position.y + 100 - 50, 3.0);
         const pig3 = new RigidBody(new CircleShape(30), plank2.position.x + 460, floor.position.y + 100 - 50, 3.0);
-        const pig4 = new RigidBody(new CircleShape(30), 220, 130, 1.0);
+        const pig4 = new RigidBody(new CircleShape(30), startStep.position.x, startStep.position.y + 100, 1.0);
         pig1.setTexture('pig1');
         pig2.setTexture('pig2');
         pig3.setTexture('pig1');
