@@ -6,7 +6,6 @@ import RigidBody from './RigidBody';
 export abstract class Joint extends Constraint {
     public drawAnchor = false;
     public drawConnectionLine = false;
-    public id: number = -1;
 
     private _frequency!: number;
     private _dampingRatio!: number;
