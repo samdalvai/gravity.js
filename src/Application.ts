@@ -174,16 +174,16 @@ export default class Application {
                         switch (inputEvent.button) {
                             case MouseButton.LEFT:
                                 {
-                                    const ball = new RigidBody(new CircleShape(30), x, y, 4.0);
+                                    const ball = new RigidBody(new CircleShape(30), x, y, 1.0);
                                     ball.restitution = 0.2;
-                                    ball.friction = 0.5;
+                                    ball.friction = 0.1;
                                     ball.setTexture('basketball');
                                     this.world.addBody(ball);
                                 }
                                 break;
                             case MouseButton.RIGHT:
                                 {
-                                    const box = new RigidBody(new BoxShape(60, 60), x, y, 6.0);
+                                    const box = new RigidBody(new BoxShape(60, 60), x, y, 1.0);
                                     box.restitution = 0.3;
                                     box.friction = 0.7;
                                     box.setTexture('crate');
