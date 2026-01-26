@@ -1,5 +1,3 @@
-import Utils from './Utils';
-
 export default class Vec2 {
     x: number;
     y: number;
@@ -72,11 +70,6 @@ export default class Vec2 {
             result.y = this.y / length;
         }
         return result;
-    }
-
-    /** Perpendicular (clockwise), NOT normalized */
-    perp(): Vec2 {
-        return new Vec2(this.y, -this.x);
     }
 
     dot(v: Vec2): number {
