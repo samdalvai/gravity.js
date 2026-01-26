@@ -22,7 +22,7 @@ export default class Demo {
     static generateFloor = (world: World): RigidBody => {
         const floorWidth = Graphics.width();
         const floorHeight = 50;
-        const floorPositionY = -350;
+        const floorPositionY = -400;
         const floor = new RigidBody(new BoxShape(floorWidth, floorHeight), 0, floorPositionY, 0.0);
         world.addBody(floor);
         return floor;
@@ -31,7 +31,7 @@ export default class Demo {
     static generateFences = (world: World): void => {
         const floorHeight = 50;
         const floorWidth = Graphics.width();
-        const floorPositionY = -350;
+        const floorPositionY = -400;
 
         const fenceWidth = 50;
         const fenceHeight = 900;
