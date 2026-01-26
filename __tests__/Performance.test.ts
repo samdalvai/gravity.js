@@ -1,3 +1,4 @@
+import Utils from '../src/math/Utils';
 import Vec2 from '../src/math/Vec2';
 import CollisionDetection from '../src/physics/CollisionDetection';
 import { DistanceJoint } from '../src/physics/DistanceJoint';
@@ -101,6 +102,15 @@ describe('Performance', () => {
     // });
 
     test('', () => {
-        expect(true).toBe(true);
+        console.time('time');
+        const a = new RigidBody(new BoxShape(20, 20), 100, 100, 5);
+        const b = new RigidBody(new BoxShape(20, 20), 100, 100, 5);
+
+        for (let i = 0; i < 100000000; i++) {
+            RigidBody.pairKey(a, b);
+            // Utils.make_pair_natural(a.id, b.id)
+        }
+
+        console.timeEnd('time');
     });
 });
