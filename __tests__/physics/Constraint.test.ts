@@ -1,4 +1,3 @@
-import Vec2 from '../../src/math/Vec2';
 import CollisionDetection from '../../src/physics/CollisionDetection';
 import { DistanceJoint } from '../../src/physics/DistanceJoint';
 import RigidBody from '../../src/physics/RigidBody';
@@ -67,9 +66,9 @@ describe('Constraint', () => {
         expect(b.position.y).toBe(100);
 
         // Check that the solver moved the objects apart
-        expect(a.position.x).toBeLessThan(100);
-        expect(b.position.x).toBeGreaterThan(200);
-        expect(a.velocity.x).toBeLessThan(0);
-        expect(b.velocity.x).toBeGreaterThan(0);
+        expect(a.position.x).toBe(98.05);
+        expect(b.position.x).toBe(201.95);
+        expect(a.velocity.x).toBe(-117);
+        expect(b.velocity.x).toBe(117);
     });
 });
