@@ -18,8 +18,8 @@ export default class Edge {
     public id2: number;
 
     constructor(p1: Vec2, p2: Vec2, id1: number = -1, id2: number = -1) {
-        this.p1 = p1.clone();
-        this.p2 = p2.clone();
+        this.p1 = p1.copy();
+        this.p2 = p2.copy();
 
         if (this.p1.equals(this.p2)) this.dir = new Vec2(0, 0);
         else this.dir = p2.subNew(p1).normalizeNew();
