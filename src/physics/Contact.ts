@@ -150,9 +150,11 @@ class ContactSolver {
         // V2 = V2' + M^-1 ⋅ Pc
         // Pc = J^t ⋅ λ
 
-        this.bodyA.velocity = this.bodyA.velocity.addNew(this.jacobian.va.scaleNew(this.bodyA.invMass * lambda));
+        this.bodyA.velocity.x = this.bodyA.velocity.x + this.jacobian.va.x * this.bodyA.invMass * lambda;
+        this.bodyA.velocity.y = this.bodyA.velocity.y + this.jacobian.va.y * this.bodyA.invMass * lambda;
         this.bodyA.angularVelocity = this.bodyA.angularVelocity + this.bodyA.invI * this.jacobian.wa * lambda;
-        this.bodyB.velocity = this.bodyB.velocity.addNew(this.jacobian.vb.scaleNew(this.bodyB.invMass * lambda));
+        this.bodyB.velocity.x = this.bodyB.velocity.x + this.jacobian.vb.x * this.bodyB.invMass * lambda;
+        this.bodyB.velocity.y = this.bodyB.velocity.y + this.jacobian.vb.y * this.bodyB.invMass * lambda;
         this.bodyB.angularVelocity = this.bodyB.angularVelocity + this.bodyB.invI * this.jacobian.wb * lambda;
     }
 }
@@ -348,14 +350,13 @@ class BlockSolver {
         // V2 = V2' + M^-1 ⋅ Pc
         // Pc = J^t ⋅ λ
 
-        this.bodyA.velocity = this.bodyA.velocity.addNew(
-            this.j1.va.scaleNew(this.bodyA.invMass * (lambda.x + lambda.y)),
-        );
+        this.bodyA.velocity.x = this.bodyA.velocity.x + this.j1.va.x * this.bodyA.invMass * (lambda.x + lambda.y);
+        this.bodyA.velocity.y = this.bodyA.velocity.y + this.j1.va.y * this.bodyA.invMass * (lambda.x + lambda.y);
         this.bodyA.angularVelocity =
             this.bodyA.angularVelocity + this.bodyA.invI * (this.j1.wa * lambda.x + this.j2.wa * lambda.y);
-        this.bodyB.velocity = this.bodyB.velocity.addNew(
-            this.j1.vb.scaleNew(this.bodyB.invMass * (lambda.x + lambda.y)),
-        );
+
+        this.bodyB.velocity.x = this.bodyB.velocity.x + this.j1.vb.x * this.bodyB.invMass * (lambda.x + lambda.y);
+        this.bodyB.velocity.y = this.bodyB.velocity.y + this.j1.vb.y * this.bodyB.invMass * (lambda.x + lambda.y);
         this.bodyB.angularVelocity =
             this.bodyB.angularVelocity + this.bodyB.invI * (this.j1.wb * lambda.x + this.j2.wb * lambda.y);
     }
