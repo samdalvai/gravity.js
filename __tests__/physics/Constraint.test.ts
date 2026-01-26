@@ -29,16 +29,16 @@ describe('Constraint', () => {
         b.integrateVelocities(deltaTime);
 
         // Check that the solver approximation is "good enough"
-        expect(Math.abs(a.position.y - 95)).toBeLessThan(1);
-        expect(Math.abs(a.position.x - 100)).toBeLessThan(0.001);
-        expect(Math.abs(b.position.y - 205)).toBeLessThan(1);
-        expect(Math.abs(b.position.x - 100)).toBeLessThan(0.001);
+        expect(Math.abs(a.position.y - 95)).toBe(0.6009915351155684);
+        expect(Math.abs(a.position.x - 100)).toBe(0);
+        expect(Math.abs(b.position.y - 205)).toBe(0.6009915351155826);
+        expect(Math.abs(b.position.x - 100)).toBe(0);
 
-        expect(Math.abs(a.velocity.x)).toBeLessThan(0.005);
-        expect(Math.abs(a.velocity.y - 260)).toBeLessThan(5);
+        expect(Math.abs(a.velocity.x)).toBe(0);
+        expect(Math.abs(a.velocity.y - 260)).toBe(3.9405078930655577);
 
-        expect(Math.abs(b.velocity.x)).toBeLessThan(0.005);
-        expect(Math.abs(b.velocity.y + 260)).toBeLessThan(6);
+        expect(Math.abs(b.velocity.x)).toBe(0);
+        expect(Math.abs(b.velocity.y + 260)).toBe(3.9405078930655577);
     });
 
     test('Penetration constraint solving should apply impulses to correct position of bodies', () => {
