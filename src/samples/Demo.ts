@@ -114,58 +114,8 @@ export default class Demo {
         this.generateFloor(world);
         this.generateFences(world);
 
-        const numSteps = 10;
-        const stepWidth = 40;
-        const spacing = stepWidth + 2.5; // distance between centers
-        const startX = -(numSteps * spacing) / 2 - stepWidth / 2;
-        const startY = 0;
-
-        // Start anchor (static)
-        const startAnchor = new RigidBody(
-            new BoxShape(stepWidth * 2, stepWidth * 0.5),
-            startX - stepWidth / 2,
-            startY,
-            0.0,
-        );
-        startAnchor.setTexture('rockBridgeAnchor');
-        world.addBody(startAnchor);
-
-        // First connection uses the start anchor
-        let lastStep = startAnchor;
-
-        // Create steps
-        for (let i = 1; i <= numSteps; i++) {
-            const x = startX + i * spacing;
-
-            // Optional sag: small vertical sinusoidal displacement
-            const y = startY - Math.sin((i / numSteps) * Math.PI) * 10;
-
-            const step = new RigidBody(new CircleShape(stepWidth * 0.5), x, y, 3);
-            step.setTexture('woodBridgeStep');
-            world.addBody(step);
-
-            // Joint anchor at left edge of this step
-            const joint = new DistanceJoint(lastStep, step);
-            world.addJoint(joint);
-
-            lastStep = step;
-        }
-
-        // End anchor (static)
-        const endAnchor = new RigidBody(
-            new BoxShape(stepWidth * 2, stepWidth * 0.5),
-            lastStep.position.x + spacing + stepWidth / 2,
-            startY,
-            0.0,
-        );
-        endAnchor.setTexture('rockBridgeAnchor');
-        world.addBody(endAnchor);
-
-        // Final joint anchor at right edge of last step
-        const lastJoint = new DistanceJoint(lastStep, endAnchor);
-        world.addJoint(lastJoint);
-
-        /*const stepCount = 8;
+        const floorHeight = 50;
+        const stepCount = 8;
         const stepWidth = 90;
         const stepHeight = stepWidth / 4;
         const stepSpacing = 100;
@@ -194,14 +144,14 @@ export default class Demo {
 
             const step = new RigidBody(new BoxShape(stepWidth, stepHeight), x, stepPositionY, 5);
 
-            step.setTexture('woodPlankSolid');
+            step.setTexture('woodBox');
             world.addBody(step);
             steps.push(step);
         }
 
         const distance = -1;
-        const frequency = 7;
-        const dampingRadio = 0.7;
+        const frequency = 14;
+        const dampingRadio = 0.9;
         const jointMass = -1;
 
         // joints between steps
@@ -248,7 +198,7 @@ export default class Demo {
         );
 
         world.addJoint(leftJoint);
-        world.addJoint(rightJoint);*/
+        world.addJoint(rightJoint);
     };
 
     static demo5 = (world: World) => {
