@@ -64,7 +64,7 @@ export class PolygonShape extends Shape {
         for (const v of vertices) {
             this.localVertices.push(v);
             // Need to clone this vector, otherwise both arrays are aliasing the same vector
-            this.worldVertices.push(v.clone());
+            this.worldVertices.push(v.copy());
 
             // Find min and max X and Y to calculate polygon width and height
             minX = Math.min(minX, v.x);
