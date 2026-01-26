@@ -81,19 +81,15 @@ export class DistanceJoint extends Joint {
         // Calculate corrective impulse: Pc
         // Pc = J^t · λ (λ: lagrangian multiplier)
         // λ = (J · M^-1 · J^t)^-1 ⋅ -(J·v+b)ù
-
-        // dot(v: Vec2): number {
-        //     return this.x * v.x + this.y * v.y;
-        // }
-
-        // crossScalar(n: number): Vec2 {
-        //     return new Vec2(-n * this.y, n * this.x);
-        // }
-
-        const jv = this.bodyB.velocity
-            .addNew(this.rb.crossScalar(this.bodyB.angularVelocity))
-            .subNew(this.bodyA.velocity.addNew(this.ra.crossScalar(this.bodyA.angularVelocity)))
-            .dot(this.n);
+        const jv =
+            (this.bodyB.velocity.x +
+                -this.bodyB.angularVelocity * this.rb.y -
+                (this.bodyA.velocity.x + -this.bodyA.angularVelocity)) *
+                this.n.x +
+            (this.bodyB.velocity.y +
+                this.bodyB.angularVelocity * this.rb.x -
+                (this.bodyA.velocity.y + this.bodyA.angularVelocity * this.ra.x)) *
+                this.n.y;
 
         // Check out below for the reason why the (accumulated impulse * gamma) term is on the right hand side
         // https://pybullet.org/Bullet/phpBB3/viewtopic.php?f=4&t=1354
