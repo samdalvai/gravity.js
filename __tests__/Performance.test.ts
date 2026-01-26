@@ -8,8 +8,8 @@ describe('Performance', () => {
         // test('Performance test', () => {
         console.time('test');
         const a = new RigidBody(new BoxShape(20, 20), 100, 100, 5);
-        // const b = new RigidBody(new CircleShape(10), 100, 100, 10);
-        const b = new RigidBody(new BoxShape(20, 20), 110, 100, 10);
+        const b = new RigidBody(new CircleShape(10), 100, 100, 10);
+        // const b = new RigidBody(new BoxShape(20, 20), 110, 100, 10);
 
         // const a = new RigidBody(new CircleShape(60), 100, 100, 5);
         // const b = new RigidBody(new CircleShape(60), 100, 200, 5);
