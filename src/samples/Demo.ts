@@ -1,3 +1,9 @@
+/*
+ * This implementation is inspired by techniques used in Box2D
+ * by Erin Catto, licensed under the MIT License.
+ *
+ * https://github.com/erincatto/box2d-lite
+ */
 import Graphics from '../Graphics';
 import Vec2 from '../math/Vec2';
 import { DistanceJoint } from '../physics/DistanceJoint';

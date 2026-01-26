@@ -1,6 +1,14 @@
+/*
+ * Portions of this file are derived from the Sopiro Physics Engine.
+ *
+ * Copyright (c) 2022 Sopiro
+ * Licensed under the MIT License
+ *
+ * Original project:
+ * https://github.com/Sopiro
+ */
 import RigidBody from './RigidBody';
 
-// Children: ContactManifold, Joint
 export abstract class Constraint {
     public readonly bodyA: RigidBody;
     public readonly bodyB: RigidBody;
