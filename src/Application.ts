@@ -249,13 +249,15 @@ export default class Application {
                 const worldA = joint.bodyA.localPointToWorld(anchorA);
                 const worldB = joint.bodyB.localPointToWorld(anchorB);
 
+                const color = this.debug ? 'white' : 'black';
+
                 if (joint.drawAnchor) {
-                    Graphics.drawFillCircle(worldA.x, worldA.y, 5, 'white');
-                    Graphics.drawFillCircle(worldB.x, worldB.y, 5, 'white');
+                    Graphics.drawFillCircle(worldA.x, worldA.y, 5, color);
+                    Graphics.drawFillCircle(worldB.x, worldB.y, 5, color);
                 }
 
                 if (joint.drawConnectionLine) {
-                    Graphics.drawLine(worldA.x, worldA.y, worldB.x, worldB.y, 'white');
+                    Graphics.drawLine(worldA.x, worldA.y, worldB.x, worldB.y, color);
                 }
             }
         }
