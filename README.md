@@ -27,3 +27,8 @@ Now open the browser at http://localhost:1234
 The engine features a set of basic example scenarios with sprites based on the angry birds game.
 
 ![game](game.png)
+
+## References
+- https://pikuma.com/courses/game-physics-engine-programming
+- https://github.com/erincatto/box2d-lite
+- https://github.com/Sopiro/Physics
