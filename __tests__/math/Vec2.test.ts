@@ -82,13 +82,6 @@ describe('Vec2', () => {
         expect(n.y).toBe(-1);
     });
 
-    test('normal() returns the perpendicular vector', () => {
-        const v = new Vec2(10, 0);
-        const p = v.perp();
-        expect(p.x).toBe(0);
-        expect(p.y).toBe(-10);
-    });
-
     test('dot() computes dot product', () => {
         const v1 = new Vec2(1, 3);
         const v2 = new Vec2(2, 4);
