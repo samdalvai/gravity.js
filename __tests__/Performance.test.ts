@@ -29,6 +29,7 @@ describe('Performance', () => {
 
         // Baseline = 540 ms (normal)
         // Baseline = 680 ms (block solve)
+        // Baseline = 480 ms (joint)
         for (let i = 0; i < 1000; i++) {
             for (let i = 0; i < numFrames; i++) {
                 joint.preSolve(inverseDeltaTime);
