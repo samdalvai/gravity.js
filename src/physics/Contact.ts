@@ -1,3 +1,12 @@
+/*
+ * Portions of this file are derived from the Sopiro Physics Engine.
+ *
+ * Copyright (c) 2022 Sopiro
+ * Licensed under the MIT License
+ *
+ * Original project:
+ * https://github.com/Sopiro
+ */
 import { Mat2 } from '../math/Mat2';
 import Utils from '../math/Utils';
 import Vec2 from '../math/Vec2';

@@ -1,0 +1,31 @@
+NOTICE
+
+This project includes software developed by third parties and redistributed
+in accordance with their respective licenses.
+
+----------------------------------------------------------------
+Sopiro Physics Engine
+----------------------------------------------------------------
+Copyright (c) 2022 Sopiro
+Licensed under the MIT License.
+
+Portions of this software are derived from or inspired by the Sopiro
+Physics Engine project.
+https://github.com/Sopiro/Physics
+
+----------------------------------------------------------------
+Box2D
+----------------------------------------------------------------
+Copyright (c) 2019 Erin Catto
+Licensed under the MIT License.
+
+Portions of this software are derived from or inspired by the Box2D-lite
+physics engine.
+https://github.com/erincatto/box2d-lite
+
+----------------------------------------------------------------
+
+The MIT License texts for the above components are included in this
+distribution. All other code in this project is copyright
+(c) 2026 Samuel Dalvai and is licensed under the MIT License unless
+otherwise stated.
