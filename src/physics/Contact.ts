@@ -116,9 +116,11 @@ class ContactSolver {
 
         // Jacobian * velocity vector (Normal velocity)
         const jv: number =
-            +this.jacobian.va.dot(this.bodyA.velocity) +
+            this.jacobian.va.x * this.bodyA.velocity.x +
+            this.jacobian.va.y * this.bodyA.velocity.y +
             this.jacobian.wa * this.bodyA.angularVelocity +
-            this.jacobian.vb.dot(this.bodyB.velocity) +
+            this.jacobian.vb.x * this.bodyB.velocity.x +
+            this.jacobian.vb.y * this.bodyB.velocity.y +
             this.jacobian.wb * this.bodyB.angularVelocity;
 
         let lambda = this.effectiveMass * -(jv + this.bias);
@@ -126,21 +128,29 @@ class ContactSolver {
         const oldImpulseSum = this.impulseSum;
         switch (this.contactType) {
             case ContactType.Normal: {
-                if (SETTINGS.impulseAccumulation) this.impulseSum = Math.max(0.0, this.impulseSum + lambda);
-                else this.impulseSum = Math.max(0.0, lambda);
+                if (SETTINGS.impulseAccumulation) {
+                    this.impulseSum = Math.max(0.0, this.impulseSum + lambda);
+                } else {
+                    this.impulseSum = Math.max(0.0, lambda);
+                }
                 break;
             }
             case ContactType.Tangent: {
                 const maxFriction = this.friction * normalContact!.impulseSum;
-                if (SETTINGS.impulseAccumulation)
+                if (SETTINGS.impulseAccumulation) {
                     this.impulseSum = Utils.clamp(this.impulseSum + lambda, -maxFriction, maxFriction);
-                else this.impulseSum = Utils.clamp(lambda, -maxFriction, maxFriction);
+                } else {
+                    this.impulseSum = Utils.clamp(lambda, -maxFriction, maxFriction);
+                }
                 break;
             }
         }
 
-        if (SETTINGS.impulseAccumulation) lambda = this.impulseSum - oldImpulseSum;
-        else lambda = this.impulseSum;
+        if (SETTINGS.impulseAccumulation) {
+            lambda = this.impulseSum - oldImpulseSum;
+        } else {
+            lambda = this.impulseSum;
+        }
 
         // Apply impulse
         this.applyImpulse(lambda);
@@ -166,6 +176,7 @@ class BlockSolver {
     // Normal contacts
     private nc1!: ContactSolver;
     private nc2!: ContactSolver;
+
     // Jacobians
     private j1!: Jacobian;
     private j2!: Jacobian;
@@ -254,27 +265,33 @@ class BlockSolver {
         //     = A * x + b'
         // b' = b - A * a;
 
-        const a = new Vec2(this.nc1.impulseSum, this.nc2.impulseSum); // old total impulse
-        Utils.assert(a.x >= 0.0, a.y >= 0.0);
+        const ax = this.nc1.impulseSum; // old total impulse x
+        const ay = this.nc2.impulseSum; // old total impulse y
+        Utils.assert(ax >= 0.0, ay >= 0.0);
 
         // (Velocity constraint) Normal velocity: Jv = 0
         let vn1: number =
-            +this.nc1.jacobian.va.dot(this.bodyA.velocity) +
+            this.nc1.jacobian.va.x * this.bodyA.velocity.x +
+            this.nc1.jacobian.va.y * this.bodyA.velocity.y +
             this.nc1.jacobian.wa * this.bodyA.angularVelocity +
-            this.nc1.jacobian.vb.dot(this.bodyB.velocity) +
+            this.nc1.jacobian.vb.x * this.bodyB.velocity.x +
+            this.nc1.jacobian.vb.y * this.bodyB.velocity.y +
             this.nc1.jacobian.wb * this.bodyB.angularVelocity;
 
         let vn2: number =
-            +this.nc2.jacobian.va.dot(this.bodyA.velocity) +
+            this.nc2.jacobian.va.x * this.bodyA.velocity.x +
+            this.nc2.jacobian.va.y * this.bodyA.velocity.y +
             this.nc2.jacobian.wa * this.bodyA.angularVelocity +
-            this.nc2.jacobian.vb.dot(this.bodyB.velocity) +
+            this.nc2.jacobian.vb.x * this.bodyB.velocity.x +
+            this.nc2.jacobian.vb.y * this.bodyB.velocity.y +
             this.nc2.jacobian.wb * this.bodyB.angularVelocity;
 
-        let b = new Vec2(vn1 + this.nc1.bias, vn2 + this.nc2.bias);
-
         // b' = b - K * a
-        b = b.subNew(this.k.mulVector(a));
-        let x: Vec2; // Lambda
+        const bx = vn1 + this.nc1.bias - (this.k.m00 * ax + this.k.m01 * ay);
+        const by = vn2 + this.nc2.bias - (this.k.m10 * ax + this.k.m11 * ay);
+
+        let lambdaX: number;
+        let lambdaY: number;
 
         // eslint-disable-next-line no-constant-condition
         while (true) {
@@ -288,8 +305,10 @@ class BlockSolver {
             //
             // x = - inv(A) * b'
             //
-            x = this.m.mulVector(b).negateNew();
-            if (x.x >= 0.0 && x.y >= 0.0) break;
+            lambdaX = -(this.m.m00 * bx + this.m.m01 * by);
+            lambdaY = -(this.m.m10 * bx + this.m.m11 * by);
+
+            if (lambdaX >= 0.0 && lambdaY >= 0.0) break;
 
             //
             // Case 2: vn1 = 0 and x2 = 0
@@ -298,11 +317,11 @@ class BlockSolver {
             //   0 = a11 * x1 + a12 * 0 + b1'
             // vn2 = a21 * x1 + a22 * 0 + b2'
             //
-            x.x = this.nc1.effectiveMass * -b.x;
-            x.y = 0.0;
+            lambdaX = this.nc1.effectiveMass * -bx;
+            lambdaY = 0.0;
             vn1 = 0.0;
-            vn2 = this.k.m01 * x.x + b.y;
-            if (x.x >= 0.0 && vn2 >= 0.0) break;
+            vn2 = this.k.m01 * lambdaX + by;
+            if (lambdaX >= 0.0 && vn2 >= 0.0) break;
 
             //
             // Case 3: vn2 = 0 and x1 = 0
@@ -311,11 +330,11 @@ class BlockSolver {
             // vn1 = a11 * 0 + a12 * x2 + b1'
             //   0 = a21 * 0 + a22 * x2 + b2'
             //
-            x.x = 0.0;
-            x.y = this.nc2.effectiveMass * -b.y;
-            vn1 = this.k.m10 * x.y + b.x;
+            lambdaX = 0.0;
+            lambdaY = this.nc2.effectiveMass * -by;
+            vn1 = this.k.m10 * lambdaY + bx;
             vn2 = 0.0;
-            if (x.y >= 0.0 && vn1 >= 0.0) break;
+            if (lambdaY >= 0.0 && vn1 >= 0.0) break;
 
             //
             // Case 4: x1 = 0 and x2 = 0
@@ -324,10 +343,10 @@ class BlockSolver {
             // vn1 = b1
             // vn2 = b2;
             //
-            x.x = 0.0;
-            x.y = 0.0;
-            vn1 = b.x;
-            vn2 = b.y;
+            lambdaX = 0.0;
+            lambdaY = 0.0;
+            vn1 = bx;
+            vn2 = by;
             if (vn1 >= 0.0 && vn2 >= 0.0) break;
 
             // How did you reach here?! something went wrong!
@@ -338,27 +357,28 @@ class BlockSolver {
         }
 
         // Get the incremental impulse
-        const d = x.subNew(a);
-        this.applyImpulse(d);
+        const incrementalImpulseX = lambdaX - ax;
+        const incrementalImpulseY = lambdaY - ay;
+        this.applyImpulse(incrementalImpulseX, incrementalImpulseY);
 
         // Accumulate
-        this.nc1.impulseSum = x.x;
-        this.nc2.impulseSum = x.y;
+        this.nc1.impulseSum = lambdaX;
+        this.nc2.impulseSum = lambdaY;
     }
 
-    private applyImpulse(lambda: Vec2): void {
+    private applyImpulse(lambdaX: number, lambdaY: number): void {
         // V2 = V2' + M^-1 ⋅ Pc
         // Pc = J^t ⋅ λ
 
-        this.bodyA.velocity.x = this.bodyA.velocity.x + this.j1.va.x * this.bodyA.invMass * (lambda.x + lambda.y);
-        this.bodyA.velocity.y = this.bodyA.velocity.y + this.j1.va.y * this.bodyA.invMass * (lambda.x + lambda.y);
+        this.bodyA.velocity.x = this.bodyA.velocity.x + this.j1.va.x * this.bodyA.invMass * (lambdaX + lambdaY);
+        this.bodyA.velocity.y = this.bodyA.velocity.y + this.j1.va.y * this.bodyA.invMass * (lambdaX + lambdaY);
         this.bodyA.angularVelocity =
-            this.bodyA.angularVelocity + this.bodyA.invI * (this.j1.wa * lambda.x + this.j2.wa * lambda.y);
+            this.bodyA.angularVelocity + this.bodyA.invI * (this.j1.wa * lambdaX + this.j2.wa * lambdaY);
 
-        this.bodyB.velocity.x = this.bodyB.velocity.x + this.j1.vb.x * this.bodyB.invMass * (lambda.x + lambda.y);
-        this.bodyB.velocity.y = this.bodyB.velocity.y + this.j1.vb.y * this.bodyB.invMass * (lambda.x + lambda.y);
+        this.bodyB.velocity.x = this.bodyB.velocity.x + this.j1.vb.x * this.bodyB.invMass * (lambdaX + lambdaY);
+        this.bodyB.velocity.y = this.bodyB.velocity.y + this.j1.vb.y * this.bodyB.invMass * (lambdaX + lambdaY);
         this.bodyB.angularVelocity =
-            this.bodyB.angularVelocity + this.bodyB.invI * (this.j1.wb * lambda.x + this.j2.wb * lambda.y);
+            this.bodyB.angularVelocity + this.bodyB.invI * (this.j1.wb * lambdaX + this.j2.wb * lambdaY);
     }
 }
 
