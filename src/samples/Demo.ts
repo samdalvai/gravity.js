@@ -156,7 +156,7 @@ export default class Demo {
         }
 
         const distance = -1;
-        const frequency = 14;
+        const frequency = 7;
         const dampingRadio = 0.9;
         const jointMass = -1;
 
