@@ -290,13 +290,13 @@ export default class Demo {
             torso,
             leftArm,
             torso.position.addNew(new Vec2(-28, 45)),
-            leftArm.position.addNew(new Vec2(0, 35)),
+            leftArm.position.addNew(new Vec2(5, 35)),
         );
         const rightShoulder = new DistanceJoint(
             torso,
             rightArm,
             torso.position.addNew(new Vec2(28, 45)),
-            rightArm.position.addNew(new Vec2(0, 35)),
+            rightArm.position.addNew(new Vec2(-5, 35)),
         );
         const leftHip = new DistanceJoint(
             torso,
