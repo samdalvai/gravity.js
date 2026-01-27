@@ -407,7 +407,7 @@ export class ContactManifold extends Constraint {
         this.contactPoints = contactPoints;
         this.penetrationDepth = penetrationDepth;
         this.contactNormal = contactNormal;
-        this.contactTangent = new Vec2(-contactNormal.y, contactNormal.x);
+        this.contactTangent = contactNormal.perpNew();
         this.featureFlipped = featureFlipped;
 
         for (let i = 0; i < this.numContacts; i++) {
