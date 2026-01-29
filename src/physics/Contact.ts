@@ -61,9 +61,6 @@ class ContactSolver {
 
     preSolve(dir: Vec2, contactType: ContactType, featureFlipped: boolean, inverseDeltaTime: number) {
         // Calculate Jacobian J and effective mass M
-        // J = [-dir, -ra × dir, dir, rb × dir] (dir: Contact vector, normal or tangent)
-        // M = (J · M^-1 · J^t)^-1
-
         this.contactType = contactType;
 
         this.ra = this.contactPoint.subNew(this.bodyA.position);
@@ -111,9 +108,6 @@ class ContactSolver {
 
     solve(normalContact?: ContactSolver) {
         // Calculate corrective impulse: Pc
-        // Pc = J^t * λ (λ: lagrangian multiplier)
-        // λ = (J · M^-1 · J^t)^-1 ⋅ -(J·v+b)
-
         // Jacobian * velocity vector (Normal velocity)
         const jv: number =
             this.jacobian.va.x * this.bodyA.velocity.x +
@@ -157,9 +151,6 @@ class ContactSolver {
     }
 
     private applyImpulse(lambda: number) {
-        // V2 = V2' + M^-1 ⋅ Pc
-        // Pc = J^t ⋅ λ
-
         this.bodyA.velocity.x = this.bodyA.velocity.x + this.jacobian.va.x * this.bodyA.invMass * lambda;
         this.bodyA.velocity.y = this.bodyA.velocity.y + this.jacobian.va.y * this.bodyA.invMass * lambda;
         this.bodyA.angularVelocity = this.bodyA.angularVelocity + this.bodyA.invI * this.jacobian.wa * lambda;
@@ -191,11 +182,6 @@ class BlockSolver {
 
     preSolve(normalContacts: ContactSolver[]) {
         // Calculate Jacobian J and effective mass M
-        // J = [-n, -ra1 × n, n, rb1 × n
-        //      -n, -ra2 × n, n, rb2 × n]
-        // K = (J · M^-1 · J^t)
-        // M = K^-1
-
         this.nc1 = normalContacts[0];
         this.nc2 = normalContacts[1];
 
@@ -229,42 +215,6 @@ class BlockSolver {
     }
 
     solve() {
-        // The comments below are copied from Box2D::b2_contact_solver.cpp
-        // Check out Box2D: https://box2d.org
-        //
-        // Block solver developed in collaboration with Dirk Gregorius (back in 01/07 on Box2D_Lite).
-        // Build the mini LCP for this contact patch
-        //
-        // vn = A * x + b, vn >= 0, x >= 0 and vn_i * x_i = 0 with i = 1..2
-        //
-        // A = J * W * JT and J = ( -n, -r1 x n, n, r2 x n )
-        // b = vn0 - velocityBias
-        //
-        // The system is solved using the "Total enumeration method" (s. Murty). The complementary constraint vn_i * x_i
-        // implies that we must have in any solution either vn_i = 0 or x_i = 0. So for the 2D contact problem the cases
-        // vn1 = 0 and vn2 = 0, x1 = 0 and x2 = 0, x1 = 0 and vn2 = 0, x2 = 0 and vn1 = 0 need to be tested. The first valid
-        // solution that satisfies the problem is chosen.
-        //
-        // In order to account of the accumulated impulse 'a' (because of the iterative nature of the solver which only requires
-        // that the accumulated impulse is clamped and not the incremental impulse) we change the impulse variable (x_i).
-        //
-        // Substitute:
-        //
-        // x = a + d
-        //
-        // a := old total impulse
-        // x := new total impulse
-        // d := incremental impulse
-        //
-        // For the current iteration we extend the formula for the incremental impulse
-        // to compute the new total impulse:
-        //
-        // vn = A * d + b
-        //     = A * (x - a) + b
-        //     = A * x + b - A * a
-        //     = A * x + b'
-        // b' = b - A * a;
-
         const ax = this.nc1.impulseSum; // old total impulse x
         const ay = this.nc2.impulseSum; // old total impulse y
         Utils.assert(ax >= 0.0, ay >= 0.0);
@@ -298,13 +248,6 @@ class BlockSolver {
             //
             // Case 1: vn = 0
             // Both constraints are violated
-            //
-            // 0 = A * x + b'
-            //
-            // Solve for x:
-            //
-            // x = - inv(A) * b'
-            //
             lambdaX = -(this.m.m00 * bx + this.m.m01 * by);
             lambdaY = -(this.m.m10 * bx + this.m.m11 * by);
 
@@ -313,10 +256,6 @@ class BlockSolver {
             //
             // Case 2: vn1 = 0 and x2 = 0
             // The first constraint is violated and the second constraint is satisfied
-            //
-            //   0 = a11 * x1 + a12 * 0 + b1'
-            // vn2 = a21 * x1 + a22 * 0 + b2'
-            //
             lambdaX = this.nc1.effectiveMass * -bx;
             lambdaY = 0.0;
             vn1 = 0.0;
@@ -326,10 +265,6 @@ class BlockSolver {
             //
             // Case 3: vn2 = 0 and x1 = 0
             // The first constraint is satisfied and the second constraint is violated
-            //
-            // vn1 = a11 * 0 + a12 * x2 + b1'
-            //   0 = a21 * 0 + a22 * x2 + b2'
-            //
             lambdaX = 0.0;
             lambdaY = this.nc2.effectiveMass * -by;
             vn1 = this.k.m10 * lambdaY + bx;
@@ -339,10 +274,6 @@ class BlockSolver {
             //
             // Case 4: x1 = 0 and x2 = 0
             // Both constraints are satisfied
-            //
-            // vn1 = b1
-            // vn2 = b2;
-            //
             lambdaX = 0.0;
             lambdaY = 0.0;
             vn1 = bx;
@@ -367,9 +298,6 @@ class BlockSolver {
     }
 
     private applyImpulse(lambdaX: number, lambdaY: number): void {
-        // V2 = V2' + M^-1 ⋅ Pc
-        // Pc = J^t ⋅ λ
-
         this.bodyA.velocity.x = this.bodyA.velocity.x + this.j1.va.x * this.bodyA.invMass * (lambdaX + lambdaY);
         this.bodyA.velocity.y = this.bodyA.velocity.y + this.j1.va.y * this.bodyA.invMass * (lambdaX + lambdaY);
         this.bodyA.angularVelocity =
@@ -452,8 +380,8 @@ export class ContactManifold extends Constraint {
             for (let i = 0; i < this.numContacts; i++) {
                 this.normalContacts[i].solve();
             }
-        } // Solve two contact constraint in one shot using block solver
-        else {
+        } else {
+            // Solve two contact constraint in one shot using block solver
             this.blockSolver.solve();
         }
     }
