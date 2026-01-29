@@ -85,10 +85,6 @@ export class Mat2 {
         return res;
     }
 
-    get determinant(): number {
-        return this.m00 * this.m11 - this.m01 * this.m10;
-    }
-
     inverted(): Mat2 {
         const res = new Mat2();
         let det = this.determinant;
@@ -113,5 +109,9 @@ export class Mat2 {
         res.m11 = this.m11 + m.m11;
 
         return res;
+    }
+
+    get determinant(): number {
+        return this.m00 * this.m11 - this.m01 * this.m10;
     }
 }
