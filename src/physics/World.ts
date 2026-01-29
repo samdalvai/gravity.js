@@ -22,7 +22,6 @@ export default class World {
 
     private bodies: RigidBody[] = [];
 
-    // Constraints to be solved
     public manifolds: ContactManifold[] = [];
     public joints: Joint[] = [];
 
