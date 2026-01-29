@@ -45,9 +45,6 @@ export class DistanceJoint extends Joint {
 
     override preSolve(inverseDeltaTime: number): void {
         // Calculate Jacobian J and effective mass M
-        // J = [-n, -n·cross(ra), n, n·cross(rb)] ( n = (anchorB-anchorA) / ||anchorB-anchorA|| )
-        // M = (J · M^-1 · J^t)^-1
-
         const pa = this.bodyA.localPointToWorld(this.localAnchorA);
         const pb = this.bodyB.localPointToWorld(this.localAnchorB);
         this.ra = pa.subNew(this.bodyA.position);
@@ -79,8 +76,6 @@ export class DistanceJoint extends Joint {
 
     override solve(): void {
         // Calculate corrective impulse: Pc
-        // Pc = J^t · λ (λ: lagrangian multiplier)
-        // λ = (J · M^-1 · J^t)^-1 ⋅ -(J·v+b)ù
         const jv =
             (this.bodyB.velocity.x +
                 -this.bodyB.angularVelocity * this.rb.y -
@@ -91,8 +86,6 @@ export class DistanceJoint extends Joint {
                 (this.bodyA.velocity.y + this.bodyA.angularVelocity * this.ra.x)) *
                 this.n.y;
 
-        // Check out below for the reason why the (accumulated impulse * gamma) term is on the right hand side
-        // https://pybullet.org/Bullet/phpBB3/viewtopic.php?f=4&t=1354
         const lambda = this.m * -(jv + this.bias + this.impulseSum * this.gamma);
 
         this.applyImpulse(lambda);
@@ -101,9 +94,6 @@ export class DistanceJoint extends Joint {
     }
 
     private applyImpulse(lambda: number): void {
-        // V2 = V2' + M^-1 ⋅ Pc
-        // Pc = J^t ⋅ λ
-
         this.bodyA.velocity.x = this.bodyA.velocity.x - this.n.x * (lambda * this.bodyA.invMass);
         this.bodyA.velocity.y = this.bodyA.velocity.y - this.n.y * (lambda * this.bodyA.invMass);
         this.bodyA.angularVelocity =

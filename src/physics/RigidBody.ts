@@ -42,7 +42,6 @@ export default class RigidBody {
     minY!: number;
     maxY!: number;
 
-    // Body(const Shape& shape, float x, float y, float mass);
     constructor(shape: Shape, x: number, y: number, mass: number) {
         this.id = RigidBody._nextId++;
 
