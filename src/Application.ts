@@ -312,8 +312,9 @@ export default class Application {
 
         const defaultText = [
             // General info
-            'Keys: 1-9 Demos, Left Mouse to generate circles, Right Mouse to generate boxes, Space to drop bomb',
             `${Demo.demoStrings[this.demoIndex]}`,
+            '(1-9) select demo, Left Mouse to generate circles, Right Mouse to generate boxes',
+            '(E) to generate explosion, (G) to generate particles',
             `(D) debug mode: ${this.debug ? 'ON' : 'OFF'}`,
             `(C) chosen particle: ${this.generateCircles ? 'Circle' : 'Box'}`,
         ];
