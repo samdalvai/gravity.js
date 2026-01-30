@@ -191,15 +191,30 @@ export class BoxShape extends PolygonShape {
 }
 
 export class CapsuleShape extends Shape {
+    halfHeight: number;
+    radius: number;
+
+    constructor(halfHeight: number, radius: number) {
+        super();
+
+        this.halfHeight = halfHeight;
+        this.radius = radius;
+    }
+
     getType(): ShapeType {
-        throw new Error('Method not implemented.');
+        return ShapeType.CAPSULE;
     }
+
     getMomentOfInertia(): number {
-        throw new Error('Method not implemented.');
+        // TODO: to be updated
+        return 0.5 * (this.radius * this.radius);
     }
-    updateVertices(angle: number, position: Vec2): void {
-        throw new Error('Method not implemented.');
-    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    updateVertices = (angle: number, position: Vec2): void => {
+        return; // Capsules don't have vertices... nothing to do here
+    };
+
     support(dir: Vec2): SupportResult {
         throw new Error('Method not implemented.');
     }
