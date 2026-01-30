@@ -1,6 +1,6 @@
 import AssetStore, { TEXTURES } from '../AssetStore';
 import Vec2 from '../math/Vec2';
-import { CircleShape, PolygonShape, Shape, ShapeType } from './Shape';
+import { CapsuleShape, CircleShape, PolygonShape, Shape, ShapeType } from './Shape';
 
 export default class RigidBody {
     static _nextId = 0;
@@ -257,25 +257,28 @@ export default class RigidBody {
                 break;
             case ShapeType.CAPSULE:
                 {
-                    // TODO: to be updated with correct implementation
-                    const worldVertices = (this.shape as PolygonShape).worldVertices;
+                    const shape = this.shape as CapsuleShape;
+                    const radius = shape.radius;
+                    const topCirclePosition = this.position.subNew(new Vec2(0, shape.halfHeight)).rotate(this.rotation);
+                    const bottomCirclePosition = this.position
+                        .addNew(new Vec2(0, shape.halfHeight))
+                        .rotate(this.rotation);
 
-                    let minX = Infinity;
-                    let minY = Infinity;
-                    let maxX = -Infinity;
-                    let maxY = -Infinity;
+                    const topCircleMinX = topCirclePosition.x - radius;
+                    const topCircleMinY = topCirclePosition.y - radius;
+                    const topCircleMaxX = topCirclePosition.x + radius;
+                    const topCircleMaxY = topCirclePosition.y + radius;
 
-                    for (const v of worldVertices) {
-                        minX = Math.min(minX, v.x);
-                        minY = Math.min(minY, v.y);
-                        maxX = Math.max(maxX, v.x);
-                        maxY = Math.max(maxY, v.y);
-                    }
+                    const bottomCircleMinX = bottomCirclePosition.x - radius;
+                    const bottomCircleMinY = bottomCirclePosition.y - radius;
+                    const bottomCircleMaxX = bottomCirclePosition.x + radius;
+                    const bottomCircleMaxY = bottomCirclePosition.y + radius;
 
-                    this.minX = minX;
-                    this.maxX = maxX;
-                    this.minY = minY;
-                    this.maxY = maxY;
+                    this.minX = Math.min(topCircleMinX, bottomCircleMinX);
+                    this.minY = Math.min(topCircleMinY, bottomCircleMinY);
+
+                    this.maxX = Math.max(topCircleMaxX, bottomCircleMaxX);
+                    this.maxY = Math.max(topCircleMaxY, bottomCircleMaxY);
                 }
                 break;
         }
