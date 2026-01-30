@@ -94,33 +94,33 @@ export default class World {
 
         // Broad phase check with prune & sweep algorithm
         // TODO: some collisions are not correclty found, try to set gravity to 0
-        // for (let i = 0; i < this.bodies.length; i++) {
-        //     const a = this.bodies[i];
+        for (let i = 0; i < this.bodies.length; i++) {
+            const a = this.bodies[i];
 
-        //     for (let j = i + 1; j < this.bodies.length; j++) {
-        //         const b = this.bodies[j];
-
-        //         // If objects don't overlap on X axis they cannot collide
-        //         if (b.minX > a.maxX) break;
-
-        //         // If objects overlap on X axis but don't overlap on Y axis the cannot collide
-        //         if (a.maxY < b.minY || a.minY > b.maxY) {
-        //             continue;
-        //         }
-
-        //         // Objects may be colliding
-        //         potentialPairs.push([a, b]);
-        //     }
-        // }
-
-        // Brute force broad phase
-        for (let i = 0; i < this.bodies.length - 1; i++) {
             for (let j = i + 1; j < this.bodies.length; j++) {
-                const a = this.bodies[i];
                 const b = this.bodies[j];
+
+                // If objects don't overlap on X axis they cannot collide
+                if (b.minX > a.maxX) break;
+
+                // If objects overlap on X axis but don't overlap on Y axis the cannot collide
+                if (a.maxY < b.minY || a.minY > b.maxY) {
+                    continue;
+                }
+
+                // Objects may be colliding
                 potentialPairs.push([a, b]);
             }
         }
+
+        // Brute force broad phase
+        // for (let i = 0; i < this.bodies.length - 1; i++) {
+        //     for (let j = i + 1; j < this.bodies.length; j++) {
+        //         const a = this.bodies[i];
+        //         const b = this.bodies[j];
+        //         potentialPairs.push([a, b]);
+        //     }
+        // }
 
         // Narrow phase check, potential pairs may still not collide
         for (let [a, b] of potentialPairs) {

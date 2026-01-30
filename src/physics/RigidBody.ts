@@ -1,6 +1,6 @@
 import AssetStore, { TEXTURES } from '../AssetStore';
 import Vec2 from '../math/Vec2';
-import { PolygonShape, Shape, ShapeType } from './Shape';
+import { CircleShape, PolygonShape, Shape, ShapeType } from './Shape';
 
 export default class RigidBody {
     static _nextId = 0;
@@ -216,9 +216,7 @@ export default class RigidBody {
         this.shape.updateVertices(this.rotation, this.position);
 
         // Update AABB values based on new position
-        if (this.angularVelocity !== 0 || this.velocity.x !== 0 || this.velocity.y !== 0) {
-            this.updateAABB();
-        }
+        this.updateAABB();
 
         // Bleed off tiny angular velocity to avoid circle rolling forever
         this.angularVelocity *= 0.99;
@@ -226,10 +224,11 @@ export default class RigidBody {
 
     updateAABB = (): void => {
         if (this.shape.getType() === ShapeType.CIRCLE) {
-            this.minX = this.position.x - this.shape.radius;
-            this.maxX = this.position.x + this.shape.radius;
-            this.minY = this.position.y - this.shape.radius;
-            this.maxY = this.position.y + this.shape.radius;
+            const radius = (this.shape as CircleShape).radius;
+            this.minX = this.position.x - radius;
+            this.maxX = this.position.x + radius;
+            this.minY = this.position.y - radius;
+            this.maxY = this.position.y + radius;
         }
 
         if (this.shape.getType() === ShapeType.POLYGON) {
