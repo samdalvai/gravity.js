@@ -8,7 +8,7 @@ import Graphics from '../Graphics';
 import Vec2 from '../math/Vec2';
 import { DistanceJoint } from '../physics/DistanceJoint';
 import RigidBody from '../physics/RigidBody';
-import { BoxShape, CircleShape, PolygonShape } from '../physics/Shape';
+import { BoxShape, CapsuleShape, CircleShape, PolygonShape } from '../physics/Shape';
 import World from '../physics/World';
 
 export default class Demo {
@@ -63,10 +63,13 @@ export default class Demo {
         this.generateFloor(world);
         this.generateFences(world);
 
-        const box = new RigidBody(new BoxShape(60, 60), 0, 0, 1);
-        box.angularVelocity = 5;
-        box.setTexture('crate');
-        world.addBody(box);
+        // const box = new RigidBody(new BoxShape(60, 60), 0, 0, 1);
+        // box.angularVelocity = 5;
+        // box.setTexture('crate');
+        const capsule = new RigidBody(new CapsuleShape(40, 20), 0, 0, 1);
+        capsule.rotation = 0.5;
+        capsule.angularVelocity = 2
+        world.addBody(capsule);
     };
 
     static demo2 = (world: World) => {
