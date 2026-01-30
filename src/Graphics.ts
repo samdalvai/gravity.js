@@ -304,7 +304,7 @@ export default class Graphics {
                         //     body.texture,
                         // );
                     } else if (debug) {
-                        // Graphics.drawPolygon(body.position.x, body.position.y, capsuleShape.worldVertices, 'white');
+                        Graphics.drawPolygon(body.position.x, body.position.y, capsuleShape.worldVertices, 'white');
                         const offsetUp = new Vec2(0, capsuleShape.halfHeight).rotate(body.rotation); // local vector rotated
                         const offsetDown = new Vec2(0, -capsuleShape.halfHeight).rotate(body.rotation);
 

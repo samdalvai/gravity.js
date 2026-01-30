@@ -190,13 +190,13 @@ export class BoxShape extends PolygonShape {
     };
 }
 
-export class CapsuleShape extends Shape {
+export class CapsuleShape extends BoxShape {
     halfHeight: number;
     radius: number;
 
     constructor(halfHeight: number, radius: number) {
-        // super(radius * 2, halfHeight * 2);
-        super();
+        super(radius * 2, halfHeight * 2);
+        // super();
         this.halfHeight = halfHeight;
         this.radius = radius;
     }
@@ -208,11 +208,6 @@ export class CapsuleShape extends Shape {
     getMomentOfInertia = (): number => {
         // TODO: to be updated
         return 0.5 * (this.radius * this.radius);
-    };
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    updateVertices = (angle: number, position: Vec2): void => {
-        return; // Capsules don't have vertices... nothing to do here
     };
 
     support(dir: Vec2): SupportResult {
