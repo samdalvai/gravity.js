@@ -271,7 +271,7 @@ export default class Application {
                     const centerY = body.minY + (body.maxY - body.minY) / 2;
                     const width = body.maxX - body.minX;
                     const height = body.maxY - body.minY;
-                    Graphics.drawRect(centerX, centerY, width, height, 'gray');
+                    Graphics.drawRect(centerX, centerY, width, height, 'pink');
                 }
             }
 
