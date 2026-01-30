@@ -1,6 +1,6 @@
 import Vec2 from './math/Vec2';
 import RigidBody from './physics/RigidBody';
-import { CircleShape, PolygonShape, ShapeType } from './physics/Shape';
+import { CapsuleShape, CircleShape, PolygonShape, ShapeType } from './physics/Shape';
 
 export default class Graphics {
     static windowWidth: number;
@@ -167,6 +167,51 @@ export default class Graphics {
         this.ctx.fill();
     };
 
+    static drawCapsule = (
+        x: number,
+        y: number,
+        halfHeight: number,
+        radius: number,
+        angle: number,
+        color: string,
+    ): void => {
+        this.ctx.strokeStyle = color;
+
+        const topCenterX = x + Math.cos(angle) * halfHeight;
+        const topCenterY = y + Math.sin(angle) * halfHeight;
+
+        this.ctx.beginPath();
+        this.ctx.arc(topCenterX, topCenterY, radius, 0, Math.PI * 2);
+        this.ctx.strokeStyle = color;
+        this.ctx.stroke();
+
+        const bottomCenterX = x - Math.cos(angle) * halfHeight;
+        const bottomCenterY = y - Math.sin(angle) * halfHeight;
+
+        this.ctx.beginPath();
+        this.ctx.arc(bottomCenterX, bottomCenterY, radius, 0, Math.PI * 2);
+        this.ctx.strokeStyle = color;
+        this.ctx.stroke();
+
+        const rectUpLeftX = topCenterX - radius;
+        const rectUpLeftY = topCenterY - radius;
+        const rectUpRightX = topCenterX + radius;
+        const rectUpRightY = topCenterY + radius;
+
+        const rectDownLeftX = bottomCenterX - radius;
+        const rectDownLeftY = bottomCenterY - radius;
+        const rectDownRightX = bottomCenterX + radius;
+        const rectDownRightY = bottomCenterY + radius;
+
+        this.ctx.beginPath();
+        this.ctx.moveTo(rectUpLeftX, rectUpLeftY);
+        this.ctx.lineTo(rectUpRightX, rectUpRightY);
+        this.ctx.lineTo(rectDownRightX, rectDownRightY);
+        this.ctx.lineTo(rectDownLeftX, rectDownLeftY);
+        this.ctx.closePath();
+        this.ctx.stroke();
+    };
+
     static drawTexture = (
         x: number,
         y: number,
@@ -243,6 +288,31 @@ export default class Graphics {
                         );
                     } else if (debug) {
                         Graphics.drawPolygon(body.position.x, body.position.y, polygonShape.worldVertices, 'white');
+                    }
+                }
+                break;
+            case ShapeType.CAPSULE:
+                {
+                    const capsuleShape = body.shape as CapsuleShape;
+                    if (!debug && body.texture) {
+                        // Graphics.drawTexture(
+                        //     body.position.x,
+                        //     body.position.y,
+                        //     polygonShape.width,
+                        //     polygonShape.height,
+                        //     body.rotation,
+                        //     body.texture,
+                        // );
+                    } else if (debug) {
+                        //Graphics.drawPolygon(body.position.x, body.position.y, polygonShape.worldVertices, 'white');
+                        Graphics.drawCapsule(
+                            body.position.x,
+                            body.position.y,
+                            capsuleShape.halfHeight,
+                            capsuleShape.radius,
+                            body.rotation,
+                            'white',
+                        );
                     }
                 }
                 break;
