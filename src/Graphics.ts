@@ -305,23 +305,34 @@ export default class Graphics {
                         // );
                     } else if (debug) {
                         // Graphics.drawPolygon(body.position.x, body.position.y, capsuleShape.worldVertices, 'white');
-                        const positionUp = body.position
-                            .subNew(new Vec2(0, capsuleShape.halfHeight))
-                            .rotate(body.rotation);
-                        const positionDown = body.position
-                            .addNew(new Vec2(0, capsuleShape.halfHeight))
-                            .rotate(body.rotation);
+                        const offsetUp = new Vec2(0, capsuleShape.halfHeight).rotate(body.rotation); // local vector rotated
+                        const offsetDown = new Vec2(0, -capsuleShape.halfHeight).rotate(body.rotation);
 
-                        Graphics.drawCircle(positionUp.x, positionUp.y, capsuleShape.radius, body.rotation, 'white');
+                        const topCirclePosition = body.position.addNew(offsetUp);
+                        const bottomCirclePosition = body.position.addNew(offsetDown);
+
                         Graphics.drawCircle(
-                            positionDown.x,
-                            positionDown.y,
+                            topCirclePosition.x,
+                            topCirclePosition.y,
+                            capsuleShape.radius,
+                            body.rotation,
+                            'white',
+                        );
+                        Graphics.drawCircle(
+                            bottomCirclePosition.x,
+                            bottomCirclePosition.y,
                             capsuleShape.radius,
                             body.rotation,
                             'white',
                         );
 
-                        Graphics.drawLine(positionUp.x, positionUp.y, positionDown.x, positionDown.y, 'white');
+                        Graphics.drawLine(
+                            topCirclePosition.x,
+                            topCirclePosition.y,
+                            bottomCirclePosition.x,
+                            bottomCirclePosition.y,
+                            'white',
+                        );
                         // Graphics.drawCapsule(
                         //     body.position.x,
                         //     body.position.y,
@@ -330,6 +341,7 @@ export default class Graphics {
                         //     body.rotation,
                         //     'white',
                         // );
+                        Graphics.drawFillCircle(body.position.x, body.position.y, 5, 'blue');
                     }
                 }
                 break;
