@@ -3,7 +3,7 @@ import { CONTACT_MERGE_THRESHOLD } from './Constants';
 import { ContactManifold } from './Contact';
 import Edge from './Edge';
 import RigidBody from './RigidBody';
-import { CircleShape, PolygonShape, ShapeType } from './Shape';
+import { CapsuleShape, CircleShape, PolygonShape, Shape, ShapeType } from './Shape';
 
 const findFarthestEdge = (b: RigidBody, dir: Vec2): Edge => {
     const localDir = b.worldDirToLocal(dir);
@@ -76,7 +76,7 @@ export default class CollisionDetection {
         const bIsCircle = b.shapeType === ShapeType.CIRCLE;
 
         if (aIsCircle && bIsCircle) {
-            return this.detectCollisionCircleCircle(a, b);
+            return this.detectCollisionCircleCircle(a, b, a.shape, b.shape);
         }
 
         const aIsPolygon = a.shapeType === ShapeType.POLYGON;
@@ -94,12 +94,32 @@ export default class CollisionDetection {
             return this.detectCollisionPolygonCircle(b, a);
         }
 
+        const aIsCapsule = a.shapeType === ShapeType.CAPSULE;
+        const bIsCapsule = b.shapeType === ShapeType.CAPSULE;
+
+        if (aIsCapsule && bIsCircle) {
+            //return this.detectCollisionCapsuleCircle(a, b);
+        }
+
         return null;
     };
 
-    static detectCollisionCircleCircle = (a: RigidBody, b: RigidBody): ContactManifold | null => {
-        const aCircleShape = a.shape as CircleShape;
-        const bCircleShape = b.shape as CircleShape;
+    // static detectCollisionCapsuleCircle = (a: RigidBody, b: RigidBody): ContactManifold | null => {
+    //     const aCapsuleShape = a.shape as CapsuleShape;
+    //     const positionUp = a.position.subNew(new Vec2(0, aCapsuleShape.halfHeight)).rotate(a.rotation);
+    //     const positionDown = a.position.addNew(new Vec2(0, aCapsuleShape.halfHeight)).rotate(a.rotation);
+
+        
+    // };
+
+    static detectCollisionCircleCircle = (
+        a: RigidBody,
+        b: RigidBody,
+        shapeA: Shape,
+        shapeB: Shape,
+    ): ContactManifold | null => {
+        const aCircleShape = shapeA as CircleShape;
+        const bCircleShape = shapeB as CircleShape;
 
         const ab = b.position.subNew(a.position);
         const radiusSum = aCircleShape.radius + bCircleShape.radius;
