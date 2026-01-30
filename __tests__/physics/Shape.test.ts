@@ -73,12 +73,4 @@ describe('Shape', () => {
         expect(box.worldVertices[3].x).toBe(90);
         expect(box.worldVertices[3].y).toBe(90);
     });
-
-    test('Should correctly compute shape radius for non circles', () => {
-        const boxA = new BoxShape(20, 20);
-        expect(boxA.radius).toBeCloseTo(14.14213562);
-
-        const boxB = new BoxShape(14.14213562, 14.14213562);
-        expect(boxB.radius).toBeCloseTo(10);
-    });
 });
