@@ -135,7 +135,7 @@ export default class CollisionDetection {
         if (topHit) return topHit;
 
         // Test bottom circle
-        return this.detectCollisionCircleCircle(
+        const bottomHit = this.detectCollisionCircleCircle(
             bottomPos,
             capsuleShape.radius,
             capsule,
@@ -143,6 +143,10 @@ export default class CollisionDetection {
             circleShape.radius,
             circle,
         );
+        if (bottomHit) return bottomHit;
+
+        // TODO: should take the deepest contact?
+        return this.detectCollisionPolygonCircle(capsule, circle);
     };
 
     private static detectCollisionCircleCircle(
