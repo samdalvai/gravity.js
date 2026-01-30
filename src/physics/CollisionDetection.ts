@@ -76,7 +76,7 @@ export default class CollisionDetection {
         const bIsCircle = b.shapeType === ShapeType.CIRCLE;
 
         if (aIsCircle && bIsCircle) {
-            return this.detectCollisionCircleCircle(a, b, a.shape, b.shape);
+            return this.detectCollisionCircleCircle(a, b);
         }
 
         const aIsPolygon = a.shapeType === ShapeType.POLYGON;
@@ -115,11 +115,9 @@ export default class CollisionDetection {
     static detectCollisionCircleCircle = (
         a: RigidBody,
         b: RigidBody,
-        shapeA: Shape,
-        shapeB: Shape,
     ): ContactManifold | null => {
-        const aCircleShape = shapeA as CircleShape;
-        const bCircleShape = shapeB as CircleShape;
+        const aCircleShape = a.shape as CircleShape;
+        const bCircleShape = b.shape as CircleShape;
 
         const ab = b.position.subNew(a.position);
         const radiusSum = aCircleShape.radius + bCircleShape.radius;
