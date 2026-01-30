@@ -3,6 +3,7 @@ import Vec2 from '../math/Vec2';
 export enum ShapeType {
     CIRCLE,
     POLYGON,
+    CAPSULE,
 }
 
 interface SupportResult {
@@ -11,8 +12,6 @@ interface SupportResult {
 }
 
 export abstract class Shape {
-    radius: number = 0;
-
     abstract getType(): ShapeType;
     abstract getMomentOfInertia(): number;
     abstract updateVertices(angle: number, position: Vec2): void;
@@ -20,6 +19,8 @@ export abstract class Shape {
 }
 
 export class CircleShape extends Shape {
+    radius: number = 0;
+
     constructor(radius: number) {
         super();
         this.radius = radius;
@@ -58,8 +59,6 @@ export class PolygonShape extends Shape {
         let maxX = -Infinity;
         let maxY = -Infinity;
 
-        let maxRadiusSq = 0;
-
         // Initialize the vertices of the polygon shape and set width and height
         for (const v of vertices) {
             this.localVertices.push(v);
@@ -71,14 +70,7 @@ export class PolygonShape extends Shape {
             minY = Math.min(minY, v.y);
             maxX = Math.max(maxX, v.x);
             maxY = Math.max(maxY, v.y);
-
-            const r2 = v.x * v.x + v.y * v.y;
-            if (r2 > maxRadiusSq) {
-                maxRadiusSq = r2;
-            }
         }
-
-        this.radius = Math.sqrt(maxRadiusSq);
 
         this.width = maxX - minX;
         this.height = maxY - minY;
@@ -196,4 +188,19 @@ export class BoxShape extends PolygonShape {
         // But this still needs to be multiplied by the rigidbody's mass
         return 0.083333 * (this.width * this.width + this.height * this.height);
     };
+}
+
+export class CapsuleShape extends Shape {
+    getType(): ShapeType {
+        throw new Error('Method not implemented.');
+    }
+    getMomentOfInertia(): number {
+        throw new Error('Method not implemented.');
+    }
+    updateVertices(angle: number, position: Vec2): void {
+        throw new Error('Method not implemented.');
+    }
+    support(dir: Vec2): SupportResult {
+        throw new Error('Method not implemented.');
+    }
 }
