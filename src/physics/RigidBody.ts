@@ -259,20 +259,21 @@ export default class RigidBody {
                 {
                     const shape = this.shape as CapsuleShape;
                     const radius = shape.radius;
-                    const topCirclePosition = this.position.subNew(new Vec2(0, shape.halfHeight)).rotate(this.rotation);
-                    const bottomCirclePosition = this.position
-                        .addNew(new Vec2(0, shape.halfHeight))
-                        .rotate(this.rotation);
+                    const offsetUp = new Vec2(0, shape.halfHeight).rotate(this.rotation);
+                    const offsetDown = new Vec2(0, -shape.halfHeight).rotate(this.rotation);
 
-                    const topCircleMinX = topCirclePosition.x - radius;
-                    const topCircleMinY = topCirclePosition.y - radius;
-                    const topCircleMaxX = topCirclePosition.x + radius;
-                    const topCircleMaxY = topCirclePosition.y + radius;
+                    const topCirclePos = this.position.addNew(offsetUp);
+                    const bottomCirclePos = this.position.addNew(offsetDown);
 
-                    const bottomCircleMinX = bottomCirclePosition.x - radius;
-                    const bottomCircleMinY = bottomCirclePosition.y - radius;
-                    const bottomCircleMaxX = bottomCirclePosition.x + radius;
-                    const bottomCircleMaxY = bottomCirclePosition.y + radius;
+                    const topCircleMinX = topCirclePos.x - radius;
+                    const topCircleMinY = topCirclePos.y - radius;
+                    const topCircleMaxX = topCirclePos.x + radius;
+                    const topCircleMaxY = topCirclePos.y + radius;
+
+                    const bottomCircleMinX = bottomCirclePos.x - radius;
+                    const bottomCircleMinY = bottomCirclePos.y - radius;
+                    const bottomCircleMaxX = bottomCirclePos.x + radius;
+                    const bottomCircleMaxY = bottomCirclePos.y + radius;
 
                     this.minX = Math.min(topCircleMinX, bottomCircleMinX);
                     this.minY = Math.min(topCircleMinY, bottomCircleMinY);
