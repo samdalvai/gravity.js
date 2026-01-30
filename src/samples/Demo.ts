@@ -68,7 +68,7 @@ export default class Demo {
         // box.setTexture('crate');
         const capsule = new RigidBody(new CapsuleShape(40, 20), 0, 0, 1);
         capsule.rotation = 0.5;
-        capsule.angularVelocity = 2
+        capsule.angularVelocity = 10;
         world.addBody(capsule);
     };
 
