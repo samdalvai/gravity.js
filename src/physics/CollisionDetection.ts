@@ -98,24 +98,43 @@ export default class CollisionDetection {
         const bIsCapsule = b.shapeType === ShapeType.CAPSULE;
 
         if (aIsCapsule && bIsCircle) {
-            //return this.detectCollisionCapsuleCircle(a, b);
+            return this.detectCollisionCapsuleCircle(a, b);
         }
 
         return null;
     };
 
-    // static detectCollisionCapsuleCircle = (a: RigidBody, b: RigidBody): ContactManifold | null => {
-    //     const aCapsuleShape = a.shape as CapsuleShape;
-    //     const positionUp = a.position.subNew(new Vec2(0, aCapsuleShape.halfHeight)).rotate(a.rotation);
-    //     const positionDown = a.position.addNew(new Vec2(0, aCapsuleShape.halfHeight)).rotate(a.rotation);
+    static detectCollisionCapsuleCircle = (a: RigidBody, b: RigidBody): ContactManifold | null => {
+        const aCapsuleShape = a.shape as CapsuleShape;
+        const bCircleShape = b.shape as CircleShape;
+        const radiusSum = aCapsuleShape.radius + bCircleShape.radius;
 
-        
-    // };
+        const offsetUp = new Vec2(0, aCapsuleShape.halfHeight).rotate(a.rotation);
+        const offsetDown = new Vec2(0, -aCapsuleShape.halfHeight).rotate(a.rotation);
 
-    static detectCollisionCircleCircle = (
-        a: RigidBody,
-        b: RigidBody,
-    ): ContactManifold | null => {
+        const topCirclePos = a.position.addNew(offsetUp);
+        const bottomCirclePos = a.position.addNew(offsetDown);
+
+        const abUp = b.position.subNew(topCirclePos);
+        if (abUp.magnitudeSquared() <= radiusSum * radiusSum) {
+            const normal = abUp.normalizeNew();
+            const contactPoint = topCirclePos.addNew(normal.scaleNew(aCapsuleShape.radius));
+            const penetrationDepth = radiusSum - abUp.magnitude();
+            return new ContactManifold(a, b, [{ point: contactPoint, id: -1 }], penetrationDepth, normal, false);
+        }
+
+        const abDown = b.position.subNew(bottomCirclePos);
+        if (abDown.magnitudeSquared() <= radiusSum * radiusSum) {
+            const normal = abDown.normalizeNew();
+            const contactPoint = bottomCirclePos.addNew(normal.scaleNew(aCapsuleShape.radius));
+            const penetrationDepth = radiusSum - abDown.magnitude();
+            return new ContactManifold(a, b, [{ point: contactPoint, id: -1 }], penetrationDepth, normal, false);
+        }
+
+        return null;
+    };
+
+    static detectCollisionCircleCircle = (a: RigidBody, b: RigidBody): ContactManifold | null => {
         const aCircleShape = a.shape as CircleShape;
         const bCircleShape = b.shape as CircleShape;
 
