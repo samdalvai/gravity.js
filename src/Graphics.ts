@@ -304,15 +304,30 @@ export default class Graphics {
                         //     body.texture,
                         // );
                     } else if (debug) {
-                        //Graphics.drawPolygon(body.position.x, body.position.y, polygonShape.worldVertices, 'white');
-                        Graphics.drawCapsule(
-                            body.position.x,
-                            body.position.y,
-                            capsuleShape.halfHeight,
+                        Graphics.drawPolygon(body.position.x, body.position.y, capsuleShape.worldVertices, 'white');
+                        const positionUp = body.position
+                            .subNew(new Vec2(0, capsuleShape.halfHeight))
+                            .rotate(body.rotation);
+                        const positionDown = body.position
+                            .addNew(new Vec2(0, capsuleShape.halfHeight))
+                            .rotate(body.rotation);
+
+                        Graphics.drawCircle(positionUp.x, positionUp.y, capsuleShape.radius, body.rotation, 'white');
+                        Graphics.drawCircle(
+                            positionDown.x,
+                            positionDown.y,
                             capsuleShape.radius,
                             body.rotation,
                             'white',
                         );
+                        // Graphics.drawCapsule(
+                        //     body.position.x,
+                        //     body.position.y,
+                        //     capsuleShape.halfHeight,
+                        //     capsuleShape.radius,
+                        //     body.rotation,
+                        //     'white',
+                        // );
                     }
                 }
                 break;
