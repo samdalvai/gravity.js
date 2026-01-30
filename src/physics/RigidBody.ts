@@ -223,33 +223,61 @@ export default class RigidBody {
     };
 
     updateAABB = (): void => {
-        if (this.shape.getType() === ShapeType.CIRCLE) {
-            const radius = (this.shape as CircleShape).radius;
-            this.minX = this.position.x - radius;
-            this.maxX = this.position.x + radius;
-            this.minY = this.position.y - radius;
-            this.maxY = this.position.y + radius;
-        }
+        switch (this.shapeType) {
+            case ShapeType.CIRCLE:
+                {
+                    const radius = (this.shape as CircleShape).radius;
+                    this.minX = this.position.x - radius;
+                    this.maxX = this.position.x + radius;
+                    this.minY = this.position.y - radius;
+                    this.maxY = this.position.y + radius;
+                }
+                break;
+            case ShapeType.POLYGON:
+                {
+                    const worldVertices = (this.shape as PolygonShape).worldVertices;
 
-        if (this.shape.getType() === ShapeType.POLYGON) {
-            const worldVertices = (this.shape as PolygonShape).worldVertices;
+                    let minX = Infinity;
+                    let minY = Infinity;
+                    let maxX = -Infinity;
+                    let maxY = -Infinity;
 
-            let minX = Infinity;
-            let minY = Infinity;
-            let maxX = -Infinity;
-            let maxY = -Infinity;
+                    for (const v of worldVertices) {
+                        minX = Math.min(minX, v.x);
+                        minY = Math.min(minY, v.y);
+                        maxX = Math.max(maxX, v.x);
+                        maxY = Math.max(maxY, v.y);
+                    }
 
-            for (const v of worldVertices) {
-                minX = Math.min(minX, v.x);
-                minY = Math.min(minY, v.y);
-                maxX = Math.max(maxX, v.x);
-                maxY = Math.max(maxY, v.y);
-            }
+                    this.minX = minX;
+                    this.maxX = maxX;
+                    this.minY = minY;
+                    this.maxY = maxY;
+                }
+                break;
+            case ShapeType.CAPSULE:
+                {
+                    // TODO: to be updated with correct implementation
+                    const worldVertices = (this.shape as PolygonShape).worldVertices;
 
-            this.minX = minX;
-            this.maxX = maxX;
-            this.minY = minY;
-            this.maxY = maxY;
+                    let minX = Infinity;
+                    let minY = Infinity;
+                    let maxX = -Infinity;
+                    let maxY = -Infinity;
+
+                    for (const v of worldVertices) {
+                        minX = Math.min(minX, v.x);
+                        minY = Math.min(minY, v.y);
+                        maxX = Math.max(maxX, v.x);
+                        maxY = Math.max(maxY, v.y);
+                    }
+
+                    this.minX = minX;
+                    this.maxX = maxX;
+                    this.minY = minY;
+                    this.maxY = maxY;
+                }
+                break;
         }
     };
 }
