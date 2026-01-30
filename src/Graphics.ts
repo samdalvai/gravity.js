@@ -304,7 +304,7 @@ export default class Graphics {
                         //     body.texture,
                         // );
                     } else if (debug) {
-                        Graphics.drawPolygon(body.position.x, body.position.y, capsuleShape.worldVertices, 'white');
+                        // Graphics.drawPolygon(body.position.x, body.position.y, capsuleShape.worldVertices, 'white');
                         const positionUp = body.position
                             .subNew(new Vec2(0, capsuleShape.halfHeight))
                             .rotate(body.rotation);
@@ -320,6 +320,8 @@ export default class Graphics {
                             body.rotation,
                             'white',
                         );
+
+                        Graphics.drawLine(positionUp.x, positionUp.y, positionDown.x, positionDown.y, 'white');
                         // Graphics.drawCapsule(
                         //     body.position.x,
                         //     body.position.y,
