@@ -123,6 +123,9 @@ export default class CollisionDetection {
         const topPos = capsule.position.addNew(offsetUp);
         const bottomPos = capsule.position.addNew(offsetDown);
 
+        const bodyHit = this.detectCollisionPolygonCircle(capsule, circle);
+        if (bodyHit) return bodyHit;
+
         // Test top circle
         const topHit = this.detectCollisionCircleCircle(
             topPos,
@@ -143,10 +146,9 @@ export default class CollisionDetection {
             circleShape.radius,
             circle,
         );
-        if (bottomHit) return bottomHit;
 
         // TODO: should take the deepest contact?
-        return this.detectCollisionPolygonCircle(capsule, circle);
+        return bottomHit;
     };
 
     private static detectCollisionCircleCircle(
