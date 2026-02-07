@@ -96,11 +96,13 @@ export default class CollisionDetection {
         }
 
         if (aIsPolygon && bIsCircle) {
-            return this.detectCollisionPolygonCircle(a, b);
+            const bCircleShape = b.shape as CircleShape;
+            return this.detectCollisionPolygonCircle(a, b.position, bCircleShape.radius, b);
         }
 
         if (aIsCircle && bIsPolygon) {
-            return this.detectCollisionPolygonCircle(b, a);
+            const aCircleShape = a.shape as CircleShape;
+            return this.detectCollisionPolygonCircle(b, a.position, aCircleShape.radius, a);
         }
 
         const aIsCapsule = a.shapeType === ShapeType.CAPSULE;
@@ -108,6 +110,10 @@ export default class CollisionDetection {
 
         if (aIsCapsule && bIsCircle) {
             return this.detectCollisionCapsuleCircle(a, b);
+        }
+
+        if (aIsCapsule && bIsPolygon) {
+            return this.detectCollisionCapsulePolygon(a, b);
         }
 
         return null;
@@ -123,7 +129,7 @@ export default class CollisionDetection {
         const topPos = capsule.position.addNew(offsetUp);
         const bottomPos = capsule.position.addNew(offsetDown);
 
-        const bodyHit = this.detectCollisionPolygonCircle(capsule, circle);
+        const bodyHit = this.detectCollisionPolygonCircle(capsule, circle.position, circleShape.radius, circle);
         if (bodyHit) return bodyHit;
 
         // Test top circle
@@ -151,6 +157,45 @@ export default class CollisionDetection {
         // shapes, but for now we treat them as three separate shapes
         return bottomHit;
     };
+
+    static detectCollisionCapsulePolygon(capsule: RigidBody, polygon: RigidBody): ContactManifold | null {
+        const capsuleShape = capsule.shape as CapsuleShape;
+        const polygonShape = polygon.shape as PolygonShape;
+
+        const offsetUp = new Vec2(0, capsuleShape.halfHeight).rotate(capsule.rotation);
+        const offsetDown = new Vec2(0, -capsuleShape.halfHeight).rotate(capsule.rotation);
+
+        const topPos = capsule.position.addNew(offsetUp);
+        const bottomPos = capsule.position.addNew(offsetDown);
+
+        // const bodyHit = this.detectCollisionPolygonPolygon(capsule, circle.position, circleShape.radius, circle);
+        // if (bodyHit) return bodyHit;
+
+        // Test top circle
+        // const topHit = this.detectCollisionCircleCircle(
+        //     topPos,
+        //     capsuleShape.radius,
+        //     capsule,
+        //     circle.position,
+        //     circleShape.radius,
+        //     circle,
+        // );
+        // if (topHit) return topHit;
+
+        // Test bottom circle
+        // const bottomHit = this.detectCollisionCircleCircle(
+        //     bottomPos,
+        //     capsuleShape.radius,
+        //     capsule,
+        //     circle.position,
+        //     circleShape.radius,
+        //     circle,
+        // );
+
+        // TODO: should take the deepest contact? No, we need to treat capsules differently as with other
+        // shapes, but for now we treat them as three separate shapes
+        // return bottomHit;
+    }
 
     private static detectCollisionCircleCircle(
         aPos: Vec2,
@@ -203,9 +248,15 @@ export default class CollisionDetection {
         return new ContactManifold(a, b, contactPoints, penetrationDepth, normal, flipped);
     };
 
-    static detectCollisionPolygonCircle = (polygon: RigidBody, circle: RigidBody): ContactManifold | null => {
+    // static detectCollisionPolygonCircle = (polygon: RigidBody, circle: RigidBody): ContactManifold | null => {
+    static detectCollisionPolygonCircle = (
+        polygon: RigidBody,
+        circlePos: Vec2,
+        circleRadius: number,
+        circle: RigidBody,
+    ): ContactManifold | null => {
         const polygonShape = polygon.shape as PolygonShape;
-        const circleShape = circle.shape as CircleShape;
+        // const circleShape = circle.shape as CircleShape;
         const polygonVertices = polygonShape.worldVertices;
 
         let isOutside = false;
@@ -221,7 +272,7 @@ export default class CollisionDetection {
             const edgeNormal = edge.normal();
 
             // Compare the circle center with the rectangle vertex
-            const vertexToCircleCenter = circle.position.subNew(polygonVertices[currVertex]);
+            const vertexToCircleCenter = circlePos.subNew(polygonVertices[currVertex]);
             const projection = vertexToCircleCenter.dot(edgeNormal);
 
             // If we found a dot product projection that is in the positive/outside side of the normal
@@ -246,19 +297,19 @@ export default class CollisionDetection {
             ///////////////////////////////////////
             // Check if we are inside region A:
             ///////////////////////////////////////
-            let v1 = circle.position.subNew(minCurrVertex); // vector from the nearest vertex to the circle center
+            let v1 = circlePos.subNew(minCurrVertex); // vector from the nearest vertex to the circle center
             let v2 = minNextVertex.subNew(minCurrVertex); // the nearest edge (from curr vertex to next vertex)
             if (v1.dot(v2) < 0) {
                 // Distance from vertex to circle center is greater than radius... no collision
-                if (v1.magnitude() > circleShape.radius) {
+                if (v1.magnitude() > circleRadius) {
                     return null;
                 } else {
                     // Detected collision in region A:
                     const a = polygon;
                     const b = circle;
-                    const depth = circleShape.radius - v1.magnitude();
+                    const depth = circleRadius - v1.magnitude();
                     const normal = v1.normalize();
-                    const start = circle.position.addNew(normal.scaleNew(-circleShape.radius));
+                    const start = circle.position.addNew(normal.scaleNew(-circleRadius));
                     const end = start.addNew(normal.scaleNew(depth));
 
                     const contact = new ContactManifold(a, b, [{ point: end, id: -1 }], depth, normal, false);
@@ -272,15 +323,15 @@ export default class CollisionDetection {
                 v2 = minCurrVertex.subNew(minNextVertex); // the nearest edge
                 if (v1.dot(v2) < 0) {
                     // Distance from vertex to circle center is greater than radius... no collision
-                    if (v1.magnitude() > circleShape.radius) {
+                    if (v1.magnitude() > circleRadius) {
                         return null;
                     } else {
                         // Detected collision in region B:
                         const a = polygon;
                         const b = circle;
-                        const depth = circleShape.radius - v1.magnitude();
+                        const depth = circleRadius - v1.magnitude();
                         const normal = v1.normalize();
-                        const start = circle.position.addNew(normal.scaleNew(-circleShape.radius));
+                        const start = circle.position.addNew(normal.scaleNew(-circleRadius));
                         const end = start.addNew(normal.scaleNew(depth));
 
                         const contact = new ContactManifold(a, b, [{ point: end, id: -1 }], depth, normal, false);
@@ -290,16 +341,16 @@ export default class CollisionDetection {
                     ///////////////////////////////////////
                     // We are inside region C:
                     ///////////////////////////////////////
-                    if (distanceCircleEdge > circleShape.radius) {
+                    if (distanceCircleEdge > circleRadius) {
                         // No collision... Distance between the closest distance and the circle center is greater than the radius.
                         return null;
                     } else {
                         // Detected collision in region C:
                         const a = polygon;
                         const b = circle;
-                        const depth = circleShape.radius - distanceCircleEdge;
+                        const depth = circleRadius - distanceCircleEdge;
                         const normal = minNextVertex.subNew(minCurrVertex).normal();
-                        const start = circle.position.subNew(normal.scaleNew(circleShape.radius));
+                        const start = circle.position.subNew(normal.scaleNew(circleRadius));
                         const end = start.addNew(normal.scaleNew(depth));
 
                         const contact = new ContactManifold(a, b, [{ point: end, id: -1 }], depth, normal, false);
@@ -311,9 +362,9 @@ export default class CollisionDetection {
             // The center of circle is inside the polygon... it is definitely colliding!
             const a = polygon;
             const b = circle;
-            const depth = circleShape.radius - distanceCircleEdge;
+            const depth = circleRadius - distanceCircleEdge;
             const normal = minNextVertex.subNew(minCurrVertex).normal();
-            const start = circle.position.subNew(normal.scaleNew(circleShape.radius));
+            const start = circle.position.subNew(normal.scaleNew(circleRadius));
             const end = start.addNew(normal.scaleNew(depth));
 
             const contact = new ContactManifold(a, b, [{ point: end, id: -1 }], depth, normal, false);
