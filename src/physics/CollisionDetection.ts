@@ -147,7 +147,8 @@ export default class CollisionDetection {
             circle,
         );
 
-        // TODO: should take the deepest contact?
+        // TODO: should take the deepest contact? No, we need to treat capsules differently as with other
+        // shapes, but for now we treat them as three separate shapes
         return bottomHit;
     };
 
