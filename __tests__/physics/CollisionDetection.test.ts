@@ -8,7 +8,9 @@ describe('CollisionDetection', () => {
         const a = new RigidBody(new CircleShape(30), 0, 0, 1.0);
         const b = new RigidBody(new CircleShape(30), 0, 0, 1.0);
 
-        const result = CollisionDetection.detectCollisionCircleCircle(a, b)!;
+        const aCircleShape = a.shape as CircleShape;
+        const bCircleShape = b.shape as CircleShape;
+        const result = CollisionDetection.detectCollisionCircleCircle(a.position, aCircleShape.radius, a, b.position, bCircleShape.radius, b)!;
 
         expect(result).not.toBeNull();
         expect(result.contactPoints).toHaveLength(1);
@@ -19,7 +21,9 @@ describe('CollisionDetection', () => {
         const a = new RigidBody(new CircleShape(30), 0, 0, 1.0);
         const b = new RigidBody(new CircleShape(30), 30, 0, 1.0);
 
-        const result = CollisionDetection.detectCollisionCircleCircle(a, b)!;
+        const aCircleShape = a.shape as CircleShape;
+        const bCircleShape = b.shape as CircleShape;
+        const result = CollisionDetection.detectCollisionCircleCircle(a.position, aCircleShape.radius, a, b.position, bCircleShape.radius, b)!;
 
         expect(result).not.toBeNull();
         expect(result.contactPoints).toHaveLength(1);
@@ -30,7 +34,9 @@ describe('CollisionDetection', () => {
         const a = new RigidBody(new CircleShape(30), 0, 0, 1.0);
         const b = new RigidBody(new CircleShape(30), 45, 0, 1.0);
 
-        const result = CollisionDetection.detectCollisionCircleCircle(a, b)!;
+        const aCircleShape = a.shape as CircleShape;
+        const bCircleShape = b.shape as CircleShape;
+        const result = CollisionDetection.detectCollisionCircleCircle(a.position, aCircleShape.radius, a, b.position, bCircleShape.radius, b)!;
 
         expect(result).not.toBeNull();
         expect(result.contactPoints).toHaveLength(1);
@@ -92,7 +98,8 @@ describe('CollisionDetection', () => {
         const a = new RigidBody(new BoxShape(60, 60), 0, 0, 1.0);
         const b = new RigidBody(new CircleShape(30), 0, 0, 1.0);
 
-        const result = CollisionDetection.detectCollisionPolygonCircle(a, b)!;
+        const bCircleShape = b.shape as CircleShape;
+        const result = CollisionDetection.detectCollisionPolygonCircle(a, b.position, bCircleShape.radius, b)!;
 
         expect(result).not.toBeNull();
         expect(result.contactPoints).toHaveLength(1);
@@ -103,7 +110,8 @@ describe('CollisionDetection', () => {
         const a = new RigidBody(new BoxShape(60, 60), 0, 0, 1.0);
         const b = new RigidBody(new CircleShape(30), 30, 0, 1.0);
 
-        const result = CollisionDetection.detectCollisionPolygonCircle(a, b)!;
+        const bCircleShape = b.shape as CircleShape;
+        const result = CollisionDetection.detectCollisionPolygonCircle(a, b.position, bCircleShape.radius, b)!;
 
         expect(result).not.toBeNull();
         expect(result.contactPoints).toHaveLength(1);
@@ -114,7 +122,8 @@ describe('CollisionDetection', () => {
         const a = new RigidBody(new BoxShape(60, 60), 0, 0, 1.0);
         const b = new RigidBody(new CircleShape(30), 30, 30, 1.0);
 
-        const result = CollisionDetection.detectCollisionPolygonCircle(a, b)!;
+        const bCircleShape = b.shape as CircleShape;
+        const result = CollisionDetection.detectCollisionPolygonCircle(a, b.position, bCircleShape.radius, b)!;
 
         expect(result).not.toBeNull();
         expect(result.contactPoints).toHaveLength(1);
@@ -125,7 +134,8 @@ describe('CollisionDetection', () => {
         const a = new RigidBody(new BoxShape(60, 60), 0, 0, 1.0);
         const b = new RigidBody(new CircleShape(30), 200, 200, 1.0);
 
-        const result = CollisionDetection.detectCollisionPolygonCircle(a, b);
+        const bCircleShape = b.shape as CircleShape;
+        const result = CollisionDetection.detectCollisionPolygonCircle(a, b.position, bCircleShape.radius, b)!;
 
         expect(result).toBeNull();
     });
@@ -134,7 +144,8 @@ describe('CollisionDetection', () => {
         const a = new RigidBody(new BoxShape(60, 60), 0, 0, 1.0);
         const b = new RigidBody(new CircleShape(30), 60, 60, 1.0);
 
-        const result = CollisionDetection.detectCollisionPolygonCircle(a, b);
+        const bCircleShape = b.shape as CircleShape;
+        const result = CollisionDetection.detectCollisionPolygonCircle(a, b.position, bCircleShape.radius, b)!;
 
         expect(result).toBeNull();
     });
