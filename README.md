@@ -2,6 +2,15 @@
 
 A Javascript 2d game physics engine, rendering in a Canvas on the browser. Inspired by the C++ game physics engine featured in the related Pikuma course. Learn more at [pikuma.com](https://pikuma.com/).
 
+# Features
+
+- Collision detection between different shape: Circles, Boxes, Polygons and Capsules
+- Broad Phase using prune & sweep algorithm with AABB partitioning
+- Warm starting with contact caching
+- Distance joints
+- Texture rendering for shapes
+- Set of demos showcasing different scenarios
+
 # How to run
 
 ## Prerequisites
