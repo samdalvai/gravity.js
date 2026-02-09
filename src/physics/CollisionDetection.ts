@@ -134,6 +134,11 @@ export default class CollisionDetection {
     };
 
     static detectCollisionCapsuleCapsule(capsuleA: RigidBody, capsuleB: RigidBody): ContactManifold | null {
+        // Test top circle of a with top circle, body and bottom circle of b
+
+        // Test body of a with top circle, body and bottom circle of b
+
+        // Test bottom circle of a with top circle, body and bottom circle of b
         return null;
     }
 
