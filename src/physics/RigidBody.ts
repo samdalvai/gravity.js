@@ -3,7 +3,7 @@ import Vec2 from '../math/Vec2';
 import { CapsuleShape, CircleShape, PolygonShape, Shape, ShapeType } from './Shape';
 
 export default class RigidBody {
-    static _nextId = 0;
+    static nextId = 0;
     id: number;
 
     // Linear motion
@@ -43,7 +43,7 @@ export default class RigidBody {
     maxY!: number;
 
     constructor(shape: Shape, x: number, y: number, mass: number) {
-        this.id = RigidBody._nextId++;
+        this.id = RigidBody.nextId++;
 
         this.shape = shape;
         this.shapeType = shape.getType();
