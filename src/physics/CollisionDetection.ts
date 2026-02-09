@@ -184,7 +184,6 @@ export default class CollisionDetection {
 
         // Test bottom circle
         const bottomHit = this.detectCollisionPolygonCircle(polygon, bottomPos, capsuleShape.radius, capsule);
-        if (bottomHit) return topHit;
 
         // TODO: should take the deepest contact? No, we need to treat capsules differently as with other
         // shapes, but for now we treat them as three separate shapes
