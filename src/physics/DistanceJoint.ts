@@ -7,7 +7,6 @@
  * Original project:
  * https://github.com/Sopiro
  */
-import Utils from '../math/Utils';
 import Vec2 from '../math/Vec2';
 import { SETTINGS } from './Constants';
 import { Joint } from './Joint';
@@ -17,7 +16,7 @@ export class DistanceJoint extends Joint {
     public localAnchorA: Vec2;
     public localAnchorB: Vec2;
 
-    private _length: number;
+    private length: number;
 
     private ra!: Vec2;
     private rb!: Vec2;
@@ -40,7 +39,7 @@ export class DistanceJoint extends Joint {
 
         this.localAnchorA = this.bodyA.worldPointToLocal(anchorA);
         this.localAnchorB = this.bodyB.worldPointToLocal(anchorB);
-        this._length = length <= 0 ? anchorB.subNew(anchorA).magnitude() : length;
+        this.length = length <= 0 ? anchorB.subNew(anchorA).magnitude() : length;
     }
 
     override preSolve(inverseDeltaTime: number): void {
@@ -63,7 +62,7 @@ export class DistanceJoint extends Joint {
 
         this.m = 1.0 / k;
 
-        const error = u.magnitude() - this._length;
+        const error = u.magnitude() - this.length;
 
         if (SETTINGS.positionCorrection) {
             this.bias = error * this.beta * inverseDeltaTime;
@@ -105,13 +104,5 @@ export class DistanceJoint extends Joint {
         this.bodyB.angularVelocity =
             this.bodyB.angularVelocity +
             (this.n.x * (-lambda * this.rb.y) + this.n.y * (lambda * this.rb.x)) * this.bodyB.invI;
-    }
-
-    get length(): number {
-        return this._length;
-    }
-
-    set length(length: number) {
-        this._length = Utils.clamp(length, 0, Number.MAX_VALUE);
     }
 }
