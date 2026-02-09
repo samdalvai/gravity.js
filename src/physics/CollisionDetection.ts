@@ -168,8 +168,7 @@ export default class CollisionDetection {
 
     static detectCollisionCapsulePolygon(capsule: RigidBody, polygon: RigidBody): ContactManifold | null {
         const capsuleShape = capsule.shape as CapsuleShape;
-        const polygonShape = polygon.shape as PolygonShape;
-
+ 
         const offsetUp = new Vec2(0, capsuleShape.halfHeight).rotate(capsule.rotation);
         const offsetDown = new Vec2(0, -capsuleShape.halfHeight).rotate(capsule.rotation);
 
@@ -183,21 +182,13 @@ export default class CollisionDetection {
         const topHit = this.detectCollisionPolygonCircle(polygon, topPos, capsuleShape.radius, capsule);
         if (topHit) return topHit;
 
-        return null;
-
         // Test bottom circle
-        // const bottomHit = this.detectCollisionCircleCircle(
-        //     bottomPos,
-        //     capsuleShape.radius,
-        //     capsule,
-        //     circle.position,
-        //     circleShape.radius,
-        //     circle,
-        // );
+        const bottomHit = this.detectCollisionPolygonCircle(polygon, bottomPos, capsuleShape.radius, capsule);
+        if (bottomHit) return topHit;
 
         // TODO: should take the deepest contact? No, we need to treat capsules differently as with other
         // shapes, but for now we treat them as three separate shapes
-        // return bottomHit;
+        return bottomHit;
     }
 
     private static detectCollisionCircleCircle(

@@ -211,6 +211,6 @@ export class CapsuleShape extends BoxShape {
     };
 
     support(dir: Vec2): SupportResult {
-        throw new Error('Method not implemented.');
+        return super.support(dir);
     }
 }
