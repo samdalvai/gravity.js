@@ -108,6 +108,8 @@ export default class CollisionDetection {
         const aIsCapsule = a.shapeType === ShapeType.CAPSULE;
         const bIsCapsule = b.shapeType === ShapeType.CAPSULE;
 
+        // TODO: should take the deepest contact? No, we need to treat capsules differently as with other
+        // shapes, but for now we treat them as three separate shapes
         if (aIsCapsule && bIsCapsule) {
             return this.detectCollisionCapsuleCapsule(a, b);
         }
@@ -160,7 +162,7 @@ export default class CollisionDetection {
         if (topHit) return topHit;
 
         // Test bottom circle
-        const bottomHit = this.detectCollisionCircleCircle(
+        return this.detectCollisionCircleCircle(
             bottomPos,
             capsuleShape.radius,
             capsule,
@@ -168,10 +170,6 @@ export default class CollisionDetection {
             circleShape.radius,
             circle,
         );
-
-        // TODO: should take the deepest contact? No, we need to treat capsules differently as with other
-        // shapes, but for now we treat them as three separate shapes
-        return bottomHit;
     };
 
     static detectCollisionCapsulePolygon(capsule: RigidBody, polygon: RigidBody): ContactManifold | null {
@@ -191,11 +189,7 @@ export default class CollisionDetection {
         if (topHit) return topHit;
 
         // Test bottom circle
-        const bottomHit = this.detectCollisionPolygonCircle(polygon, bottomPos, capsuleShape.radius, capsule);
-
-        // TODO: should take the deepest contact? No, we need to treat capsules differently as with other
-        // shapes, but for now we treat them as three separate shapes
-        return bottomHit;
+        return this.detectCollisionPolygonCircle(polygon, bottomPos, capsuleShape.radius, capsule);
     }
 
     private static detectCollisionCircleCircle(
