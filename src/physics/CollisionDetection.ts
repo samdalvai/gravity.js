@@ -214,7 +214,7 @@ export default class CollisionDetection {
         return this.detectCollisionPolygonCircle(polygon, bottomPos, capsuleShape.radius, capsule);
     }
 
-    private static detectCollisionCircleCircle(
+    static detectCollisionCircleCircle(
         aPos: Vec2,
         aRadius: number,
         aBody: RigidBody,
