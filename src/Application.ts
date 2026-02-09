@@ -1,12 +1,13 @@
 import AssetStore from './AssetStore';
 import Graphics from './Graphics';
 import InputManager, { MouseButton } from './InputManager';
+import Utils from './math/Utils';
 import Vec2 from './math/Vec2';
 import { GRAVITY, MAX_BODIES } from './physics/Constants';
 import { DistanceJoint } from './physics/DistanceJoint';
 import Force from './physics/Force';
 import RigidBody from './physics/RigidBody';
-import { BoxShape, CircleShape } from './physics/Shape';
+import { BoxShape, CapsuleShape, CircleShape } from './physics/Shape';
 import World from './physics/World';
 import Demo from './samples/Demo';
 
@@ -112,6 +113,17 @@ export default class Application {
 
                     if (inputEvent.key === 's') {
                         this.showContacts = !this.showContacts;
+                    }
+
+                    if (inputEvent.key === 'x') {
+                        const x = InputManager.mousePosition.x - Graphics.width() / 2;
+                        const y = -(InputManager.mousePosition.y - Graphics.height() / 2);
+
+                        const capsule = new RigidBody(new CapsuleShape(40, 20), x, y, 1);
+                        capsule.restitution = 0.2;
+                        capsule.friction = 0.1;
+                        capsule.rotation = Utils.randomNumber(0, 1);
+                        this.world.addBody(capsule);
                     }
 
                     if (!Number.isNaN(Number.parseInt(inputEvent.key))) {
