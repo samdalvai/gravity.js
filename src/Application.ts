@@ -116,13 +116,17 @@ export default class Application {
                     }
 
                     if (inputEvent.key === 'x') {
+                        if (this.world.getBodies().length >= MAX_BODIES) {
+                            continue;
+                        }
+                        
                         const x = InputManager.mousePosition.x - Graphics.width() / 2;
                         const y = -(InputManager.mousePosition.y - Graphics.height() / 2);
 
                         const capsule = new RigidBody(new CapsuleShape(40, 20), x, y, 1);
                         capsule.restitution = 0.2;
                         capsule.friction = 0.1;
-                        capsule.rotation = Utils.randomNumber(0, 1);
+                        // capsule.rotation = Utils.randomNumber(0, 1);
                         this.world.addBody(capsule);
                     }
 
@@ -327,7 +331,7 @@ export default class Application {
             // General info
             `${Demo.demoStrings[this.demoIndex]}`,
             '(1-9) select demo, Left Mouse to generate circles, Right Mouse to generate boxes',
-            '(E) to generate explosion, (G) to generate particles',
+            '(E) to generate explosion, (G) to generate particles, (X) to generate capsules',
             `(D) debug mode: ${this.debug ? 'ON' : 'OFF'}`,
             `(C) chosen particle: ${this.generateCircles ? 'Circle' : 'Box'}`,
         ];
