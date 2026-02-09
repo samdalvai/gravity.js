@@ -3,7 +3,7 @@ import { CONTACT_MERGE_THRESHOLD } from './Constants';
 import { ContactManifold } from './Contact';
 import Edge from './Edge';
 import RigidBody from './RigidBody';
-import { CapsuleShape, CircleShape, PolygonShape, Shape, ShapeType } from './Shape';
+import { CapsuleShape, CircleShape, PolygonShape, ShapeType } from './Shape';
 
 const findFarthestEdge = (b: RigidBody, dir: Vec2): Edge => {
     const localDir = b.worldDirToLocal(dir);
