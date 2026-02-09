@@ -108,6 +108,10 @@ export default class CollisionDetection {
         const aIsCapsule = a.shapeType === ShapeType.CAPSULE;
         const bIsCapsule = b.shapeType === ShapeType.CAPSULE;
 
+        if (aIsCapsule && bIsCapsule) {
+            return this.detectCollisionCapsuleCapsule(a, b);
+        }
+
         if (aIsCapsule && bIsCircle) {
             return this.detectCollisionCapsuleCircle(a, b);
         }
@@ -126,6 +130,10 @@ export default class CollisionDetection {
 
         return null;
     };
+
+    static detectCollisionCapsuleCapsule(capsuleA: RigidBody, capsuleB: RigidBody): ContactManifold | null {
+        return null;
+    }
 
     static detectCollisionCapsuleCircle = (capsule: RigidBody, circle: RigidBody): ContactManifold | null => {
         const capsuleShape = capsule.shape as CapsuleShape;
@@ -168,7 +176,7 @@ export default class CollisionDetection {
 
     static detectCollisionCapsulePolygon(capsule: RigidBody, polygon: RigidBody): ContactManifold | null {
         const capsuleShape = capsule.shape as CapsuleShape;
- 
+
         const offsetUp = new Vec2(0, capsuleShape.halfHeight).rotate(capsule.rotation);
         const offsetDown = new Vec2(0, -capsuleShape.halfHeight).rotate(capsule.rotation);
 
