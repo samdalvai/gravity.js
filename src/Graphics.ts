@@ -97,6 +97,35 @@ export default class Graphics {
         this.ctx.stroke();
     };
 
+    static drawHalfCircle = (
+        x: number,
+        y: number,
+        radius: number,
+        bodyAngle: number,
+        half: 'top' | 'bottom',
+        color: string,
+    ): void => {
+        let localStart: number;
+        let localEnd: number;
+
+        if (half === 'bottom') {
+            localStart = 0;
+            localEnd = Math.PI;
+        } else {
+            localStart = Math.PI;
+            localEnd = Math.PI * 2;
+        }
+
+        const startAngle = bodyAngle + localStart;
+        const endAngle = bodyAngle + localEnd;
+
+        // Draw rotated arc
+        this.ctx.beginPath();
+        this.ctx.arc(x, y, radius, startAngle, endAngle);
+        this.ctx.strokeStyle = color;
+        this.ctx.stroke();
+    };
+
     static drawFillCircle = (x: number, y: number, radius: number, color: string): void => {
         this.ctx.beginPath();
         this.ctx.arc(x, y, radius, 0, Math.PI * 2);
@@ -223,6 +252,7 @@ export default class Graphics {
         this.ctx.save();
         this.ctx.translate(x, y);
         this.ctx.rotate(rotation);
+        
         // This is needed because we flip the canvas with beginWorld()
         this.ctx.scale(1, -1);
         this.ctx.drawImage(texture, -width / 2, -height / 2, width, height);
@@ -304,43 +334,39 @@ export default class Graphics {
                         //     body.texture,
                         // );
                     } else if (debug) {
-                        Graphics.drawPolygon(body.position.x, body.position.y, capsuleShape.worldVertices, 'white');
-                        const offsetUp = new Vec2(0, capsuleShape.halfHeight).rotate(body.rotation); // local vector rotated
+                        const vertices = capsuleShape.worldVertices;
+                        Graphics.drawLine(
+                            vertices[vertices.length - 1].x,
+                            vertices[vertices.length - 1].y,
+                            vertices[0].x,
+                            vertices[0].y,
+                            'white',
+                        );
+                        Graphics.drawLine(vertices[1].x, vertices[1].y, vertices[2].x, vertices[2].y, 'white');
+                        const offsetUp = new Vec2(0, capsuleShape.halfHeight).rotate(body.rotation);
                         const offsetDown = new Vec2(0, -capsuleShape.halfHeight).rotate(body.rotation);
 
                         const topCirclePosition = body.position.addNew(offsetUp);
                         const bottomCirclePosition = body.position.addNew(offsetDown);
 
-                        Graphics.drawCircle(
+                        Graphics.drawHalfCircle(
                             topCirclePosition.x,
                             topCirclePosition.y,
                             capsuleShape.radius,
                             body.rotation,
-                            'white',
-                        );
-                        Graphics.drawCircle(
-                            bottomCirclePosition.x,
-                            bottomCirclePosition.y,
-                            capsuleShape.radius,
-                            body.rotation,
+                            'bottom',
                             'white',
                         );
 
-                        Graphics.drawLine(
-                            topCirclePosition.x,
-                            topCirclePosition.y,
+                        Graphics.drawHalfCircle(
                             bottomCirclePosition.x,
                             bottomCirclePosition.y,
+                            capsuleShape.radius,
+                            body.rotation,
+                            'top',
                             'white',
                         );
-                        // Graphics.drawCapsule(
-                        //     body.position.x,
-                        //     body.position.y,
-                        //     capsuleShape.halfHeight,
-                        //     capsuleShape.radius,
-                        //     body.rotation,
-                        //     'white',
-                        // );
+
                         Graphics.drawFillCircle(body.position.x, body.position.y, 5, 'blue');
                     }
                 }
