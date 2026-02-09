@@ -28,7 +28,8 @@ The engine features a set of basic example scenarios with sprites based on the a
 
 ![game](game.png)
 
-## References
+# References
+
 - https://pikuma.com/courses/game-physics-engine-programming
 - https://github.com/erincatto/box2d-lite
 - https://github.com/Sopiro/Physics
