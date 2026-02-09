@@ -252,7 +252,7 @@ export default class Graphics {
         this.ctx.save();
         this.ctx.translate(x, y);
         this.ctx.rotate(rotation);
-        
+
         // This is needed because we flip the canvas with beginWorld()
         this.ctx.scale(1, -1);
         this.ctx.drawImage(texture, -width / 2, -height / 2, width, height);
@@ -325,14 +325,15 @@ export default class Graphics {
                 {
                     const capsuleShape = body.shape as CapsuleShape;
                     if (!debug && body.texture) {
-                        // Graphics.drawTexture(
-                        //     body.position.x,
-                        //     body.position.y,
-                        //     polygonShape.width,
-                        //     polygonShape.height,
-                        //     body.rotation,
-                        //     body.texture,
-                        // );
+                        const polygonShape = body.shape as PolygonShape;
+                        Graphics.drawTexture(
+                            body.position.x,
+                            body.position.y,
+                            polygonShape.width,
+                            polygonShape.height + capsuleShape.radius * 2,
+                            body.rotation,
+                            body.texture,
+                        );
                     } else if (debug) {
                         const vertices = capsuleShape.worldVertices;
                         Graphics.drawLine(
