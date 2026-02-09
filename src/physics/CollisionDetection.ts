@@ -136,12 +136,23 @@ export default class CollisionDetection {
     };
 
     static detectCollisionCapsuleCapsule(capsuleA: RigidBody, capsuleB: RigidBody): ContactManifold | null {
-        // Test top circle of a with top circle, body and bottom circle of b
+        const capsuleShapeB = capsuleB.shape as CapsuleShape;
 
-        // Test body of a with top circle, body and bottom circle of b
+        const offsetUpB = new Vec2(0, capsuleShapeB.halfHeight).rotate(capsuleB.rotation);
+        const offsetDownB = new Vec2(0, -capsuleShapeB.halfHeight).rotate(capsuleB.rotation);
 
-        // Test bottom circle of a with top circle, body and bottom circle of b
-        return null;
+        const topPosB = capsuleB.position.addNew(offsetUpB);
+        const bottomPosB = capsuleB.position.addNew(offsetDownB);
+
+        const bodyHit = this.detectCollisionCapsulePolygon(capsuleA, capsuleB);
+        if (bodyHit) return bodyHit;
+
+        // Test top circle
+        const topHit = this.detectCollisionCapsuleCircle(capsuleA, topPosB, capsuleShapeB.radius, capsuleB);
+        if (topHit) return topHit;
+
+        // Test bottom circle
+        return this.detectCollisionCapsuleCircle(capsuleA, bottomPosB, capsuleShapeB.radius, capsuleB);
     }
 
     static detectCollisionCapsuleCircle = (
