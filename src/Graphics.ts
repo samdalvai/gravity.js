@@ -326,6 +326,7 @@ export default class Graphics {
                     const capsuleShape = body.shape as CapsuleShape;
                     if (!debug && body.texture) {
                         const polygonShape = body.shape as PolygonShape;
+                        // TODO: draw texture without stretching it
                         Graphics.drawTexture(
                             body.position.x,
                             body.position.y,
