@@ -115,11 +115,13 @@ export default class CollisionDetection {
         }
 
         if (aIsCapsule && bIsCircle) {
-            return this.detectCollisionCapsuleCircle(a, b);
+            const bCircleShape = b.shape as CircleShape;
+            return this.detectCollisionCapsuleCircle(a, b.position, bCircleShape.radius, b);
         }
 
         if (aIsCircle && bIsCapsule) {
-            return this.detectCollisionCapsuleCircle(b, a);
+            const aCircleShape = a.shape as CircleShape;
+            return this.detectCollisionCapsuleCircle(b, a.position, aCircleShape.radius, a);
         }
 
         if (aIsCapsule && bIsPolygon) {
@@ -142,9 +144,13 @@ export default class CollisionDetection {
         return null;
     }
 
-    static detectCollisionCapsuleCircle = (capsule: RigidBody, circle: RigidBody): ContactManifold | null => {
+    static detectCollisionCapsuleCircle = (
+        capsule: RigidBody,
+        circlePos: Vec2,
+        circleRadius: number,
+        circle: RigidBody,
+    ): ContactManifold | null => {
         const capsuleShape = capsule.shape as CapsuleShape;
-        const circleShape = circle.shape as CircleShape;
 
         const offsetUp = new Vec2(0, capsuleShape.halfHeight).rotate(capsule.rotation);
         const offsetDown = new Vec2(0, -capsuleShape.halfHeight).rotate(capsule.rotation);
@@ -152,7 +158,7 @@ export default class CollisionDetection {
         const topPos = capsule.position.addNew(offsetUp);
         const bottomPos = capsule.position.addNew(offsetDown);
 
-        const bodyHit = this.detectCollisionPolygonCircle(capsule, circle.position, circleShape.radius, circle);
+        const bodyHit = this.detectCollisionPolygonCircle(capsule, circlePos, circleRadius, circle);
         if (bodyHit) return bodyHit;
 
         // Test top circle
@@ -160,8 +166,8 @@ export default class CollisionDetection {
             topPos,
             capsuleShape.radius,
             capsule,
-            circle.position,
-            circleShape.radius,
+            circlePos,
+            circleRadius,
             circle,
         );
         if (topHit) return topHit;
@@ -171,8 +177,8 @@ export default class CollisionDetection {
             bottomPos,
             capsuleShape.radius,
             capsule,
-            circle.position,
-            circleShape.radius,
+            circlePos,
+            circleRadius,
             circle,
         );
     };
