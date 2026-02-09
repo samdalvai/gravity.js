@@ -135,85 +135,6 @@ export default class CollisionDetection {
         return null;
     };
 
-    static detectCollisionCapsuleCapsule(capsuleA: RigidBody, capsuleB: RigidBody): ContactManifold | null {
-        const capsuleShapeB = capsuleB.shape as CapsuleShape;
-
-        const offsetUpB = new Vec2(0, capsuleShapeB.halfHeight).rotate(capsuleB.rotation);
-        const offsetDownB = new Vec2(0, -capsuleShapeB.halfHeight).rotate(capsuleB.rotation);
-
-        const topPosB = capsuleB.position.addNew(offsetUpB);
-        const bottomPosB = capsuleB.position.addNew(offsetDownB);
-
-        const bodyHit = this.detectCollisionCapsulePolygon(capsuleA, capsuleB);
-        if (bodyHit) return bodyHit;
-
-        // Test top circle
-        const topHit = this.detectCollisionCapsuleCircle(capsuleA, topPosB, capsuleShapeB.radius, capsuleB);
-        if (topHit) return topHit;
-
-        // Test bottom circle
-        return this.detectCollisionCapsuleCircle(capsuleA, bottomPosB, capsuleShapeB.radius, capsuleB);
-    }
-
-    static detectCollisionCapsuleCircle = (
-        capsule: RigidBody,
-        circlePos: Vec2,
-        circleRadius: number,
-        circle: RigidBody,
-    ): ContactManifold | null => {
-        const capsuleShape = capsule.shape as CapsuleShape;
-
-        const offsetUp = new Vec2(0, capsuleShape.halfHeight).rotate(capsule.rotation);
-        const offsetDown = new Vec2(0, -capsuleShape.halfHeight).rotate(capsule.rotation);
-
-        const topPos = capsule.position.addNew(offsetUp);
-        const bottomPos = capsule.position.addNew(offsetDown);
-
-        const bodyHit = this.detectCollisionPolygonCircle(capsule, circlePos, circleRadius, circle);
-        if (bodyHit) return bodyHit;
-
-        // Test top circle
-        const topHit = this.detectCollisionCircleCircle(
-            topPos,
-            capsuleShape.radius,
-            capsule,
-            circlePos,
-            circleRadius,
-            circle,
-        );
-        if (topHit) return topHit;
-
-        // Test bottom circle
-        return this.detectCollisionCircleCircle(
-            bottomPos,
-            capsuleShape.radius,
-            capsule,
-            circlePos,
-            circleRadius,
-            circle,
-        );
-    };
-
-    static detectCollisionCapsulePolygon(capsule: RigidBody, polygon: RigidBody): ContactManifold | null {
-        const capsuleShape = capsule.shape as CapsuleShape;
-
-        const offsetUp = new Vec2(0, capsuleShape.halfHeight).rotate(capsule.rotation);
-        const offsetDown = new Vec2(0, -capsuleShape.halfHeight).rotate(capsule.rotation);
-
-        const topPos = capsule.position.addNew(offsetUp);
-        const bottomPos = capsule.position.addNew(offsetDown);
-
-        const bodyHit = this.detectCollisionPolygonPolygon(capsule, polygon);
-        if (bodyHit) return bodyHit;
-
-        // Test top circle
-        const topHit = this.detectCollisionPolygonCircle(polygon, topPos, capsuleShape.radius, capsule);
-        if (topHit) return topHit;
-
-        // Test bottom circle
-        return this.detectCollisionPolygonCircle(polygon, bottomPos, capsuleShape.radius, capsule);
-    }
-
     static detectCollisionCircleCircle(
         aPos: Vec2,
         aRadius: number,
@@ -388,4 +309,83 @@ export default class CollisionDetection {
             return contact;
         }
     };
+
+    static detectCollisionCapsuleCapsule(capsuleA: RigidBody, capsuleB: RigidBody): ContactManifold | null {
+        const capsuleShapeB = capsuleB.shape as CapsuleShape;
+
+        const offsetUpB = new Vec2(0, capsuleShapeB.halfHeight).rotate(capsuleB.rotation);
+        const offsetDownB = new Vec2(0, -capsuleShapeB.halfHeight).rotate(capsuleB.rotation);
+
+        const topPosB = capsuleB.position.addNew(offsetUpB);
+        const bottomPosB = capsuleB.position.addNew(offsetDownB);
+
+        const bodyHit = this.detectCollisionCapsulePolygon(capsuleA, capsuleB);
+        if (bodyHit) return bodyHit;
+
+        // Test top circle
+        const topHit = this.detectCollisionCapsuleCircle(capsuleA, topPosB, capsuleShapeB.radius, capsuleB);
+        if (topHit) return topHit;
+
+        // Test bottom circle
+        return this.detectCollisionCapsuleCircle(capsuleA, bottomPosB, capsuleShapeB.radius, capsuleB);
+    }
+
+    static detectCollisionCapsuleCircle = (
+        capsule: RigidBody,
+        circlePos: Vec2,
+        circleRadius: number,
+        circle: RigidBody,
+    ): ContactManifold | null => {
+        const capsuleShape = capsule.shape as CapsuleShape;
+
+        const offsetUp = new Vec2(0, capsuleShape.halfHeight).rotate(capsule.rotation);
+        const offsetDown = new Vec2(0, -capsuleShape.halfHeight).rotate(capsule.rotation);
+
+        const topPos = capsule.position.addNew(offsetUp);
+        const bottomPos = capsule.position.addNew(offsetDown);
+
+        const bodyHit = this.detectCollisionPolygonCircle(capsule, circlePos, circleRadius, circle);
+        if (bodyHit) return bodyHit;
+
+        // Test top circle
+        const topHit = this.detectCollisionCircleCircle(
+            topPos,
+            capsuleShape.radius,
+            capsule,
+            circlePos,
+            circleRadius,
+            circle,
+        );
+        if (topHit) return topHit;
+
+        // Test bottom circle
+        return this.detectCollisionCircleCircle(
+            bottomPos,
+            capsuleShape.radius,
+            capsule,
+            circlePos,
+            circleRadius,
+            circle,
+        );
+    };
+
+    static detectCollisionCapsulePolygon(capsule: RigidBody, polygon: RigidBody): ContactManifold | null {
+        const capsuleShape = capsule.shape as CapsuleShape;
+
+        const offsetUp = new Vec2(0, capsuleShape.halfHeight).rotate(capsule.rotation);
+        const offsetDown = new Vec2(0, -capsuleShape.halfHeight).rotate(capsule.rotation);
+
+        const topPos = capsule.position.addNew(offsetUp);
+        const bottomPos = capsule.position.addNew(offsetDown);
+
+        const bodyHit = this.detectCollisionPolygonPolygon(capsule, polygon);
+        if (bodyHit) return bodyHit;
+
+        // Test top circle
+        const topHit = this.detectCollisionPolygonCircle(polygon, topPos, capsuleShape.radius, capsule);
+        if (topHit) return topHit;
+
+        // Test bottom circle
+        return this.detectCollisionPolygonCircle(polygon, bottomPos, capsuleShape.radius, capsule);
+    }
 }
