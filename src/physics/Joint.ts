@@ -16,9 +16,9 @@ export abstract class Joint extends Constraint {
     public drawAnchor = false;
     public drawConnectionLine = false;
 
-    private _frequency!: number;
-    private _dampingRatio!: number;
-    private _jointMass!: number;
+    private frequency!: number;
+    private dampingRatio!: number;
+    private jointMass!: number;
 
     // 0 < Frequency
     // 0 <= Damping ratio <= 1
@@ -30,23 +30,23 @@ export abstract class Joint extends Constraint {
     }
 
     private setFDM(
-        frequency: number = this._frequency,
-        dampingRatio: number = this._dampingRatio,
-        jointMass: number = this._jointMass,
+        frequency: number = this.frequency,
+        dampingRatio: number = this.dampingRatio,
+        jointMass: number = this.jointMass,
     ): void {
         if (frequency > 0) {
-            this._frequency = frequency;
-            this._dampingRatio = Utils.clamp(dampingRatio, 0.0, 1.0);
+            this.frequency = frequency;
+            this.dampingRatio = Utils.clamp(dampingRatio, 0.0, 1.0);
 
             Utils.assert(this.bodyA.mass > 0 || this.bodyB.mass > 0);
-            this._jointMass = jointMass <= 0 ? (this.bodyA.mass > 0 ? this.bodyA.mass : this.bodyB.mass) : jointMass;
+            this.jointMass = jointMass <= 0 ? (this.bodyA.mass > 0 ? this.bodyA.mass : this.bodyB.mass) : jointMass;
 
             this.calculateBetaAndGamma();
         } else {
             // If the frequency is less than or equal to zero, make this joint solid
-            this._frequency = -1;
-            this._dampingRatio = 1.0;
-            this._jointMass = -1;
+            this.frequency = -1;
+            this.dampingRatio = 1.0;
+            this.jointMass = -1;
 
             this.beta = 1.0;
             this.gamma = 0.0;
@@ -54,40 +54,12 @@ export abstract class Joint extends Constraint {
     }
 
     private calculateBetaAndGamma() {
-        const omega = 2 * Math.PI * this._frequency;
-        const d = 2 * this._jointMass * this._dampingRatio * omega; // Damping coefficient
-        const k = this._jointMass * omega * omega; // Spring constant
+        const omega = 2 * Math.PI * this.frequency;
+        const d = 2 * this.jointMass * this.dampingRatio * omega; // Damping coefficient
+        const k = this.jointMass * omega * omega; // Spring constant
         const h = DELTA_TIME;
 
         this.beta = (h * k) / (d + h * k);
         this.gamma = 1.0 / ((d + h * k) * h);
-    }
-
-    get frequency(): number {
-        return this._frequency;
-    }
-
-    set frequency(frequency: number) {
-        this.setFDM(frequency, undefined, undefined);
-    }
-
-    get dampingRatio(): number {
-        return this._frequency;
-    }
-
-    set dampingRatio(dampingRatio: number) {
-        this.setFDM(undefined, dampingRatio, undefined);
-    }
-
-    get jointMass(): number {
-        return this._frequency;
-    }
-
-    set jointMass(jointMass: number) {
-        this.setFDM(undefined, undefined, jointMass);
-    }
-
-    get isSolid(): boolean {
-        return this._frequency <= 0;
     }
 }
