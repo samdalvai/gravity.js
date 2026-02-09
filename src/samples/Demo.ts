@@ -63,13 +63,10 @@ export default class Demo {
         this.generateFloor(world);
         this.generateFences(world);
 
-        // const box = new RigidBody(new BoxShape(60, 60), 0, 0, 1);
-        // box.angularVelocity = 5;
-        // box.setTexture('crate');
-        const capsule = new RigidBody(new CapsuleShape(40, 20), 0, 0, 1);
-        // capsule.rotation = 0.5;
-        // capsule.angularVelocity = 10;
-        world.addBody(capsule);
+        const box = new RigidBody(new BoxShape(60, 60), 0, 0, 1);
+        box.angularVelocity = 5;
+        box.setTexture('crate');
+        world.addBody(box);
     };
 
     static demo2 = (world: World) => {
