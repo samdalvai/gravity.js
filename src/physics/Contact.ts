@@ -8,7 +8,7 @@
  * https://github.com/Sopiro
  */
 import { Mat2 } from '../math/Mat2';
-import Utils from '../math/Utils';
+import Utils from './Utils';
 import Vec2 from '../math/Vec2';
 import { ContactPoint } from './CollisionDetection';
 import { SETTINGS } from './Constants';
