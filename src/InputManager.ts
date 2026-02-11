@@ -10,19 +10,24 @@ export default class InputManager {
     static keyboardInputBuffer: KeyboardEvent[];
     static mouseInputBuffer: MouseEvent[];
     static mouseMoveBuffer: MouseEvent[];
+    static mouseWheelBuffer: MouseEvent[];
     static mousePosition: Vec2;
 
     static initialize = () => {
         this.keyboardInputBuffer = [];
         this.mouseInputBuffer = [];
         this.mouseMoveBuffer = [];
+        this.mouseWheelBuffer = [];
         this.mousePosition = new Vec2();
 
         window.addEventListener('keydown', this.handleKeyboardEvent);
         window.addEventListener('keyup', this.handleKeyboardEvent);
+
         window.addEventListener('mousemove', this.handleMouseMove);
         window.addEventListener('mousedown', this.handleMouseClick);
         window.addEventListener('mouseup', this.handleMouseClick);
+
+        window.addEventListener('wheel', this.handleWheelEvent);
 
         window.addEventListener('contextmenu', e => {
             e.preventDefault();
@@ -41,5 +46,9 @@ export default class InputManager {
 
     static handleMouseClick = (event: MouseEvent) => {
         this.mouseInputBuffer.push(event);
+    };
+
+    static handleWheelEvent = (event: MouseEvent) => {
+        this.mouseWheelBuffer.push(event);
     };
 }
