@@ -118,7 +118,7 @@ export default class Application {
                         if (this.world.getBodies().length >= MAX_BODIES) {
                             continue;
                         }
-                        
+
                         const x = InputManager.mousePosition.x - Graphics.width() / 2;
                         const y = -(InputManager.mousePosition.y - Graphics.height() / 2);
 
@@ -216,13 +216,17 @@ export default class Application {
 
         // Handle wheel events
         while (InputManager.mouseWheelBuffer.length > 0) {
-            const inputEvent = InputManager.mouseWheelBuffer.shift();
+            const inputEvent = InputManager.mouseWheelBuffer.shift() as WheelEvent;
 
             if (!inputEvent) {
                 return;
             }
 
-            console.log(inputEvent);
+            if (inputEvent.deltaY > 0) {
+                Graphics.decreaseZoom();
+            } else {
+                Graphics.increaseZoom();
+            }
         }
     };
 
@@ -355,6 +359,7 @@ export default class Application {
             `(S) show contacts and joints: ${this.showContacts ? 'ON' : 'OFF'}`,
             `FPS: ${this.FPS.toFixed(2)}`,
             `Mouse position: {${x}, ${y}}`,
+            `Zoom: ${Graphics.zoom.toFixed(2)}`,
             `Num objects: ${this.world.getBodies().length}`,
             `Num contacts: ${numContacts}`,
         ];
