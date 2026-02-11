@@ -40,18 +40,18 @@ export default class Demo {
         const floorPositionY = -400;
 
         const fenceWidth = 50;
-        const fenceHeight = 900;
+        const fenceHeight = 900 + floorHeight;
         const leftFence = new RigidBody(
             new BoxShape(fenceWidth, fenceHeight),
             -(floorWidth / 2 + fenceWidth / 2),
-            floorPositionY + floorHeight / 2 + fenceHeight / 2,
+            floorPositionY + floorHeight / 2 + fenceHeight / 2 - floorHeight,
             0.0,
         );
 
         const rightFence = new RigidBody(
             new BoxShape(fenceWidth, fenceHeight),
             floorWidth / 2 + fenceWidth / 2,
-            floorPositionY + floorHeight / 2 + fenceHeight / 2,
+            floorPositionY + floorHeight / 2 + fenceHeight / 2 - floorHeight,
             0.0,
         );
         world.addBody(leftFence);
