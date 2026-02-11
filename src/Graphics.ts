@@ -39,6 +39,14 @@ export default class Graphics {
         return true;
     };
 
+    static increaseZoom = (): void => {
+        this.zoom += 0.05;
+    };
+
+    static decreaseZoom = (): void => {
+        this.zoom -= 0.05;
+    };
+
     static clearScreen = (): void => {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     };
