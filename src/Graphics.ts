@@ -238,7 +238,10 @@ export default class Graphics {
             'white',
         );
 
-        Graphics.drawFillCircle(position.x, position.y, 5, 'blue');
+        this.ctx.fillStyle = 'white';
+        this.ctx.beginPath();
+        this.ctx.arc(position.x, position.y, 1, 0, Math.PI * 2);
+        this.ctx.fill();
     };
 
     static drawTexture = (
