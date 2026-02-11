@@ -213,6 +213,17 @@ export default class Application {
                     break;
             }
         }
+
+        // Handle wheel events
+        while (InputManager.mouseWheelBuffer.length > 0) {
+            const inputEvent = InputManager.mouseWheelBuffer.shift();
+
+            if (!inputEvent) {
+                return;
+            }
+
+            console.log(inputEvent);
+        }
     };
 
     update = (frameTime: number): void => {
