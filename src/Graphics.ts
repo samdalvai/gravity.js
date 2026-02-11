@@ -196,49 +196,41 @@ export default class Graphics {
         this.ctx.fill();
     };
 
-    static drawCapsule = (
-        x: number,
-        y: number,
-        halfHeight: number,
-        radius: number,
-        angle: number,
-        color: string,
-    ): void => {
-        this.ctx.strokeStyle = color;
+    static drawCapsule = (position: Vec2, capsuleShape: CapsuleShape, rotation: number): void => {
+        const vertices = capsuleShape.worldVertices;
+        Graphics.drawLine(
+            vertices[vertices.length - 1].x,
+            vertices[vertices.length - 1].y,
+            vertices[0].x,
+            vertices[0].y,
+            'white',
+        );
+        Graphics.drawLine(vertices[1].x, vertices[1].y, vertices[2].x, vertices[2].y, 'white');
+        const offsetUp = new Vec2(0, capsuleShape.halfHeight).rotate(rotation);
+        const offsetDown = new Vec2(0, -capsuleShape.halfHeight).rotate(rotation);
 
-        const topCenterX = x + Math.cos(angle) * halfHeight;
-        const topCenterY = y + Math.sin(angle) * halfHeight;
+        const topCirclePosition = position.addNew(offsetUp);
+        const bottomCirclePosition = position.addNew(offsetDown);
 
-        this.ctx.beginPath();
-        this.ctx.arc(topCenterX, topCenterY, radius, 0, Math.PI * 2);
-        this.ctx.strokeStyle = color;
-        this.ctx.stroke();
+        Graphics.drawHalfCircle(
+            topCirclePosition.x,
+            topCirclePosition.y,
+            capsuleShape.radius,
+            rotation,
+            'bottom',
+            'white',
+        );
 
-        const bottomCenterX = x - Math.cos(angle) * halfHeight;
-        const bottomCenterY = y - Math.sin(angle) * halfHeight;
+        Graphics.drawHalfCircle(
+            bottomCirclePosition.x,
+            bottomCirclePosition.y,
+            capsuleShape.radius,
+            rotation,
+            'top',
+            'white',
+        );
 
-        this.ctx.beginPath();
-        this.ctx.arc(bottomCenterX, bottomCenterY, radius, 0, Math.PI * 2);
-        this.ctx.strokeStyle = color;
-        this.ctx.stroke();
-
-        const rectUpLeftX = topCenterX - radius;
-        const rectUpLeftY = topCenterY - radius;
-        const rectUpRightX = topCenterX + radius;
-        const rectUpRightY = topCenterY + radius;
-
-        const rectDownLeftX = bottomCenterX - radius;
-        const rectDownLeftY = bottomCenterY - radius;
-        const rectDownRightX = bottomCenterX + radius;
-        const rectDownRightY = bottomCenterY + radius;
-
-        this.ctx.beginPath();
-        this.ctx.moveTo(rectUpLeftX, rectUpLeftY);
-        this.ctx.lineTo(rectUpRightX, rectUpRightY);
-        this.ctx.lineTo(rectDownRightX, rectDownRightY);
-        this.ctx.lineTo(rectDownLeftX, rectDownLeftY);
-        this.ctx.closePath();
-        this.ctx.stroke();
+        Graphics.drawFillCircle(position.x, position.y, 5, 'blue');
     };
 
     static drawTexture = (
@@ -336,40 +328,7 @@ export default class Graphics {
                             body.texture,
                         );
                     } else if (debug) {
-                        const vertices = capsuleShape.worldVertices;
-                        Graphics.drawLine(
-                            vertices[vertices.length - 1].x,
-                            vertices[vertices.length - 1].y,
-                            vertices[0].x,
-                            vertices[0].y,
-                            'white',
-                        );
-                        Graphics.drawLine(vertices[1].x, vertices[1].y, vertices[2].x, vertices[2].y, 'white');
-                        const offsetUp = new Vec2(0, capsuleShape.halfHeight).rotate(body.rotation);
-                        const offsetDown = new Vec2(0, -capsuleShape.halfHeight).rotate(body.rotation);
-
-                        const topCirclePosition = body.position.addNew(offsetUp);
-                        const bottomCirclePosition = body.position.addNew(offsetDown);
-
-                        Graphics.drawHalfCircle(
-                            topCirclePosition.x,
-                            topCirclePosition.y,
-                            capsuleShape.radius,
-                            body.rotation,
-                            'bottom',
-                            'white',
-                        );
-
-                        Graphics.drawHalfCircle(
-                            bottomCirclePosition.x,
-                            bottomCirclePosition.y,
-                            capsuleShape.radius,
-                            body.rotation,
-                            'top',
-                            'white',
-                        );
-
-                        Graphics.drawFillCircle(body.position.x, body.position.y, 5, 'blue');
+                        Graphics.drawCapsule(body.position, capsuleShape, body.rotation);
                     }
                 }
                 break;
