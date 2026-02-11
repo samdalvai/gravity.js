@@ -161,6 +161,9 @@ export default class Application {
                 return;
             }
 
+            const updatedX = (inputEvent.x - Graphics.width() / 2) / Graphics.zoom;
+            const updatedY = -(inputEvent.y - Graphics.height() / 2) / Graphics.zoom;
+
             // Test for body collision
             if (this.testBody) {
                 const x = InputManager.mousePosition.x;
@@ -170,13 +173,17 @@ export default class Application {
             }
 
             if (this.middleMousePressed) {
-                console.log('Updating pan: ', inputEvent);
+                const previousX = InputManager.mousePosition.x;
+                const previousY = InputManager.mousePosition.y;
+
+                const diffX = updatedX - previousX;
+                const diffY = updatedY - previousY;
+
+                Graphics.pan.addAssign(new Vec2(-diffX, -diffY));
             }
 
-            const x = inputEvent.x - Graphics.width() / 2;
-            const y = -(inputEvent.y - Graphics.height() / 2);
-            InputManager.mousePosition.x = x / Graphics.zoom;
-            InputManager.mousePosition.y = y / Graphics.zoom;
+            InputManager.mousePosition.x = updatedX;
+            InputManager.mousePosition.y = updatedY;
         }
 
         // Handle mouse click events
