@@ -29,7 +29,7 @@ export default class Utils {
         for (let i = 0; i < test.length; i++) if (!test[i]) throw new Error('Assertion failed');
     };
 
-    static generateRandomConvexBody = (x: number, y: number, radius: number, numVertices: number = -1): RigidBody => {
+    static randomConvexBody = (x: number, y: number, radius: number, numVertices: number = -1): RigidBody => {
         if (numVertices < 3) throw Error('Must have at least 3 vertices');
 
         const angles: number[] = [];
