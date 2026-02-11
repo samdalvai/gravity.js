@@ -180,16 +180,15 @@ export default class Application {
             switch (inputEvent.type) {
                 case 'mousedown':
                     {
-                        if (this.world.getBodies().length >= MAX_BODIES) {
-                            continue;
-                        }
-
                         const x = InputManager.mousePosition.x;
                         const y = InputManager.mousePosition.y;
 
                         switch (inputEvent.button) {
                             case MouseButton.LEFT:
                                 {
+                                    if (this.world.getBodies().length >= MAX_BODIES) {
+                                        continue;
+                                    }
                                     const ball = new RigidBody(new CircleShape(30), x, y, 1.0);
                                     ball.restitution = 0.2;
                                     ball.friction = 0.1;
@@ -199,6 +198,9 @@ export default class Application {
                                 break;
                             case MouseButton.RIGHT:
                                 {
+                                    if (this.world.getBodies().length >= MAX_BODIES) {
+                                        continue;
+                                    }
                                     const box = new RigidBody(new BoxShape(60, 60), x, y, 1.0);
                                     box.restitution = 0.3;
                                     box.friction = 0.7;
@@ -206,10 +208,22 @@ export default class Application {
                                     this.world.addBody(box);
                                 }
                                 break;
+                            case MouseButton.MIDDLE:
+                                {
+                                    console.log('Mouse middle pressed');
+                                }
+                                break;
                         }
                     }
                     break;
                 case 'mouseup':
+                    switch (inputEvent.button) {
+                        case MouseButton.MIDDLE:
+                            {
+                                console.log('Mouse middle released');
+                            }
+                            break;
+                    }
                     break;
             }
         }
