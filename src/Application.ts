@@ -80,8 +80,8 @@ export default class Application {
 
                     if (inputEvent.key === 'e') {
                         {
-                            const x = InputManager.mousePosition.x - Graphics.width() / 2;
-                            const y = -(InputManager.mousePosition.y - Graphics.height() / 2);
+                            const x = InputManager.mousePosition.x;
+                            const y = InputManager.mousePosition.y;
                             const explosionPos = new Vec2(x, y);
                             const radius = 250;
                             const strength = 10000;
@@ -119,8 +119,8 @@ export default class Application {
                             continue;
                         }
 
-                        const x = InputManager.mousePosition.x - Graphics.width() / 2;
-                        const y = -(InputManager.mousePosition.y - Graphics.height() / 2);
+                        const x = InputManager.mousePosition.x;
+                        const y = InputManager.mousePosition.y;
 
                         const capsule = new RigidBody(new CapsuleShape(40, 20), x, y, 1);
                         capsule.restitution = 0.2;
@@ -162,8 +162,8 @@ export default class Application {
 
             // Test for body collision
             if (this.testBody) {
-                const x = InputManager.mousePosition.x - Graphics.width() / 2;
-                const y = -(InputManager.mousePosition.y - Graphics.height() / 2);
+                const x = InputManager.mousePosition.x;
+                const y = InputManager.mousePosition.y;
                 this.testBody.position.x = x;
                 this.testBody.position.y = y;
             }
@@ -184,8 +184,8 @@ export default class Application {
                             continue;
                         }
 
-                        const x = InputManager.mousePosition.x - Graphics.width() / 2;
-                        const y = -(InputManager.mousePosition.y - Graphics.height() / 2);
+                        const x = InputManager.mousePosition.x;
+                        const y = InputManager.mousePosition.y;
 
                         switch (inputEvent.button) {
                             case MouseButton.LEFT:
@@ -241,8 +241,8 @@ export default class Application {
         this.world.update();
 
         if (this.generateParticle) {
-            const x = InputManager.mousePosition.x - Graphics.width() / 2;
-            const y = -(InputManager.mousePosition.y - Graphics.height() / 2);
+            const x = InputManager.mousePosition.x;
+            const y = InputManager.mousePosition.y;
             for (let i = 0; i < 10; i++) {
                 if (this.world.getBodies().length >= MAX_BODIES) {
                     continue;
@@ -350,8 +350,8 @@ export default class Application {
             `(C) chosen particle: ${this.generateCircles ? 'Circle' : 'Box'}`,
         ];
 
-        const x = InputManager.mousePosition.x - Graphics.width() / 2;
-        const y = -(InputManager.mousePosition.y - Graphics.height() / 2);
+        const x = InputManager.mousePosition.x;
+        const y = InputManager.mousePosition.y;
 
         const debugText = [
             // Debug related info

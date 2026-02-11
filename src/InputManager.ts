@@ -1,3 +1,4 @@
+import Graphics from './Graphics';
 import Vec2 from './math/Vec2';
 
 export enum MouseButton {
@@ -41,8 +42,10 @@ export default class InputManager {
     };
 
     static handleMouseMove = (event: MouseEvent) => {
-        this.mousePosition.x = event.x;
-        this.mousePosition.y = event.y;
+        const x = event.x - Graphics.width() / 2;
+        const y = -(event.y - Graphics.height() / 2);
+        this.mousePosition.x = x;
+        this.mousePosition.y = y;
         this.mouseMoveBuffer.push(event);
     };
 
