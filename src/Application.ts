@@ -21,6 +21,7 @@ export default class Application {
     private showAABB = false;
     private demoIndex = 1;
     private testBody: RigidBody | null = null;
+    private middleMousePressed = false;
 
     // Debug related properties
     private debug = true;
@@ -167,6 +168,15 @@ export default class Application {
                 this.testBody.position.x = x;
                 this.testBody.position.y = y;
             }
+
+            if (this.middleMousePressed) {
+                console.log('Updating pan: ', inputEvent);
+            }
+
+            const x = inputEvent.x - Graphics.width() / 2;
+            const y = -(inputEvent.y - Graphics.height() / 2);
+            InputManager.mousePosition.x = x / Graphics.zoom;
+            InputManager.mousePosition.y = y / Graphics.zoom;
         }
 
         // Handle mouse click events
@@ -209,6 +219,7 @@ export default class Application {
                                 }
                                 break;
                             case MouseButton.MIDDLE:
+                                this.middleMousePressed = true;
                                 {
                                     console.log('Mouse middle pressed');
                                 }
@@ -219,6 +230,7 @@ export default class Application {
                 case 'mouseup':
                     switch (inputEvent.button) {
                         case MouseButton.MIDDLE:
+                            this.middleMousePressed = false;
                             {
                                 console.log('Mouse middle released');
                             }
