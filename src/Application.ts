@@ -68,10 +68,7 @@ export default class Application {
         // Handle keyboard events
         while (InputManager.keyboardInputBuffer.length > 0) {
             const inputEvent = InputManager.keyboardInputBuffer.shift();
-
-            if (!inputEvent) {
-                return;
-            }
+            if (!inputEvent) return;
 
             switch (inputEvent.type) {
                 case 'keydown':
@@ -156,43 +153,27 @@ export default class Application {
         // Handle mouse move events
         while (InputManager.mouseMoveBuffer.length > 0) {
             const inputEvent = InputManager.mouseMoveBuffer.shift();
-
-            if (!inputEvent) {
-                return;
-            }
-
-            const updatedX = (inputEvent.x - Graphics.width() / 2) / Graphics.zoom;
-            const updatedY = -(inputEvent.y - Graphics.height() / 2) / Graphics.zoom;
-
-            // Test for body collision
-            if (this.testBody) {
-                const x = InputManager.mousePosition.x;
-                const y = InputManager.mousePosition.y;
-                this.testBody.position.x = x;
-                this.testBody.position.y = y;
-            }
+            if (!inputEvent) return;
 
             if (this.middleMousePressed) {
-                const previousX = InputManager.mousePosition.x;
-                const previousY = InputManager.mousePosition.y;
-
-                const diffX = updatedX - previousX;
-                const diffY = updatedY - previousY;
-
-                Graphics.pan.addAssign(new Vec2(-diffX, -diffY));
+                // Drag the camera opposite to mouse movement
+                Graphics.pan.x -= inputEvent.movementX / Graphics.zoom;
+                Graphics.pan.y += inputEvent.movementY / Graphics.zoom;
             }
 
-            InputManager.mousePosition.x = updatedX;
-            InputManager.mousePosition.y = updatedY;
+            // Convert screen -> world coordinates
+            const screenX = inputEvent.x - Graphics.width() / 2;
+            const screenY = -(inputEvent.y - Graphics.height() / 2);
+
+            // Adjust mouse world position with pan and zoom
+            InputManager.mousePosition.x = screenX / Graphics.zoom + Graphics.pan.x;
+            InputManager.mousePosition.y = screenY / Graphics.zoom + Graphics.pan.y;
         }
 
         // Handle mouse click events
         while (InputManager.mouseInputBuffer.length > 0) {
             const inputEvent = InputManager.mouseInputBuffer.shift();
-
-            if (!inputEvent) {
-                return;
-            }
+            if (!inputEvent) return;
 
             switch (inputEvent.type) {
                 case 'mousedown':
@@ -250,10 +231,7 @@ export default class Application {
         // Handle wheel events
         while (InputManager.mouseWheelBuffer.length > 0) {
             const inputEvent = InputManager.mouseWheelBuffer.shift() as WheelEvent;
-
-            if (!inputEvent) {
-                return;
-            }
+            if (!inputEvent) return;
 
             if (inputEvent.deltaY > 0) {
                 Graphics.decreaseZoom();
