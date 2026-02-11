@@ -1,3 +1,7 @@
+import RigidBody from './RigidBody';
+import { PolygonShape } from './Shape';
+import Vec2 from '../math/Vec2';
+
 export default class Utils {
     static randomNumber = (min: number = 1.0, max: number = 10.0): number => {
         return Math.random() * (max - min) + min;
@@ -23,5 +27,23 @@ export default class Utils {
 
     static assert = (...test: boolean[]): void => {
         for (let i = 0; i < test.length; i++) if (!test[i]) throw new Error('Assertion failed');
+    };
+
+    static generateRandomConvexBody = (x: number, y: number, radius: number, numVertices: number = -1): RigidBody => {
+        if (numVertices < 3) throw Error('Must have at least 3 vertices');
+
+        const angles: number[] = [];
+
+        for (let i = 0; i < numVertices; i++) angles.push(Math.random() * Math.PI * 2);
+
+        angles.sort();
+
+        const vertices: Vec2[] = [];
+
+        for (const angle of angles) {
+            vertices.push(new Vec2(Math.cos(angle), Math.sin(angle)).scaleNew(radius));
+        }
+
+        return new RigidBody(new PolygonShape(vertices), x, y, 1);
     };
 }

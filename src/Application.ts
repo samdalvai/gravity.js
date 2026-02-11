@@ -1,6 +1,7 @@
 import AssetStore from './AssetStore';
 import Graphics from './Graphics';
 import InputManager, { MouseButton } from './InputManager';
+import Utils from './physics/Utils';
 import Vec2 from './math/Vec2';
 import { GRAVITY, MAX_BODIES } from './physics/Constants';
 import { DistanceJoint } from './physics/DistanceJoint';
@@ -80,6 +81,7 @@ export default class Application {
                             const x = InputManager.mousePosition.x;
                             const y = InputManager.mousePosition.y;
                             const explosionPos = new Vec2(x, y);
+
                             const radius = 250;
                             const strength = 10000;
 
@@ -124,6 +126,21 @@ export default class Application {
                         capsule.friction = 0.1;
                         // capsule.rotation = Utils.randomNumber(0, 1);
                         this.world.addBody(capsule);
+                    }
+
+                    if (inputEvent.key === 'r') {
+                        if (this.world.getBodies().length >= MAX_BODIES) {
+                            continue;
+                        }
+
+                        const x = InputManager.mousePosition.x;
+                        const y = InputManager.mousePosition.y;
+
+                        const radius = Utils.randomNumber(20, 50);
+                        const vertices = Utils.randomNumber(3, 10);
+
+                        const body = Utils.generateRandomConvexBody(x, y, radius, vertices);
+                        this.world.addBody(body);
                     }
 
                     if (!Number.isNaN(Number.parseInt(inputEvent.key))) {
@@ -355,7 +372,7 @@ export default class Application {
             // General info
             `${Demo.demoStrings[this.demoIndex]}`,
             '(1-9) select demo, Left Mouse to generate circles, Right Mouse to generate boxes',
-            '(E) to generate explosion, (G) to generate particles, (X) to generate capsules',
+            '(G) to generate particles, (X) to generate capsules, (R) to generate random convex polygon, (E) to generate explosion',
             `(D) debug mode: ${this.debug ? 'ON' : 'OFF'}`,
             `(C) chosen particle: ${this.generateCircles ? 'Circle' : 'Box'}`,
         ];
