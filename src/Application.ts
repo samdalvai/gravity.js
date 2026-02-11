@@ -1,13 +1,13 @@
 import AssetStore from './AssetStore';
 import Graphics from './Graphics';
 import InputManager, { MouseButton } from './InputManager';
-import Utils from './physics/Utils';
 import Vec2 from './math/Vec2';
 import { GRAVITY, MAX_BODIES } from './physics/Constants';
 import { DistanceJoint } from './physics/DistanceJoint';
 import Force from './physics/Force';
 import RigidBody from './physics/RigidBody';
 import { BoxShape, CapsuleShape, CircleShape } from './physics/Shape';
+import Utils from './physics/Utils';
 import World from './physics/World';
 import Demo from './samples/Demo';
 
@@ -82,8 +82,25 @@ export default class Application {
                             const y = InputManager.mousePosition.y;
                             const explosionPos = new Vec2(x, y);
 
+                            const debrisRadius = 50;
+                            const debrisWidth = 10;
                             const radius = 250;
-                            const strength = 10000;
+                            const strength = 5000;
+
+                            const angles: number[] = [];
+                            for (let i = 0; i < 10; i++) angles.push(Math.random() * Math.PI * 2);
+                            const positions: Vec2[] = [];
+
+                            for (const angle of angles) {
+                                positions.push(new Vec2(Math.cos(angle), Math.sin(angle)).scaleNew(debrisRadius));
+                            }
+
+                            for (const pos of positions) {
+                                const bodyPosition = new Vec2(x, y).addAssign(pos);
+                                const body = Utils.randomConvexBody(bodyPosition.x, bodyPosition.y, debrisWidth, 5);
+                                body.angularVelocity = Utils.randomNumber(0, 100);
+                                this.world.addBody(body);
+                            }
 
                             for (const body of this.world.getBodies()) {
                                 const explosionImpulse = Force.generateExplosionForce(
@@ -139,7 +156,7 @@ export default class Application {
                         const radius = Utils.randomNumber(20, 50);
                         const vertices = Utils.randomNumber(3, 10);
 
-                        const body = Utils.generateRandomConvexBody(x, y, radius, vertices);
+                        const body = Utils.randomConvexBody(x, y, radius, vertices);
                         this.world.addBody(body);
                     }
 
