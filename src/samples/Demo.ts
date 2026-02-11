@@ -11,6 +11,10 @@ import RigidBody from '../physics/RigidBody';
 import { BoxShape, CircleShape, PolygonShape } from '../physics/Shape';
 import World from '../physics/World';
 
+const FLOOR_WIDTH = 2000;
+const FLOOR_HEIGHT = 50;
+const FLOOR_POSITION_Y = -400;
+
 export default class Demo {
     static demoStrings = [
         'Demo 0: A complex scene',
@@ -26,32 +30,25 @@ export default class Demo {
     ];
 
     static generateFloor = (world: World): RigidBody => {
-        const floorWidth = Graphics.width();
-        const floorHeight = 50;
-        const floorPositionY = -400;
-        const floor = new RigidBody(new BoxShape(floorWidth, floorHeight), 0, floorPositionY, 0.0);
+        const floor = new RigidBody(new BoxShape(FLOOR_WIDTH, FLOOR_HEIGHT), 0, FLOOR_POSITION_Y, 0.0);
         world.addBody(floor);
         return floor;
     };
 
     static generateFences = (world: World): void => {
-        const floorHeight = 50;
-        const floorWidth = Graphics.width();
-        const floorPositionY = -400;
-
         const fenceWidth = 50;
-        const fenceHeight = 900 + floorHeight;
+        const fenceHeight = 900 + FLOOR_HEIGHT;
         const leftFence = new RigidBody(
             new BoxShape(fenceWidth, fenceHeight),
-            -(floorWidth / 2 + fenceWidth / 2),
-            floorPositionY + floorHeight / 2 + fenceHeight / 2 - floorHeight,
+            -(FLOOR_WIDTH / 2 + fenceWidth / 2),
+            FLOOR_POSITION_Y + FLOOR_HEIGHT / 2 + fenceHeight / 2 - FLOOR_HEIGHT,
             0.0,
         );
 
         const rightFence = new RigidBody(
             new BoxShape(fenceWidth, fenceHeight),
-            floorWidth / 2 + fenceWidth / 2,
-            floorPositionY + floorHeight / 2 + fenceHeight / 2 - floorHeight,
+            FLOOR_WIDTH / 2 + fenceWidth / 2,
+            FLOOR_POSITION_Y + FLOOR_HEIGHT / 2 + fenceHeight / 2 - FLOOR_HEIGHT,
             0.0,
         );
         world.addBody(leftFence);
@@ -120,7 +117,7 @@ export default class Demo {
         this.generateFloor(world);
         this.generateFences(world);
 
-        const floorHeight = 50;
+        const FLOOR_HEIGHT = 50;
         const stepCount = 8;
         const stepWidth = 90;
         const stepHeight = stepWidth / 4;
@@ -131,7 +128,7 @@ export default class Demo {
 
         const pillarWidth = 50;
         const pillarHeight = 400;
-        const pillarPositionY = -pillarHeight / 2 + floorHeight / 2;
+        const pillarPositionY = -pillarHeight / 2 + FLOOR_HEIGHT / 2;
 
         const pillarLeft = new RigidBody(new BoxShape(pillarWidth, pillarHeight), -pillarOffsetX, pillarPositionY, 0);
         const pillarRight = new RigidBody(new BoxShape(pillarWidth, pillarHeight), pillarOffsetX, pillarPositionY, 0);
