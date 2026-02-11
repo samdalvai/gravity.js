@@ -8,7 +8,7 @@ import Graphics from '../Graphics';
 import Vec2 from '../math/Vec2';
 import { DistanceJoint } from '../physics/DistanceJoint';
 import RigidBody from '../physics/RigidBody';
-import { BoxShape, CapsuleShape, CircleShape, PolygonShape } from '../physics/Shape';
+import { BoxShape, CircleShape, PolygonShape } from '../physics/Shape';
 import World from '../physics/World';
 
 export default class Demo {
