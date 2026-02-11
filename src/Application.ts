@@ -358,7 +358,7 @@ export default class Application {
             `(A) show AABB: ${this.showAABB ? 'ON' : 'OFF'}`,
             `(S) show contacts and joints: ${this.showContacts ? 'ON' : 'OFF'}`,
             `FPS: ${this.FPS.toFixed(2)}`,
-            `Mouse position: {${x}, ${y}}`,
+            `Mouse position: {${x.toFixed(2)}, ${y.toFixed(2)}}`,
             `Zoom: ${Graphics.zoom.toFixed(2)}`,
             `Num objects: ${this.world.getBodies().length}`,
             `Num contacts: ${numContacts}`,
