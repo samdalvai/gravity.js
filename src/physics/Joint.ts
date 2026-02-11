@@ -7,7 +7,7 @@
  * Original project:
  * https://github.com/Sopiro
  */
-import Utils from '../math/Utils';
+import Utils from './Utils';
 import { DELTA_TIME } from './Constants';
 import { Constraint } from './Constraint';
 import RigidBody from './RigidBody';
