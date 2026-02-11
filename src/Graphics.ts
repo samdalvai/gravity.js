@@ -204,16 +204,16 @@ export default class Graphics {
         this.ctx.fill();
     };
 
-    static drawCapsule = (position: Vec2, capsuleShape: CapsuleShape, rotation: number): void => {
+    static drawCapsule = (position: Vec2, capsuleShape: CapsuleShape, rotation: number, color: string): void => {
         const vertices = capsuleShape.worldVertices;
         Graphics.drawLine(
             vertices[vertices.length - 1].x,
             vertices[vertices.length - 1].y,
             vertices[0].x,
             vertices[0].y,
-            'white',
+            color,
         );
-        Graphics.drawLine(vertices[1].x, vertices[1].y, vertices[2].x, vertices[2].y, 'white');
+        Graphics.drawLine(vertices[1].x, vertices[1].y, vertices[2].x, vertices[2].y, color);
         const offsetUp = new Vec2(0, capsuleShape.halfHeight).rotate(rotation);
         const offsetDown = new Vec2(0, -capsuleShape.halfHeight).rotate(rotation);
 
@@ -226,7 +226,7 @@ export default class Graphics {
             capsuleShape.radius,
             rotation,
             'bottom',
-            'white',
+            color,
         );
 
         Graphics.drawHalfCircle(
@@ -235,10 +235,10 @@ export default class Graphics {
             capsuleShape.radius,
             rotation,
             'top',
-            'white',
+            color,
         );
 
-        this.ctx.fillStyle = 'white';
+        this.ctx.fillStyle = color;
         this.ctx.beginPath();
         this.ctx.arc(position.x, position.y, 1, 0, Math.PI * 2);
         this.ctx.fill();
@@ -339,7 +339,7 @@ export default class Graphics {
                             body.texture,
                         );
                     } else if (debug) {
-                        Graphics.drawCapsule(body.position, capsuleShape, body.rotation);
+                        Graphics.drawCapsule(body.position, capsuleShape, body.rotation, 'white');
                     }
                 }
                 break;
