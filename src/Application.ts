@@ -1,7 +1,6 @@
 import AssetStore from './AssetStore';
 import Graphics from './Graphics';
 import InputManager, { MouseButton } from './InputManager';
-import Utils from './math/Utils';
 import Vec2 from './math/Vec2';
 import { GRAVITY, MAX_BODIES } from './physics/Constants';
 import { DistanceJoint } from './physics/DistanceJoint';

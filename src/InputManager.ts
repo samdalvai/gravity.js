@@ -1,4 +1,3 @@
-import Graphics from './Graphics';
 import Vec2 from './math/Vec2';
 
 export enum MouseButton {
