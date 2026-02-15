@@ -1,6 +1,6 @@
 import Vec2 from './math/Vec2';
 import RigidBody from './physics/RigidBody';
-import { CapsuleShape, CircleShape, PolygonShape, ShapeType } from './physics/Shape';
+import { BoxShape, CapsuleShape, CircleShape, PolygonShape, ShapeType } from './physics/Shape';
 
 export default class Graphics {
     static windowWidth: number;
@@ -204,6 +204,22 @@ export default class Graphics {
         this.ctx.fill();
     };
 
+    static drawBox(x: number, y: number, rotation: number, width: number, height: number, color = 'white') {
+        this.ctx.save();
+        this.ctx.translate(x, y);
+        this.ctx.rotate(rotation);
+
+        const halfWidth = width / 2;
+        const halfHeight = height / 2;
+
+        this.ctx.beginPath();
+        this.ctx.rect(-halfWidth, -halfHeight, halfWidth * 2, halfHeight * 2);
+        this.ctx.strokeStyle = color;
+        this.ctx.stroke();
+
+        this.ctx.restore();
+    }
+
     static drawCapsule = (position: Vec2, capsuleShape: CapsuleShape, rotation: number, color: string): void => {
         const vertices = capsuleShape.worldVertices;
         Graphics.drawLine(
@@ -321,6 +337,30 @@ export default class Graphics {
                         );
                     } else if (debug) {
                         Graphics.drawPolygon(body.position.x, body.position.y, polygonShape.worldVertices, 'white');
+                    }
+                }
+                break;
+            case ShapeType.BOX:
+                {
+                    const boxShape = body.shape as BoxShape;
+                    if (!debug && body.texture) {
+                        Graphics.drawTexture(
+                            body.position.x,
+                            body.position.y,
+                            boxShape.width,
+                            boxShape.height,
+                            body.rotation,
+                            body.texture,
+                        );
+                    } else if (debug) {
+                        Graphics.drawBox(
+                            body.position.x,
+                            body.position.y,
+                            body.rotation,
+                            boxShape.width,
+                            boxShape.height,
+                            'white',
+                        );
                     }
                 }
                 break;
