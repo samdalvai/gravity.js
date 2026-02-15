@@ -87,19 +87,19 @@ export default class Graphics {
         this.ctx.stroke();
     };
 
-    static drawCircle = (x: number, y: number, radius: number, angle: number, color: string): void => {
+    static drawCircle = (radius: number, color: string): void => {
         // Draw the circle
         this.ctx.beginPath();
-        this.ctx.arc(x, y, radius, 0, Math.PI * 2);
+        this.ctx.arc(0, 0, radius, 0, Math.PI * 2);
         this.ctx.strokeStyle = color;
         this.ctx.stroke();
 
         // Draw the line from center to circle edge at given angle
-        const endX = x + Math.cos(angle) * radius;
-        const endY = y + Math.sin(angle) * radius;
+        const endX = Math.cos(0) * radius;
+        const endY = Math.sin(0) * radius;
 
         this.ctx.beginPath();
-        this.ctx.moveTo(x, y);
+        this.ctx.moveTo(0, 0);
         this.ctx.lineTo(endX, endY);
         this.ctx.strokeStyle = color;
         this.ctx.stroke();
@@ -155,15 +155,7 @@ export default class Graphics {
         this.ctx.stroke();
     };
 
-    static drawFillRect = (x: number, y: number, width: number, height: number, color: string): void => {
-        const hw = width / 2;
-        const hh = height / 2;
-
-        this.ctx.fillStyle = color;
-        this.ctx.fillRect(x - hw, y - hh, width, height);
-    };
-
-    static drawPolygon = (x: number, y: number, vertices: Vec2[], color: string): void => {
+    static drawPolygon = (vertices: Vec2[], color: string): void => {
         this.ctx.strokeStyle = color;
         this.ctx.beginPath();
 
@@ -180,7 +172,7 @@ export default class Graphics {
         // draw the 1px center point like filledCircleColor(..., radius=1)
         this.ctx.fillStyle = color;
         this.ctx.beginPath();
-        this.ctx.arc(x, y, 1, 0, Math.PI * 2);
+        this.ctx.arc(0, 0, 1, 0, Math.PI * 2);
         this.ctx.fill();
     };
 
@@ -204,11 +196,7 @@ export default class Graphics {
         this.ctx.fill();
     };
 
-    static drawBox(x: number, y: number, rotation: number, width: number, height: number, color = 'white') {
-        this.ctx.save();
-        this.ctx.translate(x, y);
-        this.ctx.rotate(rotation);
-
+    static drawBox(width: number, height: number, color = 'white') {
         const halfWidth = width / 2;
         const halfHeight = height / 2;
 
@@ -217,7 +205,11 @@ export default class Graphics {
         this.ctx.strokeStyle = color;
         this.ctx.stroke();
 
-        this.ctx.restore();
+        // draw the 1px center point like filledCircleColor(..., radius=1)
+        this.ctx.fillStyle = color;
+        this.ctx.beginPath();
+        this.ctx.arc(0, 0, 1, 0, Math.PI * 2);
+        this.ctx.fill();
     }
 
     static drawCapsule = (position: Vec2, capsuleShape: CapsuleShape, rotation: number, color: string): void => {
@@ -298,6 +290,14 @@ export default class Graphics {
     };
 
     static drawBody = (body: RigidBody, debug = false): void => {
+        const x = body.position.x;
+        const y = body.position.y;
+        const rotation = body.rotation;
+
+        this.ctx.save();
+        this.ctx.translate(x, y);
+        this.ctx.rotate(rotation);
+
         switch (body.shape.getType()) {
             case ShapeType.CIRCLE:
                 {
@@ -313,13 +313,7 @@ export default class Graphics {
                             body.texture,
                         );
                     } else if (debug) {
-                        Graphics.drawCircle(
-                            body.position.x,
-                            body.position.y,
-                            circleShape.radius,
-                            body.rotation,
-                            'white',
-                        );
+                        Graphics.drawCircle(circleShape.radius, 'white');
                     }
                 }
                 break;
@@ -336,7 +330,7 @@ export default class Graphics {
                             body.texture,
                         );
                     } else if (debug) {
-                        Graphics.drawPolygon(body.position.x, body.position.y, polygonShape.worldVertices, 'white');
+                        Graphics.drawPolygon(polygonShape.localVertices, 'white');
                     }
                 }
                 break;
@@ -353,14 +347,7 @@ export default class Graphics {
                             body.texture,
                         );
                     } else if (debug) {
-                        Graphics.drawBox(
-                            body.position.x,
-                            body.position.y,
-                            body.rotation,
-                            boxShape.width,
-                            boxShape.height,
-                            'white',
-                        );
+                        Graphics.drawBox(boxShape.width, boxShape.height, 'white');
                     }
                 }
                 break;
@@ -384,5 +371,7 @@ export default class Graphics {
                 }
                 break;
         }
+
+        this.ctx.restore();
     };
 }
