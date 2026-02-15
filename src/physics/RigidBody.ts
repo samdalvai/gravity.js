@@ -78,7 +78,7 @@ export default class RigidBody {
         }
 
         this.shape.updateVertices(this.rotation, this.position);
-        this.updateAABB();
+        this.shape.updateAABB(this);
     }
 
     // a.id << 16 → shifts a.id into the upper 16 bits of a 32-bit integer
@@ -201,7 +201,7 @@ export default class RigidBody {
         if (this.isStatic()) {
             // TODO: this is needed because otherwise AABB is not correctly set for static objects with rotation
             this.shape.updateVertices(this.rotation, this.position);
-            this.updateAABB();
+            this.shape.updateAABB(this);
             return;
         }
 
@@ -216,91 +216,9 @@ export default class RigidBody {
         this.shape.updateVertices(this.rotation, this.position);
 
         // Update AABB values based on new position
-        this.updateAABB();
+        this.shape.updateAABB(this);
 
         // Bleed off tiny angular velocity to avoid circle rolling forever
         this.angularVelocity *= 0.99;
-    };
-
-    updateAABB = (): void => {
-        switch (this.shapeType) {
-            case ShapeType.CIRCLE:
-                {
-                    const radius = (this.shape as CircleShape).radius;
-                    this.minX = this.position.x - radius;
-                    this.maxX = this.position.x + radius;
-                    this.minY = this.position.y - radius;
-                    this.maxY = this.position.y + radius;
-                }
-                break;
-            case ShapeType.POLYGON:
-                {
-                    const polygon = this.shape as PolygonShape;
-
-                    let minX = Infinity;
-                    let minY = Infinity;
-                    let maxX = -Infinity;
-                    let maxY = -Infinity;
-
-                    for (const v of polygon.worldVertices) {
-                        minX = Math.min(minX, v.x);
-                        minY = Math.min(minY, v.y);
-                        maxX = Math.max(maxX, v.x);
-                        maxY = Math.max(maxY, v.y);
-                    }
-
-                    this.minX = minX;
-                    this.maxX = maxX;
-                    this.minY = minY;
-                    this.maxY = maxY;
-                }
-                break;
-            case ShapeType.BOX:
-                {
-                    const box = this.shape as BoxShape;
-
-                    const hw = box.width * 0.5;
-                    const hh = box.height * 0.5;
-
-                    const cos = Math.cos(this.rotation);
-                    const sin = Math.sin(this.rotation);
-
-                    const ex = Math.abs(cos) * hw + Math.abs(sin) * hh;
-                    const ey = Math.abs(sin) * hw + Math.abs(cos) * hh;
-
-                    this.minX = this.position.x - ex;
-                    this.maxX = this.position.x + ex;
-                    this.minY = this.position.y - ey;
-                    this.maxY = this.position.y + ey;
-                }
-                break;
-            case ShapeType.CAPSULE:
-                {
-                    const shape = this.shape as CapsuleShape;
-                    const radius = shape.radius;
-                    const offsetUp = new Vec2(0, shape.halfHeight).rotate(this.rotation);
-                    const offsetDown = new Vec2(0, -shape.halfHeight).rotate(this.rotation);
-
-                    const topCirclePos = this.position.addNew(offsetUp);
-                    const bottomCirclePos = this.position.addNew(offsetDown);
-
-                    const topCircleMinX = topCirclePos.x - radius;
-                    const topCircleMinY = topCirclePos.y - radius;
-                    const topCircleMaxX = topCirclePos.x + radius;
-                    const topCircleMaxY = topCirclePos.y + radius;
-
-                    const bottomCircleMinX = bottomCirclePos.x - radius;
-                    const bottomCircleMinY = bottomCirclePos.y - radius;
-                    const bottomCircleMaxX = bottomCirclePos.x + radius;
-                    const bottomCircleMaxY = bottomCirclePos.y + radius;
-
-                    this.minX = Math.min(topCircleMinX, bottomCircleMinX);
-                    this.minY = Math.min(topCircleMinY, bottomCircleMinY);
-
-                    this.maxX = Math.max(topCircleMaxX, bottomCircleMaxX);
-                    this.maxY = Math.max(topCircleMaxY, bottomCircleMaxY);
-                }
-                break;
-        }
     };
 }
