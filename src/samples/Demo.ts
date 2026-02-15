@@ -31,6 +31,7 @@ export default class Demo {
 
     static generateFloor = (world: World): RigidBody => {
         const floor = new RigidBody(new BoxShape(FLOOR_WIDTH, FLOOR_HEIGHT), 0, FLOOR_POSITION_Y, 0.0);
+        floor.setTexture('transparent');
         world.addBody(floor);
         return floor;
     };
@@ -51,6 +52,9 @@ export default class Demo {
             FLOOR_POSITION_Y + FLOOR_HEIGHT / 2 + fenceHeight / 2 - FLOOR_HEIGHT,
             0.0,
         );
+
+        leftFence.setTexture('transparent');
+        rightFence.setTexture('transparent');
         world.addBody(leftFence);
         world.addBody(rightFence);
     };
