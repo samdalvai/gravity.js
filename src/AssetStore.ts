@@ -4,6 +4,7 @@ export const TEXTURES = {
     bowlingball: 'assets/bowlingball.png',
     crate: 'assets/crate.png',
     metal: 'assets/metal.png',
+    transparent: 'assets/transparent.png',
 
     // Skeleton ragdoll
     bob: 'assets/ragdoll/bob.png',
