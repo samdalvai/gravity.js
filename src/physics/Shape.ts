@@ -3,6 +3,7 @@ import Vec2 from '../math/Vec2';
 export enum ShapeType {
     CIRCLE,
     POLYGON,
+    BOX,
     CAPSULE,
 }
 
@@ -165,6 +166,7 @@ export class PolygonShape extends Shape {
 }
 
 export class BoxShape extends PolygonShape {
+    // TODO: store halfwidth and height to avoid division by 2
     constructor(width: number, height: number) {
         const verts = [
             new Vec2(-width / 2, -height / 2),
@@ -180,7 +182,7 @@ export class BoxShape extends PolygonShape {
     }
 
     getType = (): ShapeType => {
-        return ShapeType.POLYGON;
+        return ShapeType.BOX;
     };
 
     getMomentOfInertia = (): number => {
