@@ -1,6 +1,6 @@
 import AssetStore, { TEXTURES } from '../AssetStore';
 import Vec2 from '../math/Vec2';
-import { CapsuleShape, CircleShape, PolygonShape, Shape, ShapeType } from './Shape';
+import { BoxShape, CapsuleShape, CircleShape, PolygonShape, Shape, ShapeType } from './Shape';
 
 export default class RigidBody {
     static nextId = 0;
@@ -235,14 +235,14 @@ export default class RigidBody {
                 break;
             case ShapeType.POLYGON:
                 {
-                    const worldVertices = (this.shape as PolygonShape).worldVertices;
+                    const polygon = this.shape as PolygonShape;
 
                     let minX = Infinity;
                     let minY = Infinity;
                     let maxX = -Infinity;
                     let maxY = -Infinity;
 
-                    for (const v of worldVertices) {
+                    for (const v of polygon.worldVertices) {
                         minX = Math.min(minX, v.x);
                         minY = Math.min(minY, v.y);
                         maxX = Math.max(maxX, v.x);
@@ -253,6 +253,25 @@ export default class RigidBody {
                     this.maxX = maxX;
                     this.minY = minY;
                     this.maxY = maxY;
+                }
+                break;
+            case ShapeType.BOX:
+                {
+                    const box = this.shape as BoxShape;
+
+                    const hw = box.width * 0.5;
+                    const hh = box.height * 0.5;
+
+                    const cos = Math.cos(this.rotation);
+                    const sin = Math.sin(this.rotation);
+
+                    const ex = Math.abs(cos) * hw + Math.abs(sin) * hh;
+                    const ey = Math.abs(sin) * hw + Math.abs(cos) * hh;
+
+                    this.minX = this.position.x - ex;
+                    this.maxX = this.position.x + ex;
+                    this.minY = this.position.y - ey;
+                    this.maxY = this.position.y + ey;
                 }
                 break;
             case ShapeType.CAPSULE:

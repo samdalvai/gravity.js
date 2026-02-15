@@ -88,8 +88,8 @@ export default class CollisionDetection {
             );
         }
 
-        const aIsPolygon = a.shapeType === ShapeType.POLYGON;
-        const bIsPolygon = b.shapeType === ShapeType.POLYGON;
+        const aIsPolygon = a.shapeType === ShapeType.BOX || a.shapeType === ShapeType.POLYGON;
+        const bIsPolygon = b.shapeType === ShapeType.BOX || b.shapeType === ShapeType.POLYGON;
 
         if (aIsPolygon && bIsPolygon) {
             return this.detectCollisionPolygonPolygon(a, b);
