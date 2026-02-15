@@ -164,12 +164,6 @@ export default class Graphics {
         }
         this.ctx.closePath();
         this.ctx.fill();
-
-        // Draw the 1px center point
-        this.ctx.fillStyle = '#000000'; // black like 0xFF000000 in SDL
-        this.ctx.beginPath();
-        this.ctx.arc(x, y, 1, 0, Math.PI * 2);
-        this.ctx.fill();
     };
 
     static drawRect = (x: number, y: number, width: number, height: number, color = 'white'): void => {
@@ -200,6 +194,14 @@ export default class Graphics {
         this.ctx.beginPath();
         this.ctx.arc(0, 0, 1, 0, Math.PI * 2);
         this.ctx.fill();
+    }
+
+    static drawFillBox(width: number, height: number, color = 'white') {
+        const halfWidth = width / 2;
+        const halfHeight = height / 2;
+
+        this.ctx.fillStyle = color;
+        this.ctx.fillRect(-halfWidth, -halfHeight, halfWidth * 2, halfHeight * 2);
     }
 
     static drawCapsule = (capsuleShape: CapsuleShape, color = 'white'): void => {
@@ -268,47 +270,57 @@ export default class Graphics {
             case ShapeType.CIRCLE:
                 {
                     const circleShape = body.shape as CircleShape;
-
-                    if (!debug && body.texture) {
-                        Graphics.drawTexture(circleShape.radius * 2, circleShape.radius * 2, body.texture);
-                    } else if (debug) {
-                        Graphics.drawCircle(circleShape.radius, 'white');
+                    if (debug) {
+                        this.drawCircle(circleShape.radius, 'white');
+                    } else if (body.texture) {
+                        this.drawTexture(circleShape.radius * 2, circleShape.radius * 2, body.texture);
+                    } else {
+                        this.drawFillCircle(0, 0, circleShape.radius, 'gray');
                     }
                 }
                 break;
             case ShapeType.POLYGON:
                 {
                     const polygonShape = body.shape as PolygonShape;
-                    if (!debug && body.texture) {
-                        Graphics.drawTexture(polygonShape.width, polygonShape.height, body.texture);
-                    } else if (debug) {
-                        Graphics.drawPolygon(polygonShape.localVertices, 'white');
+
+                    if (debug) {
+                        this.drawPolygon(polygonShape.localVertices, 'white');
+                    } else if (body.texture) {
+                        this.drawTexture(polygonShape.width, polygonShape.height, body.texture);
+                    } else {
+                        this.drawFillPolygon(0, 0, polygonShape.localVertices, 'gray');
                     }
                 }
                 break;
             case ShapeType.BOX:
                 {
                     const boxShape = body.shape as BoxShape;
-                    if (!debug && body.texture) {
-                        Graphics.drawTexture(boxShape.width, boxShape.height, body.texture);
-                    } else if (debug) {
-                        Graphics.drawBox(boxShape.width, boxShape.height, 'white');
+
+                    if (debug) {
+                        this.drawBox(boxShape.width, boxShape.height, 'white');
+                    } else if (body.texture) {
+                        this.drawTexture(boxShape.width, boxShape.height, body.texture);
+                    } else {
+                        this.drawFillBox(boxShape.width, boxShape.height, 'gray');
                     }
                 }
                 break;
             case ShapeType.CAPSULE:
                 {
                     const capsuleShape = body.shape as CapsuleShape;
-                    if (!debug && body.texture) {
+
+                    if (debug) {
+                        this.drawCapsule(capsuleShape, 'white');
+                    } else if (body.texture) {
                         const polygonShape = body.shape as PolygonShape;
                         // TODO: draw texture without stretching it
-                        Graphics.drawTexture(
+                        this.drawTexture(
                             polygonShape.width,
                             polygonShape.height + capsuleShape.radius * 2,
                             body.texture,
                         );
-                    } else if (debug) {
-                        Graphics.drawCapsule(capsuleShape, 'white');
+                    } else {
+                        // Method missing
                     }
                 }
                 break;
