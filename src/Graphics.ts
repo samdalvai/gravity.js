@@ -252,17 +252,8 @@ export default class Graphics {
         this.ctx.fill();
     };
 
-    static drawTexture = (
-        x: number,
-        y: number,
-        width: number,
-        height: number,
-        rotation: number, // in radians
-        texture: CanvasImageSource,
-    ): void => {
+    static drawTexture = (width: number, height: number, texture: CanvasImageSource): void => {
         this.ctx.save();
-        this.ctx.translate(x, y);
-        this.ctx.rotate(rotation);
 
         // This is needed because we flip the canvas with beginWorld()
         this.ctx.scale(1, -1);
@@ -298,20 +289,15 @@ export default class Graphics {
         this.ctx.translate(x, y);
         this.ctx.rotate(rotation);
 
+        // TODO: Draw filled shape if texture is not available
+
         switch (body.shape.getType()) {
             case ShapeType.CIRCLE:
                 {
                     const circleShape = body.shape as CircleShape;
 
                     if (!debug && body.texture) {
-                        Graphics.drawTexture(
-                            body.position.x,
-                            body.position.y,
-                            circleShape.radius * 2,
-                            circleShape.radius * 2,
-                            body.rotation,
-                            body.texture,
-                        );
+                        Graphics.drawTexture(circleShape.radius * 2, circleShape.radius * 2, body.texture);
                     } else if (debug) {
                         Graphics.drawCircle(circleShape.radius, 'white');
                     }
@@ -321,14 +307,7 @@ export default class Graphics {
                 {
                     const polygonShape = body.shape as PolygonShape;
                     if (!debug && body.texture) {
-                        Graphics.drawTexture(
-                            body.position.x,
-                            body.position.y,
-                            polygonShape.width,
-                            polygonShape.height,
-                            body.rotation,
-                            body.texture,
-                        );
+                        Graphics.drawTexture(polygonShape.width, polygonShape.height, body.texture);
                     } else if (debug) {
                         Graphics.drawPolygon(polygonShape.localVertices, 'white');
                     }
@@ -338,14 +317,7 @@ export default class Graphics {
                 {
                     const boxShape = body.shape as BoxShape;
                     if (!debug && body.texture) {
-                        Graphics.drawTexture(
-                            body.position.x,
-                            body.position.y,
-                            boxShape.width,
-                            boxShape.height,
-                            body.rotation,
-                            body.texture,
-                        );
+                        Graphics.drawTexture(boxShape.width, boxShape.height, body.texture);
                     } else if (debug) {
                         Graphics.drawBox(boxShape.width, boxShape.height, 'white');
                     }
@@ -358,11 +330,8 @@ export default class Graphics {
                         const polygonShape = body.shape as PolygonShape;
                         // TODO: draw texture without stretching it
                         Graphics.drawTexture(
-                            body.position.x,
-                            body.position.y,
                             polygonShape.width,
                             polygonShape.height + capsuleShape.radius * 2,
-                            body.rotation,
                             body.texture,
                         );
                     } else if (debug) {

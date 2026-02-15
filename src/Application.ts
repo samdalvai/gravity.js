@@ -308,7 +308,7 @@ export default class Application {
 
         // Draw background texture
         if (this.bgTexture && !this.debug) {
-            Graphics.drawTexture(0, 0, Graphics.width(), Graphics.height(), 0.0, this.bgTexture);
+            Graphics.drawTexture(Graphics.width(), Graphics.height(), this.bgTexture);
         }
 
         // Draw all bodies
