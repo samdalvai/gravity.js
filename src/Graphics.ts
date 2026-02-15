@@ -79,7 +79,7 @@ export default class Graphics {
         this.ctx.restore();
     }
 
-    static drawLine = (x0: number, y0: number, x1: number, y1: number, color: string): void => {
+    static drawLine = (x0: number, y0: number, x1: number, y1: number, color = 'white'): void => {
         this.ctx.strokeStyle = color;
         this.ctx.beginPath();
         this.ctx.moveTo(x0, y0);
@@ -87,7 +87,7 @@ export default class Graphics {
         this.ctx.stroke();
     };
 
-    static drawCircle = (radius: number, color: string): void => {
+    static drawCircle = (radius: number, color = 'white'): void => {
         // Draw the circle
         this.ctx.beginPath();
         this.ctx.arc(0, 0, radius, 0, Math.PI * 2);
@@ -105,14 +105,7 @@ export default class Graphics {
         this.ctx.stroke();
     };
 
-    static drawHalfCircle = (
-        x: number,
-        y: number,
-        radius: number,
-        bodyAngle: number,
-        half: 'top' | 'bottom',
-        color: string,
-    ): void => {
+    static drawHalfCircle = (x: number, y: number, radius: number, half: 'top' | 'bottom', color = 'white'): void => {
         let localStart: number;
         let localEnd: number;
 
@@ -124,38 +117,21 @@ export default class Graphics {
             localEnd = Math.PI * 2;
         }
 
-        const startAngle = bodyAngle + localStart;
-        const endAngle = bodyAngle + localEnd;
-
         // Draw rotated arc
         this.ctx.beginPath();
-        this.ctx.arc(x, y, radius, startAngle, endAngle);
+        this.ctx.arc(x, y, radius, localStart, localEnd);
         this.ctx.strokeStyle = color;
         this.ctx.stroke();
     };
 
-    static drawFillCircle = (x: number, y: number, radius: number, color: string): void => {
+    static drawFillCircle = (x: number, y: number, radius: number, color = 'white'): void => {
         this.ctx.beginPath();
         this.ctx.arc(x, y, radius, 0, Math.PI * 2);
         this.ctx.fillStyle = color;
         this.ctx.fill();
     };
 
-    static drawRect = (x: number, y: number, width: number, height: number, color: string): void => {
-        const hw = width / 2;
-        const hh = height / 2;
-
-        this.ctx.strokeStyle = color;
-        this.ctx.beginPath();
-        this.ctx.moveTo(x - hw, y - hh);
-        this.ctx.lineTo(x + hw, y - hh);
-        this.ctx.lineTo(x + hw, y + hh);
-        this.ctx.lineTo(x - hw, y + hh);
-        this.ctx.closePath();
-        this.ctx.stroke();
-    };
-
-    static drawPolygon = (vertices: Vec2[], color: string): void => {
+    static drawPolygon = (vertices: Vec2[], color = 'white'): void => {
         this.ctx.strokeStyle = color;
         this.ctx.beginPath();
 
@@ -176,7 +152,7 @@ export default class Graphics {
         this.ctx.fill();
     };
 
-    static drawFillPolygon = (x: number, y: number, vertices: Vec2[], color: string): void => {
+    static drawFillPolygon = (x: number, y: number, vertices: Vec2[], color = 'white'): void => {
         if (vertices.length === 0) return;
 
         // Fill polygon
@@ -196,6 +172,20 @@ export default class Graphics {
         this.ctx.fill();
     };
 
+    static drawRect = (x: number, y: number, width: number, height: number, color = 'white'): void => {
+        const halfWidth = width / 2;
+        const halfHeight = height / 2;
+
+        this.ctx.strokeStyle = color;
+        this.ctx.beginPath();
+        this.ctx.moveTo(x - halfWidth, y - halfHeight);
+        this.ctx.lineTo(x + halfWidth, y - halfHeight);
+        this.ctx.lineTo(x + halfWidth, y + halfHeight);
+        this.ctx.lineTo(x - halfWidth, y + halfHeight);
+        this.ctx.closePath();
+        this.ctx.stroke();
+    };
+
     static drawBox(width: number, height: number, color = 'white') {
         const halfWidth = width / 2;
         const halfHeight = height / 2;
@@ -212,8 +202,8 @@ export default class Graphics {
         this.ctx.fill();
     }
 
-    static drawCapsule = (position: Vec2, capsuleShape: CapsuleShape, rotation: number, color: string): void => {
-        const vertices = capsuleShape.worldVertices;
+    static drawCapsule = (capsuleShape: CapsuleShape, color = 'white'): void => {
+        const vertices = capsuleShape.localVertices;
         Graphics.drawLine(
             vertices[vertices.length - 1].x,
             vertices[vertices.length - 1].y,
@@ -222,33 +212,16 @@ export default class Graphics {
             color,
         );
         Graphics.drawLine(vertices[1].x, vertices[1].y, vertices[2].x, vertices[2].y, color);
-        const offsetUp = new Vec2(0, capsuleShape.halfHeight).rotate(rotation);
-        const offsetDown = new Vec2(0, -capsuleShape.halfHeight).rotate(rotation);
 
-        const topCirclePosition = position.addNew(offsetUp);
-        const bottomCirclePosition = position.addNew(offsetDown);
+        const topCirclePosition = new Vec2(0, capsuleShape.halfHeight);
+        const bottomCirclePosition = new Vec2(0, -capsuleShape.halfHeight);
 
-        Graphics.drawHalfCircle(
-            topCirclePosition.x,
-            topCirclePosition.y,
-            capsuleShape.radius,
-            rotation,
-            'bottom',
-            color,
-        );
-
-        Graphics.drawHalfCircle(
-            bottomCirclePosition.x,
-            bottomCirclePosition.y,
-            capsuleShape.radius,
-            rotation,
-            'top',
-            color,
-        );
+        Graphics.drawHalfCircle(topCirclePosition.x, topCirclePosition.y, capsuleShape.radius, 'bottom', color);
+        Graphics.drawHalfCircle(bottomCirclePosition.x, bottomCirclePosition.y, capsuleShape.radius, 'top', color);
 
         this.ctx.fillStyle = color;
         this.ctx.beginPath();
-        this.ctx.arc(position.x, position.y, 1, 0, Math.PI * 2);
+        this.ctx.arc(0, 0, 1, 0, Math.PI * 2);
         this.ctx.fill();
     };
 
@@ -267,7 +240,7 @@ export default class Graphics {
         y: number,
         fontSize: number = 20,
         fontFamily: string = 'Arial',
-        color: string = 'white',
+        color = 'white',
         align: CanvasTextAlign = 'left',
         baseline: CanvasTextBaseline = 'middle',
     ): void => {
@@ -335,7 +308,7 @@ export default class Graphics {
                             body.texture,
                         );
                     } else if (debug) {
-                        Graphics.drawCapsule(body.position, capsuleShape, body.rotation, 'white');
+                        Graphics.drawCapsule(capsuleShape, 'white');
                     }
                 }
                 break;
