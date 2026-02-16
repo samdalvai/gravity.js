@@ -253,8 +253,24 @@ export class CapsuleShape extends BoxShape {
     };
 
     getMomentOfInertia = (): number => {
-        // TODO: to be updated
-        return 0.5 * (this.radius * this.radius);
+        // For solid capsules, the moment of inertia is the sum of the two half circles and box body inertia, accounting fot heir position
+        // Still needs to be multiplied by the rigidbody's mass
+        const r = this.radius;
+        const l = this.halfHeight * 2;
+
+        const areaRect = 2 * r * l;
+        const areaCircle = Math.PI * r * r;
+        const areaTotal = areaRect + areaCircle;
+
+        if (areaTotal === 0) return 0;
+
+        const mRect = areaRect / areaTotal;
+        const mCircle = areaCircle / areaTotal;
+
+        const iRect = (1 / 12) * mRect * (l * l + 4 * r * r);
+        const iCircle = 0.5 * mCircle * r * r + (mCircle * (l * l)) / 4;
+
+        return iRect + iCircle;
     };
 
     updateAABB = (body: RigidBody): void => {
