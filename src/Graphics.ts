@@ -215,8 +215,8 @@ export default class Graphics {
         );
         Graphics.drawLine(vertices[1].x, vertices[1].y, vertices[2].x, vertices[2].y, color);
 
-        const topCirclePosition = new Vec2(0, capsuleShape.halfHeight);
-        const bottomCirclePosition = new Vec2(0, -capsuleShape.halfHeight);
+        const topCirclePosition = capsuleShape.getTopCirclePosition();
+        const bottomCirclePosition = capsuleShape.getBottomCirclePosition();
 
         Graphics.drawHalfCircle(topCirclePosition.x, topCirclePosition.y, capsuleShape.radius, 'bottom', color);
         Graphics.drawHalfCircle(bottomCirclePosition.x, bottomCirclePosition.y, capsuleShape.radius, 'top', color);
