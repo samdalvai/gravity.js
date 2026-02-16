@@ -273,13 +273,19 @@ export class CapsuleShape extends BoxShape {
         return iRect + iCircle;
     };
 
+    getTopCirclePosition = (): Vec2 => {
+        return new Vec2(0, this.halfHeight);
+    };
+
+    getBottomCirclePosition = (): Vec2 => {
+        return new Vec2(0, -this.halfHeight);
+    };
+
     updateAABB = (body: RigidBody): void => {
         const radius = this.radius;
-        const offsetUp = new Vec2(0, this.halfHeight).rotate(body.rotation);
-        const offsetDown = new Vec2(0, -this.halfHeight).rotate(body.rotation);
 
-        const topCirclePos = body.position.addNew(offsetUp);
-        const bottomCirclePos = body.position.addNew(offsetDown);
+        const topCirclePos = this.getTopCirclePosition().rotate(body.rotation).addNew(body.position);
+        const bottomCirclePos = this.getBottomCirclePosition().rotate(body.rotation).addNew(body.position);
 
         const topCircleMinX = topCirclePos.x - radius;
         const topCircleMinY = topCirclePos.y - radius;
