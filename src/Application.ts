@@ -1,4 +1,4 @@
-import AssetStore from './AssetStore';
+import AssetStore, { TEXTURES } from './AssetStore';
 import Graphics from './Graphics';
 import InputManager, { MouseButton } from './InputManager';
 import Vec2 from './math/Vec2';
@@ -28,7 +28,6 @@ export default class Application {
     private showContacts = true;
     private showAABB = false;
     private demoIndex = 1;
-    private testBody: RigidBody | null = null;
     private middleMousePressed = false;
 
     private player: RigidBody | null = null;
@@ -44,13 +43,17 @@ export default class Application {
         this.world = new World(GRAVITY);
     }
 
-    isRunning = (): boolean => {
+    isRunning(): boolean {
         return this.running;
-    };
+    }
 
-    setRunning = (newValue: boolean): void => {
+    setRunning(newValue: boolean): void {
         this.running = newValue;
-    };
+    }
+
+    setBackground(texture: keyof typeof TEXTURES) {
+        this.bgTexture = AssetStore.getTexture(texture);
+    }
 
     setup = async (): Promise<void> => {
         InputManager.initialize();
@@ -60,21 +63,7 @@ export default class Application {
         this.running = Graphics.openWindow();
         const demo = Demo.demoFunctions[this.demoIndex];
         this.world.clear();
-        demo(this.world);
-
-        // Test for collision, if you enable this you need to skip static objects from constraint solve
-        // otherwise determinant becomes 0
-        // const b = new RigidBody(new BoxShape(100, 100), 0, 0, 0);
-        // const b = new RigidBody(new CircleShape(50), 0, 0, 0);
-        // b.rotation = 0.5;
-        // this.world.addBody(b);
-
-        // this.testBody = new RigidBody(new CircleShape(25), 0, 0, 0);
-        // this.testBody = new RigidBody(new BoxShape(50, 50), 0, 0, 0);
-        // this.world.addBody(this.testBody);
-
-        // this.bgTexture = AssetStore.getTexture('darkBackground');
-        this.bgTexture = AssetStore.getTexture('background');
+        demo(this.world, this);
     };
 
     input = (): void => {
@@ -201,7 +190,7 @@ export default class Application {
                         }
 
                         this.world.clear();
-                        demo(this.world);
+                        demo(this.world, this);
                     }
 
                     if (inputEvent.code === 'Space') {
