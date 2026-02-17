@@ -7,9 +7,9 @@ export default class Vec2 {
         this.y = y;
     }
 
-    copy = (): Vec2 => {
+    copy(): Vec2 {
         return new Vec2(this.x, this.y);
-    };
+    }
 
     add(v: Vec2): void {
         this.x += v.x;
@@ -176,8 +176,4 @@ export default class Vec2 {
         result.y = -this.y;
         return result;
     }
-
-    squaredDistance = (b: Vec2): number => {
-        return (this.x - b.x) * (this.x - b.x) + (this.y - b.y) * (this.y - b.y);
-    };
 }
