@@ -109,7 +109,7 @@ export default class Graphics {
         let localStart: number;
         let localEnd: number;
 
-        if (half === 'bottom') {
+        if (half === 'top') {
             localStart = 0;
             localEnd = Math.PI;
         } else {
@@ -205,22 +205,26 @@ export default class Graphics {
     }
 
     static drawCapsule = (capsuleShape: CapsuleShape, color = 'white'): void => {
-        const vertices = capsuleShape.localVertices;
-        Graphics.drawLine(
-            vertices[vertices.length - 1].x,
-            vertices[vertices.length - 1].y,
-            vertices[0].x,
-            vertices[0].y,
-            color,
-        );
-        Graphics.drawLine(vertices[1].x, vertices[1].y, vertices[2].x, vertices[2].y, color);
+        const topPosition = new Vec2(0, capsuleShape.halfHeight);
+        const bottomPosition = new Vec2(0, -capsuleShape.halfHeight);
 
-        const topCirclePosition = capsuleShape.getTopCirclePosition();
-        const bottomCirclePosition = capsuleShape.getBottomCirclePosition();
+        Graphics.drawHalfCircle(topPosition.x, topPosition.y, capsuleShape.radius, 'top', color);
+        Graphics.drawHalfCircle(bottomPosition.x, bottomPosition.y, capsuleShape.radius, 'bottom', color);
 
-        Graphics.drawHalfCircle(topCirclePosition.x, topCirclePosition.y, capsuleShape.radius, 'bottom', color);
-        Graphics.drawHalfCircle(bottomCirclePosition.x, bottomCirclePosition.y, capsuleShape.radius, 'top', color);
+        const topStartX = topPosition.x - capsuleShape.radius;
+        const topStartY = topPosition.y;
+        const bottomStartX = bottomPosition.x - capsuleShape.radius;
+        const bottomStartY = bottomPosition.y;
 
+        const topEndX = topPosition.x + capsuleShape.radius;
+        const topEndY = topPosition.y;
+        const bottomEndX = bottomPosition.x + capsuleShape.radius;
+        const bottomEndY = bottomPosition.y;
+
+        Graphics.drawLine(topStartX, topStartY, bottomStartX, bottomStartY, color);
+        Graphics.drawLine(topEndX, topEndY, bottomEndX, bottomEndY, color);
+
+        // Draw body position
         this.ctx.fillStyle = color;
         this.ctx.beginPath();
         this.ctx.arc(0, 0, 1, 0, Math.PI * 2);
