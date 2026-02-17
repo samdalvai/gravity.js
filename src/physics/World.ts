@@ -39,6 +39,19 @@ export default class World {
         this.bodies.push(body);
     };
 
+    removeBody = (body: RigidBody): void => {
+        for (let i = 0; i < this.bodies.length; i++) {
+            const current = this.bodies[i];
+
+            // It suffices to look for the position going below the screen
+            if (body.id === current.id) {
+                this.bodies[i] = this.bodies[this.bodies.length - 1];
+                this.bodies.pop();
+                return;
+            }
+        }
+    };
+
     getBodies = (): RigidBody[] => {
         return this.bodies;
     };
