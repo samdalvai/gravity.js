@@ -4,6 +4,7 @@
  *
  * https://github.com/erincatto/box2d-lite
  */
+import Application from '../Application';
 import Graphics from '../Graphics';
 import Vec2 from '../math/Vec2';
 import { DistanceJoint } from '../physics/DistanceJoint';
@@ -29,14 +30,14 @@ export default class Demo {
         'Demo 9: Stress test',
     ];
 
-    static generateFloor = (world: World): RigidBody => {
+    static generateFloor(world: World): RigidBody {
         const floor = new RigidBody(new BoxShape(FLOOR_WIDTH, FLOOR_HEIGHT), 0, FLOOR_POSITION_Y, 0.0);
         floor.setTexture('transparent');
         world.addBody(floor);
         return floor;
-    };
+    }
 
-    static generateFences = (world: World): void => {
+    static generateFences(world: World): void {
         const fenceWidth = 50;
         const fenceHeight = 900 + FLOOR_HEIGHT;
         const leftFence = new RigidBody(
@@ -57,9 +58,11 @@ export default class Demo {
         rightFence.setTexture('transparent');
         world.addBody(leftFence);
         world.addBody(rightFence);
-    };
+    }
 
-    static demo1 = (world: World) => {
+    static demo1 = (world: World, app: Application) => {
+        app.setBackground('background');
+
         // Demo 1: Single box demo
         this.generateFloor(world);
         this.generateFences(world);
@@ -70,7 +73,9 @@ export default class Demo {
         world.addBody(box);
     };
 
-    static demo2 = (world: World) => {
+    static demo2 = (world: World, app: Application) => {
+        app.setBackground('background');
+
         // Demo 2: Stack of boxes
         this.generateFloor(world);
         this.generateFences(world);
@@ -87,7 +92,9 @@ export default class Demo {
         }
     };
 
-    static demo3 = (world: World) => {
+    static demo3 = (world: World, app: Application) => {
+        app.setBackground('background');
+
         // Demo 3: Pyramid of boxes
         this.generateFloor(world);
         this.generateFences(world);
@@ -116,7 +123,9 @@ export default class Demo {
         }
     };
 
-    static demo4 = (world: World) => {
+    static demo4 = (world: World, app: Application) => {
+        app.setBackground('background');
+
         // Demo 4: A suspension bridge
         this.generateFloor(world);
         this.generateFences(world);
@@ -208,7 +217,9 @@ export default class Demo {
         world.addJoint(rightJoint);
     };
 
-    static demo5 = (world: World) => {
+    static demo5 = (world: World, app: Application) => {
+        app.setBackground('background');
+
         // Demo 5: A simple whip
         this.generateFloor(world);
         this.generateFences(world);
@@ -251,7 +262,9 @@ export default class Demo {
         }
     };
 
-    static demo6 = (world: World) => {
+    static demo6 = (world: World, app: Application) => {
+        app.setBackground('darkBackground');
+
         // Demo 6: A skeleton ragdoll
         this.generateFloor(world);
         this.generateFences(world);
@@ -320,7 +333,9 @@ export default class Demo {
         world.addJoint(rightHip);
     };
 
-    static demo7 = (world: World) => {
+    static demo7 = (world: World, app: Application) => {
+        app.setBackground('background');
+
         // Demo 7: A plank
         const floor = this.generateFloor(world);
         this.generateFences(world);
@@ -352,7 +367,9 @@ export default class Demo {
         world.addBody(heavyBox);
     };
 
-    static demo8 = (world: World) => {
+    static demo8 = (world: World, app: Application) => {
+        app.setBackground('background');
+
         // Demo 8: Cloth simulation
         this.generateFloor(world);
         this.generateFences(world);
@@ -404,7 +421,9 @@ export default class Demo {
         }
     };
 
-    static demo9 = (world: World) => {
+    static demo9 = (world: World, app: Application) => {
+        app.setBackground('background');
+
         // Demo 9: stress test
         this.generateFloor(world);
         this.generateFences(world);
@@ -494,7 +513,9 @@ export default class Demo {
         }
     };
 
-    static demo0 = (world: World) => {
+    static demo0 = (world: World, app: Application) => {
+        app.setBackground('background');
+
         // Demo 0: a complex scene
         const floor = this.generateFloor(world);
         this.generateFences(world);
