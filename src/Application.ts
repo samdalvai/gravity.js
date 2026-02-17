@@ -150,8 +150,8 @@ export default class Application {
                             this.player = null;
                         }
 
-                        this.player = new RigidBody(new CapsuleShape(40, 20), x, y, 1);
-                        // this.player = new RigidBody(new CircleShape(40), x, y, 1);
+                        // this.player = new RigidBody(new CapsuleShape(40, 20), x, y, 1);
+                        this.player = new RigidBody(new CircleShape(40), x, y, 1);
                         // this.player = new RigidBody(new BoxShape(40, 40), x, y, 1);
                         this.player.canRotate = false;
                         this.player.restitution = 0;
