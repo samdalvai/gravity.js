@@ -347,8 +347,6 @@ export default class Application {
 
             // Clamp velocity so you don't exceed max speed
             this.player.velocity.x = Utils.clamp(this.player.velocity.x, -PLAYER_MAX_SPEED, PLAYER_MAX_SPEED);
-
-            // console.log(object);
         }
 
         this.world.update();

@@ -216,6 +216,8 @@ export default class RigidBody {
         // Integrate the angular velocity to find the new rotation angle
         if (this.canRotate) {
             this.rotation += this.angularVelocity * dt;
+        } else {
+            this.angularVelocity = 0;
         }
 
         // Update the vertices to adjust them to the new position/rotation
