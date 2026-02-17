@@ -307,7 +307,7 @@ export default class Graphics {
                     } else if (body.texture) {
                         this.drawTexture(polygonShape.width, polygonShape.height, body.texture);
                     } else {
-                        this.drawFillPolygon(0, 0, polygonShape.localVertices, 'gray');
+                        this.drawFillPolygon(0, 0, polygonShape.localVertices, body.shapeFillColor);
                     }
                 }
                 break;
@@ -320,7 +320,7 @@ export default class Graphics {
                     } else if (body.texture) {
                         this.drawTexture(boxShape.width, boxShape.height, body.texture);
                     } else {
-                        this.drawFillBox(boxShape.width, boxShape.height, 'gray');
+                        this.drawFillBox(boxShape.width, boxShape.height, body.shapeFillColor);
                     }
                 }
                 break;
@@ -339,7 +339,7 @@ export default class Graphics {
                             body.texture,
                         );
                     } else {
-                        this.drawFillCapsule(capsuleShape, 'gray');
+                        this.drawFillCapsule(capsuleShape, body.shapeFillColor);
                     }
                 }
                 break;
