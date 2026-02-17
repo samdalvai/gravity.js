@@ -18,7 +18,6 @@ export abstract class Shape {
     abstract getType(): ShapeType;
     abstract getMomentOfInertia(): number;
     abstract updateVertices(angle: number, position: Vec2): void;
-    abstract support(dir: Vec2): SupportResult;
     abstract updateAABB(body: RigidBody): void;
 }
 
@@ -43,10 +42,6 @@ export class CircleShape extends Shape {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     updateVertices = (angle: number, position: Vec2): void => {
         return; // Circles don't have vertices... nothing to do here
-    };
-
-    support = (dir: Vec2): SupportResult => {
-        return { vertex: dir.normalizeNew().scaleNew(this.radius), index: -1 };
     };
 
     updateAABB = (body: RigidBody): void => {
@@ -177,15 +172,13 @@ export class PolygonShape extends Shape {
 
     findFarthestEdge = (b: RigidBody, dir: Vec2): Edge => {
         const localDir = b.worldDirToLocal(dir);
-        const farthest = b.shape.support(localDir);
+        const farthest = this.support(localDir);
         let curr = farthest.vertex;
         const idx = farthest.index;
-    
-        const p = b.shape as PolygonShape;
-    
-        const count = p.localVertices.length;
-        const prev = p.localVertices[(idx - 1 + count) % count];
-        const next = p.localVertices[(idx + 1) % count];
+     
+        const count = this.localVertices.length;
+        const prev = this.localVertices[(idx - 1 + count) % count];
+        const next = this.localVertices[(idx + 1) % count];
     
         const e1 = curr.subNew(prev).normalizeNew();
         const e2 = curr.subNew(next).normalizeNew();
