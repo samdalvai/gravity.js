@@ -1,6 +1,7 @@
 import Vec2 from './math/Vec2';
 import RigidBody from './physics/RigidBody';
 import { BoxShape, CapsuleShape, CircleShape, PolygonShape, ShapeType } from './physics/Shape';
+import Utils from './physics/Utils';
 
 export default class Graphics {
     static windowWidth: number;
@@ -45,6 +46,10 @@ export default class Graphics {
 
     static decreaseZoom = (): void => {
         this.zoom -= 0.05;
+
+        if (this.zoom < 0.05) {
+            this.zoom = 0.05;
+        }
     };
 
     static clearScreen = (): void => {
