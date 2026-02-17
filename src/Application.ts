@@ -491,8 +491,7 @@ export default class Application {
         for (const manifold of this.world.getManifolds()) {
             if (manifold.bodyA === this.player || manifold.bodyB === this.player) {
                 // Normal pointing upward relative to player
-                console.log(manifold.contactNormal);
-                if (manifold.contactNormal.y > 0.5) {
+                if (manifold.contactNormal.y > 0) {
                     return true;
                 }
             }
