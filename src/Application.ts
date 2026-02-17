@@ -116,6 +116,11 @@ export default class Application {
                         }
                     }
 
+                    if (inputEvent.key === 'f') {
+                        const x = InputManager.mousePosition.x;
+                        const y = InputManager.mousePosition.y;
+                    }
+
                     if (inputEvent.key === 'g') {
                         this.generateParticle = true;
                     }
@@ -448,7 +453,8 @@ export default class Application {
             // General info
             `${Demo.demoStrings[this.demoIndex]}`,
             '(1-9) select demo, Left Mouse to generate circles, Right Mouse to generate boxes',
-            '(G) to generate particles, (X) to generate capsules, (R) to generate random convex polygon, (E) to generate explosion',
+            '(G) to generate particles, (X) to generate capsules, (R) to generate random convex polygon',
+            '(E) to generate explosion, (F) to generate attraction force',
             `(D) debug mode: ${this.debug ? 'ON' : 'OFF'}`,
             `(C) chosen particle: ${this.generateCircles ? 'Circle' : 'Box'}`,
             '(Q) To span a player object',
