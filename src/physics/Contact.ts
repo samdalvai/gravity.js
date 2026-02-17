@@ -8,12 +8,12 @@
  * https://github.com/Sopiro
  */
 import { Mat2 } from '../math/Mat2';
-import Utils from './Utils';
 import Vec2 from '../math/Vec2';
 import { ContactPoint } from './CollisionDetection';
 import { SETTINGS } from './Constants';
 import { Constraint } from './Constraint';
 import RigidBody from './RigidBody';
+import Utils from './Utils';
 
 enum ContactType {
     Normal,
@@ -154,7 +154,7 @@ class ContactSolver {
         this.bodyA.velocity.x = this.bodyA.velocity.x + this.jacobian.va.x * this.bodyA.invMass * lambda;
         this.bodyA.velocity.y = this.bodyA.velocity.y + this.jacobian.va.y * this.bodyA.invMass * lambda;
         this.bodyA.angularVelocity = this.bodyA.angularVelocity + this.bodyA.invI * this.jacobian.wa * lambda;
-        
+
         this.bodyB.velocity.x = this.bodyB.velocity.x + this.jacobian.vb.x * this.bodyB.invMass * lambda;
         this.bodyB.velocity.y = this.bodyB.velocity.y + this.jacobian.vb.y * this.bodyB.invMass * lambda;
         this.bodyB.angularVelocity = this.bodyB.angularVelocity + this.bodyB.invI * this.jacobian.wb * lambda;
@@ -332,12 +332,29 @@ export class ContactManifold extends Constraint {
         contactNormal: Vec2,
         featureFlipped: boolean,
     ) {
-        super(bodyA, bodyB);
+        // Force consistent normal sign so that "collision from above"
+        // always gives contactNormal.y > 0 (positive = upward), regardless of
+        // which body is a box/polygon vs circle/capsule and regardless of
+        // the order the collision detection passed the bodies.
+        let finalBodyA = bodyA;
+        let finalBodyB = bodyB;
+        let finalNormal = contactNormal;
+        let finalFlipped = featureFlipped;
+
+        if (contactNormal.y < 0) {
+            finalBodyA = bodyB;
+            finalBodyB = bodyA;
+            finalNormal = contactNormal.negateNew();
+            finalFlipped = !featureFlipped;
+        }
+
+        super(finalBodyA, finalBodyB);
+
         this.contactPoints = contactPoints;
         this.penetrationDepth = penetrationDepth;
-        this.contactNormal = contactNormal;
-        this.contactTangent = contactNormal.perpNew();
-        this.featureFlipped = featureFlipped;
+        this.contactNormal = finalNormal;
+        this.contactTangent = finalNormal.perpNew();
+        this.featureFlipped = finalFlipped;
 
         for (let i = 0; i < this.numContacts; i++) {
             this.normalContacts.push(new ContactSolver(this, contactPoints[i].point));
