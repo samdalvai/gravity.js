@@ -16,7 +16,6 @@ export const TEXTURES = {
     torso: 'assets/ragdoll/torso.png',
 
     // Angry birds sprites
-    background: 'assets/angrybirds/background.png',
     birdRed: 'assets/angrybirds/bird-red.png',
     pig1: 'assets/angrybirds/pig-1.png',
     pig2: 'assets/angrybirds/pig-2.png',
@@ -28,6 +27,10 @@ export const TEXTURES = {
     woodPlankCracked: 'assets/angrybirds/wood-plank-cracked.png',
     woodPlankSolid: 'assets/angrybirds/wood-plank-solid.png',
     woodTriangle: 'assets/angrybirds/wood-triangle.png',
+
+    // Backgrounds
+    background: 'assets/angrybirds/background.png',
+    darkBackground: 'assets/dark.png',
 };
 
 type TextureMap = Record<string, ImageBitmap>;
@@ -52,7 +55,7 @@ export default class AssetStore {
     }
 
     /** Retrieves a texture by name */
-    static getTexture(name: string): ImageBitmap {
+    static getTexture(name: keyof typeof TEXTURES): ImageBitmap {
         const texture = this.textures[name];
 
         if (!texture) {
