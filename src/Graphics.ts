@@ -205,29 +205,44 @@ export default class Graphics {
     }
 
     static drawCapsule = (capsuleShape: CapsuleShape, color = 'white'): void => {
-        const topPosition = new Vec2(0, capsuleShape.halfHeight);
-        const bottomPosition = new Vec2(0, -capsuleShape.halfHeight);
+        const r = capsuleShape.radius;
+        const hh = capsuleShape.halfHeight;
 
-        Graphics.drawHalfCircle(topPosition.x, topPosition.y, capsuleShape.radius, 'top', color);
-        Graphics.drawHalfCircle(bottomPosition.x, bottomPosition.y, capsuleShape.radius, 'bottom', color);
+        this.ctx.beginPath();
 
-        const topStartX = topPosition.x - capsuleShape.radius;
-        const topStartY = topPosition.y;
-        const bottomStartX = bottomPosition.x - capsuleShape.radius;
-        const bottomStartY = bottomPosition.y;
+        this.ctx.moveTo(-r, hh);
+        this.ctx.arc(0, -hh, r, Math.PI, 0);
+        this.ctx.lineTo(r, -hh);
+        this.ctx.arc(0, hh, r, 0, Math.PI);
+        this.ctx.lineTo(-r, hh);
 
-        const topEndX = topPosition.x + capsuleShape.radius;
-        const topEndY = topPosition.y;
-        const bottomEndX = bottomPosition.x + capsuleShape.radius;
-        const bottomEndY = bottomPosition.y;
+        this.ctx.closePath();
 
-        Graphics.drawLine(topStartX, topStartY, bottomStartX, bottomStartY, color);
-        Graphics.drawLine(topEndX, topEndY, bottomEndX, bottomEndY, color);
+        this.ctx.strokeStyle = color;
+        this.ctx.stroke();
 
         // Draw body position
         this.ctx.fillStyle = color;
         this.ctx.beginPath();
         this.ctx.arc(0, 0, 1, 0, Math.PI * 2);
+        this.ctx.fill();
+    };
+
+    static drawFillCapsule = (capsuleShape: CapsuleShape, color = 'white'): void => {
+        const r = capsuleShape.radius;
+        const hh = capsuleShape.halfHeight;
+
+        this.ctx.beginPath();
+
+        this.ctx.moveTo(-r, hh);
+        this.ctx.arc(0, -hh, r, Math.PI, 0);
+        this.ctx.lineTo(r, -hh);
+        this.ctx.arc(0, hh, r, 0, Math.PI);
+        this.ctx.lineTo(-r, hh);
+
+        this.ctx.closePath();
+
+        this.ctx.fillStyle = color;
         this.ctx.fill();
     };
 
@@ -324,7 +339,7 @@ export default class Graphics {
                             body.texture,
                         );
                     } else {
-                        // Method missing
+                        this.drawFillCapsule(capsuleShape, 'gray');
                     }
                 }
                 break;
