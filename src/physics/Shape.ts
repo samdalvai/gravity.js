@@ -103,15 +103,11 @@ export class PolygonShape extends Shape {
         return acc0 / 6 / acc1;
     };
 
-    /**
-     * @param angle The angle in radians, use degrees * Math.PI / 180 to convert to radians
-     * @param position The updated position of the shape
-     */
     updateVertices = (angle: number, position: Vec2): void => {
         // Loop all the vertices, transforming from local to world space
         const cos = Math.cos(angle);
         const sin = Math.sin(angle);
-        // console.log(this.localVertices);
+
         for (let i = 0; i < this.localVertices.length; i++) {
             // First rotate, then we translate
             this.worldVertices[i].x = this.localVertices[i].x * cos - this.localVertices[i].y * sin;
@@ -261,7 +257,6 @@ export class CapsuleShape extends BoxShape {
 
     constructor(halfHeight: number, radius: number) {
         super(radius * 2, halfHeight * 2);
-        // super();
         this.halfHeight = halfHeight;
         this.radius = radius;
     }
