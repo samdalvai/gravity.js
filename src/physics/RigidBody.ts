@@ -15,6 +15,7 @@ export default class RigidBody {
     rotation: number;
     angularVelocity: number;
     angularAcceleration: number;
+    canRotate: boolean;
 
     // Forces and torque
     sumForces: Vec2;
@@ -51,9 +52,12 @@ export default class RigidBody {
         this.position = new Vec2(x, y);
         this.velocity = new Vec2(0, 0);
         this.acceleration = new Vec2(0, 0);
+
         this.rotation = 0.0;
         this.angularVelocity = 0.0;
         this.angularAcceleration = 0.0;
+        this.canRotate = true;
+
         this.sumForces = new Vec2(0, 0);
         this.sumTorque = 0.0;
 
@@ -210,7 +214,9 @@ export default class RigidBody {
         this.position.y += this.velocity.y * dt;
 
         // Integrate the angular velocity to find the new rotation angle
-        this.rotation += this.angularVelocity * dt;
+        if (this.canRotate) {
+            this.rotation += this.angularVelocity * dt;
+        }
 
         // Update the vertices to adjust them to the new position/rotation
         this.shape.updateVertices(this.rotation, this.position);
