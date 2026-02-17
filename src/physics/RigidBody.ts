@@ -35,6 +35,7 @@ export default class RigidBody {
     // Pointer to the shape/geometry of this rigid body
     shape: Shape;
     shapeType: ShapeType;
+    shapeFillColor = 'gray';
 
     texture: CanvasImageSource | null = null;
 

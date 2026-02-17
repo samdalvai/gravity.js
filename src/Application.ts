@@ -154,6 +154,7 @@ export default class Application {
                         this.player.canRotate = false;
                         this.player.restitution = 0;
                         this.player.friction = 0.8;
+                        this.player.shapeFillColor = 'orange';
                         this.world.addBody(this.player);
                     }
 
@@ -168,7 +169,6 @@ export default class Application {
                         const capsule = new RigidBody(new CapsuleShape(40, 20), x, y, 1);
                         capsule.restitution = 0.2;
                         capsule.friction = 0.1;
-                        // capsule.rotation = Utils.randomNumber(0, 1);
                         this.world.addBody(capsule);
                     }
 
