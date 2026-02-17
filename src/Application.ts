@@ -73,6 +73,7 @@ export default class Application {
         // this.testBody = new RigidBody(new BoxShape(50, 50), 0, 0, 0);
         // this.world.addBody(this.testBody);
 
+        // this.bgTexture = AssetStore.getTexture('darkBackground');
         this.bgTexture = AssetStore.getTexture('background');
     };
 
