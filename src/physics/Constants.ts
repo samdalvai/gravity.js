@@ -19,3 +19,8 @@ export const SETTINGS = {
     restitutionSlop: 50,
     positionCorrectionBeta: 0.2,
 };
+
+export const PLAYER_MOVE_FORCE = 1500;
+export const PLAYER_MAX_SPEED = 350;
+export const PLAYER_ACCELERATION = 10;
+export const PLAYER_JUMP_IMPULSE = 600;
