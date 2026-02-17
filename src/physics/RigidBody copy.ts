@@ -1,9 +1,9 @@
 import AssetStore, { TEXTURES } from '../AssetStore';
 import Vec2 from '../math/Vec2';
-import { Shape, ShapeType } from './Shape';
+import { PolygonShape, Shape, ShapeType } from './Shape';
 
 export default class RigidBody {
-    static nextId = 0;
+    static _nextId = 0;
     id: number;
 
     // Linear motion
@@ -44,7 +44,7 @@ export default class RigidBody {
     maxY!: number;
 
     constructor(shape: Shape, x: number, y: number, mass: number) {
-        this.id = RigidBody.nextId++;
+        this.id = RigidBody._nextId++;
 
         this.shape = shape;
         this.shapeType = shape.getType();
@@ -82,7 +82,7 @@ export default class RigidBody {
         }
 
         this.shape.updateVertices(this.rotation, this.position);
-        this.shape.updateAABB(this);
+        this.updateAABB();
     }
 
     // a.id << 16 → shifts a.id into the upper 16 bits of a 32-bit integer
@@ -205,7 +205,7 @@ export default class RigidBody {
         if (this.isStatic()) {
             // TODO: this is needed because otherwise AABB is not correctly set for static objects with rotation
             this.shape.updateVertices(this.rotation, this.position);
-            this.shape.updateAABB(this);
+            this.updateAABB();
             return;
         }
 
@@ -222,9 +222,41 @@ export default class RigidBody {
         this.shape.updateVertices(this.rotation, this.position);
 
         // Update AABB values based on new position
-        this.shape.updateAABB(this);
+        if (this.angularVelocity !== 0 || this.velocity.x !== 0 || this.velocity.y !== 0) {
+            this.updateAABB();
+        }
 
         // Bleed off tiny angular velocity to avoid circle rolling forever
         this.angularVelocity *= 0.99;
+    };
+
+    updateAABB = (): void => {
+        if (this.shape.getType() === ShapeType.CIRCLE) {
+            this.minX = this.position.x - this.shape.radius;
+            this.maxX = this.position.x + this.shape.radius;
+            this.minY = this.position.y - this.shape.radius;
+            this.maxY = this.position.y + this.shape.radius;
+        }
+
+        if (this.shape.getType() === ShapeType.POLYGON) {
+            const worldVertices = (this.shape as PolygonShape).worldVertices;
+
+            let minX = Infinity;
+            let minY = Infinity;
+            let maxX = -Infinity;
+            let maxY = -Infinity;
+
+            for (const v of worldVertices) {
+                minX = Math.min(minX, v.x);
+                minY = Math.min(minY, v.y);
+                maxX = Math.max(maxX, v.x);
+                maxY = Math.max(maxY, v.y);
+            }
+
+            this.minX = minX;
+            this.maxX = maxX;
+            this.minY = minY;
+            this.maxY = maxY;
+        }
     };
 }
