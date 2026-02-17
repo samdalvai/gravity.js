@@ -119,6 +119,13 @@ export default class Application {
                     if (inputEvent.key === 'f') {
                         const x = InputManager.mousePosition.x;
                         const y = InputManager.mousePosition.y;
+                        const blackHole = new RigidBody(new CircleShape(1), x, y, 1000);
+
+                        for (const body of this.world.getBodies()) {
+                            const attraction = Force.generateGravitationalForce(blackHole, body, GRAVITY, 1, 200);
+                            console.log("Impulse: ", attraction);
+                            body.applyImpulseLinear(attraction);
+                        }
                     }
 
                     if (inputEvent.key === 'g') {
