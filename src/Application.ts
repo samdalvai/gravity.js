@@ -25,6 +25,7 @@ export default class Application {
     private bgTexture: ImageBitmap | null = null;
     private generateParticle = false;
     private generateCircles = true;
+    private generateAttraction = false;
     private showContacts = true;
     private showAABB = false;
     private demoIndex = 1;
@@ -117,15 +118,7 @@ export default class Application {
                     }
 
                     if (inputEvent.key === 'f') {
-                        const x = InputManager.mousePosition.x;
-                        const y = InputManager.mousePosition.y;
-                        const blackHole = new RigidBody(new CircleShape(1), x, y, 1000);
-
-                        for (const body of this.world.getBodies()) {
-                            const attraction = Force.generateGravitationalForce(blackHole, body, GRAVITY, 1, 200);
-                            console.log("Impulse: ", attraction);
-                            body.applyImpulseLinear(attraction);
-                        }
+                        this.generateAttraction = true;
                     }
 
                     if (inputEvent.key === 'g') {
@@ -223,6 +216,10 @@ export default class Application {
                 case 'keyup':
                     if (inputEvent.key === 'g') {
                         this.generateParticle = false;
+                    }
+
+                    if (inputEvent.key === 'f') {
+                        this.generateAttraction = false;
                     }
 
                     if (inputEvent.code === 'ArrowLeft') {
@@ -369,6 +366,17 @@ export default class Application {
                 particle.friction = 0.5;
                 particle.setTexture(this.generateCircles ? 'rockRound' : 'rockBox');
                 this.world.addBody(particle);
+            }
+        }
+
+        if (this.generateAttraction) {
+            const x = InputManager.mousePosition.x;
+            const y = InputManager.mousePosition.y;
+            const blackHole = new RigidBody(new CircleShape(1), x, y, 1000);
+
+            for (const body of this.world.getBodies()) {
+                const attraction = Force.generateGravitationalForce(body, blackHole, 1000, 1, 200);
+                body.addForce(attraction);
             }
         }
     };
