@@ -151,6 +151,8 @@ export default class Application {
                         }
 
                         this.player = new RigidBody(new CapsuleShape(40, 20), x, y, 1);
+                        // this.player = new RigidBody(new CircleShape(40), x, y, 1);
+                        // this.player = new RigidBody(new BoxShape(40, 40), x, y, 1);
                         this.player.canRotate = false;
                         this.player.restitution = 0;
                         this.player.friction = 0.8;
@@ -489,6 +491,7 @@ export default class Application {
         for (const manifold of this.world.getManifolds()) {
             if (manifold.bodyA === this.player || manifold.bodyB === this.player) {
                 // Normal pointing upward relative to player
+                console.log(manifold.contactNormal);
                 if (manifold.contactNormal.y > 0.5) {
                     return true;
                 }
