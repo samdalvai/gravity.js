@@ -332,21 +332,13 @@ export class ContactManifold extends Constraint {
         contactNormal: Vec2,
         featureFlipped: boolean,
     ) {
-        // Force consistent normal sign so that "collision from above"
-        // always gives contactNormal.y > 0 (positive = upward), regardless of
-        // which body is a box/polygon vs circle/capsule and regardless of
-        // the order the collision detection passed the bodies.
-        let finalBodyA = bodyA;
-        let finalBodyB = bodyB;
-        let finalNormal = contactNormal;
-        let finalFlipped = featureFlipped;
+        // Ensure normal always points upward (y >= 0)
+        const shouldFlip = contactNormal.y < 0;
 
-        if (contactNormal.y < 0) {
-            finalBodyA = bodyB;
-            finalBodyB = bodyA;
-            finalNormal = contactNormal.negateNew();
-            finalFlipped = !featureFlipped;
-        }
+        const finalBodyA = shouldFlip ? bodyB : bodyA;
+        const finalBodyB = shouldFlip ? bodyA : bodyB;
+        const finalNormal = shouldFlip ? contactNormal.negateNew() : contactNormal;
+        const finalFlipped = shouldFlip ? !featureFlipped : featureFlipped;
 
         super(finalBodyA, finalBodyB);
 
