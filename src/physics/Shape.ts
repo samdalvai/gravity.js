@@ -1,4 +1,5 @@
 import Vec2 from '../math/Vec2';
+import Edge from './Edge';
 import RigidBody from './RigidBody';
 
 export enum ShapeType {
@@ -172,6 +173,30 @@ export class PolygonShape extends Shape {
         }
 
         return { vertex: this.localVertices[idx], index: idx };
+    };
+
+    findFarthestEdge = (b: RigidBody, dir: Vec2): Edge => {
+        const localDir = b.worldDirToLocal(dir);
+        const farthest = b.shape.support(localDir);
+        let curr = farthest.vertex;
+        const idx = farthest.index;
+    
+        const p = b.shape as PolygonShape;
+    
+        const count = p.localVertices.length;
+        const prev = p.localVertices[(idx - 1 + count) % count];
+        const next = p.localVertices[(idx + 1) % count];
+    
+        const e1 = curr.subNew(prev).normalizeNew();
+        const e2 = curr.subNew(next).normalizeNew();
+    
+        const w = Math.abs(e1.dot(localDir)) <= Math.abs(e2.dot(localDir));
+    
+        curr = b.localPointToWorld(curr);
+    
+        return w
+            ? new Edge(b.localPointToWorld(prev), curr, (idx - 1 + count) % count, idx)
+            : new Edge(curr, b.localPointToWorld(next), idx, (idx + 1) % count);
     };
 
     updateAABB = (body: RigidBody): void => {
