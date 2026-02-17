@@ -2,7 +2,14 @@ import AssetStore from './AssetStore';
 import Graphics from './Graphics';
 import InputManager, { MouseButton } from './InputManager';
 import Vec2 from './math/Vec2';
-import { GRAVITY, MAX_BODIES } from './physics/Constants';
+import {
+    GRAVITY,
+    MAX_BODIES,
+    PIXELS_PER_METER,
+    PLAYER_ACCELERATION,
+    PLAYER_JUMP_IMPULSE,
+    PLAYER_MAX_SPEED,
+} from './physics/Constants';
 import { DistanceJoint } from './physics/DistanceJoint';
 import Force from './physics/Force';
 import RigidBody from './physics/RigidBody';
@@ -22,6 +29,10 @@ export default class Application {
     private demoIndex = 1;
     private testBody: RigidBody | null = null;
     private middleMousePressed = false;
+
+    private player: RigidBody | null = null;
+    private leftButtonPressed: boolean = false;
+    private rightButtonPressed: boolean = false;
 
     // Debug related properties
     private debug = true;
@@ -130,6 +141,22 @@ export default class Application {
                         this.showContacts = !this.showContacts;
                     }
 
+                    if (inputEvent.key === 'q') {
+                        const x = InputManager.mousePosition.x;
+                        const y = InputManager.mousePosition.y;
+
+                        if (this.player) {
+                            this.world.removeBody(this.player);
+                            this.player = null;
+                        }
+
+                        this.player = new RigidBody(new BoxShape(40, 100), x, y, 1);
+                        this.player.canRotate = false;
+                        this.player.restitution = 0;
+                        this.player.friction = 0.3;
+                        this.world.addBody(this.player);
+                    }
+
                     if (inputEvent.key === 'x') {
                         if (this.world.getBodies().length >= MAX_BODIES) {
                             continue;
@@ -173,10 +200,32 @@ export default class Application {
                         demo(this.world);
                     }
 
+                    if (inputEvent.code === 'Space') {
+                        if (this.player && this.isPlayerGrounded()) {
+                            this.player.applyImpulseLinear(new Vec2(0, PLAYER_JUMP_IMPULSE));
+                        }
+                    }
+
+                    if (inputEvent.code === 'ArrowLeft') {
+                        this.leftButtonPressed = true;
+                    }
+
+                    if (inputEvent.code === 'ArrowRight') {
+                        this.rightButtonPressed = true;
+                    }
+
                     break;
                 case 'keyup':
                     if (inputEvent.key === 'g') {
                         this.generateParticle = false;
+                    }
+
+                    if (inputEvent.code === 'ArrowLeft') {
+                        this.leftButtonPressed = false;
+                    }
+
+                    if (inputEvent.code === 'ArrowRight') {
+                        this.rightButtonPressed = false;
                     }
 
                     break;
@@ -280,6 +329,24 @@ export default class Application {
                 this.lastFPSUpdate = performance.now();
                 this.FPS = 1 / frameTime;
             }
+        }
+
+        if (this.player) {
+            const dt = frameTime;
+            const acceleration = PLAYER_ACCELERATION;
+
+            if (this.leftButtonPressed) {
+                const impulse = -acceleration * this.player.mass * dt * PIXELS_PER_METER;
+                this.player.applyImpulseLinear(new Vec2(impulse, 0));
+            }
+
+            if (this.rightButtonPressed) {
+                const impulse = acceleration * this.player.mass * dt * PIXELS_PER_METER;
+                this.player.applyImpulseLinear(new Vec2(impulse, 0));
+            }
+
+            // Clamp velocity so you don't exceed max speed
+            this.player.velocity.x = Utils.clamp(this.player.velocity.x, -PLAYER_MAX_SPEED, PLAYER_MAX_SPEED);
         }
 
         this.world.update();
@@ -392,6 +459,7 @@ export default class Application {
             '(G) to generate particles, (X) to generate capsules, (R) to generate random convex polygon, (E) to generate explosion',
             `(D) debug mode: ${this.debug ? 'ON' : 'OFF'}`,
             `(C) chosen particle: ${this.generateCircles ? 'Circle' : 'Box'}`,
+            '(Q) To span a player object',
         ];
 
         const x = InputManager.mousePosition.x;
@@ -414,4 +482,18 @@ export default class Application {
             Graphics.drawText(text[i], 50, 50 + i * 25, 18, 'arial', this.debug ? 'orange' : 'black');
         }
     };
+
+    private isPlayerGrounded(): boolean {
+        if (!this.player) return false;
+
+        for (const manifold of this.world.getManifolds()) {
+            if (manifold.bodyA === this.player || manifold.bodyB === this.player) {
+                // Normal pointing upward relative to player
+                if (manifold.contactNormal.y > 0.5) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 }
