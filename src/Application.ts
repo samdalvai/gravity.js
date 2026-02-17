@@ -150,10 +150,10 @@ export default class Application {
                             this.player = null;
                         }
 
-                        this.player = new RigidBody(new BoxShape(40, 100), x, y, 1);
+                        this.player = new RigidBody(new CapsuleShape(40, 20), x, y, 1);
                         this.player.canRotate = false;
                         this.player.restitution = 0;
-                        this.player.friction = 0.3;
+                        this.player.friction = 0.8;
                         this.world.addBody(this.player);
                     }
 
@@ -347,6 +347,8 @@ export default class Application {
 
             // Clamp velocity so you don't exceed max speed
             this.player.velocity.x = Utils.clamp(this.player.velocity.x, -PLAYER_MAX_SPEED, PLAYER_MAX_SPEED);
+
+            // console.log(object);
         }
 
         this.world.update();
