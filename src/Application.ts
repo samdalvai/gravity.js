@@ -3,6 +3,7 @@ import Graphics from './Graphics';
 import InputManager, { MouseButton } from './InputManager';
 import Vec2 from './math/Vec2';
 import {
+    DELTA_TIME,
     GRAVITY,
     MAX_BODIES,
     PIXELS_PER_METER,
@@ -150,8 +151,8 @@ export default class Application {
                             this.player = null;
                         }
 
-                        // this.player = new RigidBody(new CapsuleShape(40, 20), x, y, 1);
-                        this.player = new RigidBody(new CircleShape(40), x, y, 1);
+                        this.player = new RigidBody(new CapsuleShape(40, 20), x, y, 1);
+                        // this.player = new RigidBody(new CircleShape(40), x, y, 1);
                         // this.player = new RigidBody(new BoxShape(40, 40), x, y, 1);
                         this.player.canRotate = false;
                         this.player.restitution = 0;
@@ -334,16 +335,15 @@ export default class Application {
         }
 
         if (this.player) {
-            const dt = frameTime;
             const acceleration = PLAYER_ACCELERATION;
 
             if (this.leftButtonPressed) {
-                const impulse = -acceleration * this.player.mass * dt * PIXELS_PER_METER;
+                const impulse = -acceleration * this.player.mass * DELTA_TIME * PIXELS_PER_METER;
                 this.player.applyImpulseLinear(new Vec2(impulse, 0));
             }
 
             if (this.rightButtonPressed) {
-                const impulse = acceleration * this.player.mass * dt * PIXELS_PER_METER;
+                const impulse = acceleration * this.player.mass * DELTA_TIME * PIXELS_PER_METER;
                 this.player.applyImpulseLinear(new Vec2(impulse, 0));
             }
 
