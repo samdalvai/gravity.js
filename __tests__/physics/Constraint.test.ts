@@ -48,16 +48,7 @@ describe('Constraint', () => {
         const numFrames = 60;
         const solverIterations = 20;
 
-        const aCircleShape = a.shape as CircleShape;
-        const bCircleShape = b.shape as CircleShape;
-        const manifold = CollisionDetection.detectCollisionCircleCircle(
-            a.position,
-            aCircleShape.radius,
-            a,
-            b.position,
-            bCircleShape.radius,
-            b,
-        )!;
+        const manifold = CollisionDetection.detectCollisionCircleCircle(a, b)!;
 
         const deltaTime = 1 / 60;
         for (let i = 0; i < numFrames; i++) {
