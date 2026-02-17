@@ -1,49 +1,26 @@
 import Vec2 from '../math/Vec2';
 import { CONTACT_MERGE_THRESHOLD } from './Constants';
 import { ContactManifold } from './Contact';
-import Edge from './Edge';
 import RigidBody from './RigidBody';
 import { CapsuleShape, CircleShape, PolygonShape, ShapeType } from './Shape';
-
-const findFarthestEdge = (b: RigidBody, dir: Vec2): Edge => {
-    const localDir = b.worldDirToLocal(dir);
-    const farthest = b.shape.support(localDir);
-    let curr = farthest.vertex;
-    const idx = farthest.index;
-
-    const p = b.shape as PolygonShape;
-
-    const count = p.localVertices.length;
-    const prev = p.localVertices[(idx - 1 + count) % count];
-    const next = p.localVertices[(idx + 1) % count];
-
-    const e1 = curr.subNew(prev).normalizeNew();
-    const e2 = curr.subNew(next).normalizeNew();
-
-    const w = Math.abs(e1.dot(localDir)) <= Math.abs(e2.dot(localDir));
-
-    curr = b.localPointToWorld(curr);
-
-    return w
-        ? new Edge(b.localPointToWorld(prev), curr, (idx - 1 + count) % count, idx)
-        : new Edge(curr, b.localPointToWorld(next), idx, (idx + 1) % count);
-};
 
 export interface ContactPoint {
     point: Vec2;
     id: number;
 }
 
-const findContactPoints = (n: Vec2, a: RigidBody, b: RigidBody): ContactPoint[] => {
-    const edgeA = findFarthestEdge(a, n);
-    const edgeB = findFarthestEdge(b, n.negateNew());
+const findContactPoints = (normal: Vec2, a: RigidBody, b: RigidBody): ContactPoint[] => {
+    const aPolygon = a.shape as PolygonShape;
+    const bPolygon = b.shape as PolygonShape;
+    const edgeA = aPolygon.findFarthestEdge(a, normal);
+    const edgeB = bPolygon.findFarthestEdge(b, normal.negateNew());
 
     let ref = edgeA; // Reference edge
     let inc = edgeB; // Incidence edge
     let flip = false;
 
-    const aPerpendicularness = Math.abs(edgeA.dir.dot(n));
-    const bPerpendicularness = Math.abs(edgeB.dir.dot(n));
+    const aPerpendicularness = Math.abs(edgeA.dir.dot(normal));
+    const bPerpendicularness = Math.abs(edgeB.dir.dot(normal));
 
     if (aPerpendicularness >= bPerpendicularness) {
         ref = edgeB;
@@ -53,7 +30,7 @@ const findContactPoints = (n: Vec2, a: RigidBody, b: RigidBody): ContactPoint[] 
 
     inc.clip(ref.p1, ref.dir);
     inc.clip(ref.p2, ref.dir.negateNew());
-    inc.clip(ref.p1, flip ? n : n.negateNew(), true);
+    inc.clip(ref.p1, flip ? normal : normal.negateNew(), true);
 
     let contactPoints: ContactPoint[];
 
@@ -120,11 +97,11 @@ export default class CollisionDetection {
         return null;
     };
 
-    static detectCollisionCircleCircle(a: RigidBody, b: RigidBody): ContactManifold | null {
-        const aCircleShape = a.shape as CircleShape;
-        const bCircleShape = b.shape as CircleShape;
+    static detectCollisionCircleCircle(circleA: RigidBody, circleB: RigidBody): ContactManifold | null {
+        const aCircleShape = circleA.shape as CircleShape;
+        const bCircleShape = circleB.shape as CircleShape;
 
-        return this.circleCircleTest(a.position, aCircleShape.radius, a, b.position, bCircleShape.radius, b);
+        return this.circleCircleTest(circleA.position, aCircleShape.radius, circleA, circleB.position, bCircleShape.radius, circleB);
     }
 
     private static circleCircleTest = (
@@ -149,9 +126,9 @@ export default class CollisionDetection {
         return new ContactManifold(aBody, bBody, [{ point: contactPoint, id: -1 }], penetrationDepth, normal, false);
     };
 
-    static detectCollisionPolygonPolygon = (a: RigidBody, b: RigidBody): ContactManifold | null => {
-        const aPoly = a.shape as PolygonShape;
-        const bPoly = b.shape as PolygonShape;
+    static detectCollisionPolygonPolygon = (polygonA: RigidBody, polygonB: RigidBody): ContactManifold | null => {
+        const aPoly = polygonA.shape as PolygonShape;
+        const bPoly = polygonB.shape as PolygonShape;
 
         const [abSep, aEdge] = aPoly.findMinSeparation(bPoly);
         if (abSep >= 0) return null;
@@ -172,15 +149,15 @@ export default class CollisionDetection {
             flipped = true;
         }
 
-        const contactPoints = findContactPoints(normal, a, b);
+        const contactPoints = findContactPoints(normal, polygonA, polygonB);
         if (contactPoints.length === 0) return null;
 
-        return new ContactManifold(a, b, contactPoints, penetrationDepth, normal, flipped);
+        return new ContactManifold(polygonA, polygonB, contactPoints, penetrationDepth, normal, flipped);
     };
 
-    static detectCollisionPolygonCircle = (a: RigidBody, b: RigidBody): ContactManifold | null => {
-        const bCircleShape = b.shape as CircleShape;
-        return this.polygonCircleTest(a, b.position, bCircleShape.radius, b);
+    static detectCollisionPolygonCircle = (polygon: RigidBody, circle: RigidBody): ContactManifold | null => {
+        const bCircleShape = circle.shape as CircleShape;
+        return this.polygonCircleTest(polygon, circle.position, bCircleShape.radius, circle);
     };
 
     private static polygonCircleTest = (
