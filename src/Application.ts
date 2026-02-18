@@ -204,7 +204,7 @@ export default class Application {
                     }
 
                     if (inputEvent.code === 'Space') {
-                        if (this.player && this.isPlayerGrounded()) {
+                        if (this.player && this.player.isGrounded) {
                             this.player.applyImpulseLinear(new Vec2(0, PLAYER_JUMP_IMPULSE));
                         }
                     }

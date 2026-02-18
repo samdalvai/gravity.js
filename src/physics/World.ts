@@ -14,6 +14,7 @@ import { ContactManifold } from './Contact';
 import Force from './Force';
 import { Joint } from './Joint';
 import RigidBody from './RigidBody';
+import { ShapeType } from './Shape';
 
 export default class World {
     private G: number;
@@ -92,7 +93,7 @@ export default class World {
                 body.addForce(force);
             }
 
-            // Apply torque to all bodies
+            // Apply torque to all bodiesx
             for (const torque of this.torques) {
                 body.addTorque(torque);
             }
