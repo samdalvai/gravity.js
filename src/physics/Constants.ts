@@ -20,6 +20,7 @@ export const SETTINGS = {
     penetrationSlop: 0.5,
     restitutionSlop: 50,
     positionCorrectionBeta: 0.2,
+    angularVelocitySlop: 0.05,
 };
 
 export const PLAYER_MOVE_FORCE = 1500;
