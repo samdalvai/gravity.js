@@ -14,7 +14,6 @@ import { ContactManifold } from './Contact';
 import Force from './Force';
 import { Joint } from './Joint';
 import RigidBody from './RigidBody';
-import { ShapeType } from './Shape';
 
 export default class World {
     private G: number;
