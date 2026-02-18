@@ -289,7 +289,7 @@ export default class Graphics {
         this.ctx.rotate(rotation);
 
         // TODO: Draw filled shape if texture is not available
-        const color = body.isGrounded ? 'green' : 'white'
+        const color = 'white';
 
         switch (body.shape.getType()) {
             case ShapeType.CIRCLE:

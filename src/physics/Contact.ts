@@ -332,12 +332,21 @@ export class ContactManifold extends Constraint {
         contactNormal: Vec2,
         featureFlipped: boolean,
     ) {
-        super(bodyA, bodyB);
+        // Ensure normal always points upward (y >= 0)
+        const shouldFlip = contactNormal.y < 0;
+
+        const finalBodyA = shouldFlip ? bodyB : bodyA;
+        const finalBodyB = shouldFlip ? bodyA : bodyB;
+        const finalNormal = shouldFlip ? contactNormal.negateNew() : contactNormal;
+        const finalFlipped = shouldFlip ? !featureFlipped : featureFlipped;
+
+        super(finalBodyA, finalBodyB);
+
         this.contactPoints = contactPoints;
         this.penetrationDepth = penetrationDepth;
-        this.contactNormal = contactNormal;
-        this.contactTangent = contactNormal.perpNew();
-        this.featureFlipped = featureFlipped;
+        this.contactNormal = finalNormal;
+        this.contactTangent = finalNormal.perpNew();
+        this.featureFlipped = finalFlipped;
 
         for (let i = 0; i < this.numContacts; i++) {
             this.normalContacts.push(new ContactSolver(this, contactPoints[i].point));
