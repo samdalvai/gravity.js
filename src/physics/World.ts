@@ -10,7 +10,7 @@
 import Graphics from '../Graphics';
 import Vec2 from '../math/Vec2';
 import CollisionDetection from './CollisionDetection';
-import { DELTA_TIME, INVERSE_DELTA_TIME, SETTINGS } from './Constants';
+import { BODY_REMOVAL_THRESHOLD, DELTA_TIME, INVERSE_DELTA_TIME, SETTINGS } from './Constants';
 import { ContactManifold } from './Contact';
 import Force from './Force';
 import { Joint } from './Joint';
@@ -175,7 +175,7 @@ export default class World {
             const body = this.bodies[i];
 
             // It suffices to look for the position going below the screen
-            if (body.position.y < -Graphics.height()) {
+            if (body.position.y < BODY_REMOVAL_THRESHOLD) {
                 this.bodies[i] = this.bodies[this.bodies.length - 1];
                 this.bodies.pop();
             }
