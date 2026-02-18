@@ -2,7 +2,7 @@ export const DELTA_TIME = 1 / 60;
 export const INVERSE_DELTA_TIME = 1 / DELTA_TIME;
 
 export const PIXELS_PER_METER = 100;
-export const MAX_BODIES = 2000;
+export const MAX_BODIES = 3500;
 export const GRAVITY = 9.8;
 
 // Since the findFarthestEdge function returns a edge with a minimum length of 0.01 for circle,
