@@ -25,7 +25,6 @@ export default class Application {
     private world: World;
     private bgTexture: ImageBitmap | null = null;
     private generateParticle = false;
-    private generateCircles = true;
     private generateAttraction = false;
     private showContacts = true;
     private showAABB = false;
@@ -122,16 +121,12 @@ export default class Application {
                         this.generateAttraction = true;
                     }
 
-                    if (inputEvent.key === 'w') {
+                    if (inputEvent.key === 'c') {
                         this.generateParticle = true;
                     }
 
                     if (inputEvent.key === 'g') {
                         SETTINGS.applyGravity = !SETTINGS.applyGravity;
-                    }
-
-                    if (inputEvent.key === 'c') {
-                        this.generateCircles = !this.generateCircles;
                     }
 
                     if (inputEvent.key === 'a') {
@@ -219,7 +214,7 @@ export default class Application {
 
                     break;
                 case 'keyup':
-                    if (inputEvent.key === 'w') {
+                    if (inputEvent.key === 'c') {
                         this.generateParticle = false;
                     }
 
@@ -369,11 +364,10 @@ export default class Application {
                 const angle = Math.random() * Math.PI * 2;
                 const positionOffset = new Vec2(Math.cos(angle), Math.sin(angle)).scaleNew(radius);
 
-                const shape = this.generateCircles ? new CircleShape(5) : new BoxShape(10, 10);
-                const particle = new RigidBody(shape, x + positionOffset.x, y + positionOffset.y, 0.01);
+                const particle = new RigidBody(new CircleShape(5), x + positionOffset.x, y + positionOffset.y, 0.01);
                 particle.restitution = 0.0;
                 particle.friction = 0.5;
-                particle.setTexture(this.generateCircles ? 'rockRound' : 'rockBox');
+                particle.setTexture('rockRound');
                 this.world.addBody(particle);
             }
         }
@@ -503,11 +497,10 @@ export default class Application {
             // General info
             `${Demo.demoStrings[this.demoIndex]}`,
             '(1-9) select demo, Left Mouse to generate circles, Right Mouse to generate boxes',
-            '(W) to generate particles, (X) to generate capsules, (R) to generate random convex polygon',
+            '(C) to generate particles, (X) to generate capsules, (R) to generate random convex polygon',
             '(E) to generate explosion, (F) to generate attraction force, (Q) to spawn a player object',
             `(G) apply gravity: ${SETTINGS.applyGravity ? 'ON' : 'OFF'}`,
             `(D) debug mode: ${this.debug ? 'ON' : 'OFF'}`,
-            `(C) chosen particle: ${this.generateCircles ? 'Circle' : 'Box'}`,
         ];
 
         const x = InputManager.mousePosition.x;
@@ -520,7 +513,7 @@ export default class Application {
             `FPS: ${this.FPS.toFixed(2)}`,
             `Mouse position: {${x.toFixed(2)}, ${y.toFixed(2)}}`,
             `Zoom: ${Graphics.zoom.toFixed(2)}`,
-            `Num objects: ${this.world.getBodies().length}`,
+            `Num objects: ${this.world.getBodies().length} / 5000 (max)`,
             `Num contacts: ${numContacts}`,
         ];
 
