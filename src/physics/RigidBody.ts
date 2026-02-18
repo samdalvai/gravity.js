@@ -32,6 +32,7 @@ export default class RigidBody {
     restitution: number;
     friction: number;
     surfaceSpeed: number;
+    isGrounded = false;
 
     // Pointer to the shape/geometry of this rigid body
     shape: Shape;
@@ -233,7 +234,10 @@ export default class RigidBody {
         // Update AABB values based on new position
         this.shape.updateAABB(this);
 
-        // Bleed off tiny angular velocity to avoid circle rolling forever
-        this.angularVelocity *= 0.99;       
+        if (this.isGrounded) {
+            const rollingResistance = 0.5;
+            const torque = -rollingResistance * this.angularVelocity;
+            this.angularVelocity += torque * dt;
+        }
     };
 }

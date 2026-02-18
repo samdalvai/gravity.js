@@ -289,13 +289,14 @@ export default class Graphics {
         this.ctx.rotate(rotation);
 
         // TODO: Draw filled shape if texture is not available
+        const color = body.isGrounded ? 'green' : 'white'
 
         switch (body.shape.getType()) {
             case ShapeType.CIRCLE:
                 {
                     const circleShape = body.shape as CircleShape;
                     if (debug) {
-                        this.drawCircle(circleShape.radius, 'white');
+                        this.drawCircle(circleShape.radius, color);
                     } else if (body.texture) {
                         this.drawTexture(circleShape.radius * 2, circleShape.radius * 2, body.texture);
                     } else {
@@ -308,7 +309,7 @@ export default class Graphics {
                     const polygonShape = body.shape as PolygonShape;
 
                     if (debug) {
-                        this.drawPolygon(polygonShape.localVertices, 'white');
+                        this.drawPolygon(polygonShape.localVertices, color);
                     } else if (body.texture) {
                         this.drawTexture(polygonShape.width, polygonShape.height, body.texture);
                     } else {
@@ -321,7 +322,7 @@ export default class Graphics {
                     const boxShape = body.shape as BoxShape;
 
                     if (debug) {
-                        this.drawBox(boxShape.width, boxShape.height, 'white');
+                        this.drawBox(boxShape.width, boxShape.height, color);
                     } else if (body.texture) {
                         this.drawTexture(boxShape.width, boxShape.height, body.texture);
                     } else {
@@ -334,7 +335,7 @@ export default class Graphics {
                     const capsuleShape = body.shape as CapsuleShape;
 
                     if (debug) {
-                        this.drawCapsule(capsuleShape, 'white');
+                        this.drawCapsule(capsuleShape, color);
                     } else if (body.texture) {
                         const polygonShape = body.shape as PolygonShape;
                         // TODO: draw texture without stretching it

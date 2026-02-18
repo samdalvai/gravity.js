@@ -147,6 +147,8 @@ export default class World {
 
             newManifoldMap.set(key, newManifold);
             newManifolds.push(newManifold);
+
+            this.setGrounded(a, b, newManifold.contactNormal);
         }
 
         this.manifoldMap = newManifoldMap;
@@ -187,4 +189,22 @@ export default class World {
         this.forces.length = 0;
         this.torques.length = 0;
     };
+
+    private setGrounded(bodyA: RigidBody, bodyB: RigidBody, contactNormal: Vec2): boolean {
+        const up = new Vec2(0, 1);
+
+        if (contactNormal.negateNew().dot(up) > 0) {
+            bodyA.isGrounded = true;
+        } else {
+            bodyA.isGrounded = false;
+        }
+
+        if (contactNormal.dot(up) > 0) {
+            bodyB.isGrounded = true;
+        } else {
+            bodyB.isGrounded = false;
+        }
+        
+        return false;
+    }
 }

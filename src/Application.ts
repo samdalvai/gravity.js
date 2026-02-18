@@ -389,15 +389,31 @@ export default class Application {
             }
         }
 
-        for (const manifold of this.world.getManifolds()) {
-            const isACircle = manifold.bodyA.shapeType === ShapeType.CIRCLE;
-            const isBCircle = manifold.bodyB.shapeType === ShapeType.CIRCLE;
+        // for (const manifold of this.world.getManifolds()) {
+        //     const bodyA = manifold.bodyA;
+        //     const bodyB = manifold.bodyB;
 
-            if (isACircle || isBCircle) {
-                console.log('normal: ', manifold.contactNormal);
-                console.log('tangent: ', manifold.contactTangent);
-            }
-        }
+        //     const isACircle = bodyA.shapeType === ShapeType.CIRCLE;
+        //     const isBCircle = bodyB.shapeType === ShapeType.CIRCLE;
+
+        //     if (isACircle || isBCircle) {
+        //         console.log('normal: ', manifold.contactNormal);
+        //         console.log('tangent: ', manifold.contactTangent);
+        //     } else {
+        //         continue;
+        //     }
+
+        //     const isABox = bodyA.shapeType === ShapeType.BOX;
+        //     const isBBox = bodyB.shapeType === ShapeType.BOX;
+
+        //     if (isABox && !bodyA.isStatic()) {
+        //         console.log('angular: ', bodyA.angularVelocity);
+        //     }
+
+        //     if (isBBox && !bodyB.isStatic()) {
+        //         console.log('angular: ', bodyB.angularVelocity);
+        //     }
+        // }
     };
 
     render = (): void => {
