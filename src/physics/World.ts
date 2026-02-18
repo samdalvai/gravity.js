@@ -199,7 +199,7 @@ export default class World {
         const dotA = contactNormal.negateNew().dot(up);
         const dotB = contactNormal.dot(up);
 
-        if (dotA > 0) bodyA.isGrounded = true;
-        if (dotB > 0) bodyB.isGrounded = true;
+        if (dotA > 0.5) bodyA.isGrounded = true;
+        if (dotB > 0.5) bodyB.isGrounded = true;
     }
 }
