@@ -381,7 +381,7 @@ export default class Application {
         if (this.generateAttraction) {
             const x = InputManager.mousePosition.x;
             const y = InputManager.mousePosition.y;
-            const blackHole = new RigidBody(new CircleShape(1), x, y, 100000);
+            const blackHole = new RigidBody(new CircleShape(1), x, y, 50_000);
 
             for (const body of this.world.getBodies()) {
                 const attraction = Force.generateGravitationalForce(body, blackHole, GRAVITY, 1, 200);
@@ -508,19 +508,23 @@ export default class Application {
     private isPlayerGrounded(): boolean {
         if (!this.player) return false;
 
+        const up = new Vec2(0, 1);
+
         for (const manifold of this.world.getManifolds()) {
-            if (manifold.bodyA === this.player) {
-                const normal = manifold.contactNormal.negateNew();
-                if (normal.y > 0) {
-                    return true;
-                }
-            } else if (manifold.bodyB === this.player) {
-                const normal = manifold.contactNormal;
-                if (normal.y > 0) {
-                    return true;
-                }
+            const isA = manifold.bodyA === this.player;
+            const isB = manifold.bodyB === this.player;
+
+            if (!isA && !isB) continue;
+
+            const normal = manifold.contactNormal;
+            const playerNormal = isA ? normal.negateNew() : normal;
+
+            // Check if contact pushes upward on player
+            if (playerNormal.dot(up) > 0.5) {
+                return true;
             }
         }
+
         return false;
     }
 }
