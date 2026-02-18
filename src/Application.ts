@@ -10,6 +10,7 @@ import {
     PLAYER_ACCELERATION,
     PLAYER_JUMP_IMPULSE,
     PLAYER_MAX_SPEED,
+    SETTINGS,
 } from './physics/Constants';
 import { DistanceJoint } from './physics/DistanceJoint';
 import Force from './physics/Force';
@@ -121,8 +122,12 @@ export default class Application {
                         this.generateAttraction = true;
                     }
 
-                    if (inputEvent.key === 'g') {
+                    if (inputEvent.key === 'w') {
                         this.generateParticle = true;
+                    }
+
+                    if (inputEvent.key === 'g') {
+                        SETTINGS.applyGravity = !SETTINGS.applyGravity;
                     }
 
                     if (inputEvent.key === 'c') {
@@ -214,7 +219,7 @@ export default class Application {
 
                     break;
                 case 'keyup':
-                    if (inputEvent.key === 'g') {
+                    if (inputEvent.key === 'w') {
                         this.generateParticle = false;
                     }
 
@@ -468,8 +473,9 @@ export default class Application {
             // General info
             `${Demo.demoStrings[this.demoIndex]}`,
             '(1-9) select demo, Left Mouse to generate circles, Right Mouse to generate boxes',
-            '(G) to generate particles, (X) to generate capsules, (R) to generate random convex polygon',
+            '(W) to generate particles, (X) to generate capsules, (R) to generate random convex polygon',
             '(E) to generate explosion, (F) to generate attraction force',
+            `(G) apply gravity: ${SETTINGS.applyGravity ? 'ON' : 'OFF'}`,
             `(D) debug mode: ${this.debug ? 'ON' : 'OFF'}`,
             `(C) chosen particle: ${this.generateCircles ? 'Circle' : 'Box'}`,
             '(Q) To span a player object',
