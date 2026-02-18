@@ -9,6 +9,7 @@ export const GRAVITY = 9.8;
 // merging threshold should be greater than sqrt(2) * minimum edge length
 export const TANGENT_MIN_LENGTH = 0.01 * PIXELS_PER_METER;
 export const CONTACT_MERGE_THRESHOLD = 1.415 * TANGENT_MIN_LENGTH;
+export const BODY_REMOVAL_THRESHOLD = -3500;
 
 export const SETTINGS = {
     applyGravity: true,
