@@ -234,10 +234,10 @@ export default class RigidBody {
         // Update AABB values based on new position
         this.shape.updateAABB(this);
 
+        // Bleed off angular velocity for grounded bodies
         if (this.isGrounded) {
             const rollingResistance = 0.5;
-            const torque = -rollingResistance * this.angularVelocity;
-            this.angularVelocity += torque * dt;
+            this.angularVelocity *= 1 - rollingResistance * dt;
         }
     };
 }
