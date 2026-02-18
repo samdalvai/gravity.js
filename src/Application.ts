@@ -478,11 +478,10 @@ export default class Application {
             `${Demo.demoStrings[this.demoIndex]}`,
             '(1-9) select demo, Left Mouse to generate circles, Right Mouse to generate boxes',
             '(W) to generate particles, (X) to generate capsules, (R) to generate random convex polygon',
-            '(E) to generate explosion, (F) to generate attraction force',
+            '(E) to generate explosion, (F) to generate attraction force, (Q) to spawn a player object',
             `(G) apply gravity: ${SETTINGS.applyGravity ? 'ON' : 'OFF'}`,
             `(D) debug mode: ${this.debug ? 'ON' : 'OFF'}`,
             `(C) chosen particle: ${this.generateCircles ? 'Circle' : 'Box'}`,
-            '(Q) To span a player object',
         ];
 
         const x = InputManager.mousePosition.x;
