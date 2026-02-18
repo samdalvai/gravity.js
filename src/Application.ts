@@ -509,9 +509,14 @@ export default class Application {
         if (!this.player) return false;
 
         for (const manifold of this.world.getManifolds()) {
-            if (manifold.bodyA === this.player || manifold.bodyB === this.player) {
-                // Normal pointing upward relative to player
-                if (manifold.contactNormal.y > 0) {
+            if (manifold.bodyA === this.player) {
+                const normal = manifold.contactNormal.negateNew();
+                if (normal.y > 0.5) {
+                    return true;
+                }
+            } else if (manifold.bodyB === this.player) {
+                const normal = manifold.contactNormal;
+                if (normal.y > 0.5) {
                     return true;
                 }
             }
