@@ -15,7 +15,7 @@ import {
 import { DistanceJoint } from './physics/DistanceJoint';
 import Force from './physics/Force';
 import RigidBody from './physics/RigidBody';
-import { BoxShape, CapsuleShape, CircleShape } from './physics/Shape';
+import { BoxShape, CapsuleShape, CircleShape, ShapeType } from './physics/Shape';
 import Utils from './physics/Utils';
 import World from './physics/World';
 import Demo from './samples/Demo';
@@ -386,6 +386,16 @@ export default class Application {
             for (const body of this.world.getBodies()) {
                 const attraction = Force.generateGravitationalForce(body, blackHole, GRAVITY, 1, 200);
                 body.addForce(attraction);
+            }
+        }
+
+        for (const manifold of this.world.getManifolds()) {
+            const isACircle = manifold.bodyA.shapeType === ShapeType.CIRCLE;
+            const isBCircle = manifold.bodyB.shapeType === ShapeType.CIRCLE;
+
+            if (isACircle || isBCircle) {
+                console.log('normal: ', manifold.contactNormal);
+                console.log('tangent: ', manifold.contactTangent);
             }
         }
     };
