@@ -377,10 +377,10 @@ export default class Application {
         if (this.generateAttraction) {
             const x = InputManager.mousePosition.x;
             const y = InputManager.mousePosition.y;
-            const blackHole = new RigidBody(new CircleShape(1), x, y, 1000);
+            const blackHole = new RigidBody(new CircleShape(1), x, y, 100000);
 
             for (const body of this.world.getBodies()) {
-                const attraction = Force.generateGravitationalForce(body, blackHole, 1000, 1, 200);
+                const attraction = Force.generateGravitationalForce(body, blackHole, GRAVITY, 1, 200);
                 body.addForce(attraction);
             }
         }
