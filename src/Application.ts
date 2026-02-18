@@ -360,13 +360,17 @@ export default class Application {
         if (this.generateParticle) {
             const x = InputManager.mousePosition.x;
             const y = InputManager.mousePosition.y;
+            const radius = 10;
             for (let i = 0; i < 10; i++) {
                 if (this.world.getBodies().length >= MAX_BODIES) {
                     continue;
                 }
 
+                const angle = Math.random() * Math.PI * 2;
+                const positionOffset = new Vec2(Math.cos(angle), Math.sin(angle)).scaleNew(radius);
+
                 const shape = this.generateCircles ? new CircleShape(5) : new BoxShape(10, 10);
-                const particle = new RigidBody(shape, x, y, 0.01);
+                const particle = new RigidBody(shape, x + positionOffset.x, y + positionOffset.y, 0.01);
                 particle.restitution = 0.0;
                 particle.friction = 0.5;
                 particle.setTexture(this.generateCircles ? 'rockRound' : 'rockBox');

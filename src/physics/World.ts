@@ -7,7 +7,6 @@
  * Original project:
  * https://github.com/Sopiro
  */
-import Graphics from '../Graphics';
 import Vec2 from '../math/Vec2';
 import CollisionDetection from './CollisionDetection';
 import { BODY_REMOVAL_THRESHOLD, DELTA_TIME, INVERSE_DELTA_TIME, SETTINGS } from './Constants';
