@@ -96,6 +96,9 @@ export default class World {
             for (const torque of this.torques) {
                 body.addTorque(torque);
             }
+
+            // Reset grounded value at the beginning of each frame
+            body.isGrounded = false;
         }
 
         // Integrate all the forces
@@ -190,21 +193,13 @@ export default class World {
         this.torques.length = 0;
     };
 
-    private setGrounded(bodyA: RigidBody, bodyB: RigidBody, contactNormal: Vec2): boolean {
+    private setGrounded(bodyA: RigidBody, bodyB: RigidBody, contactNormal: Vec2) {
         const up = new Vec2(0, 1);
 
-        if (contactNormal.negateNew().dot(up) > 0) {
-            bodyA.isGrounded = true;
-        } else {
-            bodyA.isGrounded = false;
-        }
+        const dotA = contactNormal.negateNew().dot(up);
+        const dotB = contactNormal.dot(up);
 
-        if (contactNormal.dot(up) > 0) {
-            bodyB.isGrounded = true;
-        } else {
-            bodyB.isGrounded = false;
-        }
-        
-        return false;
+        if (dotA > 0) bodyA.isGrounded = true;
+        if (dotB > 0) bodyB.isGrounded = true;
     }
 }
