@@ -82,9 +82,11 @@ export default class World {
 
         // Loop all bodies of the world applying forces
         for (const body of this.bodies) {
-            // Apply the weight force to all bodies
-            const weightForce = Force.generateWeightForce(body, this.G);
-            body.addForce(weightForce);
+            if (SETTINGS.applyGravity) {
+                // Apply the weight force to all bodies
+                const weightForce = Force.generateWeightForce(body, this.G);
+                body.addForce(weightForce);
+            }
 
             // Apply forces to all bodies
             for (const force of this.forces) {

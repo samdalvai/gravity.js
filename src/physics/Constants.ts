@@ -11,6 +11,7 @@ export const TANGENT_MIN_LENGTH = 0.01 * PIXELS_PER_METER;
 export const CONTACT_MERGE_THRESHOLD = 1.415 * TANGENT_MIN_LENGTH;
 
 export const SETTINGS = {
+    applyGravity: true,
     positionCorrection: true,
     impulseAccumulation: true,
     warmStarting: true,
