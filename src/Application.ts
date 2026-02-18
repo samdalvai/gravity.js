@@ -292,9 +292,6 @@ export default class Application {
                                 break;
                             case MouseButton.MIDDLE:
                                 this.middleMousePressed = true;
-                                {
-                                    console.log('Mouse middle pressed');
-                                }
                                 break;
                         }
                     }
@@ -303,9 +300,6 @@ export default class Application {
                     switch (inputEvent.button) {
                         case MouseButton.MIDDLE:
                             this.middleMousePressed = false;
-                            {
-                                console.log('Mouse middle released');
-                            }
                             break;
                     }
                     break;
