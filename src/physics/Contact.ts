@@ -372,11 +372,7 @@ export class ContactManifold extends Constraint {
     }
 
     override solve(): void {
-        // Solve tangent constraint first
-        for (let i = 0; i < this.numContacts; i++) {
-            this.tangentContacts[i].solve(this.normalContacts[i]);
-        }
-
+        // Solve normal constraint first
         if (this.numContacts == 1 || !SETTINGS.blockSolve) {
             for (let i = 0; i < this.numContacts; i++) {
                 this.normalContacts[i].solve();
@@ -384,6 +380,10 @@ export class ContactManifold extends Constraint {
         } else {
             // Solve two contact constraint in one shot using block solver
             this.blockSolver.solve();
+        }
+
+        for (let i = 0; i < this.numContacts; i++) {
+            this.tangentContacts[i].solve(this.normalContacts[i]);
         }
     }
 
