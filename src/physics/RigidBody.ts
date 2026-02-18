@@ -1,5 +1,6 @@
 import AssetStore, { TEXTURES } from '../AssetStore';
 import Vec2 from '../math/Vec2';
+import { SETTINGS } from './Constants';
 import { Shape, ShapeType } from './Shape';
 
 export default class RigidBody {
@@ -217,6 +218,11 @@ export default class RigidBody {
         // Integrate the angular velocity to find the new rotation angle
         if (this.canRotate) {
             this.rotation += this.angularVelocity * dt;
+
+            // Clamp tiny angular velocity to avoid circles accumulating angular velocity
+            if (Math.abs(this.angularVelocity) < SETTINGS.angularVelocitySlop) {
+                this.angularVelocity = 0;
+            }
         } else {
             this.angularVelocity = 0;
         }
@@ -228,6 +234,6 @@ export default class RigidBody {
         this.shape.updateAABB(this);
 
         // Bleed off tiny angular velocity to avoid circle rolling forever
-        this.angularVelocity *= 0.99;
+        this.angularVelocity *= 0.99;       
     };
 }
