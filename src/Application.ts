@@ -331,6 +331,8 @@ export default class Application {
     };
 
     update = (frameTime: number): void => {
+        // update: 4.319091796875 ms
+        console.time('update');
         if (this.debug) {
             if (!this.lastFPSUpdate || performance.now() - this.lastFPSUpdate > 1000) {
                 this.lastFPSUpdate = performance.now();
@@ -387,9 +389,12 @@ export default class Application {
                 body.addForce(attraction);
             }
         }
+        console.timeEnd('update');
     };
 
     render = (): void => {
+        // render: 1.972900390625 ms
+        console.time('render');
         Graphics.clearScreen();
         Graphics.beginWorld();
 
@@ -492,7 +497,7 @@ export default class Application {
             `FPS: ${this.FPS.toFixed(2)}`,
             `Mouse position: {${x.toFixed(2)}, ${y.toFixed(2)}}`,
             `Zoom: ${Graphics.zoom.toFixed(2)}`,
-            `Num objects: ${this.world.getBodies().length} / 5000 (max)`,
+            `Num objects: ${this.world.getBodies().length} / ${MAX_BODIES} (max)`,
             `Num contacts: ${numContacts}`,
         ];
 
@@ -501,5 +506,6 @@ export default class Application {
         for (let i = 0; i < text.length; i++) {
             Graphics.drawText(text[i], 50, 50 + i * 25, 18, 'arial', this.debug ? 'orange' : 'black');
         }
+        console.timeEnd('render');
     };
 }
