@@ -11,15 +11,15 @@ export default class Graphics {
     static zoom = 1;
     static pan = new Vec2(0, 0);
 
-    static width = (): number => {
+    static width(): number {
         return this.windowWidth;
-    };
+    }
 
-    static height = (): number => {
+    static height(): number {
         return this.windowHeight;
-    };
+    }
 
-    static openWindow = (): boolean => {
+    static openWindow(): boolean {
         const canvas = document.getElementById('gamePhysicsCanvas') as HTMLCanvasElement;
         const ctx = canvas.getContext('2d');
 
@@ -37,23 +37,23 @@ export default class Graphics {
         this.windowHeight = window.innerHeight;
 
         return true;
-    };
+    }
 
-    static increaseZoom = (): void => {
+    static increaseZoom(): void {
         this.zoom += 0.05;
-    };
+    }
 
-    static decreaseZoom = (): void => {
+    static decreaseZoom(): void {
         this.zoom -= 0.05;
 
         if (this.zoom < 0.05) {
             this.zoom = 0.05;
         }
-    };
+    }
 
-    static clearScreen = (): void => {
+    static clearScreen(): void {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    };
+    }
 
     /**
      * Start world coordinates to screen conversion.
@@ -83,15 +83,15 @@ export default class Graphics {
         this.ctx.restore();
     }
 
-    static drawLine = (x0: number, y0: number, x1: number, y1: number, color = 'white'): void => {
+    static drawLine(x0: number, y0: number, x1: number, y1: number, color = 'white'): void {
         this.ctx.strokeStyle = color;
         this.ctx.beginPath();
         this.ctx.moveTo(x0, y0);
         this.ctx.lineTo(x1, y1);
         this.ctx.stroke();
-    };
+    }
 
-    static drawCircle = (radius: number, color = 'white'): void => {
+    static drawCircle(radius: number, color = 'white'): void {
         // Draw the circle
         this.ctx.beginPath();
         this.ctx.arc(0, 0, radius, 0, Math.PI * 2);
@@ -107,9 +107,9 @@ export default class Graphics {
         this.ctx.lineTo(endX, endY);
         this.ctx.strokeStyle = color;
         this.ctx.stroke();
-    };
+    }
 
-    static drawHalfCircle = (x: number, y: number, radius: number, half: 'top' | 'bottom', color = 'white'): void => {
+    static drawHalfCircle(x: number, y: number, radius: number, half: 'top' | 'bottom', color = 'white'): void {
         let localStart: number;
         let localEnd: number;
 
@@ -126,16 +126,16 @@ export default class Graphics {
         this.ctx.arc(x, y, radius, localStart, localEnd);
         this.ctx.strokeStyle = color;
         this.ctx.stroke();
-    };
+    }
 
-    static drawFillCircle = (x: number, y: number, radius: number, color = 'white'): void => {
+    static drawFillCircle(x: number, y: number, radius: number, color = 'white'): void {
         this.ctx.beginPath();
         this.ctx.arc(x, y, radius, 0, Math.PI * 2);
         this.ctx.fillStyle = color;
         this.ctx.fill();
-    };
+    }
 
-    static drawPolygon = (vertices: Vec2[], color = 'white'): void => {
+    static drawPolygon(vertices: Vec2[], color = 'white'): void {
         this.ctx.strokeStyle = color;
         this.ctx.beginPath();
 
@@ -154,9 +154,9 @@ export default class Graphics {
         this.ctx.beginPath();
         this.ctx.arc(0, 0, 1, 0, Math.PI * 2);
         this.ctx.fill();
-    };
+    }
 
-    static drawFillPolygon = (x: number, y: number, vertices: Vec2[], color = 'white'): void => {
+    static drawFillPolygon(x: number, y: number, vertices: Vec2[], color = 'white'): void {
         if (vertices.length === 0) return;
 
         // Fill polygon
@@ -168,9 +168,9 @@ export default class Graphics {
         }
         this.ctx.closePath();
         this.ctx.fill();
-    };
+    }
 
-    static drawRect = (x: number, y: number, width: number, height: number, color = 'white'): void => {
+    static drawRect(x: number, y: number, width: number, height: number, color = 'white'): void {
         const halfWidth = width / 2;
         const halfHeight = height / 2;
 
@@ -182,7 +182,7 @@ export default class Graphics {
         this.ctx.lineTo(x - halfWidth, y + halfHeight);
         this.ctx.closePath();
         this.ctx.stroke();
-    };
+    }
 
     static drawBox(width: number, height: number, color = 'white') {
         const halfWidth = width / 2;
@@ -208,7 +208,7 @@ export default class Graphics {
         this.ctx.fillRect(-halfWidth, -halfHeight, halfWidth * 2, halfHeight * 2);
     }
 
-    static drawCapsule = (capsuleShape: CapsuleShape, color = 'white'): void => {
+    static drawCapsule(capsuleShape: CapsuleShape, color = 'white'): void {
         const r = capsuleShape.radius;
         const hh = capsuleShape.halfHeight;
 
@@ -230,9 +230,9 @@ export default class Graphics {
         this.ctx.beginPath();
         this.ctx.arc(0, 0, 1, 0, Math.PI * 2);
         this.ctx.fill();
-    };
+    }
 
-    static drawFillCapsule = (capsuleShape: CapsuleShape, color = 'white'): void => {
+    static drawFillCapsule(capsuleShape: CapsuleShape, color = 'white'): void {
         const r = capsuleShape.radius;
         const hh = capsuleShape.halfHeight;
 
@@ -248,15 +248,9 @@ export default class Graphics {
 
         this.ctx.fillStyle = color;
         this.ctx.fill();
-    };
+    }
 
-    static drawTexture = (
-        width: number,
-        height: number,
-        texture: CanvasImageSource,
-        offsetX = 0,
-        offsetY = 0,
-    ): void => {
+    static drawTexture(width: number, height: number, texture: CanvasImageSource, offsetX = 0, offsetY = 0): void {
         this.ctx.save();
 
         this.ctx.translate(offsetX, offsetY);
@@ -265,9 +259,9 @@ export default class Graphics {
         this.ctx.scale(1, -1);
         this.ctx.drawImage(texture, -width / 2, -height / 2, width, height);
         this.ctx.restore();
-    };
+    }
 
-    static drawText = (
+    static drawText(
         text: string,
         x: number,
         y: number,
@@ -276,7 +270,7 @@ export default class Graphics {
         color = 'white',
         align: CanvasTextAlign = 'left',
         baseline: CanvasTextBaseline = 'middle',
-    ): void => {
+    ): void {
         this.ctx.save();
         this.ctx.fillStyle = color;
         this.ctx.font = `${fontSize}px ${fontFamily}`;
@@ -284,9 +278,9 @@ export default class Graphics {
         this.ctx.textBaseline = baseline;
         this.ctx.fillText(text, x, y);
         this.ctx.restore();
-    };
+    }
 
-    static drawBody = (body: RigidBody, debug = false): void => {
+    static drawBody(body: RigidBody, debug = false): void {
         const x = body.position.x;
         const y = body.position.y;
         const rotation = body.rotation;
@@ -359,5 +353,5 @@ export default class Graphics {
         }
 
         this.ctx.restore();
-    };
+    }
 }
