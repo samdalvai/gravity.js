@@ -1,14 +1,14 @@
+import Vec2 from '../math/Vec2';
 import RigidBody from './RigidBody';
 import { PolygonShape } from './Shape';
-import Vec2 from '../math/Vec2';
 
 export default class Utils {
-    static randomNumber = (min: number = 1.0, max: number = 10.0): number => {
+    static randomNumber(min: number = 1.0, max: number = 10.0): number {
         return Math.random() * (max - min) + min;
-    };
+    }
 
     // Returns a random color as a hex string, e.g. "#A3F4C2"
-    static randomColor = (): string => {
+    static randomColor(): string {
         const r = Math.floor(Math.random() * 256);
         const g = Math.floor(Math.random() * 256);
         const b = Math.floor(Math.random() * 256);
@@ -19,17 +19,17 @@ export default class Utils {
         const bHex = b.toString(16).padStart(2, '0');
 
         return `#${rHex}${gHex}${bHex}`;
-    };
+    }
 
-    static clamp = (value: number, low: number, high: number): number => {
+    static clamp(value: number, low: number, high: number): number {
         return Math.max(low, Math.min(value, high));
-    };
+    }
 
-    static assert = (...test: boolean[]): void => {
+    static assert(...test: boolean[]): void {
         for (let i = 0; i < test.length; i++) if (!test[i]) throw new Error('Assertion failed');
-    };
+    }
 
-    static randomConvexBody = (x: number, y: number, radius: number, numVertices: number = -1): RigidBody => {
+    static randomConvexBody(x: number, y: number, radius: number, numVertices: number = -1): RigidBody {
         if (numVertices < 3) throw Error('Must have at least 3 vertices');
 
         const angles: number[] = [];
@@ -45,5 +45,5 @@ export default class Utils {
         }
 
         return new RigidBody(new PolygonShape(vertices), x, y, 1);
-    };
+    }
 }
