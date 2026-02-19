@@ -12,9 +12,9 @@ import RigidBody from '../physics/RigidBody';
 import { BoxShape, CircleShape, PolygonShape } from '../physics/Shape';
 import World from '../physics/World';
 
-const FLOOR_WIDTH = 2000;
+const FLOOR_WIDTH = 3200;
 const FLOOR_HEIGHT = 50;
-const FLOOR_POSITION_Y = -300;
+const FLOOR_POSITION_Y = -350;
 
 export default class Demo {
     static demoStrings = [

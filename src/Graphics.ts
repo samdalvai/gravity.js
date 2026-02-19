@@ -250,8 +250,16 @@ export default class Graphics {
         this.ctx.fill();
     };
 
-    static drawTexture = (width: number, height: number, texture: CanvasImageSource): void => {
+    static drawTexture = (
+        width: number,
+        height: number,
+        texture: CanvasImageSource,
+        offsetX = 0,
+        offsetY = 0,
+    ): void => {
         this.ctx.save();
+
+        this.ctx.translate(offsetX, offsetY);
 
         // This is needed because we flip the canvas with beginWorld()
         this.ctx.scale(1, -1);
