@@ -130,7 +130,6 @@ export default class Demo {
         this.generateFloor(world);
         this.generateFences(world);
 
-        const FLOOR_HEIGHT = 50;
         const stepCount = 8;
         const stepWidth = 90;
         const stepHeight = stepWidth / 4;
@@ -141,7 +140,7 @@ export default class Demo {
 
         const pillarWidth = 50;
         const pillarHeight = 400;
-        const pillarPositionY = -pillarHeight / 2 + FLOOR_HEIGHT / 2;
+        const pillarPositionY = FLOOR_POSITION_Y + pillarHeight / 2 + FLOOR_HEIGHT / 2; //-pillarHeight / 2 + FLOOR_HEIGHT / 2;
 
         const pillarLeft = new RigidBody(new BoxShape(pillarWidth, pillarHeight), -pillarOffsetX, pillarPositionY, 0);
         const pillarRight = new RigidBody(new BoxShape(pillarWidth, pillarHeight), pillarOffsetX, pillarPositionY, 0);
