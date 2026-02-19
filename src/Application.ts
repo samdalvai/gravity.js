@@ -248,9 +248,12 @@ export default class Application {
             if (!inputEvent) return;
 
             if (this.middleMousePressed) {
+                document.body.style.cursor = 'pointer';
                 // Drag the camera opposite to mouse movement
                 Graphics.pan.x -= inputEvent.movementX / Graphics.zoom;
                 Graphics.pan.y += inputEvent.movementY / Graphics.zoom;
+            } else {
+                document.body.style.cursor = 'default';
             }
 
             // Convert screen -> world coordinates
