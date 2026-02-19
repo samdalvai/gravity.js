@@ -91,40 +91,40 @@ export default class RigidBody {
     // a.id << 16 → shifts a.id into the upper 16 bits of a 32-bit integer
     // b.id & 0xffff → ensures that only the lower 16 bits of b.id are used
     // | -> bitwise OR combines them into a single 32-bit integer
-    static pairKey = (a: RigidBody, b: RigidBody): number => {
+    static pairKey(a: RigidBody, b: RigidBody): number {
         if (a.id < b.id) {
             return (a.id << 16) | (b.id & 0xffff);
         } else {
             return (b.id << 16) | (a.id & 0xffff);
         }
-    };
+    }
 
-    setTexture = (texture: keyof typeof TEXTURES): void => {
+    setTexture(texture: keyof typeof TEXTURES): void {
         this.texture = AssetStore.getTexture(texture);
-    };
+    }
 
-    isStatic = (): boolean => {
+    isStatic(): boolean {
         const epsilon = 0.005;
         return Math.abs(this.invMass - 0.0) < epsilon;
-    };
+    }
 
-    addForce = (force: Vec2): void => {
+    addForce(force: Vec2): void {
         this.sumForces.addAssign(force);
-    };
+    }
 
-    addTorque = (torque: number): void => {
+    addTorque(torque: number): void {
         this.sumTorque += torque;
-    };
+    }
 
-    clearForces = (): void => {
+    clearForces(): void {
         this.sumForces = new Vec2(0.0, 0.0);
-    };
+    }
 
-    clearTorque = (): void => {
+    clearTorque(): void {
         this.sumTorque = 0.0;
-    };
+    }
 
-    localPointToWorld = (point: Vec2): Vec2 => {
+    localPointToWorld(point: Vec2): Vec2 {
         const cos = Math.cos(this.rotation);
         const sin = Math.sin(this.rotation);
 
@@ -134,9 +134,9 @@ export default class RigidBody {
         );
 
         return rotated;
-    };
+    }
 
-    worldPointToLocal = (point: Vec2): Vec2 => {
+    worldPointToLocal(point: Vec2): Vec2 {
         const cos = Math.cos(-this.rotation);
         const sin = Math.sin(-this.rotation);
 
@@ -146,23 +146,23 @@ export default class RigidBody {
         const rotatedY = cos * translatedY + sin * translatedX;
 
         return new Vec2(rotatedX, rotatedY);
-    };
+    }
 
-    worldDirToLocal = (dir: Vec2): Vec2 => {
+    worldDirToLocal(dir: Vec2): Vec2 {
         const cos = Math.cos(-this.rotation);
         const sin = Math.sin(-this.rotation);
 
         return new Vec2(cos * dir.x - sin * dir.y, sin * dir.x + cos * dir.y);
-    };
+    }
 
-    applyImpulseLinear = (j: Vec2): void => {
+    applyImpulseLinear(j: Vec2): void {
         if (this.isStatic()) {
             return;
         }
 
         this.velocity.x += j.x * this.invMass;
         this.velocity.y += j.y * this.invMass;
-    };
+    }
 
     applyImpulseAngular(j: number): void {
         if (this.isStatic()) {
@@ -172,15 +172,15 @@ export default class RigidBody {
         this.angularVelocity += j * this.invI;
     }
 
-    applyImpulseAtPoint = (j: Vec2, r: Vec2): void => {
+    applyImpulseAtPoint(j: Vec2, r: Vec2): void {
         if (this.isStatic()) {
             return;
         }
         this.velocity.addAssign(j.scaleNew(this.invMass));
         this.angularVelocity += r.cross(j) * this.invI;
-    };
+    }
 
-    integrateForces = (dt: number): void => {
+    integrateForces(dt: number): void {
         if (this.isStatic()) {
             return;
         }
@@ -202,9 +202,9 @@ export default class RigidBody {
         // Clear all the forces and torque acting on the object before the next physics step
         this.clearForces();
         this.clearTorque();
-    };
+    }
 
-    integrateVelocities = (dt: number): void => {
+    integrateVelocities(dt: number): void {
         if (this.isStatic()) {
             // TODO: this is needed because otherwise AABB is not correctly set for static objects with rotation
             this.shape.updateVertices(this.rotation, this.position);
@@ -239,5 +239,5 @@ export default class RigidBody {
             const rollingResistance = 0.5;
             this.angularVelocity *= 1 - rollingResistance * dt;
         }
-    };
+    }
 }
