@@ -9,7 +9,7 @@ export interface ContactPoint {
     id: number;
 }
 
-const findContactPoints = (normal: Vec2, a: RigidBody, b: RigidBody): ContactPoint[] => {
+function findContactPoints(normal: Vec2, a: RigidBody, b: RigidBody): ContactPoint[] {
     const aPolygon = a.shape as PolygonShape;
     const bPolygon = b.shape as PolygonShape;
     const edgeA = aPolygon.findFarthestEdge(a, normal);
@@ -45,10 +45,10 @@ const findContactPoints = (normal: Vec2, a: RigidBody, b: RigidBody): ContactPoi
     }
 
     return contactPoints;
-};
+}
 
 export default class CollisionDetection {
-    static detectCollision = (a: RigidBody, b: RigidBody): ContactManifold | null => {
+    static detectCollision(a: RigidBody, b: RigidBody): ContactManifold | null {
         const aIsCircle = a.shapeType === ShapeType.CIRCLE;
         const bIsCircle = b.shapeType === ShapeType.CIRCLE;
 
@@ -95,23 +95,30 @@ export default class CollisionDetection {
         }
 
         return null;
-    };
+    }
 
     static detectCollisionCircleCircle(circleA: RigidBody, circleB: RigidBody): ContactManifold | null {
         const aCircleShape = circleA.shape as CircleShape;
         const bCircleShape = circleB.shape as CircleShape;
 
-        return this.circleCircleTest(circleA.position, aCircleShape.radius, circleA, circleB.position, bCircleShape.radius, circleB);
+        return this.circleCircleTest(
+            circleA.position,
+            aCircleShape.radius,
+            circleA,
+            circleB.position,
+            bCircleShape.radius,
+            circleB,
+        );
     }
 
-    private static circleCircleTest = (
+    private static circleCircleTest(
         aPos: Vec2,
         aRadius: number,
         aBody: RigidBody,
         bPos: Vec2,
         bRadius: number,
         bBody: RigidBody,
-    ): ContactManifold | null => {
+    ): ContactManifold | null {
         const ab = bPos.subNew(aPos);
         const radiusSum = aRadius + bRadius;
 
@@ -124,9 +131,9 @@ export default class CollisionDetection {
         const penetrationDepth = radiusSum - ab.magnitude();
 
         return new ContactManifold(aBody, bBody, [{ point: contactPoint, id: -1 }], penetrationDepth, normal, false);
-    };
+    }
 
-    static detectCollisionPolygonPolygon = (polygonA: RigidBody, polygonB: RigidBody): ContactManifold | null => {
+    static detectCollisionPolygonPolygon(polygonA: RigidBody, polygonB: RigidBody): ContactManifold | null {
         const aPoly = polygonA.shape as PolygonShape;
         const bPoly = polygonB.shape as PolygonShape;
 
@@ -153,19 +160,19 @@ export default class CollisionDetection {
         if (contactPoints.length === 0) return null;
 
         return new ContactManifold(polygonA, polygonB, contactPoints, penetrationDepth, normal, flipped);
-    };
+    }
 
-    static detectCollisionPolygonCircle = (polygon: RigidBody, circle: RigidBody): ContactManifold | null => {
+    static detectCollisionPolygonCircle(polygon: RigidBody, circle: RigidBody): ContactManifold | null {
         const bCircleShape = circle.shape as CircleShape;
         return this.polygonCircleTest(polygon, circle.position, bCircleShape.radius, circle);
-    };
+    }
 
-    private static polygonCircleTest = (
+    private static polygonCircleTest(
         polygon: RigidBody,
         circlePos: Vec2,
         circleRadius: number,
         circle: RigidBody,
-    ): ContactManifold | null => {
+    ): ContactManifold | null {
         const polygonShape = polygon.shape as PolygonShape;
         const polygonVertices = polygonShape.worldVertices;
 
@@ -280,7 +287,7 @@ export default class CollisionDetection {
             const contact = new ContactManifold(a, b, [{ point: end, id: -1 }], depth, normal, false);
             return contact;
         }
-    };
+    }
 
     static detectCollisionCapsuleCapsule(capsuleA: RigidBody, capsuleB: RigidBody): ContactManifold | null {
         const capsuleShapeB = capsuleB.shape as CapsuleShape;
@@ -302,17 +309,17 @@ export default class CollisionDetection {
         return this.capsuleCircleTest(capsuleA, bottomPosB, capsuleShapeB.radius, capsuleB);
     }
 
-    static detectCollisionCapsuleCircle = (capsule: RigidBody, circle: RigidBody): ContactManifold | null => {
+    static detectCollisionCapsuleCircle(capsule: RigidBody, circle: RigidBody): ContactManifold | null {
         const bCircleShape = circle.shape as CircleShape;
         return this.capsuleCircleTest(capsule, circle.position, bCircleShape.radius, circle);
-    };
+    }
 
-    private static capsuleCircleTest = (
+    private static capsuleCircleTest(
         capsule: RigidBody,
         circlePos: Vec2,
         circleRadius: number,
         circle: RigidBody,
-    ): ContactManifold | null => {
+    ): ContactManifold | null {
         const capsuleShape = capsule.shape as CapsuleShape;
 
         const offsetUp = new Vec2(0, capsuleShape.halfHeight).rotate(capsule.rotation);
@@ -330,7 +337,7 @@ export default class CollisionDetection {
 
         // Test bottom circle
         return this.circleCircleTest(bottomPos, capsuleShape.radius, capsule, circlePos, circleRadius, circle);
-    };
+    }
 
     static detectCollisionCapsulePolygon(capsule: RigidBody, polygon: RigidBody): ContactManifold | null {
         const capsuleShape = capsule.shape as CapsuleShape;

@@ -15,7 +15,7 @@ export default class InputManager {
 
     static lastWheelEventTime = 0;
 
-    static initialize = () => {
+    static initialize() {
         this.keyboardInputBuffer = [];
         this.mouseInputBuffer = [];
         this.mouseMoveBuffer = [];
@@ -34,25 +34,25 @@ export default class InputManager {
         window.addEventListener('contextmenu', e => {
             e.preventDefault();
         });
-    };
+    }
 
-    static handleKeyboardEvent = (event: KeyboardEvent) => {
+    static handleKeyboardEvent(event: KeyboardEvent) {
         this.keyboardInputBuffer.push(event);
-    };
+    }
 
-    static handleMouseMove = (event: MouseEvent) => {
+    static handleMouseMove(event: MouseEvent) {
         // const x = event.x - Graphics.width() / 2;
         // const y = -(event.y - Graphics.height() / 2);
         // this.mousePosition.x = x / Graphics.zoom;
         // this.mousePosition.y = y / Graphics.zoom;
         this.mouseMoveBuffer.push(event);
-    };
+    }
 
-    static handleMouseClick = (event: MouseEvent) => {
+    static handleMouseClick(event: MouseEvent) {
         this.mouseInputBuffer.push(event);
-    };
+    }
 
-    static handleWheelEvent = (event: MouseEvent) => {
+    static handleWheelEvent(event: MouseEvent) {
         // Wheel events for mousepads are triggered much faster compared to mouse wheels
         // whith this logic we prevent scrolling too fast on mouse pads
         if (performance.now() - this.lastWheelEventTime < 25) {
@@ -61,5 +61,5 @@ export default class InputManager {
 
         this.mouseWheelBuffer.push(event);
         this.lastWheelEventTime = performance.now();
-    };
+    }
 }
