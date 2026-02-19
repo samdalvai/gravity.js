@@ -150,7 +150,7 @@ export default class Application {
                         // this.player = new RigidBody(new CircleShape(40), x, y, 1);
                         // this.player = new RigidBody(new BoxShape(40, 40), x, y, 1);
                         this.player.canRotate = false;
-                        this.player.restitution = 0;
+                        this.player.restitution = 0.2;
                         this.player.friction = 0.8;
                         this.player.shapeFillColor = 'orange';
                         this.world.addBody(this.player);
@@ -166,7 +166,7 @@ export default class Application {
 
                         const capsule = new RigidBody(new CapsuleShape(40, 20), x, y, 1);
                         capsule.restitution = 0.2;
-                        capsule.friction = 0.1;
+                        capsule.friction = 0.7;
                         this.world.addBody(capsule);
                     }
 
