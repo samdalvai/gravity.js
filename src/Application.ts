@@ -56,7 +56,7 @@ export default class Application {
         this.bgTexture = AssetStore.getTexture(texture);
     }
 
-    setup = async (): Promise<void> => {
+    async setup(): Promise<void> {
         InputManager.initialize();
 
         await AssetStore.loadTextures();
@@ -65,9 +65,9 @@ export default class Application {
         const demo = Demo.demoFunctions[this.demoIndex];
         this.world.clear();
         demo(this.world, this);
-    };
+    }
 
-    input = (): void => {
+    input(): void {
         // Handle keyboard events
         while (InputManager.keyboardInputBuffer.length > 0) {
             const inputEvent = InputManager.keyboardInputBuffer.shift();
@@ -328,9 +328,9 @@ export default class Application {
                 Graphics.increaseZoom();
             }
         }
-    };
+    }
 
-    update = (frameTime: number): void => {
+    update(frameTime: number): void {
         // update: 4.319091796875 ms
         console.time('update');
         if (this.debug) {
@@ -390,9 +390,9 @@ export default class Application {
             }
         }
         console.timeEnd('update');
-    };
+    }
 
-    render = (): void => {
+    render(): void {
         // render: 1.972900390625 ms
         console.time('render');
         Graphics.clearScreen();
@@ -507,5 +507,5 @@ export default class Application {
             Graphics.drawText(text[i], 50, 50 + i * 25, 18, 'arial', this.debug ? 'orange' : 'black');
         }
         console.timeEnd('render');
-    };
+    }
 }
