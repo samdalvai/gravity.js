@@ -41,10 +41,6 @@ export default class InputManager {
     };
 
     static handleMouseMove = (event: MouseEvent) => {
-        // const x = event.x - Graphics.width() / 2;
-        // const y = -(event.y - Graphics.height() / 2);
-        // this.mousePosition.x = x / Graphics.zoom;
-        // this.mousePosition.y = y / Graphics.zoom;
         this.mouseMoveBuffer.push(event);
     };
 
