@@ -34,11 +34,11 @@ export default class World {
         this.iterations = iterations;
     }
 
-    addBody = (body: RigidBody): void => {
+    addBody(body: RigidBody): void {
         this.bodies.push(body);
-    };
+    }
 
-    removeBody = (body: RigidBody): void => {
+    removeBody(body: RigidBody): void {
         for (let i = 0; i < this.bodies.length; i++) {
             const current = this.bodies[i];
 
@@ -49,33 +49,33 @@ export default class World {
                 return;
             }
         }
-    };
+    }
 
-    getBodies = (): RigidBody[] => {
+    getBodies(): RigidBody[] {
         return this.bodies;
-    };
+    }
 
-    getManifolds = (): ContactManifold[] => {
+    getManifolds(): ContactManifold[] {
         return this.manifolds;
-    };
+    }
 
-    addJoint = (constraint: Joint): void => {
+    addJoint(constraint: Joint): void {
         this.joints.push(constraint);
-    };
+    }
 
-    getJoints = (): Joint[] => {
+    getJoints(): Joint[] {
         return this.joints;
-    };
+    }
 
-    addForce = (force: Vec2): void => {
+    addForce(force: Vec2): void {
         this.forces.push(force);
-    };
+    }
 
-    addTorque = (torque: number): void => {
+    addTorque(torque: number): void {
         this.torques.push(torque);
-    };
+    }
 
-    update = (): void => {
+    update(): void {
         const newManifolds: ContactManifold[] = [];
         const newManifoldMap: Map<number, ContactManifold> = new Map();
 
@@ -184,14 +184,14 @@ export default class World {
                 this.bodies.pop();
             }
         }
-    };
+    }
 
-    clear = () => {
+    clear() {
         this.bodies.length = 0;
         this.joints.length = 0;
         this.forces.length = 0;
         this.torques.length = 0;
-    };
+    }
 
     setGrounded(bodyA: RigidBody, bodyB: RigidBody, contactNormal: Vec2) {
         const up = new Vec2(0, 1);

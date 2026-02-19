@@ -32,7 +32,7 @@ export default class Edge {
         return this.p2.subNew(this.p1).magnitude();
     }
 
-    clip = (p: Vec2, dir: Vec2, remove: boolean = false): void => {
+    clip(p: Vec2, dir: Vec2, remove: boolean = false): void {
         const d1 = this.p1.subNew(p).dot(dir);
         const d2 = this.p2.subNew(p).dot(dir);
 
@@ -55,5 +55,5 @@ export default class Edge {
                 this.p2 = this.p2.addNew(this.p1.subNew(this.p2).scaleNew(-d2 / per));
             }
         }
-    };
+    }
 }
