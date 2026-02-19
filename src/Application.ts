@@ -331,8 +331,6 @@ export default class Application {
     }
 
     update(frameTime: number): void {
-        // update: 4.319091796875 ms
-        console.time('update');
         if (this.debug) {
             if (!this.lastFPSUpdate || performance.now() - this.lastFPSUpdate > 1000) {
                 this.lastFPSUpdate = performance.now();
@@ -389,12 +387,9 @@ export default class Application {
                 body.addForce(attraction);
             }
         }
-        console.timeEnd('update');
     }
 
     render(): void {
-        // render: 1.972900390625 ms
-        console.time('render');
         Graphics.clearScreen();
         Graphics.beginWorld();
 
@@ -506,6 +501,5 @@ export default class Application {
         for (let i = 0; i < text.length; i++) {
             Graphics.drawText(text[i], 50, 50 + i * 25, 18, 'arial', this.debug ? 'orange' : 'black');
         }
-        console.timeEnd('render');
     }
 }
