@@ -212,6 +212,10 @@ export default class Application {
                         this.rightButtonPressed = true;
                     }
 
+                    if (inputEvent.code === 'MetaLeft') {
+                        this.middleMousePressed = true;
+                    }
+
                     break;
                 case 'keyup':
                     if (inputEvent.key === 'c') {
@@ -228,6 +232,10 @@ export default class Application {
 
                     if (inputEvent.code === 'ArrowRight') {
                         this.rightButtonPressed = false;
+                    }
+
+                    if (inputEvent.code === 'MetaLeft') {
+                        this.middleMousePressed = false;
                     }
 
                     break;
