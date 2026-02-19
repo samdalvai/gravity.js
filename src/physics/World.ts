@@ -193,7 +193,7 @@ export default class World {
         this.torques.length = 0;
     };
 
-    private setGrounded(bodyA: RigidBody, bodyB: RigidBody, contactNormal: Vec2) {
+    setGrounded(bodyA: RigidBody, bodyB: RigidBody, contactNormal: Vec2) {
         const up = new Vec2(0, 1);
 
         const dotA = contactNormal.negateNew().dot(up);
