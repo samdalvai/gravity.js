@@ -29,28 +29,28 @@ export class CircleShape extends Shape {
         this.radius = radius;
     }
 
-    getType = (): ShapeType => {
+    getType(): ShapeType {
         return ShapeType.CIRCLE;
-    };
+    }
 
-    getMomentOfInertia = (): number => {
+    getMomentOfInertia(): number {
         // For solid circles, the moment of inertia is 1/2 * r^2
         // But this still needs to be multiplied by the rigidbody's mass
         return 0.5 * (this.radius * this.radius);
-    };
+    }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    updateVertices = (angle: number, position: Vec2): void => {
+    updateVertices(angle: number, position: Vec2): void {
         return; // Circles don't have vertices... nothing to do here
-    };
+    }
 
-    updateAABB = (body: RigidBody): void => {
+    updateAABB(body: RigidBody): void {
         const radius = this.radius;
         body.minX = body.position.x - radius;
         body.maxX = body.position.x + radius;
         body.minY = body.position.y - radius;
         body.maxY = body.position.y + radius;
-    };
+    }
 }
 
 export class PolygonShape extends Shape {
@@ -83,11 +83,11 @@ export class PolygonShape extends Shape {
         this.height = maxY - minY;
     }
 
-    getType = (): ShapeType => {
+    getType(): ShapeType {
         return ShapeType.POLYGON;
-    };
+    }
 
-    getMomentOfInertia = (): number => {
+    getMomentOfInertia(): number {
         let acc0 = 0;
         let acc1 = 0;
 
@@ -101,9 +101,9 @@ export class PolygonShape extends Shape {
         }
 
         return acc0 / 6 / acc1;
-    };
+    }
 
-    updateVertices = (angle: number, position: Vec2): void => {
+    updateVertices(angle: number, position: Vec2): void {
         // Loop all the vertices, transforming from local to world space
         const cos = Math.cos(angle);
         const sin = Math.sin(angle);
@@ -115,15 +115,15 @@ export class PolygonShape extends Shape {
             this.worldVertices[i].x += position.x;
             this.worldVertices[i].y += position.y;
         }
-    };
+    }
 
-    edgeAt = (index: number): Vec2 => {
+    edgeAt(index: number): Vec2 {
         const currVertex = index;
         const nextVertex = (index + 1) % this.worldVertices.length;
         return this.worldVertices[nextVertex].subNew(this.worldVertices[currVertex]);
-    };
+    }
 
-    findMinSeparation = (other: PolygonShape): [number, number] => {
+    findMinSeparation(other: PolygonShape): [number, number] {
         let separation = -Infinity;
         let indexReferenceEdge = 0;
 
@@ -149,9 +149,9 @@ export class PolygonShape extends Shape {
             }
         }
         return [separation, indexReferenceEdge];
-    };
+    }
 
-    support = (dir: Vec2): SupportResult => {
+    support(dir: Vec2): SupportResult {
         let idx = 0;
         let maxValue = dir.dot(this.localVertices[idx]);
 
@@ -164,31 +164,31 @@ export class PolygonShape extends Shape {
         }
 
         return { vertex: this.localVertices[idx], index: idx };
-    };
+    }
 
-    findFarthestEdge = (b: RigidBody, dir: Vec2): Edge => {
+    findFarthestEdge(b: RigidBody, dir: Vec2): Edge {
         const localDir = b.worldDirToLocal(dir);
         const farthest = this.support(localDir);
         let curr = farthest.vertex;
         const idx = farthest.index;
-     
+
         const count = this.localVertices.length;
         const prev = this.localVertices[(idx - 1 + count) % count];
         const next = this.localVertices[(idx + 1) % count];
-    
+
         const e1 = curr.subNew(prev).normalizeNew();
         const e2 = curr.subNew(next).normalizeNew();
-    
+
         const w = Math.abs(e1.dot(localDir)) <= Math.abs(e2.dot(localDir));
-    
+
         curr = b.localPointToWorld(curr);
-    
+
         return w
             ? new Edge(b.localPointToWorld(prev), curr, (idx - 1 + count) % count, idx)
             : new Edge(curr, b.localPointToWorld(next), idx, (idx + 1) % count);
-    };
+    }
 
-    updateAABB = (body: RigidBody): void => {
+    updateAABB(body: RigidBody): void {
         let minX = Infinity;
         let minY = Infinity;
         let maxX = -Infinity;
@@ -205,7 +205,7 @@ export class PolygonShape extends Shape {
         body.maxX = maxX;
         body.minY = minY;
         body.maxY = maxY;
-    };
+    }
 }
 
 export class BoxShape extends PolygonShape {
@@ -224,17 +224,17 @@ export class BoxShape extends PolygonShape {
         this.height = height;
     }
 
-    getType = (): ShapeType => {
+    getType(): ShapeType {
         return ShapeType.BOX;
-    };
+    }
 
-    getMomentOfInertia = (): number => {
+    getMomentOfInertia(): number {
         // For a rectangle, the moment of inertia is 1/12 * (w^2 + h^2)
         // But this still needs to be multiplied by the rigidbody's mass
         return 0.083333 * (this.width * this.width + this.height * this.height);
-    };
+    }
 
-    updateAABB = (body: RigidBody): void => {
+    updateAABB(body: RigidBody): void {
         const hw = this.width * 0.5;
         const hh = this.height * 0.5;
 
@@ -248,7 +248,7 @@ export class BoxShape extends PolygonShape {
         body.maxX = body.position.x + ex;
         body.minY = body.position.y - ey;
         body.maxY = body.position.y + ey;
-    };
+    }
 }
 
 export class CapsuleShape extends BoxShape {
@@ -261,11 +261,11 @@ export class CapsuleShape extends BoxShape {
         this.radius = radius;
     }
 
-    getType = (): ShapeType => {
+    getType(): ShapeType {
         return ShapeType.CAPSULE;
-    };
+    }
 
-    getMomentOfInertia = (): number => {
+    getMomentOfInertia(): number {
         // For solid capsules, the moment of inertia is the sum of the two half circles and box body inertia, accounting fot heir position
         // Still needs to be multiplied by the rigidbody's mass
         const r = this.radius;
@@ -284,17 +284,17 @@ export class CapsuleShape extends BoxShape {
         const iCircle = 0.5 * mCircle * r * r + (mCircle * (l * l)) / 4;
 
         return iRect + iCircle;
-    };
+    }
 
-    getTopCirclePosition = (): Vec2 => {
+    getTopCirclePosition(): Vec2 {
         return new Vec2(0, this.halfHeight);
-    };
+    }
 
-    getBottomCirclePosition = (): Vec2 => {
+    getBottomCirclePosition(): Vec2 {
         return new Vec2(0, -this.halfHeight);
-    };
+    }
 
-    updateAABB = (body: RigidBody): void => {
+    updateAABB(body: RigidBody): void {
         const radius = this.radius;
 
         const topCirclePos = this.getTopCirclePosition().rotate(body.rotation).addNew(body.position);
@@ -314,5 +314,5 @@ export class CapsuleShape extends BoxShape {
         body.minY = Math.min(topCircleMinY, bottomCircleMinY);
         body.maxX = Math.max(topCircleMaxX, bottomCircleMaxX);
         body.maxY = Math.max(topCircleMaxY, bottomCircleMaxY);
-    };
+    }
 }

@@ -1,7 +1,7 @@
 import Application from './Application';
 import { DELTA_TIME } from './physics/Constants';
 
-const run = async () => {
+async function run() {
     const app = new Application();
     await app.setup();
 
@@ -18,7 +18,7 @@ const run = async () => {
         }
     });
 
-    const loop = (now: number) => {
+    function loop(now: number) {
         let frameTime = (now - timePreviousFrame) / 1000;
         timePreviousFrame = now;
 
@@ -53,9 +53,9 @@ const run = async () => {
         }
 
         requestAnimationFrame(loop);
-    };
+    }
 
     requestAnimationFrame(loop);
-};
+}
 
 run();
