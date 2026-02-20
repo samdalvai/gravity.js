@@ -32,7 +32,10 @@ export default class RigidBody {
     restitution: number;
     friction: number;
     surfaceSpeed: number;
+
+    // Grounded variables
     isGrounded = false;
+    lastGroundedTime = 0;
 
     // Pointer to the shape/geometry of this rigid body
     shape: Shape;

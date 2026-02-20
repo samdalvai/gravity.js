@@ -220,7 +220,11 @@ export default class Application {
                     }
 
                     if (inputEvent.code === 'Space') {
-                        if (this.player && this.player.isGrounded) {
+                        const JUMP_TIME_TOLERANCE = (DELTA_TIME / SETTINGS.subSteps) * 6;
+                        if (
+                            this.player &&
+                            (this.player.isGrounded || this.player.lastGroundedTime <= JUMP_TIME_TOLERANCE)
+                        ) {
                             this.player.applyImpulseLinear(new Vec2(0, PLAYER_JUMP_IMPULSE));
                         }
                     }

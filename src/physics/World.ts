@@ -16,6 +16,7 @@ import { Joint } from './Joint';
 import RigidBody from './RigidBody';
 
 export default class World {
+    private readonly up = new Vec2(0, 1);
     private G: number;
 
     private bodies: RigidBody[] = [];
@@ -96,6 +97,14 @@ export default class World {
                 body.addTorque(torque);
             }
 
+            // Update last grounded time
+            if (body.isGrounded) {
+                body.lastGroundedTime = 0;
+            } else {
+                // Since we have fixed dt we can safely assume that the last frame dt is the same as this one
+                body.lastGroundedTime += dt;
+            }
+            
             // Reset grounded value at the beginning of each frame
             body.isGrounded = false;
         }
@@ -193,10 +202,8 @@ export default class World {
     }
 
     setGrounded(bodyA: RigidBody, bodyB: RigidBody, contactNormal: Vec2) {
-        const up = new Vec2(0, 1);
-
-        const dotA = contactNormal.negateNew().dot(up);
-        const dotB = contactNormal.dot(up);
+        const dotA = contactNormal.negateNew().dot(this.up);
+        const dotB = contactNormal.dot(this.up);
 
         if (dotA > 0.5) bodyA.isGrounded = true;
         if (dotB > 0.5) bodyB.isGrounded = true;
