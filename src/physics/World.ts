@@ -9,7 +9,7 @@
  */
 import Vec2 from '../math/Vec2';
 import CollisionDetection from './CollisionDetection';
-import { BODY_REMOVAL_THRESHOLD, DELTA_TIME, INVERSE_DELTA_TIME, SETTINGS } from './Constants';
+import { BODY_REMOVAL_THRESHOLD, SETTINGS } from './Constants';
 import { ContactManifold } from './Contact';
 import Force from './Force';
 import { Joint } from './Joint';
@@ -73,7 +73,8 @@ export default class World {
         this.torques.push(torque);
     }
 
-    update(): void {
+    update(dt: number): void {
+        const invDt = 1 / dt;
         const newManifolds: ContactManifold[] = [];
         const newManifoldMap: Map<number, ContactManifold> = new Map();
 
@@ -101,7 +102,7 @@ export default class World {
 
         // Integrate all the forces
         for (const body of this.bodies) {
-            body.integrateForces(DELTA_TIME);
+            body.integrateForces(dt);
         }
 
         this.bodies.sort((a, b) => a.minX - b.minX);
@@ -156,9 +157,9 @@ export default class World {
         this.manifolds = newManifolds;
 
         // Presolve constraints
-        for (let i = 0; i < this.manifolds.length; i++) this.manifolds[i].preSolve(INVERSE_DELTA_TIME);
+        for (let i = 0; i < this.manifolds.length; i++) this.manifolds[i].preSolve(invDt);
 
-        for (let i = 0; i < this.joints.length; i++) this.joints[i].preSolve(INVERSE_DELTA_TIME);
+        for (let i = 0; i < this.joints.length; i++) this.joints[i].preSolve(invDt);
 
         // Solve constraints
         for (let i = 0; i < SETTINGS.solverIterations; i++) {
@@ -169,7 +170,7 @@ export default class World {
 
         // Integrate all the velocities
         for (const body of this.bodies) {
-            body.integrateVelocities(DELTA_TIME);
+            body.integrateVelocities(dt);
         }
 
         // Kill objects that went out of the screen
