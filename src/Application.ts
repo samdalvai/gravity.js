@@ -11,7 +11,6 @@ import {
     PLAYER_JUMP_IMPULSE,
     PLAYER_MAX_SPEED,
     SETTINGS,
-    SUBSTEP_DELTA_TIME,
 } from './physics/Constants';
 import { DistanceJoint } from './physics/DistanceJoint';
 import Force from './physics/Force';
@@ -373,7 +372,7 @@ export default class Application {
         }
 
         for (let i = 0; i < SETTINGS.subSteps; i++) {
-            this.world.update(SUBSTEP_DELTA_TIME);
+            this.world.update(DELTA_TIME / SETTINGS.subSteps);
         }
 
         if (this.generateParticle) {
@@ -508,14 +507,14 @@ export default class Application {
             // Debug related info
             `(A) show AABB: ${this.showAABB ? 'ON' : 'OFF'}`,
             `(S) show contacts and joints: ${this.showContacts ? 'ON' : 'OFF'}`,
+            `Num objects: ${this.world.getBodies().length} / ${MAX_BODIES} (max)`,
             `Num contacts: ${numContacts}`,
-            `(+ -) Solver iterations: ${SETTINGS.solverIterations}`,
-            `(* /) Substeps: ${SETTINGS.subSteps}`,
+            `(+ -) solver iterations: ${SETTINGS.solverIterations}`,
+            `(* /) substeps: ${SETTINGS.subSteps}`,
             '***********************************************',
             `FPS: ${this.FPS.toFixed(2)}`,
             `Mouse position: {${x.toFixed(2)}, ${y.toFixed(2)}}`,
             `Zoom: ${Graphics.zoom.toFixed(2)}`,
-            `Num objects: ${this.world.getBodies().length} / ${MAX_BODIES} (max)`,
         ];
 
         const text = [...defaultText, ...(this.debug ? debugText : [])];
