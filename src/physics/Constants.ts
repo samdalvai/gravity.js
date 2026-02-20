@@ -1,6 +1,10 @@
 export const DELTA_TIME = 1 / 60;
 export const INVERSE_DELTA_TIME = 1 / DELTA_TIME;
 
+export const SUBSTEPS = 4;
+export const SUBSTEP_DELTA_TIME = DELTA_TIME / SUBSTEPS;
+export const SUBSTEP_IVERSE_DELTA_TIME = SUBSTEP_DELTA_TIME / SUBSTEPS;
+
 export const PIXELS_PER_METER = 100;
 export const MAX_BODIES = 5000;
 export const GRAVITY = 9.8;

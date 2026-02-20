@@ -11,6 +11,8 @@ import {
     PLAYER_JUMP_IMPULSE,
     PLAYER_MAX_SPEED,
     SETTINGS,
+    SUBSTEPS,
+    SUBSTEP_DELTA_TIME,
 } from './physics/Constants';
 import { DistanceJoint } from './physics/DistanceJoint';
 import Force from './physics/Force';
@@ -363,7 +365,9 @@ export default class Application {
             this.player.velocity.x = Utils.clamp(this.player.velocity.x, -PLAYER_MAX_SPEED, PLAYER_MAX_SPEED);
         }
 
-        this.world.update();
+        for (let i = 0; i < SUBSTEPS; i++) {
+            this.world.update(SUBSTEP_DELTA_TIME);
+        }
 
         if (this.generateParticle) {
             const x = InputManager.mousePosition.x;
