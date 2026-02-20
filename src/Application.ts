@@ -493,11 +493,12 @@ export default class Application {
         const defaultText = [
             // General info
             `${Demo.demoStrings[this.demoIndex]}`,
-            '(1-9) select demo, Left Mouse to generate circles, Right Mouse to generate boxes',
-            '(C) to generate particles, (X) to generate capsules, (R) to generate random convex polygon',
-            '(E) to generate explosion, (F) to generate attraction force, (Q) to spawn a player object',
-            `(G) apply gravity: ${SETTINGS.applyGravity ? 'ON' : 'OFF'}`,
-            `(D) debug mode: ${this.debug ? 'ON' : 'OFF'}`,
+            '[ 1-9 ] select demo, [ Left Mouse ] to generate circles, [ Right Mouse ] to generate boxes',
+            '[ C ] to generate particles, [ X ] to generate capsules, [ R ] to generate random convex polygon',
+            '[ E ] to generate explosion, [ F ] to generate attraction force',
+            '[ Q ] to spawn player object, [ Space ] to jump, [Left arrow / Right arrow] to move',
+            `[ G ] apply gravity: ${SETTINGS.applyGravity ? 'ON' : 'OFF'}`,
+            `[ D ] debug mode: ${this.debug ? 'ON' : 'OFF'}`,
         ];
 
         const x = InputManager.mousePosition.x;
@@ -505,13 +506,13 @@ export default class Application {
 
         const debugText = [
             // Debug related info
-            `(A) show AABB: ${this.showAABB ? 'ON' : 'OFF'}`,
-            `(S) show contacts and joints: ${this.showContacts ? 'ON' : 'OFF'}`,
+            `[ A ] show AABB: ${this.showAABB ? 'ON' : 'OFF'}`,
+            `[ S ] show contacts and joints: ${this.showContacts ? 'ON' : 'OFF'}`,
+            `Solver Iterations  [ - ] decrease [ + ] increase : ${SETTINGS.solverIterations}`,
+            `Substeps [ / ] decrease [ * ] increase : ${SETTINGS.subSteps}`,
             `Num objects: ${this.world.getBodies().length} / ${MAX_BODIES} (max)`,
             `Num contacts: ${numContacts}`,
-            `(+ -) solver iterations: ${SETTINGS.solverIterations}`,
-            `(* /) substeps: ${SETTINGS.subSteps}`,
-            '***********************************************',
+            '-------------------------------------------------------------------------------',
             `FPS: ${this.FPS.toFixed(2)}`,
             `Mouse position: {${x.toFixed(2)}, ${y.toFixed(2)}}`,
             `Zoom: ${Graphics.zoom.toFixed(2)}`,
