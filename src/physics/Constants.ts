@@ -1,20 +1,3 @@
-export const DELTA_TIME = 1 / 60;
-export const INVERSE_DELTA_TIME = 1 / DELTA_TIME;
-
-export const SUBSTEPS = 4;
-export const SUBSTEP_DELTA_TIME = DELTA_TIME / SUBSTEPS;
-export const SUBSTEP_IVERSE_DELTA_TIME = SUBSTEP_DELTA_TIME / SUBSTEPS;
-
-export const PIXELS_PER_METER = 100;
-export const MAX_BODIES = 5000;
-export const GRAVITY = 9.8;
-
-// Since the findFarthestEdge function returns a edge with a minimum length of 0.01 for circle,
-// merging threshold should be greater than sqrt(2) * minimum edge length
-export const TANGENT_MIN_LENGTH = 0.01 * PIXELS_PER_METER;
-export const CONTACT_MERGE_THRESHOLD = 1.415 * TANGENT_MIN_LENGTH;
-export const BODY_REMOVAL_THRESHOLD = -5000;
-
 export const SETTINGS = {
     applyGravity: true,
     positionCorrection: true,
@@ -26,7 +9,25 @@ export const SETTINGS = {
     positionCorrectionBeta: 0.2,
     angularVelocitySlop: 0.05,
     solverIterations: 10,
+    subSteps: 4,
 };
+
+export const DELTA_TIME = 1 / 60;
+export const INVERSE_DELTA_TIME = 1 / DELTA_TIME;
+
+// export const SUBSTEPS = 4;
+export const SUBSTEP_DELTA_TIME = DELTA_TIME / SETTINGS.subSteps;
+export const SUBSTEP_IVERSE_DELTA_TIME = SUBSTEP_DELTA_TIME / SETTINGS.subSteps;
+
+export const PIXELS_PER_METER = 100;
+export const MAX_BODIES = 5000;
+export const GRAVITY = 9.8;
+
+// Since the findFarthestEdge function returns a edge with a minimum length of 0.01 for circle,
+// merging threshold should be greater than sqrt(2) * minimum edge length
+export const TANGENT_MIN_LENGTH = 0.01 * PIXELS_PER_METER;
+export const CONTACT_MERGE_THRESHOLD = 1.415 * TANGENT_MIN_LENGTH;
+export const BODY_REMOVAL_THRESHOLD = -5000;
 
 export const PLAYER_MOVE_FORCE = 1500;
 export const PLAYER_MAX_SPEED = 350;
