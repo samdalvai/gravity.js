@@ -1,23 +1,5 @@
-export const SETTINGS = {
-    applyGravity: true,
-    positionCorrection: true,
-    impulseAccumulation: true,
-    warmStarting: true,
-    blockSolve: true,
-    penetrationSlop: 0.5,
-    restitutionSlop: 50,
-    positionCorrectionBeta: 0.2,
-    angularVelocitySlop: 0.05,
-    solverIterations: 10,
-    subSteps: 4,
-};
-
 export const DELTA_TIME = 1 / 60;
 export const INVERSE_DELTA_TIME = 1 / DELTA_TIME;
-
-// export const SUBSTEPS = 4;
-export const SUBSTEP_DELTA_TIME = DELTA_TIME / SETTINGS.subSteps;
-export const SUBSTEP_IVERSE_DELTA_TIME = SUBSTEP_DELTA_TIME / SETTINGS.subSteps;
 
 export const PIXELS_PER_METER = 100;
 export const MAX_BODIES = 5000;
@@ -33,3 +15,17 @@ export const PLAYER_MOVE_FORCE = 1500;
 export const PLAYER_MAX_SPEED = 350;
 export const PLAYER_ACCELERATION = 10;
 export const PLAYER_JUMP_IMPULSE = 600;
+
+export const SETTINGS = {
+    applyGravity: true,
+    positionCorrection: true,
+    impulseAccumulation: true,
+    warmStarting: true,
+    blockSolve: true,
+    penetrationSlop: 0.5,
+    restitutionSlop: 50,
+    positionCorrectionBeta: 0.2,
+    angularVelocitySlop: 0.05,
+    solverIterations: 10,
+    subSteps: 1,
+};
