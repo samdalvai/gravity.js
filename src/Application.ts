@@ -11,7 +11,6 @@ import {
     PLAYER_JUMP_IMPULSE,
     PLAYER_MAX_SPEED,
     SETTINGS,
-    SUBSTEPS,
     SUBSTEP_DELTA_TIME,
 } from './physics/Constants';
 import { DistanceJoint } from './physics/DistanceJoint';
@@ -145,6 +144,14 @@ export default class Application {
 
                     if (inputEvent.key === '-') {
                         SETTINGS.solverIterations = Math.max(1, SETTINGS.solverIterations - 1);
+                    }
+
+                    if (inputEvent.key === '*') {
+                        SETTINGS.subSteps++;
+                    }
+
+                    if (inputEvent.key === '/') {
+                        SETTINGS.subSteps = Math.max(1, SETTINGS.subSteps - 1);
                     }
 
                     if (inputEvent.key === 'q') {
@@ -365,7 +372,7 @@ export default class Application {
             this.player.velocity.x = Utils.clamp(this.player.velocity.x, -PLAYER_MAX_SPEED, PLAYER_MAX_SPEED);
         }
 
-        for (let i = 0; i < SUBSTEPS; i++) {
+        for (let i = 0; i < SETTINGS.subSteps; i++) {
             this.world.update(SUBSTEP_DELTA_TIME);
         }
 
@@ -501,12 +508,14 @@ export default class Application {
             // Debug related info
             `(A) show AABB: ${this.showAABB ? 'ON' : 'OFF'}`,
             `(S) show contacts and joints: ${this.showContacts ? 'ON' : 'OFF'}`,
+            `Num contacts: ${numContacts}`,
+            `(+ -) Solver iterations: ${SETTINGS.solverIterations}`,
+            `(* /) Substeps: ${SETTINGS.subSteps}`,
+            '***********************************************',
             `FPS: ${this.FPS.toFixed(2)}`,
             `Mouse position: {${x.toFixed(2)}, ${y.toFixed(2)}}`,
             `Zoom: ${Graphics.zoom.toFixed(2)}`,
             `Num objects: ${this.world.getBodies().length} / ${MAX_BODIES} (max)`,
-            `Num contacts: ${numContacts}`,
-            `Solver iterations: ${SETTINGS.solverIterations}`,
         ];
 
         const text = [...defaultText, ...(this.debug ? debugText : [])];
