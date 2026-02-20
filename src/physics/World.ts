@@ -17,7 +17,6 @@ import RigidBody from './RigidBody';
 
 export default class World {
     private G: number;
-    private iterations: number;
 
     private bodies: RigidBody[] = [];
 
@@ -29,9 +28,8 @@ export default class World {
     private forces: Vec2[] = [];
     private torques: number[] = [];
 
-    constructor(gravity: number, iterations = 10) {
+    constructor(gravity: number) {
         this.G = -gravity;
-        this.iterations = iterations;
     }
 
     addBody(body: RigidBody): void {
@@ -163,7 +161,7 @@ export default class World {
         for (let i = 0; i < this.joints.length; i++) this.joints[i].preSolve(INVERSE_DELTA_TIME);
 
         // Solve constraints
-        for (let i = 0; i < this.iterations; i++) {
+        for (let i = 0; i < SETTINGS.solverIterations; i++) {
             for (let j = 0; j < this.manifolds.length; j++) this.manifolds[j].solve();
 
             for (let j = 0; j < this.joints.length; j++) this.joints[j].solve();

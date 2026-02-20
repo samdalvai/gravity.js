@@ -21,6 +21,7 @@ export const SETTINGS = {
     restitutionSlop: 50,
     positionCorrectionBeta: 0.2,
     angularVelocitySlop: 0.05,
+    solverIterations: 10,
 };
 
 export const PLAYER_MOVE_FORCE = 1500;
