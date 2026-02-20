@@ -137,6 +137,14 @@ export default class Application {
                         this.showContacts = !this.showContacts;
                     }
 
+                    if (inputEvent.key === '+') {
+                        SETTINGS.solverIterations++;
+                    }
+
+                    if (inputEvent.key === '-') {
+                        SETTINGS.solverIterations = Math.max(1, SETTINGS.solverIterations - 1);
+                    }
+
                     if (inputEvent.key === 'q') {
                         const x = InputManager.mousePosition.x;
                         const y = InputManager.mousePosition.y;
@@ -494,6 +502,7 @@ export default class Application {
             `Zoom: ${Graphics.zoom.toFixed(2)}`,
             `Num objects: ${this.world.getBodies().length} / ${MAX_BODIES} (max)`,
             `Num contacts: ${numContacts}`,
+            `Solver iterations: ${SETTINGS.solverIterations}`,
         ];
 
         const text = [...defaultText, ...(this.debug ? debugText : [])];
