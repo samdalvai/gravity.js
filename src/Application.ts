@@ -22,6 +22,7 @@ import Demo from './samples/Demo';
 
 export default class Application {
     private running = false;
+    private paused = false;
     private world: World;
     private bgTexture: ImageBitmap | null = null;
     private generateParticle = false;
@@ -135,6 +136,10 @@ export default class Application {
 
                     if (inputEvent.key === 's') {
                         this.showContacts = !this.showContacts;
+                    }
+
+                    if (inputEvent.key === 'p') {
+                        this.paused = !this.paused;
                     }
 
                     if (inputEvent.key === '+') {
@@ -354,6 +359,8 @@ export default class Application {
             }
         }
 
+        if (this.paused) return;
+
         if (this.player) {
             const acceleration = PLAYER_ACCELERATION;
 
@@ -499,6 +506,7 @@ export default class Application {
             '[ Q ] to spawn player object, [ Space ] to jump, [Left arrow / Right arrow] to move',
             `[ G ] apply gravity: ${SETTINGS.applyGravity ? 'ON' : 'OFF'}`,
             `[ D ] debug mode: ${this.debug ? 'ON' : 'OFF'}`,
+            `[ P ] pause simulation: ${this.paused ? 'ON' : 'OFF'}`,
         ];
 
         const x = InputManager.mousePosition.x;
