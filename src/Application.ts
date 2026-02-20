@@ -171,7 +171,7 @@ export default class Application {
                         // this.player = new RigidBody(new CircleShape(40), x, y, 1);
                         // this.player = new RigidBody(new BoxShape(40, 40), x, y, 1);
                         this.player.canRotate = false;
-                        this.player.restitution = 0.2;
+                        this.player.restitution = 0.0;
                         this.player.friction = 0.8;
                         this.player.shapeFillColor = 'orange';
                         this.world.addBody(this.player);
