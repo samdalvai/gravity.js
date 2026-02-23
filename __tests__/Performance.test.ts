@@ -1,4 +1,4 @@
-import Utils from '../src/math/Utils';
+import * as Utils from '../src/physics/Utils';
 import Vec2 from '../src/math/Vec2';
 import CollisionDetection from '../src/physics/CollisionDetection';
 import { DistanceJoint } from '../src/physics/DistanceJoint';

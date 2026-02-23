@@ -13,7 +13,7 @@ import { ContactPoint } from './CollisionDetection';
 import { SETTINGS } from './Constants';
 import { Constraint } from './Constraint';
 import RigidBody from './RigidBody';
-import Utils from './Utils';
+import * as Utils from './Utils';
 
 enum ContactType {
     Normal,
