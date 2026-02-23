@@ -554,7 +554,7 @@ export default class Application {
                                 Graphics.drawFillCircle(closestIntersection.x, closestIntersection.y, 5, 'yellow');
 
                                 const [v0, v1] = hitEdge;
-                                const edgeVector = v1.subNew(v0);
+                                const edgeVector = v0.subNew(v1);
                                 const edgeNormal = edgeVector.perpNew().unitVector();
 
                                 // Make sure normal points away from the bullet's current position
