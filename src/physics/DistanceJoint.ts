@@ -75,6 +75,13 @@ export class DistanceJoint extends Joint {
 
     override solve(): void {
         // Calculate corrective impulse: Pc
+
+        /*
+        const jv = this.bodyB.linearVelocity
+            .addNew(Util.cross(this.bodyB.angularVelocity, this.rb))
+            .subNew(this.bodyA.linearVelocity.addNew(Util.cross(this.bodyA.angularVelocity, this.ra)))
+            .dot(this.n);
+        */
         const jv =
             (this.bodyB.velocity.x +
                 -this.bodyB.angularVelocity * this.rb.y -
@@ -93,12 +100,22 @@ export class DistanceJoint extends Joint {
     }
 
     private applyImpulse(lambda: number): void {
+        /*
+        this.bodyA.linearVelocity = this.bodyA.linearVelocity.subNew(this.n.scaleNew(lambda * this.bodyA.inverseMass));
+        this.bodyA.angularVelocity =
+            this.bodyA.angularVelocity - this.n.dot(Util.cross(lambda, this.ra)) * this.bodyA.inverseInertia;
+        */
         this.bodyA.velocity.x = this.bodyA.velocity.x - this.n.x * (lambda * this.bodyA.invMass);
         this.bodyA.velocity.y = this.bodyA.velocity.y - this.n.y * (lambda * this.bodyA.invMass);
         this.bodyA.angularVelocity =
             this.bodyA.angularVelocity -
             (this.n.x * (-lambda * this.ra.y) + this.n.y * (lambda * this.ra.x)) * this.bodyA.invI;
 
+        /*
+        this.bodyB.linearVelocity = this.bodyB.linearVelocity.addNew(this.n.scaleNew(lambda * this.bodyB.inverseMass));
+        this.bodyB.angularVelocity =
+            this.bodyB.angularVelocity + this.n.dot(Util.cross(lambda, this.rb)) * this.bodyB.inverseInertia;
+        */
         this.bodyB.velocity.x = this.bodyB.velocity.x + this.n.x * (lambda * this.bodyB.invMass);
         this.bodyB.velocity.y = this.bodyB.velocity.y + this.n.y * (lambda * this.bodyB.invMass);
         this.bodyB.angularVelocity =

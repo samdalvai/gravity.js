@@ -109,6 +109,14 @@ class ContactSolver {
     solve(normalContact?: ContactSolver) {
         // Calculate corrective impulse: Pc
         // Jacobian * velocity vector (Normal velocity)
+
+        /*
+        const jv: number =
+            +this.jacobian.va.dot(this.bodyA.linearVelocity) +
+            this.jacobian.wa * this.bodyA.angularVelocity +
+            this.jacobian.vb.dot(this.bodyB.linearVelocity) +
+            this.jacobian.wb * this.bodyB.angularVelocity;
+        */
         const jv: number =
             this.jacobian.va.x * this.bodyA.velocity.x +
             this.jacobian.va.y * this.bodyA.velocity.y +
@@ -151,10 +159,22 @@ class ContactSolver {
     }
 
     private applyImpulse(lambda: number) {
+        /*
+        this.bodyA.linearVelocity = this.bodyA.linearVelocity.addNew(
+            this.jacobian.va.scaleNew(this.bodyA.inverseMass * lambda),
+        );
+        this.bodyA.angularVelocity = this.bodyA.angularVelocity + this.bodyA.inverseInertia * this.jacobian.wa * lambda;
+        */
         this.bodyA.velocity.x = this.bodyA.velocity.x + this.jacobian.va.x * this.bodyA.invMass * lambda;
         this.bodyA.velocity.y = this.bodyA.velocity.y + this.jacobian.va.y * this.bodyA.invMass * lambda;
         this.bodyA.angularVelocity = this.bodyA.angularVelocity + this.bodyA.invI * this.jacobian.wa * lambda;
 
+        /*
+        this.bodyB.linearVelocity = this.bodyB.linearVelocity.addNew(
+            this.jacobian.vb.scaleNew(this.bodyB.inverseMass * lambda),
+        );
+        this.bodyB.angularVelocity = this.bodyB.angularVelocity + this.bodyB.inverseInertia * this.jacobian.wb * lambda;
+        */
         this.bodyB.velocity.x = this.bodyB.velocity.x + this.jacobian.vb.x * this.bodyB.invMass * lambda;
         this.bodyB.velocity.y = this.bodyB.velocity.y + this.jacobian.vb.y * this.bodyB.invMass * lambda;
         this.bodyB.angularVelocity = this.bodyB.angularVelocity + this.bodyB.invI * this.jacobian.wb * lambda;
@@ -221,6 +241,13 @@ class BlockSolver {
         Utils.assert(ax >= 0.0, ay >= 0.0);
 
         // (Velocity constraint) Normal velocity: Jv = 0
+        /*
+        let vn1: number =
+            +this.nc1.jacobian.va.dot(this.bodyA.linearVelocity) +
+            this.nc1.jacobian.wa * this.bodyA.angularVelocity +
+            this.nc1.jacobian.vb.dot(this.bodyB.linearVelocity) +
+            this.nc1.jacobian.wb * this.bodyB.angularVelocity;
+        */
         let vn1: number =
             this.nc1.jacobian.va.x * this.bodyA.velocity.x +
             this.nc1.jacobian.va.y * this.bodyA.velocity.y +
@@ -229,6 +256,13 @@ class BlockSolver {
             this.nc1.jacobian.vb.y * this.bodyB.velocity.y +
             this.nc1.jacobian.wb * this.bodyB.angularVelocity;
 
+        /*
+        let vn2: number =
+            +this.nc2.jacobian.va.dot(this.bodyA.linearVelocity) +
+            this.nc2.jacobian.wa * this.bodyA.angularVelocity +
+            this.nc2.jacobian.vb.dot(this.bodyB.linearVelocity) +
+            this.nc2.jacobian.wb * this.bodyB.angularVelocity;
+        */
         let vn2: number =
             this.nc2.jacobian.va.x * this.bodyA.velocity.x +
             this.nc2.jacobian.va.y * this.bodyA.velocity.y +
@@ -238,9 +272,11 @@ class BlockSolver {
             this.nc2.jacobian.wb * this.bodyB.angularVelocity;
 
         // b' = b - K * a
+        // b = b.subNew(this.k.mulVector(a));
         const bx = vn1 + this.nc1.bias - (this.k.m00 * ax + this.k.m01 * ay);
         const by = vn2 + this.nc2.bias - (this.k.m10 * ax + this.k.m11 * ay);
 
+        // let x: Vector2; // Lambda
         let lambdaX: number;
         let lambdaY: number;
 
@@ -249,6 +285,7 @@ class BlockSolver {
             //
             // Case 1: vn = 0
             // Both constraints are violated
+            // x = this.m.scaleNew(b).negateNew();
             lambdaX = -(this.m.m00 * bx + this.m.m01 * by);
             lambdaY = -(this.m.m10 * bx + this.m.m11 * by);
 
@@ -289,6 +326,7 @@ class BlockSolver {
         }
 
         // Get the incremental impulse
+        // const d = x.subNew(a);
         const incrementalImpulseX = lambdaX - ax;
         const incrementalImpulseY = lambdaY - ay;
         this.applyImpulse(incrementalImpulseX, incrementalImpulseY);
@@ -299,11 +337,25 @@ class BlockSolver {
     }
 
     private applyImpulse(lambdaX: number, lambdaY: number): void {
+        /*
+        this.bodyA.linearVelocity = this.bodyA.linearVelocity.addNew(
+            this.j1.va.scaleNew(this.bodyA.inverseMass * (lambda.x + lambda.y)),
+        );
+        this.bodyA.angularVelocity =
+            this.bodyA.angularVelocity + this.bodyA.inverseInertia * (this.j1.wa * lambda.x + this.j2.wa * lambda.y);
+        */
         this.bodyA.velocity.x = this.bodyA.velocity.x + this.j1.va.x * this.bodyA.invMass * (lambdaX + lambdaY);
         this.bodyA.velocity.y = this.bodyA.velocity.y + this.j1.va.y * this.bodyA.invMass * (lambdaX + lambdaY);
         this.bodyA.angularVelocity =
             this.bodyA.angularVelocity + this.bodyA.invI * (this.j1.wa * lambdaX + this.j2.wa * lambdaY);
 
+        /*
+        this.bodyB.linearVelocity = this.bodyB.linearVelocity.addNew(
+            this.j1.vb.scaleNew(this.bodyB.inverseMass * (lambda.x + lambda.y)),
+        );
+        this.bodyB.angularVelocity =
+            this.bodyB.angularVelocity + this.bodyB.inverseInertia * (this.j1.wb * lambda.x + this.j2.wb * lambda.y);
+        */
         this.bodyB.velocity.x = this.bodyB.velocity.x + this.j1.vb.x * this.bodyB.invMass * (lambdaX + lambdaY);
         this.bodyB.velocity.y = this.bodyB.velocity.y + this.j1.vb.y * this.bodyB.invMass * (lambdaX + lambdaY);
         this.bodyB.angularVelocity =
