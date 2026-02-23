@@ -560,6 +560,11 @@ export default class Application {
 
                                 // Move the bullet to the closest intersection
                                 body.position = closestIntersection.copy();
+
+                                // TODO: shift position based on normal using dot product
+                                // dot(d, n) < 0 toward the edge
+                                // dot(d, n) > 0 away from the edge
+                                // dot(d, n) == 0 parallel
                                 body.shape.updateAABB(body);
                             }
                         }
