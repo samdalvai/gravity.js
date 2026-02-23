@@ -576,7 +576,7 @@ export default class Application {
                                     edgeNormal.scaleNew(bulletShape.radius),
                                 );
                                 body.position = bulletNewPos.copy();
-                                // body.position = closestIntersection.copy();
+                                body.shape.updateAABB(body);
                             }
                         }
                     }
