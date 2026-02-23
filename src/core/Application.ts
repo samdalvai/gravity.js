@@ -29,12 +29,12 @@ export default class Application {
     private world: World;
     private bgTexture: ImageBitmap | null = null;
     private generateParticle = false;
-    private generateAttraction = false;
-    private showContacts = true;
-    private showAABB = false;
     private demoIndex = 1;
 
     private player: RigidBody | null = null;
+    private blackHole: RigidBody | null = null;
+
+    // Inputs
     private leftButtonPressed: boolean = false;
     private rightButtonPressed: boolean = false;
     private middleMousePressed = false;
@@ -44,6 +44,8 @@ export default class Application {
     private debug = true;
     private FPS = 0;
     private lastFPSUpdate = 0;
+    private showContacts = true;
+    private showAABB = false;
 
     constructor() {
         this.world = new World(GRAVITY);
@@ -106,7 +108,17 @@ export default class Application {
                     }
 
                     if (inputEvent.key === 'f') {
-                        this.generateAttraction = true;
+                        if (this.blackHole) {
+                            this.world.removeBody(this.blackHole);
+                            this.blackHole = null;
+                        }
+
+                        const x = InputManager.mousePosition.x;
+                        const y = InputManager.mousePosition.y;
+                        const blackHole = new RigidBody(new CircleShape(0.0001), x, y, 50_000);
+                        this.blackHole = blackHole;
+
+                        this.world.addBody(blackHole);
                     }
 
                     if (inputEvent.key === 'c') {
@@ -229,6 +241,8 @@ export default class Application {
                         }
 
                         this.world.clear();
+                        this.blackHole = null;
+                        this.player = null;
                         demo(this.world, this);
                     }
 
@@ -258,10 +272,6 @@ export default class Application {
                 case 'keyup':
                     if (inputEvent.key === 'c') {
                         this.generateParticle = false;
-                    }
-
-                    if (inputEvent.key === 'f') {
-                        this.generateAttraction = false;
                     }
 
                     if (inputEvent.code === 'ArrowLeft') {
@@ -419,10 +429,8 @@ export default class Application {
             }
         }
 
-        if (this.generateAttraction) {
-            const x = InputManager.mousePosition.x;
-            const y = InputManager.mousePosition.y;
-            const blackHole = new RigidBody(new CircleShape(1), x, y, 50_000);
+        if (this.blackHole) {
+            const blackHole = this.blackHole;
 
             for (const body of this.world.getBodies()) {
                 const attraction = Force.generateGravitationalForce(body, blackHole, GRAVITY, 1, 200);
