@@ -150,6 +150,12 @@ export default class Application {
                         this.world.update(REAL_DELTA_TIME());
                     }
 
+                    if (inputEvent.key === ',') {
+                        // Note: this is not physically accurate, as contacts cannot work correctly with
+                        // negative delta time, this is just used for testing purposes
+                        this.world.update(-REAL_DELTA_TIME());
+                    }
+
                     if (inputEvent.key === '+') {
                         SETTINGS.solverIterations++;
                     }
