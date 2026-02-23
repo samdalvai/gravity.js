@@ -13,6 +13,9 @@ import RigidBody from './RigidBody';
 import * as Utils from './Utils';
 
 export abstract class Joint extends Constraint {
+    protected beta = 0.0; // Coefficient of position correction (Positional error feedback factor)
+    protected gamma = 0.0; // Coefficient of Softness (Force feedback factor)
+
     public drawAnchor = false;
     public drawConnectionLine = false;
 
