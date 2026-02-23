@@ -513,7 +513,8 @@ export default class Application {
         const bodies = this.world.getBodies();
 
         for (const body of bodies) {
-            if (body.isBullet) {
+            if (body.isBullet && body.velocity.magnitudeSquared() > 2_000_000) {
+                console.log(body.velocity.magnitudeSquared());
                 const bulletShape = body.shape as CircleShape;
                 const currentPos = body.position.copy();
                 const nextPos = currentPos.addNew(body.velocity.scaleNew(REAL_DELTA_TIME()));
