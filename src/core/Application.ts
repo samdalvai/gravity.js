@@ -497,6 +497,18 @@ export default class Application {
             }
         }
 
+        const bodies = this.world.getBodies();
+
+        for (const body of bodies) {
+            if (body.isBullet) {
+                const currentPos = body.position.copy();
+                const nextPos = currentPos.addNew(body.velocity.scaleNew(REAL_DELTA_TIME()));
+
+                Graphics.drawFillCircle(nextPos.x, nextPos.y, 2, 'red');
+                Graphics.drawLine(currentPos.x, currentPos.y, nextPos.x, nextPos.y, 'red');
+            }
+        }
+
         Graphics.endWorld();
 
         let numContacts = 0;
