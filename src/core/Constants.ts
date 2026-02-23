@@ -1,5 +1,4 @@
-export const DELTA_TIME = 1 / 60;
-export const INVERSE_DELTA_TIME = 1 / DELTA_TIME;
+export const FIXED_DELTA_TIME = 1 / 60;
 
 export const PIXELS_PER_METER = 100;
 export const MAX_BODIES = 5000;
@@ -29,3 +28,5 @@ export const SETTINGS = {
     solverIterations: 10,
     subSteps: 1,
 };
+
+export const REAL_DELTA_TIME = () => FIXED_DELTA_TIME / SETTINGS.subSteps;

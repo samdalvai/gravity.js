@@ -1,5 +1,5 @@
 import Application from './core/Application';
-import { DELTA_TIME } from './core/Constants';
+import { FIXED_DELTA_TIME } from './core/Constants';
 
 async function run() {
     const app = new Application();
@@ -30,9 +30,9 @@ async function run() {
         if (app.isRunning()) {
             app.input();
 
-            while (accumulator >= DELTA_TIME) {
+            while (accumulator >= FIXED_DELTA_TIME) {
                 app.update(frameTime);
-                accumulator -= DELTA_TIME;
+                accumulator -= FIXED_DELTA_TIME;
             }
 
             // Optional: interpolation (for smooth rendering)
