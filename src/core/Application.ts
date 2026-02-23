@@ -557,6 +557,10 @@ export default class Application {
 
                                 if (!closestIntersection) throw Error('Could not determine closest intersection');
                                 Graphics.drawFillCircle(closestIntersection.x, closestIntersection.y, 5, 'yellow');
+
+                                // Move the bullet to the closest intersection
+                                body.position = closestIntersection.copy();
+                                body.shape.updateAABB(body);
                             }
                         }
                     }
