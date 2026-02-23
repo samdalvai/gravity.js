@@ -10,10 +10,10 @@
 import Vec2 from '../math/Vec2';
 import * as Collision from '../collision/Collision';
 import { BODY_REMOVAL_THRESHOLD, SETTINGS } from './Constants';
-import { ContactManifold } from '../collision/Contact';
 import Force from '../physics/Force';
 import { Joint } from '../joint/Joint';
 import RigidBody from './RigidBody';
+import { ContactManifold } from '../collision/ContactManifold';
 
 export default class World {
     private readonly up = new Vec2(0, 1);
