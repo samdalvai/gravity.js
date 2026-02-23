@@ -1,6 +1,6 @@
 import * as Utils from '../src/physics/Utils';
 import Vec2 from '../src/math/Vec2';
-import CollisionDetection from '../src/physics/CollisionDetection';
+import * as Collision from '../src/physics/Collision';
 import { DistanceJoint } from '../src/physics/DistanceJoint';
 import RigidBody from '../src/physics/RigidBody';
 import { BoxShape, CircleShape } from '../src/physics/Shape';

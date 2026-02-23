@@ -1,14 +1,14 @@
 import Vec2 from '../../src/math/Vec2';
-import CollisionDetection from '../../src/physics/CollisionDetection';
+import * as Collision from '../../src/physics/Collision';
 import RigidBody from '../../src/physics/RigidBody';
 import { BoxShape, CircleShape, PolygonShape } from '../../src/physics/Shape';
 
-describe('CollisionDetection', () => {
+describe('Collision', () => {
     test('detectCollisionCircleCircle() detects collision between fully overlapped circles', () => {
         const a = new RigidBody(new CircleShape(30), 0, 0, 1.0);
         const b = new RigidBody(new CircleShape(30), 0, 0, 1.0);
 
-        const result = CollisionDetection.detectCollisionCircleCircle(a, b)!;
+        const result = Collision.detectCollisionCircleCircle(a, b)!;
 
         expect(result).not.toBeNull();
         expect(result.contactPoints).toHaveLength(1);
@@ -19,7 +19,7 @@ describe('CollisionDetection', () => {
         const a = new RigidBody(new CircleShape(30), 0, 0, 1.0);
         const b = new RigidBody(new CircleShape(30), 30, 0, 1.0);
 
-        const result = CollisionDetection.detectCollisionCircleCircle(a, b)!;
+        const result = Collision.detectCollisionCircleCircle(a, b)!;
 
         expect(result).not.toBeNull();
         expect(result.contactPoints).toHaveLength(1);
@@ -30,7 +30,7 @@ describe('CollisionDetection', () => {
         const a = new RigidBody(new CircleShape(30), 0, 0, 1.0);
         const b = new RigidBody(new CircleShape(30), 45, 0, 1.0);
 
-        const result = CollisionDetection.detectCollisionCircleCircle(a, b)!;
+        const result = Collision.detectCollisionCircleCircle(a, b)!;
 
         expect(result).not.toBeNull();
         expect(result.contactPoints).toHaveLength(1);
@@ -41,7 +41,7 @@ describe('CollisionDetection', () => {
         const a = new RigidBody(new BoxShape(60, 60), 0, 0, 1.0);
         const b = new RigidBody(new BoxShape(60, 60), 0, 0, 1.0);
 
-        const result = CollisionDetection.detectCollisionPolygonPolygon(a, b)!;
+        const result = Collision.detectCollisionPolygonPolygon(a, b)!;
 
         expect(result).not.toBeNull();
         expect(result.contactPoints).toHaveLength(2);
@@ -52,7 +52,7 @@ describe('CollisionDetection', () => {
         const a = new RigidBody(new BoxShape(60, 60), 0, 0, 1.0);
         const b = new RigidBody(new BoxShape(60, 60), 30, 0, 1.0);
 
-        const result = CollisionDetection.detectCollisionPolygonPolygon(a, b)!;
+        const result = Collision.detectCollisionPolygonPolygon(a, b)!;
 
         expect(result).not.toBeNull();
         expect(result.contactPoints).toHaveLength(2);
@@ -63,7 +63,7 @@ describe('CollisionDetection', () => {
         const a = new RigidBody(new BoxShape(60, 60), 0, 0, 1.0);
         const b = new RigidBody(new BoxShape(60, 60), 30, 30, 1.0);
 
-        const result = CollisionDetection.detectCollisionPolygonPolygon(a, b)!;
+        const result = Collision.detectCollisionPolygonPolygon(a, b)!;
 
         expect(result).not.toBeNull();
         expect(result.contactPoints).toHaveLength(2);
@@ -74,7 +74,7 @@ describe('CollisionDetection', () => {
         const a = new RigidBody(new BoxShape(60, 60), 0, 0, 1.0);
         const b = new RigidBody(new BoxShape(60, 60), 200, 200, 1.0);
 
-        const result = CollisionDetection.detectCollisionPolygonPolygon(a, b);
+        const result = Collision.detectCollisionPolygonPolygon(a, b);
 
         expect(result).toBeNull();
     });
@@ -83,7 +83,7 @@ describe('CollisionDetection', () => {
         const a = new RigidBody(new BoxShape(60, 60), 0, 0, 1.0);
         const b = new RigidBody(new BoxShape(60, 60), 60, 60, 1.0);
 
-        const result = CollisionDetection.detectCollisionPolygonPolygon(a, b);
+        const result = Collision.detectCollisionPolygonPolygon(a, b);
 
         expect(result).toBeNull();
     });
@@ -92,7 +92,7 @@ describe('CollisionDetection', () => {
         const a = new RigidBody(new BoxShape(60, 60), 0, 0, 1.0);
         const b = new RigidBody(new CircleShape(30), 0, 0, 1.0);
 
-        const result = CollisionDetection.detectCollisionPolygonCircle(a, b)!;
+        const result = Collision.detectCollisionPolygonCircle(a, b)!;
 
         expect(result).not.toBeNull();
         expect(result.contactPoints).toHaveLength(1);
@@ -103,7 +103,7 @@ describe('CollisionDetection', () => {
         const a = new RigidBody(new BoxShape(60, 60), 0, 0, 1.0);
         const b = new RigidBody(new CircleShape(30), 30, 0, 1.0);
 
-        const result = CollisionDetection.detectCollisionPolygonCircle(a, b)!;
+        const result = Collision.detectCollisionPolygonCircle(a, b)!;
 
         expect(result).not.toBeNull();
         expect(result.contactPoints).toHaveLength(1);
@@ -114,7 +114,7 @@ describe('CollisionDetection', () => {
         const a = new RigidBody(new BoxShape(60, 60), 0, 0, 1.0);
         const b = new RigidBody(new CircleShape(30), 30, 30, 1.0);
 
-        const result = CollisionDetection.detectCollisionPolygonCircle(a, b)!;
+        const result = Collision.detectCollisionPolygonCircle(a, b)!;
 
         expect(result).not.toBeNull();
         expect(result.contactPoints).toHaveLength(1);
@@ -125,7 +125,7 @@ describe('CollisionDetection', () => {
         const a = new RigidBody(new BoxShape(60, 60), 0, 0, 1.0);
         const b = new RigidBody(new CircleShape(30), 200, 200, 1.0);
 
-        const result = CollisionDetection.detectCollisionPolygonCircle(a, b)!;
+        const result = Collision.detectCollisionPolygonCircle(a, b)!;
 
         expect(result).toBeNull();
     });
@@ -134,7 +134,7 @@ describe('CollisionDetection', () => {
         const a = new RigidBody(new BoxShape(60, 60), 0, 0, 1.0);
         const b = new RigidBody(new CircleShape(30), 60, 60, 1.0);
 
-        const result = CollisionDetection.detectCollisionPolygonCircle(a, b)!;
+        const result = Collision.detectCollisionPolygonCircle(a, b)!;
 
         expect(result).toBeNull();
     });
@@ -144,7 +144,7 @@ describe('CollisionDetection', () => {
         const a = new RigidBody(new PolygonShape(triangleVertices), 0, 0, 1.0);
         const b = new RigidBody(new PolygonShape(triangleVertices), 0, 0, 1.0);
 
-        const result = CollisionDetection.detectCollisionPolygonPolygon(a, b)!;
+        const result = Collision.detectCollisionPolygonPolygon(a, b)!;
 
         expect(result).not.toBeNull();
         expect(result.contactPoints).toHaveLength(2);
@@ -157,7 +157,7 @@ describe('CollisionDetection', () => {
         const a = new RigidBody(new PolygonShape(triangleVerticesA), 0, 0, 1.0);
         const b = new RigidBody(new PolygonShape(triangleVerticesB), 0, 15, 1.0);
 
-        const result = CollisionDetection.detectCollisionPolygonPolygon(a, b)!;
+        const result = Collision.detectCollisionPolygonPolygon(a, b)!;
 
         expect(result).not.toBeNull();
         expect(result.contactPoints).toHaveLength(1);
@@ -170,7 +170,7 @@ describe('CollisionDetection', () => {
         const a = new RigidBody(new PolygonShape(triangleVerticesA), 0, 0, 1.0);
         const b = new RigidBody(new PolygonShape(triangleVerticesB), 0, 30, 1.0);
 
-        const result = CollisionDetection.detectCollisionPolygonPolygon(a, b)!;
+        const result = Collision.detectCollisionPolygonPolygon(a, b)!;
 
         expect(result).not.toBeNull();
         expect(result.contactPoints).toHaveLength(1);
@@ -183,7 +183,7 @@ describe('CollisionDetection', () => {
         const a = new RigidBody(new PolygonShape(triangleVerticesA), 0, 0, 1.0);
         const b = new RigidBody(new PolygonShape(triangleVerticesB), 200, 0, 1.0);
 
-        const result = CollisionDetection.detectCollisionPolygonPolygon(a, b);
+        const result = Collision.detectCollisionPolygonPolygon(a, b);
 
         expect(result).toBeNull();
     });
@@ -194,7 +194,7 @@ describe('CollisionDetection', () => {
         const a = new RigidBody(new PolygonShape(triangleVerticesA), 0, 0, 1.0);
         const b = new RigidBody(new PolygonShape(triangleVerticesB), 60, 0, 1.0);
 
-        const result = CollisionDetection.detectCollisionPolygonPolygon(a, b);
+        const result = Collision.detectCollisionPolygonPolygon(a, b);
 
         expect(result).toBeNull();
     });

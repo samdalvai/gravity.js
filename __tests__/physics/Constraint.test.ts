@@ -1,4 +1,4 @@
-import CollisionDetection from '../../src/physics/CollisionDetection';
+import * as Collision from '../../src/physics/Collision';
 import { DistanceJoint } from '../../src/physics/DistanceJoint';
 import RigidBody from '../../src/physics/RigidBody';
 import { CircleShape } from '../../src/physics/Shape';
@@ -48,7 +48,7 @@ describe('Constraint', () => {
         const numFrames = 60;
         const solverIterations = 20;
 
-        const manifold = CollisionDetection.detectCollisionCircleCircle(a, b)!;
+        const manifold = Collision.detectCollisionCircleCircle(a, b)!;
 
         const deltaTime = 1 / 60;
         for (let i = 0; i < numFrames; i++) {

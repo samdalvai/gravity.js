@@ -8,7 +8,7 @@
  * https://github.com/Sopiro
  */
 import Vec2 from '../math/Vec2';
-import CollisionDetection from './CollisionDetection';
+import * as Collision from './Collision';
 import { BODY_REMOVAL_THRESHOLD, SETTINGS } from './Constants';
 import { ContactManifold } from './Contact';
 import Force from './Force';
@@ -147,7 +147,7 @@ export default class World {
                 [a, b] = [b, a];
             }
 
-            const newManifold = CollisionDetection.detectCollision(a, b);
+            const newManifold = Collision.detectCollision(a, b);
             if (newManifold == null) continue;
 
             const key = RigidBody.pairKey(a, b);
