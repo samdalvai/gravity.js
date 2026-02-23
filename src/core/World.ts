@@ -25,6 +25,7 @@ export default class World {
     public manifolds: ContactManifold[] = [];
     public joints: Joint[] = [];
 
+    public potentialPairs: [RigidBody, RigidBody][] = [];
     public manifoldMap: Map<number, ContactManifold> = new Map();
 
     private forces: Vec2[] = [];
@@ -77,8 +78,6 @@ export default class World {
 
     update(dt: number): void {
         const invDt = 1 / dt;
-        const newManifolds: ContactManifold[] = [];
-        const newManifoldMap: Map<number, ContactManifold> = new Map();
 
         // Loop all bodies of the world applying forces
         for (const body of this.bodies) {
@@ -115,56 +114,9 @@ export default class World {
             body.integrateForces(dt);
         }
 
-        this.bodies.sort((a, b) => a.minX - b.minX);
-        const potentialPairs: [RigidBody, RigidBody][] = [];
+        this.broadPhase();
 
-        // Broad phase check with prune & sweep algorithm
-        // TODO: some collisions are not correclty found, try to set gravity to 0
-        for (let i = 0; i < this.bodies.length; i++) {
-            const a = this.bodies[i];
-
-            for (let j = i + 1; j < this.bodies.length; j++) {
-                const b = this.bodies[j];
-
-                // If objects don't overlap on X axis they cannot collide
-                if (b.minX > a.maxX) break;
-
-                // If objects overlap on X axis but don't overlap on Y axis the cannot collide
-                if (a.maxY < b.minY || a.minY > b.maxY) {
-                    continue;
-                }
-
-                // Objects may be colliding
-                potentialPairs.push([a, b]);
-            }
-        }
-
-        // Narrow phase check, potential pairs may still not collide
-        for (let [a, b] of potentialPairs) {
-            if (a.isStatic() && b.isStatic()) continue;
-
-            // Improve coherence
-            if (a.id > b.id) {
-                [a, b] = [b, a];
-            }
-
-            const newManifold = Collision.detectCollision(a, b);
-            if (newManifold == null) continue;
-
-            const key = Utils.pairKey(a, b);
-            if (SETTINGS.warmStarting && this.manifoldMap.has(key)) {
-                const oldManifold = this.manifoldMap.get(key)!;
-                newManifold.tryWarmStart(oldManifold);
-            }
-
-            newManifoldMap.set(key, newManifold);
-            newManifolds.push(newManifold);
-
-            this.setGrounded(a, b, newManifold.contactNormal);
-        }
-
-        this.manifoldMap = newManifoldMap;
-        this.manifolds = newManifolds;
+        this.narrowPhase();
 
         // Presolve constraints
         for (let i = 0; i < this.manifolds.length; i++) this.manifolds[i].preSolve(invDt);
@@ -195,13 +147,62 @@ export default class World {
         }
     }
 
-    clear() {
-        this.bodies.length = 0;
-        this.manifolds.length = 0;
-        this.joints.length = 0;
-        this.manifoldMap.clear();
-        this.forces.length = 0;
-        this.torques.length = 0;
+    broadPhase() {
+        this.bodies.sort((a, b) => a.minX - b.minX);
+        this.potentialPairs.length = 0;
+
+        // Broad phase check with prune & sweep algorithm
+        // TODO: some collisions are not correclty found, try to set gravity to 0
+        for (let i = 0; i < this.bodies.length; i++) {
+            const a = this.bodies[i];
+
+            for (let j = i + 1; j < this.bodies.length; j++) {
+                const b = this.bodies[j];
+
+                // If objects don't overlap on X axis they cannot collide
+                if (b.minX > a.maxX) break;
+
+                // If objects overlap on X axis but don't overlap on Y axis the cannot collide
+                if (a.maxY < b.minY || a.minY > b.maxY) {
+                    continue;
+                }
+
+                // Objects may be colliding
+                this.potentialPairs.push([a, b]);
+            }
+        }
+    }
+
+    narrowPhase() {
+        const newManifolds: ContactManifold[] = [];
+        const newManifoldMap: Map<number, ContactManifold> = new Map();
+
+        // Narrow phase check, potential pairs may still not collide
+        for (let [a, b] of this.potentialPairs) {
+            if (a.isStatic() && b.isStatic()) continue;
+
+            // Improve coherence
+            if (a.id > b.id) {
+                [a, b] = [b, a];
+            }
+
+            const newManifold = Collision.detectCollision(a, b);
+            if (newManifold == null) continue;
+
+            const key = Utils.pairKey(a, b);
+            if (SETTINGS.warmStarting && this.manifoldMap.has(key)) {
+                const oldManifold = this.manifoldMap.get(key)!;
+                newManifold.tryWarmStart(oldManifold);
+            }
+
+            newManifoldMap.set(key, newManifold);
+            newManifolds.push(newManifold);
+
+            this.setGrounded(a, b, newManifold.contactNormal);
+        }
+
+        this.manifoldMap = newManifoldMap;
+        this.manifolds = newManifolds;
     }
 
     setGrounded(bodyA: RigidBody, bodyB: RigidBody, contactNormal: Vec2) {
@@ -210,5 +211,14 @@ export default class World {
 
         if (dotA > 0.5) bodyA.isGrounded = true;
         if (dotB > 0.5) bodyB.isGrounded = true;
+    }
+
+    clear() {
+        this.bodies.length = 0;
+        this.manifolds.length = 0;
+        this.joints.length = 0;
+        this.manifoldMap.clear();
+        this.forces.length = 0;
+        this.torques.length = 0;
     }
 }
