@@ -90,25 +90,8 @@ export default class Application {
                             const y = InputManager.mousePosition.y;
                             const explosionPos = new Vec2(x, y);
 
-                            const debrisRadius = 50;
-                            const debrisWidth = 10;
                             const radius = 250;
                             const strength = 5000;
-
-                            const angles: number[] = [];
-                            for (let i = 0; i < 10; i++) angles.push(Math.random() * Math.PI * 2);
-                            const positions: Vec2[] = [];
-
-                            for (const angle of angles) {
-                                positions.push(new Vec2(Math.cos(angle), Math.sin(angle)).scaleNew(debrisRadius));
-                            }
-
-                            for (const pos of positions) {
-                                const bodyPosition = new Vec2(x, y).addAssign(pos);
-                                const body = Utils.randomConvexBody(bodyPosition.x, bodyPosition.y, debrisWidth, 5);
-                                body.angularVelocity = Utils.randomNumber(0, 100);
-                                this.world.addBody(body);
-                            }
 
                             for (const body of this.world.getBodies()) {
                                 const explosionImpulse = Force.generateExplosionForce(
@@ -142,12 +125,34 @@ export default class Application {
                         this.showContacts = !this.showContacts;
                     }
 
+                    if (inputEvent.key === 'b') {
+                        // Emit bullet
+                        const x = InputManager.mousePosition.x;
+                        const y = InputManager.mousePosition.y;
+
+                        const center = new Vec2(0, 0);
+                        const target = new Vec2(x, y);
+                        const direction = target.subNew(center).normalizeNew();
+                        const bulletForce = 50_000;
+
+                        const bullet = new RigidBody(new CircleShape(5), 0, 0, 0.1);
+                        bullet.velocity = direction.scaleNew(bulletForce);
+                        bullet.setTexture('rockRound');
+                        this.world.addBody(bullet);
+                    }
+
                     if (inputEvent.key === 'p') {
                         this.paused = !this.paused;
                     }
 
                     if (inputEvent.key === '.') {
                         this.world.update(REAL_DELTA_TIME());
+                    }
+
+                    if (inputEvent.key === ',') {
+                        // Note: this is not physically accurate, as contacts cannot work correctly with
+                        // negative delta time, this is just used for testing purposes
+                        this.world.update(-REAL_DELTA_TIME());
                     }
 
                     if (inputEvent.key === '+') {
@@ -514,7 +519,7 @@ export default class Application {
             `${Demo.demoStrings[this.demoIndex]}`,
             '[ 1-9 ] select demo, [ Left Mouse ] to generate circles, [ Right Mouse ] to generate boxes',
             '[ C ] to generate particles, [ X ] to generate capsules, [ R ] to generate random convex polygon',
-            '[ E ] to generate explosion, [ F ] to generate attraction force',
+            '[ E ] to generate explosion, [ F ] to generate attraction force, [ B ] to shoot bullet',
             '[ Q ] to spawn player object, [ Space ] to jump, [Left arrow / Right arrow] to move',
             `[ G ] apply gravity: ${SETTINGS.applyGravity ? 'ON' : 'OFF'}`,
             `[ D ] debug mode: ${this.debug ? 'ON' : 'OFF'}`,
