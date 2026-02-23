@@ -1,10 +1,10 @@
-import * as Utils from '../src/physics/Utils';
+import * as Collision from '../src/collision/Collision';
+import RigidBody from '../src/core/RigidBody';
+import { DistanceJoint } from '../src/joint/DistanceJoint';
 import Vec2 from '../src/math/Vec2';
-import * as Collision from '../src/physics/Collision';
-import { DistanceJoint } from '../src/physics/DistanceJoint';
-import RigidBody from '../src/physics/RigidBody';
 import { BoxShape } from '../src/shapes/BoxShape';
 import { CircleShape } from '../src/shapes/CircleShape';
+import * as Utils from '../src/utils/Utils';
 
 describe('Performance', () => {
     // test.each(Array.from({ length: 5 }))('Performance test', () => {

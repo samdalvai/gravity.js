@@ -1,5 +1,5 @@
-import Application from './Application';
-import { DELTA_TIME } from './physics/Constants';
+import Application from './core/Application';
+import { DELTA_TIME } from './core/Constants';
 
 async function run() {
     const app = new Application();

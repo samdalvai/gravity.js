@@ -1,5 +1,5 @@
 import Vec2 from '../../src/math/Vec2';
-import RigidBody from '../../src/physics/RigidBody';
+import RigidBody from '../../src/core/RigidBody';
 import { CircleShape } from '../../src/shapes/CircleShape';
 
 describe('RigidBody', () => {

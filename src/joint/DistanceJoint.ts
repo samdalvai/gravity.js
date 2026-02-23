@@ -8,9 +8,9 @@
  * https://github.com/Sopiro
  */
 import Vec2 from '../math/Vec2';
-import { SETTINGS } from './Constants';
+import { SETTINGS } from '../core/Constants';
 import { Joint } from './Joint';
-import RigidBody from './RigidBody';
+import RigidBody from '../core/RigidBody';
 
 export class DistanceJoint extends Joint {
     public localAnchorA: Vec2;

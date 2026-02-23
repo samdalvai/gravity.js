@@ -1,4 +1,4 @@
-import AssetStore, { TEXTURES } from '../AssetStore';
+import AssetStore, { TEXTURES } from '../graphics/AssetStore';
 import Vec2 from '../math/Vec2';
 import { SETTINGS } from './Constants';
 import { Shape, ShapeType } from '../shapes/Shape';

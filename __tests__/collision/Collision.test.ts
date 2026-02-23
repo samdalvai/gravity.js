@@ -1,6 +1,6 @@
 import Vec2 from '../../src/math/Vec2';
-import * as Collision from '../../src/physics/Collision';
-import RigidBody from '../../src/physics/RigidBody';
+import * as Collision from '../../src/collision/Collision';
+import RigidBody from '../../src/core/RigidBody';
 import { BoxShape } from '../../src/shapes/BoxShape';
 import { CircleShape } from '../../src/shapes/CircleShape';
 import { PolygonShape } from '../../src/shapes/PolygonShape';

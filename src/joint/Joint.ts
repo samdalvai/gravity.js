@@ -7,10 +7,10 @@
  * Original project:
  * https://github.com/Sopiro
  */
-import { DELTA_TIME, SETTINGS } from './Constants';
-import { Constraint } from './Constraint';
-import RigidBody from './RigidBody';
-import * as Utils from './Utils';
+import { DELTA_TIME, SETTINGS } from '../core/Constants';
+import { Constraint } from '../constraint/Constraint';
+import RigidBody from '../core/RigidBody';
+import * as Utils from '../utils/Utils';
 
 export abstract class Joint extends Constraint {
     protected beta = 0.0; // Coefficient of position correction (Positional error feedback factor)

@@ -1,7 +1,7 @@
-import AssetStore, { TEXTURES } from './AssetStore';
-import Graphics from './Graphics';
-import InputManager, { MouseButton } from './InputManager';
-import Vec2 from './math/Vec2';
+import AssetStore, { TEXTURES } from '../graphics/AssetStore';
+import Graphics from '../graphics/Graphics';
+import InputManager, { MouseButton } from '../input/InputManager';
+import Vec2 from '../math/Vec2';
 import {
     DELTA_TIME,
     GRAVITY,
@@ -11,16 +11,16 @@ import {
     PLAYER_JUMP_IMPULSE,
     PLAYER_MAX_SPEED,
     SETTINGS,
-} from './physics/Constants';
-import { DistanceJoint } from './physics/DistanceJoint';
-import Force from './physics/Force';
-import RigidBody from './physics/RigidBody';
-import * as Utils from './physics/Utils';
-import World from './physics/World';
-import Demo from './samples/Demo';
-import { BoxShape } from './shapes/BoxShape';
-import { CapsuleShape } from './shapes/CapsuleShape';
-import { CircleShape } from './shapes/CircleShape';
+} from './Constants';
+import { DistanceJoint } from '../joint/DistanceJoint';
+import Force from '../physics/Force';
+import RigidBody from './RigidBody';
+import * as Utils from '../utils/Utils';
+import World from './World';
+import Demo from '../samples/Demo';
+import { BoxShape } from '../shapes/BoxShape';
+import { CapsuleShape } from '../shapes/CapsuleShape';
+import { CircleShape } from '../shapes/CircleShape';
 
 export default class Application {
     private running = false;

@@ -1,6 +1,6 @@
-import * as Collision from '../../src/physics/Collision';
-import { DistanceJoint } from '../../src/physics/DistanceJoint';
-import RigidBody from '../../src/physics/RigidBody';
+import * as Collision from '../../src/collision/Collision';
+import { DistanceJoint } from '../../src/joint/DistanceJoint';
+import RigidBody from '../../src/core/RigidBody';
 import { CircleShape } from '../../src/shapes/CircleShape';
 
 describe('Constraint', () => {

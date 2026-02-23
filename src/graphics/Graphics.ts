@@ -1,6 +1,10 @@
-import Vec2 from './math/Vec2';
-import RigidBody from './physics/RigidBody';
-import { BoxShape, CapsuleShape, CircleShape, PolygonShape, ShapeType } from './shapes/Shape';
+import RigidBody from '../core/RigidBody';
+import Vec2 from '../math/Vec2';
+import { BoxShape } from '../shapes/BoxShape';
+import { CapsuleShape } from '../shapes/CapsuleShape';
+import { CircleShape } from '../shapes/CircleShape';
+import { PolygonShape } from '../shapes/PolygonShape';
+import { ShapeType } from '../shapes/Shape';
 
 export default class Graphics {
     static windowWidth: number;

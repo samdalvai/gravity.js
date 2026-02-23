@@ -8,11 +8,11 @@
  * https://github.com/Sopiro
  */
 import Vec2 from '../math/Vec2';
-import * as Collision from './Collision';
+import * as Collision from '../collision/Collision';
 import { BODY_REMOVAL_THRESHOLD, SETTINGS } from './Constants';
-import { ContactManifold } from './Contact';
-import Force from './Force';
-import { Joint } from './Joint';
+import { ContactManifold } from '../collision/Contact';
+import Force from '../physics/Force';
+import { Joint } from '../joint/Joint';
 import RigidBody from './RigidBody';
 
 export default class World {

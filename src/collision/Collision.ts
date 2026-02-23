@@ -3,9 +3,9 @@ import { CapsuleShape } from '../shapes/CapsuleShape';
 import { CircleShape } from '../shapes/CircleShape';
 import { PolygonShape } from '../shapes/PolygonShape';
 import { ShapeType } from '../shapes/Shape';
-import { CONTACT_MERGE_THRESHOLD } from './Constants';
+import { CONTACT_MERGE_THRESHOLD } from '../core/Constants';
 import { ContactManifold } from './Contact';
-import RigidBody from './RigidBody';
+import RigidBody from '../core/RigidBody';
 
 export interface ContactPoint {
     point: Vec2;

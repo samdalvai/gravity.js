@@ -1,6 +1,6 @@
 import Vec2 from '../math/Vec2';
 import Edge from './Edge';
-import RigidBody from '../physics/RigidBody';
+import RigidBody from '../core/RigidBody';
 
 export enum ShapeType {
     CIRCLE,

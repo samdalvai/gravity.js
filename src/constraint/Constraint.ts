@@ -7,7 +7,7 @@
  * Original project:
  * https://github.com/Sopiro
  */
-import RigidBody from './RigidBody';
+import RigidBody from '../core/RigidBody';
 
 export abstract class Constraint {
     public readonly bodyA: RigidBody;
