@@ -32,7 +32,7 @@ export default class Application {
     private showContacts = true;
     private showAABB = false;
     private demoIndex = 1;
-    
+
     private player: RigidBody | null = null;
     private leftButtonPressed: boolean = false;
     private rightButtonPressed: boolean = false;
@@ -136,6 +136,7 @@ export default class Application {
 
                         const bullet = new RigidBody(new CircleShape(5), 0, 0, 0.1);
                         bullet.velocity = direction.scaleNew(bulletForce);
+                        bullet.isBullet = true;
                         bullet.setTexture('rockRound');
                         this.world.addBody(bullet);
                     }
