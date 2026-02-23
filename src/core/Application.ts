@@ -1,7 +1,14 @@
 import AssetStore, { TEXTURES } from '../graphics/AssetStore';
 import Graphics from '../graphics/Graphics';
 import InputManager, { MouseButton } from '../input/InputManager';
+import { DistanceJoint } from '../joint/DistanceJoint';
 import Vec2 from '../math/Vec2';
+import Force from '../physics/Force';
+import Demo from '../samples/Demo';
+import { BoxShape } from '../shapes/BoxShape';
+import { CapsuleShape } from '../shapes/CapsuleShape';
+import { CircleShape } from '../shapes/CircleShape';
+import * as Utils from '../utils/Utils';
 import {
     DELTA_TIME,
     GRAVITY,
@@ -12,15 +19,8 @@ import {
     PLAYER_MAX_SPEED,
     SETTINGS,
 } from './Constants';
-import { DistanceJoint } from '../joint/DistanceJoint';
-import Force from '../physics/Force';
 import RigidBody from './RigidBody';
-import * as Utils from '../utils/Utils';
 import World from './World';
-import Demo from '../samples/Demo';
-import { BoxShape } from '../shapes/BoxShape';
-import { CapsuleShape } from '../shapes/CapsuleShape';
-import { CircleShape } from '../shapes/CircleShape';
 
 export default class Application {
     private running = false;
@@ -88,25 +88,8 @@ export default class Application {
                             const y = InputManager.mousePosition.y;
                             const explosionPos = new Vec2(x, y);
 
-                            const debrisRadius = 50;
-                            const debrisWidth = 10;
                             const radius = 250;
                             const strength = 5000;
-
-                            const angles: number[] = [];
-                            for (let i = 0; i < 10; i++) angles.push(Math.random() * Math.PI * 2);
-                            const positions: Vec2[] = [];
-
-                            for (const angle of angles) {
-                                positions.push(new Vec2(Math.cos(angle), Math.sin(angle)).scaleNew(debrisRadius));
-                            }
-
-                            for (const pos of positions) {
-                                const bodyPosition = new Vec2(x, y).addAssign(pos);
-                                const body = Utils.randomConvexBody(bodyPosition.x, bodyPosition.y, debrisWidth, 5);
-                                body.angularVelocity = Utils.randomNumber(0, 100);
-                                this.world.addBody(body);
-                            }
 
                             for (const body of this.world.getBodies()) {
                                 const explosionImpulse = Force.generateExplosionForce(
@@ -138,6 +121,10 @@ export default class Application {
 
                     if (inputEvent.key === 's') {
                         this.showContacts = !this.showContacts;
+                    }
+
+                    if (inputEvent.key === 'b') {
+                        // Emit bullet
                     }
 
                     if (inputEvent.key === 'p') {
