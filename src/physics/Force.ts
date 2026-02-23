@@ -1,6 +1,6 @@
 import Vec2 from '../math/Vec2';
-import { PIXELS_PER_METER } from './Constants';
-import RigidBody from './RigidBody';
+import { PIXELS_PER_METER } from '../core/Constants';
+import RigidBody from '../core/RigidBody';
 
 export default class Force {
     static generateWeightForce(body: RigidBody, G: number): Vec2 {

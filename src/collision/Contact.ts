@@ -10,10 +10,10 @@
 import { Mat2 } from '../math/Mat2';
 import Vec2 from '../math/Vec2';
 import { ContactPoint } from './Collision';
-import { SETTINGS } from './Constants';
-import { Constraint } from './Constraint';
-import RigidBody from './RigidBody';
-import * as Utils from './Utils';
+import { SETTINGS } from '../core/Constants';
+import { Constraint } from '../constraint/Constraint';
+import RigidBody from '../core/RigidBody';
+import * as Utils from '../utils/Utils';
 
 enum ContactType {
     Normal,

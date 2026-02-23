@@ -1,5 +1,5 @@
 import Vec2 from '../math/Vec2';
-import RigidBody from '../physics/RigidBody';
+import RigidBody from '../core/RigidBody';
 import { Shape, ShapeType } from './Shape';
 
 export class CircleShape extends Shape {
