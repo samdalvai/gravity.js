@@ -12,8 +12,12 @@ import { ContactManifold } from '../collision/ContactManifold';
 import { Joint } from '../joint/Joint';
 import Vec2 from '../math/Vec2';
 import Force from '../physics/Force';
+import { CircleShape } from '../shapes/CircleShape';
+import { edgeIntersection } from '../shapes/Edge';
+import { PolygonShape } from '../shapes/PolygonShape';
+import { ShapeType } from '../shapes/Shape';
 import * as Utils from '../utils/Utils';
-import { BODY_REMOVAL_THRESHOLD, SETTINGS } from './Constants';
+import { BODY_REMOVAL_THRESHOLD, MIN_BULLET_SPEED, SETTINGS } from './Constants';
 import RigidBody from './RigidBody';
 
 export default class World {
@@ -114,6 +118,8 @@ export default class World {
             body.integrateForces(dt);
         }
 
+        this.ccd(dt);
+
         this.broadPhase();
 
         this.narrowPhase();
@@ -143,6 +149,65 @@ export default class World {
             if (body.position.y < BODY_REMOVAL_THRESHOLD) {
                 this.bodies[i] = this.bodies[this.bodies.length - 1];
                 this.bodies.pop();
+            }
+        }
+    }
+
+    ccd(dt: number) {
+        for (const body of this.bodies) {
+            if (body.isBullet && body.velocity.magnitudeSquared() > MIN_BULLET_SPEED) {
+                const bulletShape = body.shape as CircleShape;
+                const currentPos = body.position.copy();
+                const nextPos = currentPos.addNew(body.velocity.scaleNew(dt));
+
+                // TODO: We could cast two rays instead of one or check intersection by shifting up and down by radius
+                for (const other of this.bodies) {
+                    if (other.isStatic()) {
+                        if (other.shapeType === ShapeType.BOX || other.shapeType === ShapeType.POLYGON) {
+                            const polygonShape = other.shape as PolygonShape;
+                            const vertices = polygonShape.worldVertices;
+
+                            let minDistanceSquared = Infinity;
+                            let closestIntersection: Vec2 | undefined;
+                            let hitEdge: [Vec2, Vec2] | undefined;
+
+                            for (let i = 0; i < vertices.length; i++) {
+                                const v0 = vertices[i];
+                                const v1 = vertices[(i + 1) % vertices.length];
+
+                                const intersection = edgeIntersection(currentPos, nextPos, v0, v1);
+
+                                if (intersection) {
+                                    const distanceSquared = intersection.subNew(currentPos).magnitudeSquared();
+
+                                    if (distanceSquared < minDistanceSquared) {
+                                        closestIntersection = intersection.copy();
+                                        minDistanceSquared = distanceSquared;
+                                        hitEdge = [v0, v1];
+                                    }
+                                }
+                            }
+
+                            if (closestIntersection && hitEdge) {
+                                const [v0, v1] = hitEdge;
+                                const edgeVector = v0.subNew(v1);
+                                const edgeNormal = edgeVector.perpNew().unitVector();
+
+                                // Make sure normal points away from the bullet's current position
+                                const toBullet = currentPos.subNew(closestIntersection).unitVector();
+                                if (edgeNormal.dot(toBullet) < 0) {
+                                    edgeNormal.negate(); // flip to point outward
+                                }
+
+                                const bulletNewPos = closestIntersection.addNew(
+                                    edgeNormal.scaleNew(bulletShape.radius),
+                                );
+                                body.position = bulletNewPos.copy();
+                                body.shape.updateAABB(body);
+                            }
+                        }
+                    }
+                }
             }
         }
     }

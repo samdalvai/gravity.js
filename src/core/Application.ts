@@ -510,79 +510,79 @@ export default class Application {
             }
         }
 
-        const bodies = this.world.getBodies();
+        // const bodies = this.world.getBodies();
 
-        for (const body of bodies) {
-            if (body.isBullet && body.velocity.magnitudeSquared() > 2_000_000) {
-                const bulletShape = body.shape as CircleShape;
-                const currentPos = body.position.copy();
-                const nextPos = currentPos.addNew(body.velocity.scaleNew(REAL_DELTA_TIME()));
+        // for (const body of bodies) {
+        //     if (body.isBullet && body.velocity.magnitudeSquared() > 2_000_000) {
+        //         const bulletShape = body.shape as CircleShape;
+        //         const currentPos = body.position.copy();
+        //         const nextPos = currentPos.addNew(body.velocity.scaleNew(REAL_DELTA_TIME()));
 
-                // TODO: We could cast two rays instead of one or check intersection by shifting up and down by radius
-                Graphics.drawFillCircle(nextPos.x, nextPos.y, 2, 'red');
-                Graphics.drawLine(currentPos.x, currentPos.y, nextPos.x, nextPos.y, 'red');
+        //         // TODO: We could cast two rays instead of one or check intersection by shifting up and down by radius
+        //         Graphics.drawFillCircle(nextPos.x, nextPos.y, 2, 'red');
+        //         Graphics.drawLine(currentPos.x, currentPos.y, nextPos.x, nextPos.y, 'red');
 
-                for (const other of bodies) {
-                    if (other.isStatic()) {
-                        if (other.shapeType === ShapeType.BOX || other.shapeType === ShapeType.POLYGON) {
-                            const polygonShape = other.shape as PolygonShape;
-                            const vertices = polygonShape.worldVertices;
+        //         for (const other of bodies) {
+        //             if (other.isStatic()) {
+        //                 if (other.shapeType === ShapeType.BOX || other.shapeType === ShapeType.POLYGON) {
+        //                     const polygonShape = other.shape as PolygonShape;
+        //                     const vertices = polygonShape.worldVertices;
 
-                            let minDistanceSquared = Infinity;
-                            let closestIntersection: Vec2 | undefined;
-                            let hitEdge: [Vec2, Vec2] | undefined;
+        //                     let minDistanceSquared = Infinity;
+        //                     let closestIntersection: Vec2 | undefined;
+        //                     let hitEdge: [Vec2, Vec2] | undefined;
 
-                            for (let i = 0; i < vertices.length; i++) {
-                                const v0 = vertices[i];
-                                const v1 = vertices[(i + 1) % vertices.length];
+        //                     for (let i = 0; i < vertices.length; i++) {
+        //                         const v0 = vertices[i];
+        //                         const v1 = vertices[(i + 1) % vertices.length];
 
-                                const intersection = edgeIntersection(currentPos, nextPos, v0, v1);
+        //                         const intersection = edgeIntersection(currentPos, nextPos, v0, v1);
 
-                                if (intersection) {
-                                    Graphics.drawFillCircle(intersection.x, intersection.y, 2, 'yellow');
-                                    const distanceSquared = intersection.subNew(currentPos).magnitudeSquared();
+        //                         if (intersection) {
+        //                             Graphics.drawFillCircle(intersection.x, intersection.y, 2, 'yellow');
+        //                             const distanceSquared = intersection.subNew(currentPos).magnitudeSquared();
 
-                                    if (distanceSquared < minDistanceSquared) {
-                                        closestIntersection = intersection.copy();
-                                        minDistanceSquared = distanceSquared;
-                                        hitEdge = [v0, v1];
-                                    }
-                                }
-                            }
+        //                             if (distanceSquared < minDistanceSquared) {
+        //                                 closestIntersection = intersection.copy();
+        //                                 minDistanceSquared = distanceSquared;
+        //                                 hitEdge = [v0, v1];
+        //                             }
+        //                         }
+        //                     }
 
-                            if (closestIntersection && hitEdge) {
-                                Graphics.drawFillCircle(closestIntersection.x, closestIntersection.y, 5, 'yellow');
+        //                     if (closestIntersection && hitEdge) {
+        //                         Graphics.drawFillCircle(closestIntersection.x, closestIntersection.y, 5, 'yellow');
 
-                                const [v0, v1] = hitEdge;
-                                const edgeVector = v0.subNew(v1);
-                                const edgeNormal = edgeVector.perpNew().unitVector();
+        //                         const [v0, v1] = hitEdge;
+        //                         const edgeVector = v0.subNew(v1);
+        //                         const edgeNormal = edgeVector.perpNew().unitVector();
 
-                                // Make sure normal points away from the bullet's current position
-                                const toBullet = currentPos.subNew(closestIntersection).unitVector();
-                                if (edgeNormal.dot(toBullet) < 0) {
-                                    edgeNormal.negate(); // flip to point outward
-                                }
+        //                         // Make sure normal points away from the bullet's current position
+        //                         const toBullet = currentPos.subNew(closestIntersection).unitVector();
+        //                         if (edgeNormal.dot(toBullet) < 0) {
+        //                             edgeNormal.negate(); // flip to point outward
+        //                         }
 
-                                const normalLength = 20; // pixels, for visualization
-                                Graphics.drawLine(
-                                    closestIntersection.x,
-                                    closestIntersection.y,
-                                    closestIntersection.x + edgeNormal.x * normalLength,
-                                    closestIntersection.y + edgeNormal.y * normalLength,
-                                    'yellow',
-                                );
+        //                         const normalLength = 20; // pixels, for visualization
+        //                         Graphics.drawLine(
+        //                             closestIntersection.x,
+        //                             closestIntersection.y,
+        //                             closestIntersection.x + edgeNormal.x * normalLength,
+        //                             closestIntersection.y + edgeNormal.y * normalLength,
+        //                             'yellow',
+        //                         );
 
-                                const bulletNewPos = closestIntersection.addNew(
-                                    edgeNormal.scaleNew(bulletShape.radius),
-                                );
-                                body.position = bulletNewPos.copy();
-                                body.shape.updateAABB(body);
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        //                         const bulletNewPos = closestIntersection.addNew(
+        //                             edgeNormal.scaleNew(bulletShape.radius),
+        //                         );
+        //                         body.position = bulletNewPos.copy();
+        //                         body.shape.updateAABB(body);
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
 
         Graphics.endWorld();
 
