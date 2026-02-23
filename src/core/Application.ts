@@ -150,18 +150,6 @@ export default class Application {
                         this.world.update(REAL_DELTA_TIME());
                     }
 
-                    if (inputEvent.key === ',') {
-                        for (const body of this.world.getBodies()) {
-                            body.velocity.negate();
-                            body.angularVelocity *= -1;
-                        }
-                        this.world.update(REAL_DELTA_TIME());
-                        for (const body of this.world.getBodies()) {
-                            body.velocity.negate();
-                            body.angularVelocity *= -1;
-                        }
-                    }
-
                     if (inputEvent.key === '+') {
                         SETTINGS.solverIterations++;
                     }
@@ -530,8 +518,7 @@ export default class Application {
             '[ Q ] to spawn player object, [ Space ] to jump, [Left arrow / Right arrow] to move',
             `[ G ] apply gravity: ${SETTINGS.applyGravity ? 'ON' : 'OFF'}`,
             `[ D ] debug mode: ${this.debug ? 'ON' : 'OFF'}`,
-            `[ P ] pause simulation: ${this.paused ? 'ON' : 'OFF'}`,
-            '[ . ] step simulation forth, [ , ] step simulation back',
+            `[ P ] pause simulation: ${this.paused ? 'ON' : 'OFF'}, [ . ] step simulation`,
         ];
 
         const x = InputManager.mousePosition.x;
