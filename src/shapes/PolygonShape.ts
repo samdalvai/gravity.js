@@ -1,58 +1,12 @@
 import Vec2 from '../math/Vec2';
 import Edge from './Edge';
-import RigidBody from './RigidBody';
-
-export enum ShapeType {
-    CIRCLE,
-    POLYGON,
-    BOX,
-    CAPSULE,
-}
+import RigidBody from '../physics/RigidBody';
+import { Shape, ShapeType } from './Shape';
 
 interface SupportResult {
     vertex: Vec2;
     index: number;
 }
-
-export abstract class Shape {
-    abstract getType(): ShapeType;
-    abstract getMomentOfInertia(): number;
-    abstract updateVertices(angle: number, position: Vec2): void;
-    abstract updateAABB(body: RigidBody): void;
-}
-
-export class CircleShape extends Shape {
-    radius: number = 0;
-
-    constructor(radius: number) {
-        super();
-        this.radius = radius;
-    }
-
-    getType(): ShapeType {
-        return ShapeType.CIRCLE;
-    }
-
-    getMomentOfInertia(): number {
-        // For solid circles, the moment of inertia is 1/2 * r^2
-        // But this still needs to be multiplied by the rigidbody's mass
-        return 0.5 * (this.radius * this.radius);
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    updateVertices(angle: number, position: Vec2): void {
-        return; // Circles don't have vertices... nothing to do here
-    }
-
-    updateAABB(body: RigidBody): void {
-        const radius = this.radius;
-        body.minX = body.position.x - radius;
-        body.maxX = body.position.x + radius;
-        body.minY = body.position.y - radius;
-        body.maxY = body.position.y + radius;
-    }
-}
-
 export class PolygonShape extends Shape {
     localVertices: Vec2[] = [];
     worldVertices: Vec2[] = [];
@@ -205,114 +159,5 @@ export class PolygonShape extends Shape {
         body.maxX = maxX;
         body.minY = minY;
         body.maxY = maxY;
-    }
-}
-
-export class BoxShape extends PolygonShape {
-    // TODO: store halfwidth and height to avoid division by 2
-    constructor(width: number, height: number) {
-        const verts = [
-            new Vec2(-width / 2, -height / 2),
-            new Vec2(+width / 2, -height / 2),
-            new Vec2(+width / 2, +height / 2),
-            new Vec2(-width / 2, +height / 2),
-        ];
-
-        super(verts);
-
-        this.width = width;
-        this.height = height;
-    }
-
-    getType(): ShapeType {
-        return ShapeType.BOX;
-    }
-
-    getMomentOfInertia(): number {
-        // For a rectangle, the moment of inertia is 1/12 * (w^2 + h^2)
-        // But this still needs to be multiplied by the rigidbody's mass
-        return 0.083333 * (this.width * this.width + this.height * this.height);
-    }
-
-    updateAABB(body: RigidBody): void {
-        const hw = this.width * 0.5;
-        const hh = this.height * 0.5;
-
-        const cos = Math.cos(body.rotation);
-        const sin = Math.sin(body.rotation);
-
-        const ex = Math.abs(cos) * hw + Math.abs(sin) * hh;
-        const ey = Math.abs(sin) * hw + Math.abs(cos) * hh;
-
-        body.minX = body.position.x - ex;
-        body.maxX = body.position.x + ex;
-        body.minY = body.position.y - ey;
-        body.maxY = body.position.y + ey;
-    }
-}
-
-export class CapsuleShape extends BoxShape {
-    halfHeight: number;
-    radius: number;
-
-    constructor(halfHeight: number, radius: number) {
-        super(radius * 2, halfHeight * 2);
-        this.halfHeight = halfHeight;
-        this.radius = radius;
-    }
-
-    getType(): ShapeType {
-        return ShapeType.CAPSULE;
-    }
-
-    getMomentOfInertia(): number {
-        // For solid capsules, the moment of inertia is the sum of the two half circles and box body inertia, accounting fot heir position
-        // Still needs to be multiplied by the rigidbody's mass
-        const r = this.radius;
-        const l = this.halfHeight * 2;
-
-        const areaRect = 2 * r * l;
-        const areaCircle = Math.PI * r * r;
-        const areaTotal = areaRect + areaCircle;
-
-        if (areaTotal === 0) return 0;
-
-        const mRect = areaRect / areaTotal;
-        const mCircle = areaCircle / areaTotal;
-
-        const iRect = (1 / 12) * mRect * (l * l + 4 * r * r);
-        const iCircle = 0.5 * mCircle * r * r + (mCircle * (l * l)) / 4;
-
-        return iRect + iCircle;
-    }
-
-    getTopCirclePosition(): Vec2 {
-        return new Vec2(0, this.halfHeight);
-    }
-
-    getBottomCirclePosition(): Vec2 {
-        return new Vec2(0, -this.halfHeight);
-    }
-
-    updateAABB(body: RigidBody): void {
-        const radius = this.radius;
-
-        const topCirclePos = this.getTopCirclePosition().rotate(body.rotation).addNew(body.position);
-        const bottomCirclePos = this.getBottomCirclePosition().rotate(body.rotation).addNew(body.position);
-
-        const topCircleMinX = topCirclePos.x - radius;
-        const topCircleMinY = topCirclePos.y - radius;
-        const topCircleMaxX = topCirclePos.x + radius;
-        const topCircleMaxY = topCirclePos.y + radius;
-
-        const bottomCircleMinX = bottomCirclePos.x - radius;
-        const bottomCircleMinY = bottomCirclePos.y - radius;
-        const bottomCircleMaxX = bottomCirclePos.x + radius;
-        const bottomCircleMaxY = bottomCirclePos.y + radius;
-
-        body.minX = Math.min(topCircleMinX, bottomCircleMinX);
-        body.minY = Math.min(topCircleMinY, bottomCircleMinY);
-        body.maxX = Math.max(topCircleMaxX, bottomCircleMaxX);
-        body.maxY = Math.max(topCircleMaxY, bottomCircleMaxY);
     }
 }

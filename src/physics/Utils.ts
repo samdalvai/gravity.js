@@ -1,6 +1,6 @@
 import Vec2 from '../math/Vec2';
+import { PolygonShape } from '../shapes/PolygonShape';
 import RigidBody from './RigidBody';
-import { PolygonShape } from './Shape';
 
 export function randomNumber(min: number = 1.0, max: number = 10.0): number {
     return Math.random() * (max - min) + min;

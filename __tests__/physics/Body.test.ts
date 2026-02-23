@@ -1,6 +1,6 @@
 import Vec2 from '../../src/math/Vec2';
 import RigidBody from '../../src/physics/RigidBody';
-import { CircleShape } from '../../src/physics/Shape';
+import { CircleShape } from '../../src/shapes/CircleShape';
 
 describe('RigidBody', () => {
     test('Two bodies created should have a different id', () => {

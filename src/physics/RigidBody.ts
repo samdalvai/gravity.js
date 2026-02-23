@@ -1,7 +1,7 @@
 import AssetStore, { TEXTURES } from '../AssetStore';
 import Vec2 from '../math/Vec2';
 import { SETTINGS } from './Constants';
-import { Shape, ShapeType } from './Shape';
+import { Shape, ShapeType } from '../shapes/Shape';
 
 export default class RigidBody {
     static nextId = 0;
