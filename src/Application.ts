@@ -16,7 +16,7 @@ import { DistanceJoint } from './physics/DistanceJoint';
 import Force from './physics/Force';
 import RigidBody from './physics/RigidBody';
 import { BoxShape, CapsuleShape, CircleShape } from './physics/Shape';
-import Utils from './physics/Utils';
+import * as Utils from './physics/Utils';
 import World from './physics/World';
 import Demo from './samples/Demo';
 

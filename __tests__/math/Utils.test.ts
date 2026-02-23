@@ -1,4 +1,4 @@
-import Utils from '../../src/physics/Utils';
+import * as Utils from '../../src/physics/Utils';
 
 describe('Utils', () => {
     test('clamp() value below low returns low', () => {

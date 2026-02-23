@@ -10,7 +10,7 @@
 import { DELTA_TIME, SETTINGS } from './Constants';
 import { Constraint } from './Constraint';
 import RigidBody from './RigidBody';
-import Utils from './Utils';
+import * as Utils from './Utils';
 
 export abstract class Joint extends Constraint {
     public drawAnchor = false;
