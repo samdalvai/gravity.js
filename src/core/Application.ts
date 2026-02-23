@@ -514,6 +514,7 @@ export default class Application {
 
         for (const body of bodies) {
             if (body.isBullet) {
+                const bulletShape = body.shape as CircleShape;
                 const currentPos = body.position.copy();
                 const nextPos = currentPos.addNew(body.velocity.scaleNew(REAL_DELTA_TIME()));
 
@@ -526,7 +527,10 @@ export default class Application {
                         if (other.shapeType === ShapeType.BOX || other.shapeType === ShapeType.POLYGON) {
                             const polygonShape = other.shape as PolygonShape;
                             const vertices = polygonShape.worldVertices;
-                            const intersections: Vec2[] = [];
+
+                            let minDistanceSquared = Infinity;
+                            let closestIntersection: Vec2 | undefined;
+                            let hitEdge: [Vec2, Vec2] | undefined;
 
                             for (let i = 0; i < vertices.length; i++) {
                                 const v0 = vertices[i];
@@ -535,59 +539,44 @@ export default class Application {
                                 const intersection = edgeIntersection(currentPos, nextPos, v0, v1);
 
                                 if (intersection) {
-                                    intersections.push(intersection);
-                                }
-                            }
-
-                            for (const int of intersections) {
-                                Graphics.drawFillCircle(int.x, int.y, 2, 'yellow');
-                            }
-
-                            if (intersections.length) {
-                                let minDistanceSquared = Infinity;
-                                let closestIntersection: Vec2 | undefined;
-
-                                for (const int of intersections) {
-                                    const distanceSquared = int.subNew(currentPos).magnitudeSquared();
+                                    Graphics.drawFillCircle(intersection.x, intersection.y, 2, 'yellow');
+                                    const distanceSquared = intersection.subNew(currentPos).magnitudeSquared();
 
                                     if (distanceSquared < minDistanceSquared) {
-                                        closestIntersection = int.copy();
+                                        closestIntersection = intersection.copy();
                                         minDistanceSquared = distanceSquared;
+                                        hitEdge = [v0, v1];
                                     }
                                 }
+                            }
 
-                                if (!closestIntersection) throw Error('Could not determine closest intersection');
+                            if (closestIntersection && hitEdge) {
                                 Graphics.drawFillCircle(closestIntersection.x, closestIntersection.y, 5, 'yellow');
 
-                                // Move the bullet to the closest intersection
-                                // body.position = closestIntersection.copy();
+                                const [v0, v1] = hitEdge;
+                                const edgeVector = v1.subNew(v0);
+                                const edgeNormal = edgeVector.perpNew().unitVector();
 
-                                // TODO: shift position based on normal using dot product
-                                // dot(d, n) < 0 toward the edge
-                                // dot(d, n) > 0 away from the edge
-                                // dot(d, n) == 0 parallel
-                                // body.shape.updateAABB(body);
-                                const intersectionEdgeNormal = closestIntersection.perpNew();
+                                // Make sure normal points away from the bullet's current position
+                                const toBullet = currentPos.subNew(closestIntersection).unitVector();
+                                if (edgeNormal.dot(toBullet) < 0) {
+                                    edgeNormal.negate(); // flip to point outward
+                                }
+
+                                const normalLength = 20; // pixels, for visualization
                                 Graphics.drawLine(
                                     closestIntersection.x,
                                     closestIntersection.y,
-                                    intersectionEdgeNormal.x,
-                                    intersectionEdgeNormal.x,
+                                    closestIntersection.x + edgeNormal.x * normalLength,
+                                    closestIntersection.y + edgeNormal.y * normalLength,
                                     'yellow',
                                 );
 
-                                const dotProduct = currentPos.dot(intersectionEdgeNormal);
-
-                                if (dotProduct < 0) {
-                                    // bullet moving toward the edge
-                                    console.log('Toward');
-                                } else if (dotProduct > 0) {
-                                    // bullet moving away from the edge
-                                    console.log('away');
-                                } else {
-                                    // parallel
-                                    console.log('parallel');
-                                }
+                                const bulletNewPos = closestIntersection.addNew(
+                                    edgeNormal.scaleNew(bulletShape.radius),
+                                );
+                                body.position = bulletNewPos.copy();
+                                // body.position = closestIntersection.copy();
                             }
                         }
                     }
