@@ -1,7 +1,7 @@
 import AssetStore, { TEXTURES } from '../graphics/AssetStore';
 import Vec2 from '../math/Vec2';
-import { SETTINGS } from './Constants';
 import { Shape, ShapeType } from '../shapes/Shape';
+import { SETTINGS } from './Constants';
 
 export default class RigidBody {
     static nextId = 0;
@@ -36,6 +36,9 @@ export default class RigidBody {
     // Grounded variables
     isGrounded = false;
     lastGroundedTime = 0;
+
+    // Continuous collision detection
+    isBullet = false;
 
     // Pointer to the shape/geometry of this rigid body
     shape: Shape;
