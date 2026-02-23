@@ -1,26 +1,27 @@
 import AssetStore, { TEXTURES } from '../graphics/AssetStore';
 import Graphics from '../graphics/Graphics';
 import InputManager, { MouseButton } from '../input/InputManager';
+import { DistanceJoint } from '../joint/DistanceJoint';
 import Vec2 from '../math/Vec2';
+import Force from '../physics/Force';
+import Demo from '../samples/Demo';
+import { BoxShape } from '../shapes/BoxShape';
+import { CapsuleShape } from '../shapes/CapsuleShape';
+import { CircleShape } from '../shapes/CircleShape';
+import * as Utils from '../utils/Utils';
 import {
-    DELTA_TIME,
+    FIXED_DELTA_TIME,
     GRAVITY,
     MAX_BODIES,
     PIXELS_PER_METER,
     PLAYER_ACCELERATION,
     PLAYER_JUMP_IMPULSE,
     PLAYER_MAX_SPEED,
+    REAL_DELTA_TIME,
     SETTINGS,
 } from './Constants';
-import { DistanceJoint } from '../joint/DistanceJoint';
-import Force from '../physics/Force';
 import RigidBody from './RigidBody';
-import * as Utils from '../utils/Utils';
 import World from './World';
-import Demo from '../samples/Demo';
-import { BoxShape } from '../shapes/BoxShape';
-import { CapsuleShape } from '../shapes/CapsuleShape';
-import { CircleShape } from '../shapes/CircleShape';
 
 export default class Application {
     private running = false;
@@ -32,7 +33,7 @@ export default class Application {
     private showContacts = true;
     private showAABB = false;
     private demoIndex = 1;
-    
+
     private player: RigidBody | null = null;
     private leftButtonPressed: boolean = false;
     private rightButtonPressed: boolean = false;
@@ -223,7 +224,7 @@ export default class Application {
                     }
 
                     if (inputEvent.code === 'Space') {
-                        const JUMP_TIME_TOLERANCE = (DELTA_TIME / SETTINGS.subSteps) * 6;
+                        const JUMP_TIME_TOLERANCE = REAL_DELTA_TIME() * 6;
                         if (
                             this.player &&
                             (this.player.isGrounded || this.player.lastGroundedTime <= JUMP_TIME_TOLERANCE)
@@ -372,12 +373,12 @@ export default class Application {
             const acceleration = PLAYER_ACCELERATION;
 
             if (this.leftButtonPressed) {
-                const impulse = -acceleration * this.player.mass * DELTA_TIME * PIXELS_PER_METER;
+                const impulse = -acceleration * this.player.mass * FIXED_DELTA_TIME * PIXELS_PER_METER;
                 this.player.applyImpulseLinear(new Vec2(impulse, 0));
             }
 
             if (this.rightButtonPressed) {
-                const impulse = acceleration * this.player.mass * DELTA_TIME * PIXELS_PER_METER;
+                const impulse = acceleration * this.player.mass * FIXED_DELTA_TIME * PIXELS_PER_METER;
                 this.player.applyImpulseLinear(new Vec2(impulse, 0));
             }
 
@@ -386,7 +387,7 @@ export default class Application {
         }
 
         for (let i = 0; i < SETTINGS.subSteps; i++) {
-            this.world.update(DELTA_TIME / SETTINGS.subSteps);
+            this.world.update(REAL_DELTA_TIME());
         }
 
         if (this.generateParticle) {
