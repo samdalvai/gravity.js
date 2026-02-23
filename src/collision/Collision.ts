@@ -1,11 +1,11 @@
+import { CONTACT_MERGE_THRESHOLD } from '../core/Constants';
+import RigidBody from '../core/RigidBody';
 import Vec2 from '../math/Vec2';
 import { CapsuleShape } from '../shapes/CapsuleShape';
 import { CircleShape } from '../shapes/CircleShape';
 import { PolygonShape } from '../shapes/PolygonShape';
 import { ShapeType } from '../shapes/Shape';
-import { CONTACT_MERGE_THRESHOLD } from '../core/Constants';
-import { ContactManifold } from './Contact';
-import RigidBody from '../core/RigidBody';
+import { ContactManifold } from './ContactManifold';
 
 export interface ContactPoint {
     point: Vec2;
