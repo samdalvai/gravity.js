@@ -9,6 +9,7 @@ export const GRAVITY = 9.8;
 export const TANGENT_MIN_LENGTH = 0.01 * PIXELS_PER_METER;
 export const CONTACT_MERGE_THRESHOLD = 1.415 * TANGENT_MIN_LENGTH;
 export const BODY_REMOVAL_THRESHOLD = -5000;
+export const MIN_BULLET_SPEED = 2_000_000;
 
 export const PLAYER_MOVE_FORCE = 1500;
 export const PLAYER_MAX_SPEED = 350;

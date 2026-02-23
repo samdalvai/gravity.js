@@ -8,9 +8,6 @@ import Demo from '../samples/Demo';
 import { BoxShape } from '../shapes/BoxShape';
 import { CapsuleShape } from '../shapes/CapsuleShape';
 import { CircleShape } from '../shapes/CircleShape';
-import { edgeIntersection } from '../shapes/Edge';
-import { PolygonShape } from '../shapes/PolygonShape';
-import { ShapeType } from '../shapes/Shape';
 import * as Utils from '../utils/Utils';
 import {
     FIXED_DELTA_TIME,
