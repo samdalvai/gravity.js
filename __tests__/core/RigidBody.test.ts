@@ -11,13 +11,6 @@ describe('RigidBody', () => {
         expect(b.id).toBe(1);
     });
 
-    test('Bodies paur key should return the same value regardless of the ordering', () => {
-        const a = new RigidBody(new CircleShape(10), 100, 100, 10);
-        const b = new RigidBody(new CircleShape(10), 100, 100, 10);
-
-        expect(RigidBody.pairKey(a, b)).toBe(RigidBody.pairKey(b, a));
-    });
-
     test('Should convert local RigidBody point to world space', () => {
         const a = new RigidBody(new CircleShape(10), 100, 100, 10);
 

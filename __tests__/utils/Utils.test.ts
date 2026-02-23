@@ -1,3 +1,5 @@
+import RigidBody from '../../src/core/RigidBody';
+import { CircleShape } from '../../src/shapes/CircleShape';
 import * as Utils from '../../src/utils/Utils';
 
 describe('Utils', () => {
@@ -34,5 +36,12 @@ describe('Utils', () => {
         expect(Utils.clamp(5, 10, 3)).toBe(10);
         expect(Utils.clamp(100, 10, 3)).toBe(10);
         expect(Utils.clamp(-50, 10, 3)).toBe(10);
+    });
+
+    test('Bodies paur key should return the same value regardless of the ordering', () => {
+        const a = new RigidBody(new CircleShape(10), 100, 100, 10);
+        const b = new RigidBody(new CircleShape(10), 100, 100, 10);
+
+        expect(Utils.pairKey(a, b)).toBe(Utils.pairKey(b, a));
     });
 });

@@ -91,17 +91,6 @@ export default class RigidBody {
         this.shape.updateAABB(this);
     }
 
-    // a.id << 16 → shifts a.id into the upper 16 bits of a 32-bit integer
-    // b.id & 0xffff → ensures that only the lower 16 bits of b.id are used
-    // | -> bitwise OR combines them into a single 32-bit integer
-    static pairKey(a: RigidBody, b: RigidBody): number {
-        if (a.id < b.id) {
-            return (a.id << 16) | (b.id & 0xffff);
-        } else {
-            return (b.id << 16) | (a.id & 0xffff);
-        }
-    }
-
     setTexture(texture: keyof typeof TEXTURES): void {
         this.texture = AssetStore.getTexture(texture);
     }

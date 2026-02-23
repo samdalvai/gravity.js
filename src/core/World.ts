@@ -7,13 +7,14 @@
  * Original project:
  * https://github.com/Sopiro
  */
-import Vec2 from '../math/Vec2';
 import * as Collision from '../collision/Collision';
-import { BODY_REMOVAL_THRESHOLD, SETTINGS } from './Constants';
-import Force from '../physics/Force';
-import { Joint } from '../joint/Joint';
-import RigidBody from './RigidBody';
 import { ContactManifold } from '../collision/ContactManifold';
+import { Joint } from '../joint/Joint';
+import Vec2 from '../math/Vec2';
+import Force from '../physics/Force';
+import * as Utils from '../utils/Utils';
+import { BODY_REMOVAL_THRESHOLD, SETTINGS } from './Constants';
+import RigidBody from './RigidBody';
 
 export default class World {
     private readonly up = new Vec2(0, 1);
@@ -104,7 +105,7 @@ export default class World {
                 // Since we have fixed dt we can safely assume that the last frame dt is the same as this one
                 body.lastGroundedTime += dt;
             }
-            
+
             // Reset grounded value at the beginning of each frame
             body.isGrounded = false;
         }
@@ -150,7 +151,7 @@ export default class World {
             const newManifold = Collision.detectCollision(a, b);
             if (newManifold == null) continue;
 
-            const key = RigidBody.pairKey(a, b);
+            const key = Utils.pairKey(a, b);
             if (SETTINGS.warmStarting && this.manifoldMap.has(key)) {
                 const oldManifold = this.manifoldMap.get(key)!;
                 newManifold.tryWarmStart(oldManifold);

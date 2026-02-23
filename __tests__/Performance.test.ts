@@ -108,7 +108,7 @@ describe('Performance', () => {
         const b = new RigidBody(new BoxShape(20, 20), 100, 100, 5);
 
         for (let i = 0; i < 100000000; i++) {
-            RigidBody.pairKey(a, b);
+            Utils.pairKey(a, b);
             // Utils.make_pair_natural(a.id, b.id)
         }
 
