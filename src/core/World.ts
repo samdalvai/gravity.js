@@ -111,6 +111,7 @@ export default class World {
 
             // Reset grounded value at the beginning of each frame
             body.isGrounded = false;
+            body.hasCCD = false;
         }
 
         // Integrate all the forces
@@ -204,6 +205,7 @@ export default class World {
                                 );
                                 body.position = bulletNewPos.copy();
                                 body.shape.updateAABB(body);
+                                body.hasCCD = true;
                             }
                         }
                     }

@@ -40,6 +40,7 @@ export default class RigidBody {
 
     // Continuous collision detection
     private _isBullet = false;
+    hasCCD = false;
 
     // Pointer to the shape/geometry of this rigid body
     shape: Shape;
@@ -99,7 +100,7 @@ export default class RigidBody {
         return this._isBullet;
     }
 
-    /** Set this to true if you want to run CCD for this object, use splaringly because 
+    /** Set this to true if you want to run CCD for this object, use splaringly because
      *  CCD is expensive
      */
     set isBullet(value: boolean) {
@@ -213,7 +214,7 @@ export default class RigidBody {
     }
 
     integrateVelocities(dt: number): void {
-        if (this.isStatic()) {
+        if (this.isStatic() || this.hasCCD) {
             // TODO: this is needed because otherwise AABB is not correctly set for static objects with rotation
             this.shape.updateVertices(this.rotation, this.position);
             this.shape.updateAABB(this);
