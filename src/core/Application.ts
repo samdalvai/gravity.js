@@ -560,13 +560,34 @@ export default class Application {
                                 Graphics.drawFillCircle(closestIntersection.x, closestIntersection.y, 5, 'yellow');
 
                                 // Move the bullet to the closest intersection
-                                body.position = closestIntersection.copy();
+                                // body.position = closestIntersection.copy();
 
                                 // TODO: shift position based on normal using dot product
                                 // dot(d, n) < 0 toward the edge
                                 // dot(d, n) > 0 away from the edge
                                 // dot(d, n) == 0 parallel
-                                body.shape.updateAABB(body);
+                                // body.shape.updateAABB(body);
+                                const intersectionEdgeNormal = closestIntersection.perpNew();
+                                Graphics.drawLine(
+                                    closestIntersection.x,
+                                    closestIntersection.y,
+                                    intersectionEdgeNormal.x,
+                                    intersectionEdgeNormal.x,
+                                    'yellow',
+                                );
+
+                                const dotProduct = currentPos.dot(intersectionEdgeNormal);
+
+                                if (dotProduct < 0) {
+                                    // bullet moving toward the edge
+                                    console.log('Toward');
+                                } else if (dotProduct > 0) {
+                                    // bullet moving away from the edge
+                                    console.log('away');
+                                } else {
+                                    // parallel
+                                    console.log('parallel');
+                                }
                             }
                         }
                     }

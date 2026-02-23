@@ -14,7 +14,8 @@ import { BoxShape } from '../shapes/BoxShape';
 import { CircleShape } from '../shapes/CircleShape';
 import { PolygonShape } from '../shapes/PolygonShape';
 
-const FLOOR_WIDTH = 3200;
+// const FLOOR_WIDTH = 3200;
+const FLOOR_WIDTH = 1000;
 const FLOOR_HEIGHT = 50;
 const FLOOR_POSITION_Y = -350;
 
