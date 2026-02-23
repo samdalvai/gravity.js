@@ -1,7 +1,7 @@
 import * as Collision from '../../src/physics/Collision';
 import { DistanceJoint } from '../../src/physics/DistanceJoint';
 import RigidBody from '../../src/physics/RigidBody';
-import { CircleShape } from '../../src/physics/Shape';
+import { CircleShape } from '../../src/shapes/CircleShape';
 
 describe('Constraint', () => {
     test('Joint constraint solving should apply impulses to correct position of bodies', () => {

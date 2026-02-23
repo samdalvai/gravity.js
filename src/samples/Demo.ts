@@ -9,8 +9,10 @@ import Graphics from '../Graphics';
 import Vec2 from '../math/Vec2';
 import { DistanceJoint } from '../physics/DistanceJoint';
 import RigidBody from '../physics/RigidBody';
-import { BoxShape, CircleShape, PolygonShape } from '../physics/Shape';
 import World from '../physics/World';
+import { BoxShape } from '../shapes/BoxShape';
+import { CircleShape } from '../shapes/CircleShape';
+import { PolygonShape } from '../shapes/PolygonShape';
 
 const FLOOR_WIDTH = 3200;
 const FLOOR_HEIGHT = 50;

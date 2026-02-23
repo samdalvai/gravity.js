@@ -15,10 +15,12 @@ import {
 import { DistanceJoint } from './physics/DistanceJoint';
 import Force from './physics/Force';
 import RigidBody from './physics/RigidBody';
-import { BoxShape, CapsuleShape, CircleShape } from './physics/Shape';
 import * as Utils from './physics/Utils';
 import World from './physics/World';
 import Demo from './samples/Demo';
+import { BoxShape } from './shapes/BoxShape';
+import { CapsuleShape } from './shapes/CapsuleShape';
+import { CircleShape } from './shapes/CircleShape';
 
 export default class Application {
     private running = false;

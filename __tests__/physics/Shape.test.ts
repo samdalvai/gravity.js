@@ -1,5 +1,5 @@
 import Vec2 from '../../src/math/Vec2';
-import { BoxShape } from '../../src/physics/Shape';
+import { BoxShape } from '../../src/shapes/BoxShape';
 
 describe('Shape', () => {
     test('Should rotate box world vertices by 90 degrees', () => {

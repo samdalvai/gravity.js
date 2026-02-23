@@ -3,7 +3,8 @@ import Vec2 from '../src/math/Vec2';
 import * as Collision from '../src/physics/Collision';
 import { DistanceJoint } from '../src/physics/DistanceJoint';
 import RigidBody from '../src/physics/RigidBody';
-import { BoxShape, CircleShape } from '../src/physics/Shape';
+import { BoxShape } from '../src/shapes/BoxShape';
+import { CircleShape } from '../src/shapes/CircleShape';
 
 describe('Performance', () => {
     // test.each(Array.from({ length: 5 }))('Performance test', () => {
