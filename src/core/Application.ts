@@ -32,11 +32,12 @@ export default class Application {
     private showContacts = true;
     private showAABB = false;
     private demoIndex = 1;
-    private middleMousePressed = false;
-
+    
     private player: RigidBody | null = null;
     private leftButtonPressed: boolean = false;
     private rightButtonPressed: boolean = false;
+    private middleMousePressed = false;
+    private controlPressed = false;
 
     // Debug related properties
     private debug = true;
@@ -193,7 +194,7 @@ export default class Application {
                         this.world.addBody(capsule);
                     }
 
-                    if (inputEvent.key === 'r') {
+                    if (inputEvent.key === 'r' && !this.controlPressed) {
                         if (this.world.getBodies().length >= MAX_BODIES) {
                             continue;
                         }
@@ -240,7 +241,7 @@ export default class Application {
                     }
 
                     if (inputEvent.code === 'MetaLeft') {
-                        this.middleMousePressed = true;
+                        this.controlPressed = true;
                     }
 
                     break;
@@ -262,7 +263,7 @@ export default class Application {
                     }
 
                     if (inputEvent.code === 'MetaLeft') {
-                        this.middleMousePressed = false;
+                        this.controlPressed = false;
                     }
 
                     break;
@@ -274,7 +275,7 @@ export default class Application {
             const inputEvent = InputManager.mouseMoveBuffer.shift();
             if (!inputEvent) return;
 
-            if (this.middleMousePressed) {
+            if (this.middleMousePressed || this.controlPressed) {
                 document.body.style.cursor = 'pointer';
                 // Drag the camera opposite to mouse movement
                 Graphics.pan.x -= inputEvent.movementX / Graphics.zoom;
