@@ -102,9 +102,9 @@ export default class RigidBody {
     /** Set this to true if you want to run CCD for this object, use splaringly because 
      *  CCD is expensive
      */
-    set isBullet(isBullet: boolean) {
+    set isBullet(value: boolean) {
         assert(this.shapeType === ShapeType.CIRCLE);
-        this._isBullet = isBullet;
+        this._isBullet = value;
     }
 
     setTexture(texture: keyof typeof TEXTURES): void {

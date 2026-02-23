@@ -517,6 +517,7 @@ export default class Application {
                 const currentPos = body.position.copy();
                 const nextPos = currentPos.addNew(body.velocity.scaleNew(REAL_DELTA_TIME()));
 
+                // TODO: We could cast two rays instead of one or check intersection by shifting up and down by radius
                 Graphics.drawFillCircle(nextPos.x, nextPos.y, 2, 'red');
                 Graphics.drawLine(currentPos.x, currentPos.y, nextPos.x, nextPos.y, 'red');
 
