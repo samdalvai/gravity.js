@@ -1,6 +1,7 @@
 import AssetStore, { TEXTURES } from '../graphics/AssetStore';
 import Vec2 from '../math/Vec2';
 import { Shape, ShapeType } from '../shapes/Shape';
+import { assert } from '../utils/Utils';
 import { SETTINGS } from './Constants';
 
 export default class RigidBody {
@@ -38,7 +39,7 @@ export default class RigidBody {
     lastGroundedTime = 0;
 
     // Continuous collision detection
-    isBullet = false;
+    private _isBullet = false;
 
     // Pointer to the shape/geometry of this rigid body
     shape: Shape;
@@ -92,6 +93,18 @@ export default class RigidBody {
 
         this.shape.updateVertices(this.rotation, this.position);
         this.shape.updateAABB(this);
+    }
+
+    get isBullet() {
+        return this._isBullet;
+    }
+
+    /** Set this to true if you want to run CCD for this object, use splaringly because 
+     *  CCD is expensive
+     */
+    set isBullet(isBullet: boolean) {
+        assert(this.shapeType === ShapeType.CIRCLE);
+        this._isBullet = isBullet;
     }
 
     setTexture(texture: keyof typeof TEXTURES): void {
