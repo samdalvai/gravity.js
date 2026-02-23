@@ -8,6 +8,9 @@ import Demo from '../samples/Demo';
 import { BoxShape } from '../shapes/BoxShape';
 import { CapsuleShape } from '../shapes/CapsuleShape';
 import { CircleShape } from '../shapes/CircleShape';
+import { edgeIntersection } from '../shapes/Edge';
+import { PolygonShape } from '../shapes/PolygonShape';
+import { ShapeType } from '../shapes/Shape';
 import * as Utils from '../utils/Utils';
 import {
     FIXED_DELTA_TIME,
@@ -516,6 +519,48 @@ export default class Application {
 
                 Graphics.drawFillCircle(nextPos.x, nextPos.y, 2, 'red');
                 Graphics.drawLine(currentPos.x, currentPos.y, nextPos.x, nextPos.y, 'red');
+
+                for (const other of bodies) {
+                    if (other.isStatic()) {
+                        if (other.shapeType === ShapeType.BOX || other.shapeType === ShapeType.POLYGON) {
+                            const polygonShape = other.shape as PolygonShape;
+                            const vertices = polygonShape.worldVertices;
+                            const intersections: Vec2[] = [];
+
+                            for (let i = 0; i < vertices.length; i++) {
+                                const v0 = vertices[i];
+                                const v1 = vertices[(i + 1) % vertices.length];
+
+                                const intersection = edgeIntersection(currentPos, nextPos, v0, v1);
+
+                                if (intersection) {
+                                    intersections.push(intersection);
+                                }
+                            }
+
+                            for (const int of intersections) {
+                                Graphics.drawFillCircle(int.x, int.y, 2, 'yellow');
+                            }
+
+                            if (intersections.length) {
+                                let minDistanceSquared = Infinity;
+                                let closestIntersection: Vec2 | undefined;
+
+                                for (const int of intersections) {
+                                    const distanceSquared = int.subNew(currentPos).magnitudeSquared();
+
+                                    if (distanceSquared < minDistanceSquared) {
+                                        closestIntersection = int.copy();
+                                        minDistanceSquared = distanceSquared;
+                                    }
+                                }
+
+                                if (!closestIntersection) throw Error('Could not determine closest intersection');
+                                Graphics.drawFillCircle(closestIntersection.x, closestIntersection.y, 5, 'yellow');
+                            }
+                        }
+                    }
+                }
             }
         }
 
