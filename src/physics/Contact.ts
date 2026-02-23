@@ -9,7 +9,7 @@
  */
 import { Mat2 } from '../math/Mat2';
 import Vec2 from '../math/Vec2';
-import { ContactPoint } from './CollisionDetection';
+import { ContactPoint } from './Collision';
 import { SETTINGS } from './Constants';
 import { Constraint } from './Constraint';
 import RigidBody from './RigidBody';
