@@ -188,7 +188,10 @@ export default class World {
             const body = this.bodies[i];
 
             // It suffices to look for the position going below the screen
-            if (body.position.y < BODY_REMOVAL_THRESHOLD) {
+            if (
+                Math.abs(body.position.x) > BODY_REMOVAL_THRESHOLD ||
+                Math.abs(body.position.y) > BODY_REMOVAL_THRESHOLD
+            ) {
                 this.bodies[i] = this.bodies[this.bodies.length - 1];
                 this.bodies.pop();
             }
