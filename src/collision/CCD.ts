@@ -61,6 +61,9 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
             const topCirclePosition = capsuleShape.getTopCirclePosition(other);
             const bottomCirclePosition = capsuleShape.getBottomCirclePosition(other);
 
+            const axis = bottomCirclePosition.subNew(topCirclePosition);
+            const axisDir = axis.normalizeNew();
+
             const topCircleIntersections = edgeCircleIntersection(
                 currentPos,
                 nextPos,
@@ -69,6 +72,9 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
             );
 
             for (const int of topCircleIntersections) {
+                const v = int.subNew(topCirclePosition);
+                if (v.dot(axisDir) > 0) continue; // Skip bottom half
+
                 const distanceSquared = int.subNew(currentPos).magnitudeSquared();
 
                 if (distanceSquared < minDistanceSquared) {
@@ -85,6 +91,9 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
             );
 
             for (const int of bottomCircleIntersections) {
+                const v = int.subNew(bottomCirclePosition);
+                if (v.dot(axisDir) < 0) continue; // Skip upper half
+
                 const distanceSquared = int.subNew(currentPos).magnitudeSquared();
 
                 if (distanceSquared < minDistanceSquared) {

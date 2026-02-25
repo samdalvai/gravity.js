@@ -573,6 +573,9 @@ export default class Application {
                         const topCirclePosition = capsuleShape.getTopCirclePosition(other);
                         const bottomCirclePosition = capsuleShape.getBottomCirclePosition(other);
 
+                        const axis = bottomCirclePosition.subNew(topCirclePosition);
+                        const axisDir = axis.normalizeNew();
+
                         const topCircleIntersections = edgeCircleIntersection(
                             currentPos,
                             nextPos,
@@ -581,6 +584,9 @@ export default class Application {
                         );
 
                         for (const int of topCircleIntersections) {
+                            const v = int.subNew(topCirclePosition);
+                            if (v.dot(axisDir) > 0) continue; // Skip bottom half
+
                             Graphics.drawFillCircle(int.x, int.y, 2, 'yellow');
 
                             const distanceSquared = int.subNew(currentPos).magnitudeSquared();
@@ -599,6 +605,9 @@ export default class Application {
                         );
 
                         for (const int of bottomCircleIntersections) {
+                            const v = int.subNew(bottomCirclePosition);
+                            if (v.dot(axisDir) < 0) continue; // Skip upper half
+
                             Graphics.drawFillCircle(int.x, int.y, 2, 'yellow');
 
                             const distanceSquared = int.subNew(currentPos).magnitudeSquared();
