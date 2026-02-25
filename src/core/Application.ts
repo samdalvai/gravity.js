@@ -524,6 +524,8 @@ export default class Application {
                 for (const other of this.world.getBodies()) {
                     if (body.id === other.id || other.isBullet) continue;
 
+                    Utils.assert(body.shape instanceof CircleShape);
+
                     if (other.shapeType === ShapeType.BOX || other.shapeType === ShapeType.POLYGON) {
                         const polygonShape = other.shape as PolygonShape;
                         const vertices = polygonShape.worldVertices;
