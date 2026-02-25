@@ -12,6 +12,7 @@ import { ContactManifold } from '../collision/ContactManifold';
 import { Joint } from '../joint/Joint';
 import Vec2 from '../math/Vec2';
 import Force from '../physics/Force';
+import { CapsuleShape } from '../shapes/CapsuleShape';
 import { CircleShape } from '../shapes/CircleShape';
 import { edgeCircleIntersection, edgeIntersection } from '../shapes/Edge';
 import { PolygonShape } from '../shapes/PolygonShape';
@@ -228,7 +229,58 @@ export default class World {
                     }
 
                     if (other.shapeType === ShapeType.CAPSULE) {
-                        // to be implemented
+                        const capsuleShape = other.shape as CapsuleShape;
+                        const topCirclePosition = capsuleShape.getTopCirclePosition(other);
+                        const bottomCirclePosition = capsuleShape.getBottomCirclePosition(other);
+
+                        const topCircleIntersections = edgeCircleIntersection(
+                            currentPos,
+                            nextPos,
+                            topCirclePosition,
+                            capsuleShape.radius,
+                        );
+
+                        for (const int of topCircleIntersections) {
+                            const distanceSquared = int.subNew(currentPos).magnitudeSquared();
+
+                            if (distanceSquared < minDistanceSquared) {
+                                closestIntersection = int.copy();
+                                minDistanceSquared = distanceSquared;
+                            }
+                        }
+
+                        const bottomCircleIntersections = edgeCircleIntersection(
+                            currentPos,
+                            nextPos,
+                            bottomCirclePosition,
+                            capsuleShape.radius,
+                        );
+
+                        for (const int of bottomCircleIntersections) {
+                            const distanceSquared = int.subNew(currentPos).magnitudeSquared();
+
+                            if (distanceSquared < minDistanceSquared) {
+                                closestIntersection = int.copy();
+                                minDistanceSquared = distanceSquared;
+                            }
+                        }
+
+                        const vertices = capsuleShape.worldVertices;
+                        for (let i = 0; i < vertices.length; i++) {
+                            const v0 = vertices[i];
+                            const v1 = vertices[(i + 1) % vertices.length];
+
+                            const intersection = edgeIntersection(currentPos, nextPos, v0, v1);
+
+                            if (intersection) {
+                                const distanceSquared = intersection.subNew(currentPos).magnitudeSquared();
+
+                                if (distanceSquared < minDistanceSquared) {
+                                    closestIntersection = intersection.copy();
+                                    minDistanceSquared = distanceSquared;
+                                }
+                            }
+                        }
                     }
                 }
 

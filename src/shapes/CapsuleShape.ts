@@ -1,5 +1,5 @@
-import Vec2 from '../math/Vec2';
 import RigidBody from '../core/RigidBody';
+import Vec2 from '../math/Vec2';
 import { BoxShape } from './BoxShape';
 import { ShapeType } from './Shape';
 
@@ -38,19 +38,19 @@ export class CapsuleShape extends BoxShape {
         return iRect + iCircle;
     }
 
-    getTopCirclePosition(): Vec2 {
-        return new Vec2(0, this.halfHeight);
+    getTopCirclePosition(body: RigidBody): Vec2 {
+        return new Vec2(0, this.halfHeight).rotate(body.rotation).addNew(body.position);
     }
 
-    getBottomCirclePosition(): Vec2 {
-        return new Vec2(0, -this.halfHeight);
+    getBottomCirclePosition(body: RigidBody): Vec2 {
+        return new Vec2(0, -this.halfHeight).rotate(body.rotation).addNew(body.position);
     }
 
     updateAABB(body: RigidBody): void {
         const radius = this.radius;
 
-        const topCirclePos = this.getTopCirclePosition().rotate(body.rotation).addNew(body.position);
-        const bottomCirclePos = this.getBottomCirclePosition().rotate(body.rotation).addNew(body.position);
+        const topCirclePos = this.getTopCirclePosition(body);
+        const bottomCirclePos = this.getBottomCirclePosition(body);
 
         const topCircleMinX = topCirclePos.x - radius;
         const topCircleMinY = topCirclePos.y - radius;
