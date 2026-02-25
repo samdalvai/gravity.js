@@ -8,15 +8,11 @@ import Demo from '../samples/Demo';
 import { BoxShape } from '../shapes/BoxShape';
 import { CapsuleShape } from '../shapes/CapsuleShape';
 import { CircleShape } from '../shapes/CircleShape';
-import { edgeCircleIntersection, edgeIntersection } from '../shapes/Edge';
-import { PolygonShape } from '../shapes/PolygonShape';
-import { ShapeType } from '../shapes/Shape';
 import * as Utils from '../utils/Utils';
 import {
     FIXED_DELTA_TIME,
     GRAVITY,
     MAX_BODIES,
-    MIN_BULLET_SPEED,
     PIXELS_PER_METER,
     PLAYER_ACCELERATION,
     PLAYER_JUMP_IMPULSE,
@@ -506,143 +502,6 @@ export default class Application {
 
             Graphics.drawLine(-50, 0, 50, 0, 'gray');
             Graphics.drawLine(0, -50, 0, 50, 'gray');
-        }
-
-        for (const body of this.world.getBodies()) {
-            if (body.isBullet && body.velocity.magnitudeSquared() > MIN_BULLET_SPEED) {
-                Utils.assert(body.shape instanceof CircleShape);
-                const bulletShape = body.shape as CircleShape;
-                const currentPos = body.position.copy();
-                const nextPos = currentPos.addNew(body.velocity.scaleNew(REAL_DELTA_TIME()));
-
-                Graphics.drawLine(currentPos.x, currentPos.y, nextPos.x, nextPos.y, 'red');
-                Graphics.drawFillCircle(nextPos.x, nextPos.y, bulletShape.radius, 'red');
-
-                let minDistanceSquared = Infinity;
-                let closestIntersection: Vec2 | undefined;
-
-                // TODO: We could cast two rays instead of one or check intersection by shifting up and down by radius
-                for (const other of this.world.getBodies()) {
-                    if (body.id === other.id || other.isBullet) continue;
-
-                    if (other.shapeType === ShapeType.BOX || other.shapeType === ShapeType.POLYGON) {
-                        const polygonShape = other.shape as PolygonShape;
-                        const vertices = polygonShape.worldVertices;
-
-                        for (let i = 0; i < vertices.length; i++) {
-                            const v0 = vertices[i];
-                            const v1 = vertices[(i + 1) % vertices.length];
-
-                            const intersection = edgeIntersection(currentPos, nextPos, v0, v1);
-
-                            if (intersection) {
-                                Graphics.drawFillCircle(intersection.x, intersection.y, 2, 'yellow');
-                                const distanceSquared = intersection.subNew(currentPos).magnitudeSquared();
-
-                                if (distanceSquared < minDistanceSquared) {
-                                    closestIntersection = intersection.copy();
-                                    minDistanceSquared = distanceSquared;
-                                }
-                            }
-                        }
-                    }
-
-                    if (other.shapeType === ShapeType.CIRCLE) {
-                        const circleShape = other.shape as CircleShape;
-                        const intersections = edgeCircleIntersection(
-                            currentPos,
-                            nextPos,
-                            other.position,
-                            circleShape.radius,
-                        );
-
-                        for (const int of intersections) {
-                            Graphics.drawFillCircle(int.x, int.y, 2, 'yellow');
-
-                            const distanceSquared = int.subNew(currentPos).magnitudeSquared();
-
-                            if (distanceSquared < minDistanceSquared) {
-                                closestIntersection = int.copy();
-                                minDistanceSquared = distanceSquared;
-                            }
-                        }
-                    }
-
-                    if (other.shapeType === ShapeType.CAPSULE) {
-                        const capsuleShape = other.shape as CapsuleShape;
-                        const topCirclePosition = capsuleShape.getTopCirclePosition(other);
-                        const bottomCirclePosition = capsuleShape.getBottomCirclePosition(other);
-
-                        const axis = bottomCirclePosition.subNew(topCirclePosition);
-                        const axisDir = axis.normalizeNew();
-
-                        const topCircleIntersections = edgeCircleIntersection(
-                            currentPos,
-                            nextPos,
-                            topCirclePosition,
-                            capsuleShape.radius,
-                        );
-
-                        for (const int of topCircleIntersections) {
-                            const v = int.subNew(topCirclePosition);
-                            if (v.dot(axisDir) > 0) continue; // Skip bottom half
-
-                            Graphics.drawFillCircle(int.x, int.y, 2, 'yellow');
-
-                            const distanceSquared = int.subNew(currentPos).magnitudeSquared();
-
-                            if (distanceSquared < minDistanceSquared) {
-                                closestIntersection = int.copy();
-                                minDistanceSquared = distanceSquared;
-                            }
-                        }
-
-                        const bottomCircleIntersections = edgeCircleIntersection(
-                            currentPos,
-                            nextPos,
-                            bottomCirclePosition,
-                            capsuleShape.radius,
-                        );
-
-                        for (const int of bottomCircleIntersections) {
-                            const v = int.subNew(bottomCirclePosition);
-                            if (v.dot(axisDir) < 0) continue; // Skip upper half
-
-                            Graphics.drawFillCircle(int.x, int.y, 2, 'yellow');
-
-                            const distanceSquared = int.subNew(currentPos).magnitudeSquared();
-
-                            if (distanceSquared < minDistanceSquared) {
-                                closestIntersection = int.copy();
-                                minDistanceSquared = distanceSquared;
-                            }
-                        }
-
-                        const vertices = capsuleShape.worldVertices;
-                        for (let i = 0; i < vertices.length; i++) {
-                            if (i % 2 === 0) continue; // Skip top and bottom vertices
-                            const v0 = vertices[i];
-                            const v1 = vertices[(i + 1) % vertices.length];
-
-                            const intersection = edgeIntersection(currentPos, nextPos, v0, v1);
-
-                            if (intersection) {
-                                Graphics.drawFillCircle(intersection.x, intersection.y, 2, 'yellow');
-                                const distanceSquared = intersection.subNew(currentPos).magnitudeSquared();
-
-                                if (distanceSquared < minDistanceSquared) {
-                                    closestIntersection = intersection.copy();
-                                    minDistanceSquared = distanceSquared;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if (closestIntersection) {
-                    Graphics.drawFillCircle(closestIntersection.x, closestIntersection.y, 5, 'yellow');
-                }
-            }
         }
 
         Graphics.endWorld();

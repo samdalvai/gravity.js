@@ -2,7 +2,7 @@ import RigidBody from '../core/RigidBody';
 import Vec2 from '../math/Vec2';
 import { CapsuleShape } from '../shapes/CapsuleShape';
 import { CircleShape } from '../shapes/CircleShape';
-import { edgeCircleIntersection, edgeIntersection } from '../shapes/Edge';
+import { edgeCircleIntersection, edgeEdgeIntersection } from '../shapes/Edge';
 import { PolygonShape } from '../shapes/PolygonShape';
 import { ShapeType } from '../shapes/Shape';
 import * as Utils from '../utils/Utils';
@@ -29,7 +29,7 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
                 const v0 = vertices[i];
                 const v1 = vertices[(i + 1) % vertices.length];
 
-                const intersection = edgeIntersection(currentPos, nextPos, v0, v1);
+                const intersection = edgeEdgeIntersection(currentPos, nextPos, v0, v1);
 
                 if (intersection) {
                     const distanceSquared = intersection.subNew(currentPos).magnitudeSquared();
@@ -108,7 +108,7 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
                 const v0 = vertices[i];
                 const v1 = vertices[(i + 1) % vertices.length];
 
-                const intersection = edgeIntersection(currentPos, nextPos, v0, v1);
+                const intersection = edgeEdgeIntersection(currentPos, nextPos, v0, v1);
 
                 if (intersection) {
                     const distanceSquared = intersection.subNew(currentPos).magnitudeSquared();
