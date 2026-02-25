@@ -12,7 +12,7 @@ import * as Collision from '../collision/Collision';
 import { ContactManifold } from '../collision/ContactManifold';
 import { Joint } from '../joint/Joint';
 import Vec2 from '../math/Vec2';
-import Force from '../physics/Force';
+import Force from '../force/Force';
 import * as Utils from '../utils/Utils';
 import { BODY_REMOVAL_THRESHOLD, MIN_BULLET_SPEED, SETTINGS } from './Constants';
 import RigidBody from './RigidBody';

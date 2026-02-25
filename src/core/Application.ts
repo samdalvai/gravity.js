@@ -3,7 +3,7 @@ import Graphics from '../graphics/Graphics';
 import InputManager, { MouseButton } from '../input/InputManager';
 import { DistanceJoint } from '../joint/DistanceJoint';
 import Vec2 from '../math/Vec2';
-import Force from '../physics/Force';
+import Force from '../force/Force';
 import Demo from '../samples/Demo';
 import { BoxShape } from '../shapes/BoxShape';
 import { CapsuleShape } from '../shapes/CapsuleShape';
@@ -517,7 +517,7 @@ export default class Application {
             `${Demo.demoStrings[this.demoIndex]}`,
             '[ 1-9 ] select demo, [ Left Mouse ] to generate circles, [ Right Mouse ] to generate boxes',
             '[ C ] to generate particles, [ X ] to generate capsules, [ R ] to generate random convex polygon',
-            '[ E ] to generate explosion, [ F ] to generate attraction force, [ B ] to shoot bullet',
+            '[ E ] to generate explosion, [ F ] to generate gravitational field, [ B ] to shoot bullet',
             '[ Q ] to spawn player object, [ Space ] to jump, [Left arrow / Right arrow] to move',
             `[ G ] apply gravity: ${SETTINGS.applyGravity ? 'ON' : 'OFF'}`,
             `[ D ] debug mode: ${this.debug ? 'ON' : 'OFF'}`,
