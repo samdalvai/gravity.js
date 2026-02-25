@@ -503,22 +503,25 @@ export default class Application {
                     }
                 }
             }
+
+            Graphics.drawLine(-50, 0, 50, 0, 'gray');
+            Graphics.drawLine(0, -50, 0, 50, 'gray');
         }
 
-        const bodies = this.world.getBodies();
-        for (const body of bodies) {
+        /*for (const body of this.world.getBodies()) {
             if (body.isBullet && body.velocity.magnitudeSquared() > MIN_BULLET_SPEED) {
                 const bulletShape = body.shape as CircleShape;
                 const currentPos = body.position.copy();
                 const nextPos = currentPos.addNew(body.velocity.scaleNew(REAL_DELTA_TIME()));
 
                 Graphics.drawLine(currentPos.x, currentPos.y, nextPos.x, nextPos.y, 'red');
+                Graphics.drawFillCircle(nextPos.x, nextPos.y, bulletShape.radius, 'red');
 
                 let minDistanceSquared = Infinity;
                 let closestIntersection: Vec2 | undefined;
 
                 // TODO: We could cast two rays instead of one or check intersection by shifting up and down by radius
-                for (const other of bodies) {
+                for (const other of this.world.getBodies()) {
                     if (body.id === other.id || other.isBullet) continue;
 
                     if (other.shapeType === ShapeType.BOX || other.shapeType === ShapeType.POLYGON) {
@@ -566,16 +569,9 @@ export default class Application {
 
                 if (closestIntersection) {
                     Graphics.drawFillCircle(closestIntersection.x, closestIntersection.y, 5, 'yellow');
-
-
-                    const toBullet = currentPos.subNew(closestIntersection).unitVector();
-                    const bulletNewPos = closestIntersection.addNew(toBullet.scaleNew(bulletShape.radius));
-                    Graphics.drawFillCircle(bulletNewPos.x, bulletNewPos.y, bulletShape.radius, 'green');
-                    // body.shape.updateAABB(body);
-                    // body.hasCCD = true;
                 }
             }
-        }
+        }*/
 
         Graphics.endWorld();
 
