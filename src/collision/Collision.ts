@@ -7,49 +7,6 @@ import { PolygonShape } from '../shapes/PolygonShape';
 import { ShapeType } from '../shapes/Shape';
 import { ContactManifold } from './ContactManifold';
 
-export interface ContactPoint {
-    point: Vec2;
-    id: number;
-}
-
-function findContactPoints(normal: Vec2, a: RigidBody, b: RigidBody): ContactPoint[] {
-    const aPolygon = a.shape as PolygonShape;
-    const bPolygon = b.shape as PolygonShape;
-    const edgeA = aPolygon.findFarthestEdge(a, normal);
-    const edgeB = bPolygon.findFarthestEdge(b, normal.negateNew());
-
-    let ref = edgeA; // Reference edge
-    let inc = edgeB; // Incidence edge
-    let flip = false;
-
-    const aPerpendicularness = Math.abs(edgeA.dir.dot(normal));
-    const bPerpendicularness = Math.abs(edgeB.dir.dot(normal));
-
-    if (aPerpendicularness >= bPerpendicularness) {
-        ref = edgeB;
-        inc = edgeA;
-        flip = true;
-    }
-
-    inc.clip(ref.p1, ref.dir);
-    inc.clip(ref.p2, ref.dir.negateNew());
-    inc.clip(ref.p1, flip ? normal : normal.negateNew(), true);
-
-    let contactPoints: ContactPoint[];
-
-    // If two points are closer than threshold, merge them into one point
-    if (inc.length <= CONTACT_MERGE_THRESHOLD) {
-        contactPoints = [{ point: inc.p1, id: inc.id1 }];
-    } else {
-        contactPoints = [
-            { point: inc.p1, id: inc.id1 },
-            { point: inc.p2, id: inc.id2 },
-        ];
-    }
-
-    return contactPoints;
-}
-
 export function detectCollision(a: RigidBody, b: RigidBody): ContactManifold | null {
     const aIsCircle = a.shapeType === ShapeType.CIRCLE;
     const bIsCircle = b.shapeType === ShapeType.CIRCLE;
@@ -162,6 +119,49 @@ export function detectCollisionPolygonPolygon(polygonA: RigidBody, polygonB: Rig
     if (contactPoints.length === 0) return null;
 
     return new ContactManifold(polygonA, polygonB, contactPoints, penetrationDepth, normal, flipped);
+}
+
+export interface ContactPoint {
+    point: Vec2;
+    id: number;
+}
+
+function findContactPoints(normal: Vec2, a: RigidBody, b: RigidBody): ContactPoint[] {
+    const aPolygon = a.shape as PolygonShape;
+    const bPolygon = b.shape as PolygonShape;
+    const edgeA = aPolygon.findFarthestEdge(a, normal);
+    const edgeB = bPolygon.findFarthestEdge(b, normal.negateNew());
+
+    let ref = edgeA; // Reference edge
+    let inc = edgeB; // Incidence edge
+    let flip = false;
+
+    const aPerpendicularness = Math.abs(edgeA.dir.dot(normal));
+    const bPerpendicularness = Math.abs(edgeB.dir.dot(normal));
+
+    if (aPerpendicularness >= bPerpendicularness) {
+        ref = edgeB;
+        inc = edgeA;
+        flip = true;
+    }
+
+    inc.clip(ref.p1, ref.dir);
+    inc.clip(ref.p2, ref.dir.negateNew());
+    inc.clip(ref.p1, flip ? normal : normal.negateNew(), true);
+
+    let contactPoints: ContactPoint[];
+
+    // If two points are closer than threshold, merge them into one point
+    if (inc.length <= CONTACT_MERGE_THRESHOLD) {
+        contactPoints = [{ point: inc.p1, id: inc.id1 }];
+    } else {
+        contactPoints = [
+            { point: inc.p1, id: inc.id1 },
+            { point: inc.p2, id: inc.id2 },
+        ];
+    }
+
+    return contactPoints;
 }
 
 export function detectCollisionPolygonCircle(polygon: RigidBody, circle: RigidBody): ContactManifold | null {
