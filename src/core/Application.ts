@@ -516,7 +516,6 @@ export default class Application {
 
                 let minDistanceSquared = Infinity;
                 let closestIntersection: Vec2 | undefined;
-                // let hitEdge: [Vec2, Vec2] | undefined;
 
                 // TODO: We could cast two rays instead of one or check intersection by shifting up and down by radius
                 for (const other of bodies) {
@@ -538,7 +537,6 @@ export default class Application {
                                 if (distanceSquared < minDistanceSquared) {
                                     closestIntersection = intersection.copy();
                                     minDistanceSquared = distanceSquared;
-                                    // hitEdge = [v0, v1];
                                 }
                             }
                         }
@@ -554,7 +552,7 @@ export default class Application {
                         );
 
                         for (const int of intersections) {
-                            // Graphics.drawFillCircle(int.x, int.y, 5, 'yellow');
+                            Graphics.drawFillCircle(int.x, int.y, 2, 'yellow');
 
                             const distanceSquared = int.subNew(currentPos).magnitudeSquared();
 
@@ -566,22 +564,13 @@ export default class Application {
                     }
                 }
 
-                // if (closestIntersection && hitEdge) {
                 if (closestIntersection) {
-                    // const [v0, v1] = hitEdge;
-                    // const edgeVector = v0.subNew(v1);
-                    // const edgeNormal = edgeVector.perpNew().unitVector();
-
-                    // Make sure normal points away from the bullet's current position
-                    // const toBullet = currentPos.subNew(closestIntersection).unitVector();
-                    // if (edgeNormal.dot(toBullet) < 0) {
-                    //     edgeNormal.negate(); // flip to point outward
-                    // }
-
                     Graphics.drawFillCircle(closestIntersection.x, closestIntersection.y, 5, 'yellow');
 
-                    // const bulletNewPos = closestIntersection.addNew(edgeNormal.scaleNew(bulletShape.radius));
-                    // // body.position = bulletNewPos.copy();
+
+                    const toBullet = currentPos.subNew(closestIntersection).unitVector();
+                    const bulletNewPos = closestIntersection.addNew(toBullet.scaleNew(bulletShape.radius));
+                    Graphics.drawFillCircle(bulletNewPos.x, bulletNewPos.y, bulletShape.radius, 'green');
                     // body.shape.updateAABB(body);
                     // body.hasCCD = true;
                 }
