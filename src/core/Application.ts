@@ -510,6 +510,7 @@ export default class Application {
 
         for (const body of this.world.getBodies()) {
             if (body.isBullet && body.velocity.magnitudeSquared() > MIN_BULLET_SPEED) {
+                Utils.assert(body.shape instanceof CircleShape);
                 const bulletShape = body.shape as CircleShape;
                 const currentPos = body.position.copy();
                 const nextPos = currentPos.addNew(body.velocity.scaleNew(REAL_DELTA_TIME()));
@@ -524,7 +525,6 @@ export default class Application {
                 for (const other of this.world.getBodies()) {
                     if (body.id === other.id || other.isBullet) continue;
 
-                    Utils.assert(body.shape instanceof CircleShape);
 
                     if (other.shapeType === ShapeType.BOX || other.shapeType === ShapeType.POLYGON) {
                         const polygonShape = other.shape as PolygonShape;
