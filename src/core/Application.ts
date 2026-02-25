@@ -525,7 +525,6 @@ export default class Application {
                 for (const other of this.world.getBodies()) {
                     if (body.id === other.id || other.isBullet) continue;
 
-
                     if (other.shapeType === ShapeType.BOX || other.shapeType === ShapeType.POLYGON) {
                         const polygonShape = other.shape as PolygonShape;
                         const vertices = polygonShape.worldVertices;
@@ -612,6 +611,7 @@ export default class Application {
 
                         const vertices = capsuleShape.worldVertices;
                         for (let i = 0; i < vertices.length; i++) {
+                            if (i % 2 === 0) continue; // Skip top and bottom vertices
                             const v0 = vertices[i];
                             const v1 = vertices[(i + 1) % vertices.length];
 
