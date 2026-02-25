@@ -8,7 +8,7 @@ import Demo from '../samples/Demo';
 import { BoxShape } from '../shapes/BoxShape';
 import { CapsuleShape } from '../shapes/CapsuleShape';
 import { CircleShape } from '../shapes/CircleShape';
-import { edgeIntersection } from '../shapes/Edge';
+import { edgeCircleIntersection, edgeIntersection } from '../shapes/Edge';
 import { PolygonShape } from '../shapes/PolygonShape';
 import { ShapeType } from '../shapes/Shape';
 import * as Utils from '../utils/Utils';
@@ -541,6 +541,20 @@ export default class Application {
                                     hitEdge = [v0, v1];
                                 }
                             }
+                        }
+                    }
+
+                    if (other.shapeType === ShapeType.CIRCLE) {
+                        const circleShape = other.shape as CircleShape;
+                        const intersections = edgeCircleIntersection(
+                            currentPos,
+                            nextPos,
+                            other.position,
+                            circleShape.radius,
+                        );
+
+                        for (const int of intersections) {
+                            Graphics.drawFillCircle(int.x, int.y, 5, 'yellow');
                         }
                     }
                 }
