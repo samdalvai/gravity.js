@@ -12,6 +12,11 @@ A Javascript 2d game physics engine, rendering in a Canvas on the browser. Inspi
 - Basic CCD for bullets with circle shape
 - Texture rendering for shapes
 - Set of demos showcasing different scenarios
+- Generation of various forces: attraction, explosion, drag, friction
+
+Example of simulation with 5.000 circle particles orbiting around a gravitational field:
+
+![gravity](images/gravity.png)
 
 # How to run
 
@@ -37,7 +42,7 @@ Now open the browser at http://localhost:1234
 
 The engine features a set of basic example scenarios with sprites based on the angry birds game.
 
-![game](game.png)
+![game](images/game.png)
 
 # References
 
