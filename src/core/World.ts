@@ -186,25 +186,23 @@ export default class World {
 
                 // TODO: We could cast two rays instead of one or check intersection by shifting up and down by radius
                 for (const other of this.bodies) {
-                    if (other.isStatic()) {
-                        if (other.shapeType === ShapeType.BOX || other.shapeType === ShapeType.POLYGON) {
-                            const polygonShape = other.shape as PolygonShape;
-                            const vertices = polygonShape.worldVertices;
+                    if (other.shapeType === ShapeType.BOX || other.shapeType === ShapeType.POLYGON) {
+                        const polygonShape = other.shape as PolygonShape;
+                        const vertices = polygonShape.worldVertices;
 
-                            for (let i = 0; i < vertices.length; i++) {
-                                const v0 = vertices[i];
-                                const v1 = vertices[(i + 1) % vertices.length];
+                        for (let i = 0; i < vertices.length; i++) {
+                            const v0 = vertices[i];
+                            const v1 = vertices[(i + 1) % vertices.length];
 
-                                const intersection = edgeIntersection(currentPos, nextPos, v0, v1);
+                            const intersection = edgeIntersection(currentPos, nextPos, v0, v1);
 
-                                if (intersection) {
-                                    const distanceSquared = intersection.subNew(currentPos).magnitudeSquared();
+                            if (intersection) {
+                                const distanceSquared = intersection.subNew(currentPos).magnitudeSquared();
 
-                                    if (distanceSquared < minDistanceSquared) {
-                                        closestIntersection = intersection.copy();
-                                        minDistanceSquared = distanceSquared;
-                                        hitEdge = [v0, v1];
-                                    }
+                                if (distanceSquared < minDistanceSquared) {
+                                    closestIntersection = intersection.copy();
+                                    minDistanceSquared = distanceSquared;
+                                    hitEdge = [v0, v1];
                                 }
                             }
                         }
