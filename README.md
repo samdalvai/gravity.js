@@ -38,12 +38,6 @@ npm start
 
 Now open the browser at http://localhost:1234
 
-# Example scenarios
-
-The engine features a set of basic example scenarios with sprites based on the angry birds game.
-
-![game](images/game.png)
-
 # References
 
 - https://pikuma.com/courses/game-physics-engine-programming
