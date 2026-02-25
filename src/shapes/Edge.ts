@@ -73,3 +73,35 @@ export function edgeIntersection(A: Vec2, B: Vec2, C: Vec2, D: Vec2): Vec2 | nul
 
     return null; // no intersection on the segments
 }
+
+export function edgeCircleIntersection(A: Vec2, B: Vec2, C: Vec2, r: number): Vec2[] {
+    const d = B.subNew(A);
+    const f = A.subNew(C);
+
+    const a = d.dot(d);
+    const b = 2 * f.dot(d);
+    const c = f.dot(f) - r * r;
+
+    let discriminant = b * b - 4 * a * c;
+
+    if (discriminant < 0) {
+        return []; // no intersection
+    }
+
+    discriminant = Math.sqrt(discriminant);
+
+    const t1 = (-b - discriminant) / (2 * a);
+    const t2 = (-b + discriminant) / (2 * a);
+
+    const intersections: Vec2[] = [];
+
+    if (0 <= t1 && t1 <= 1) {
+        intersections.push(A.addNew(d.scaleNew(t1)));
+    }
+
+    if (0 <= t2 && t2 <= 1 && t2 != t1) {
+        intersections.push(A.addNew(d.scaleNew(t2)));
+    }
+
+    return intersections;
+}
