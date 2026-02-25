@@ -58,7 +58,7 @@ export default class Edge {
     }
 }
 
-export function edgeIntersection(A: Vec2, B: Vec2, C: Vec2, D: Vec2): Vec2 | null {
+export function edgeEdgeIntersection(A: Vec2, B: Vec2, C: Vec2, D: Vec2): Vec2 | null {
     const r = B.subNew(A); // vector along first segment
     const s = D.subNew(C); // vector along second segment
     const rxs = r.x * s.y - r.y * s.x;
