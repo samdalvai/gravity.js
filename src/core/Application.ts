@@ -512,6 +512,8 @@ export default class Application {
                 const currentPos = body.position.copy();
                 const nextPos = currentPos.addNew(body.velocity.scaleNew(REAL_DELTA_TIME()));
 
+                Graphics.drawLine(currentPos.x, currentPos.y, nextPos.x, nextPos.y, 'red');
+
                 let minDistanceSquared = Infinity;
                 let closestIntersection: Vec2 | undefined;
                 let hitEdge: [Vec2, Vec2] | undefined;
@@ -553,6 +555,8 @@ export default class Application {
                     if (edgeNormal.dot(toBullet) < 0) {
                         edgeNormal.negate(); // flip to point outward
                     }
+
+                    Graphics.drawFillCircle(closestIntersection.x, closestIntersection.y, 5, 'yellow');
 
                     const bulletNewPos = closestIntersection.addNew(edgeNormal.scaleNew(bulletShape.radius));
                     // body.position = bulletNewPos.copy();
