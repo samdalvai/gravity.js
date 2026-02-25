@@ -5,8 +5,11 @@ import { CircleShape } from '../shapes/CircleShape';
 import { edgeCircleIntersection, edgeIntersection } from '../shapes/Edge';
 import { PolygonShape } from '../shapes/PolygonShape';
 import { ShapeType } from '../shapes/Shape';
+import * as Utils from '../utils/Utils';
 
 export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): void {
+    Utils.assert(bullet.shape instanceof CircleShape);
+
     const bulletShape = bullet.shape as CircleShape;
     const currentPos = bullet.position.copy();
     const nextPos = currentPos.addNew(bullet.velocity.scaleNew(dt));
