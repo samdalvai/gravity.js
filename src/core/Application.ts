@@ -8,11 +8,15 @@ import Demo from '../samples/Demo';
 import { BoxShape } from '../shapes/BoxShape';
 import { CapsuleShape } from '../shapes/CapsuleShape';
 import { CircleShape } from '../shapes/CircleShape';
+import { edgeIntersection } from '../shapes/Edge';
+import { PolygonShape } from '../shapes/PolygonShape';
+import { ShapeType } from '../shapes/Shape';
 import * as Utils from '../utils/Utils';
 import {
     FIXED_DELTA_TIME,
     GRAVITY,
     MAX_BODIES,
+    MIN_BULLET_SPEED,
     PIXELS_PER_METER,
     PLAYER_ACCELERATION,
     PLAYER_JUMP_IMPULSE,
@@ -497,6 +501,63 @@ export default class Application {
                         Graphics.drawFillCircle(endPoint.x, endPoint.y, 3, 'red');
                         Graphics.drawLine(startPoint.x, startPoint.y, endPoint.x, endPoint.y, 'red');
                     }
+                }
+            }
+        }
+
+        const bodies = this.world.getBodies();
+        for (const body of bodies) {
+            if (body.isBullet && body.velocity.magnitudeSquared() > MIN_BULLET_SPEED) {
+                const bulletShape = body.shape as CircleShape;
+                const currentPos = body.position.copy();
+                const nextPos = currentPos.addNew(body.velocity.scaleNew(REAL_DELTA_TIME()));
+
+                let minDistanceSquared = Infinity;
+                let closestIntersection: Vec2 | undefined;
+                let hitEdge: [Vec2, Vec2] | undefined;
+
+                // TODO: We could cast two rays instead of one or check intersection by shifting up and down by radius
+                for (const other of bodies) {
+                    if (body.id === other.id) continue;
+
+                    if (other.shapeType === ShapeType.BOX || other.shapeType === ShapeType.POLYGON) {
+                        const polygonShape = other.shape as PolygonShape;
+                        const vertices = polygonShape.worldVertices;
+
+                        for (let i = 0; i < vertices.length; i++) {
+                            const v0 = vertices[i];
+                            const v1 = vertices[(i + 1) % vertices.length];
+
+                            const intersection = edgeIntersection(currentPos, nextPos, v0, v1);
+
+                            if (intersection) {
+                                const distanceSquared = intersection.subNew(currentPos).magnitudeSquared();
+
+                                if (distanceSquared < minDistanceSquared) {
+                                    closestIntersection = intersection.copy();
+                                    minDistanceSquared = distanceSquared;
+                                    hitEdge = [v0, v1];
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (closestIntersection && hitEdge) {
+                    const [v0, v1] = hitEdge;
+                    const edgeVector = v0.subNew(v1);
+                    const edgeNormal = edgeVector.perpNew().unitVector();
+
+                    // Make sure normal points away from the bullet's current position
+                    const toBullet = currentPos.subNew(closestIntersection).unitVector();
+                    if (edgeNormal.dot(toBullet) < 0) {
+                        edgeNormal.negate(); // flip to point outward
+                    }
+
+                    const bulletNewPos = closestIntersection.addNew(edgeNormal.scaleNew(bulletShape.radius));
+                    // body.position = bulletNewPos.copy();
+                    body.shape.updateAABB(body);
+                    // body.hasCCD = true;
                 }
             }
         }

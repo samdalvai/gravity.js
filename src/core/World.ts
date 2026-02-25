@@ -135,7 +135,7 @@ export default class World {
             body.integrateForces(dt);
         }
 
-        this.ccd(dt);
+        // this.ccd(dt);
 
         this.broadPhase();
 
