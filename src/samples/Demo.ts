@@ -5,11 +5,11 @@
  * https://github.com/erincatto/box2d-lite
  */
 import Application from '../core/Application';
-import Graphics from '../graphics/Graphics';
-import Vec2 from '../math/Vec2';
-import { DistanceJoint } from '../joint/DistanceJoint';
 import RigidBody from '../core/RigidBody';
 import World from '../core/World';
+import Graphics from '../graphics/Graphics';
+import { DistanceJoint } from '../joint/DistanceJoint';
+import Vec2 from '../math/Vec2';
 import { BoxShape } from '../shapes/BoxShape';
 import { CircleShape } from '../shapes/CircleShape';
 import { PolygonShape } from '../shapes/PolygonShape';
