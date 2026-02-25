@@ -72,6 +72,7 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
             );
 
             for (const int of topCircleIntersections) {
+                // TODO: can we take advantage of this to improve capsules collision?
                 const v = int.subNew(topCirclePosition);
                 if (v.dot(axisDir) > 0) continue; // Skip bottom half
 
@@ -91,6 +92,7 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
             );
 
             for (const int of bottomCircleIntersections) {
+                // TODO: can we take advantage of this to improve capsules collision?
                 const v = int.subNew(bottomCirclePosition);
                 if (v.dot(axisDir) < 0) continue; // Skip upper half
 
@@ -104,6 +106,7 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
 
             const vertices = capsuleShape.worldVertices;
             for (let i = 0; i < vertices.length; i++) {
+                // TODO: can we take advantage of this to improve capsules collision?
                 if (i % 2 === 0) continue; // Skip top and bottom vertices
                 const v0 = vertices[i];
                 const v1 = vertices[(i + 1) % vertices.length];
