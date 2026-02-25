@@ -14,8 +14,7 @@ import { BoxShape } from '../shapes/BoxShape';
 import { CircleShape } from '../shapes/CircleShape';
 import { PolygonShape } from '../shapes/PolygonShape';
 
-// const FLOOR_WIDTH = 3200;
-const FLOOR_WIDTH = 1000;
+const FLOOR_WIDTH = 3200;
 const FLOOR_HEIGHT = 50;
 const FLOOR_POSITION_Y = -350;
 
@@ -73,7 +72,7 @@ export default class Demo {
         const box = new RigidBody(new BoxShape(60, 60), 0, 0, 1);
         box.angularVelocity = 5;
         box.setTexture('crate');
-        // world.addBody(box);
+        world.addBody(box);
     };
 
     static demo2 = (world: World, app: Application) => {
