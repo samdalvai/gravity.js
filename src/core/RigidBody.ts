@@ -1,5 +1,6 @@
 import AssetStore, { TEXTURES } from '../graphics/AssetStore';
 import Vec2 from '../math/Vec2';
+import { CircleShape } from '../shapes/CircleShape';
 import { Shape, ShapeType } from '../shapes/Shape';
 import * as Utils from '../utils/Utils';
 import { SETTINGS } from './Constants';
@@ -105,6 +106,7 @@ export default class RigidBody {
      */
     set isBullet(value: boolean) {
         Utils.assert(this.shapeType === ShapeType.CIRCLE);
+        Utils.assert(this.shape instanceof CircleShape);
         this._isBullet = value;
     }
 
