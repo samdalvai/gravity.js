@@ -8,7 +8,8 @@ A Javascript 2d game physics engine, rendering in a Canvas on the browser. Inspi
 - Broad Phase using prune & sweep algorithm with AABB partitioning
 - Warm starting with contact caching
 - Distance joints
-- Substepping for reduce collision tunneling
+- Substepping to reduce collision tunneling
+- Basic CCD for bullets with circle shape
 - Texture rendering for shapes
 - Set of demos showcasing different scenarios
 
