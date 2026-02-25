@@ -186,6 +186,8 @@ export default class World {
 
                 // TODO: We could cast two rays instead of one or check intersection by shifting up and down by radius
                 for (const other of this.bodies) {
+                    if (body.id === other.id) continue;
+
                     if (other.shapeType === ShapeType.BOX || other.shapeType === ShapeType.POLYGON) {
                         const polygonShape = other.shape as PolygonShape;
                         const vertices = polygonShape.worldVertices;
