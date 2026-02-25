@@ -1,5 +1,5 @@
 {
-  "name": "js-2d-game-physics-engine",
+  "name": "gravity.js",
   "version": "1.0.0",
   "description": "A game physics engine for the browser",
   "scripts": {
