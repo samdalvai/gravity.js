@@ -95,6 +95,7 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
 
             const vertices = capsuleShape.worldVertices;
             for (let i = 0; i < vertices.length; i++) {
+                if (i % 2 === 0) continue; // Skip top and bottom vertices
                 const v0 = vertices[i];
                 const v1 = vertices[(i + 1) % vertices.length];
 
