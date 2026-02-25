@@ -23,6 +23,7 @@ import RigidBody from './RigidBody';
 export default class World {
     private readonly up = new Vec2(0, 1);
     private G: number;
+    private _blackHole: RigidBody | null = null;
 
     private bodies: RigidBody[] = [];
 
@@ -37,6 +38,14 @@ export default class World {
 
     constructor(gravity: number) {
         this.G = -gravity;
+    }
+
+    get blackHole(): RigidBody | null {
+        return this._blackHole;
+    }
+
+    set blackHole(body: RigidBody | null) {
+        this._blackHole = body;
     }
 
     addBody(body: RigidBody): void {
@@ -89,6 +98,13 @@ export default class World {
                 // Apply the weight force to all bodies
                 const weightForce = Force.generateWeightForce(body, this.G);
                 body.addForce(weightForce);
+            }
+
+            if (this.blackHole) {
+                const blackHole = this.blackHole;
+
+                const attraction = Force.generateGravitationalForce(body, blackHole, -this.G, 1, 200);
+                body.addForce(attraction);
             }
 
             // Apply forces to all bodies
@@ -147,7 +163,10 @@ export default class World {
             const body = this.bodies[i];
 
             // It suffices to look for the position going below the screen
-            if (body.position.y < BODY_REMOVAL_THRESHOLD) {
+            if (
+                Math.abs(body.position.x) > BODY_REMOVAL_THRESHOLD ||
+                Math.abs(body.position.y) > BODY_REMOVAL_THRESHOLD
+            ) {
                 this.bodies[i] = this.bodies[this.bodies.length - 1];
                 this.bodies.pop();
             }
@@ -285,5 +304,7 @@ export default class World {
         this.manifoldMap.clear();
         this.forces.length = 0;
         this.torques.length = 0;
+
+        this._blackHole = null;
     }
 }

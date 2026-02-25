@@ -1,7 +1,7 @@
 import AssetStore, { TEXTURES } from '../graphics/AssetStore';
 import Vec2 from '../math/Vec2';
 import { Shape, ShapeType } from '../shapes/Shape';
-import { assert } from '../utils/Utils';
+import * as Utils from '../utils/Utils';
 import { SETTINGS } from './Constants';
 
 export default class RigidBody {
@@ -20,8 +20,8 @@ export default class RigidBody {
     canRotate: boolean;
 
     // Forces and torque
-    sumForces: Vec2;
-    sumTorque: number;
+    private sumForces: Vec2;
+    private sumTorque: number;
 
     // Mass and Moment of Inertia
     mass: number;
@@ -30,8 +30,8 @@ export default class RigidBody {
     invI: number;
 
     // Coefficient of restitution (elasticity)
-    restitution: number;
-    friction: number;
+    private _restitution: number;
+    private _friction: number;
     surfaceSpeed: number;
 
     // Grounded variables
@@ -72,8 +72,8 @@ export default class RigidBody {
         this.sumForces = new Vec2(0, 0);
         this.sumTorque = 0.0;
 
-        this.restitution = 0.2;
-        this.friction = 0.7;
+        this._restitution = 0.2;
+        this._friction = 0.7;
         this.surfaceSpeed = 0;
 
         this.mass = mass;
@@ -104,8 +104,26 @@ export default class RigidBody {
      *  CCD is expensive
      */
     set isBullet(value: boolean) {
-        assert(this.shapeType === ShapeType.CIRCLE);
+        Utils.assert(this.shapeType === ShapeType.CIRCLE);
         this._isBullet = value;
+    }
+
+    get restitution() {
+        return this._restitution;
+    }
+
+    get friction() {
+        return this._friction;
+    }
+
+    set restitution(value: number) {
+        Utils.assert(value >= 0 && value <= 1);
+        this._restitution = value;
+    }
+
+    set friction(value: number) {
+        Utils.assert(value >= 0 && value <= 1);
+        this._friction = value;
     }
 
     setTexture(texture: keyof typeof TEXTURES): void {
