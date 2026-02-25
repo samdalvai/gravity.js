@@ -508,7 +508,7 @@ export default class Application {
             Graphics.drawLine(0, -50, 0, 50, 'gray');
         }
 
-        /*for (const body of this.world.getBodies()) {
+        for (const body of this.world.getBodies()) {
             if (body.isBullet && body.velocity.magnitudeSquared() > MIN_BULLET_SPEED) {
                 const bulletShape = body.shape as CircleShape;
                 const currentPos = body.position.copy();
@@ -535,6 +535,7 @@ export default class Application {
                             const intersection = edgeIntersection(currentPos, nextPos, v0, v1);
 
                             if (intersection) {
+                                Graphics.drawFillCircle(intersection.x, intersection.y, 2, 'yellow');
                                 const distanceSquared = intersection.subNew(currentPos).magnitudeSquared();
 
                                 if (distanceSquared < minDistanceSquared) {
@@ -565,13 +566,17 @@ export default class Application {
                             }
                         }
                     }
+
+                    if (other.shapeType === ShapeType.CAPSULE) {
+                        // to be implemented
+                    }
                 }
 
                 if (closestIntersection) {
                     Graphics.drawFillCircle(closestIntersection.x, closestIntersection.y, 5, 'yellow');
                 }
             }
-        }*/
+        }
 
         Graphics.endWorld();
 

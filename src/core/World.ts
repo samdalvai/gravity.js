@@ -226,6 +226,10 @@ export default class World {
                             }
                         }
                     }
+
+                    if (other.shapeType === ShapeType.CAPSULE) {
+                        // to be implemented
+                    }
                 }
 
                 if (closestIntersection) {
