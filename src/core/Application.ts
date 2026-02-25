@@ -568,7 +568,63 @@ export default class Application {
                     }
 
                     if (other.shapeType === ShapeType.CAPSULE) {
-                        // to be implemented
+                        const capsuleShape = other.shape as CapsuleShape;
+                        const topCirclePosition = capsuleShape.getTopCirclePosition(other);
+                        const bottomCirclePosition = capsuleShape.getBottomCirclePosition(other);
+
+                        const topCircleIntersections = edgeCircleIntersection(
+                            currentPos,
+                            nextPos,
+                            topCirclePosition,
+                            capsuleShape.radius,
+                        );
+
+                        for (const int of topCircleIntersections) {
+                            Graphics.drawFillCircle(int.x, int.y, 2, 'yellow');
+
+                            const distanceSquared = int.subNew(currentPos).magnitudeSquared();
+
+                            if (distanceSquared < minDistanceSquared) {
+                                closestIntersection = int.copy();
+                                minDistanceSquared = distanceSquared;
+                            }
+                        }
+
+                        const bottomCircleIntersections = edgeCircleIntersection(
+                            currentPos,
+                            nextPos,
+                            bottomCirclePosition,
+                            capsuleShape.radius,
+                        );
+
+                        for (const int of bottomCircleIntersections) {
+                            Graphics.drawFillCircle(int.x, int.y, 2, 'yellow');
+
+                            const distanceSquared = int.subNew(currentPos).magnitudeSquared();
+
+                            if (distanceSquared < minDistanceSquared) {
+                                closestIntersection = int.copy();
+                                minDistanceSquared = distanceSquared;
+                            }
+                        }
+
+                        const vertices = capsuleShape.worldVertices;
+                        for (let i = 0; i < vertices.length; i++) {
+                            const v0 = vertices[i];
+                            const v1 = vertices[(i + 1) % vertices.length];
+
+                            const intersection = edgeIntersection(currentPos, nextPos, v0, v1);
+
+                            if (intersection) {
+                                Graphics.drawFillCircle(intersection.x, intersection.y, 2, 'yellow');
+                                const distanceSquared = intersection.subNew(currentPos).magnitudeSquared();
+
+                                if (distanceSquared < minDistanceSquared) {
+                                    closestIntersection = intersection.copy();
+                                    minDistanceSquared = distanceSquared;
+                                }
+                            }
+                        }
                     }
                 }
 
