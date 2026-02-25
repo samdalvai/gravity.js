@@ -13,7 +13,7 @@ import { Joint } from '../joint/Joint';
 import Vec2 from '../math/Vec2';
 import Force from '../physics/Force';
 import { CircleShape } from '../shapes/CircleShape';
-import { edgeIntersection } from '../shapes/Edge';
+import { edgeCircleIntersection, edgeIntersection } from '../shapes/Edge';
 import { PolygonShape } from '../shapes/PolygonShape';
 import { ShapeType } from '../shapes/Shape';
 import * as Utils from '../utils/Utils';
@@ -135,7 +135,7 @@ export default class World {
             body.integrateForces(dt);
         }
 
-        // this.ccd(dt);
+        this.ccd(dt);
 
         this.broadPhase();
 
@@ -182,11 +182,10 @@ export default class World {
 
                 let minDistanceSquared = Infinity;
                 let closestIntersection: Vec2 | undefined;
-                let hitEdge: [Vec2, Vec2] | undefined;
 
                 // TODO: We could cast two rays instead of one or check intersection by shifting up and down by radius
                 for (const other of this.bodies) {
-                    if (body.id === other.id) continue;
+                    if (body.id === other.id || other.isBullet) continue;
 
                     if (other.shapeType === ShapeType.BOX || other.shapeType === ShapeType.POLYGON) {
                         const polygonShape = other.shape as PolygonShape;
@@ -204,25 +203,34 @@ export default class World {
                                 if (distanceSquared < minDistanceSquared) {
                                     closestIntersection = intersection.copy();
                                     minDistanceSquared = distanceSquared;
-                                    hitEdge = [v0, v1];
                                 }
+                            }
+                        }
+                    }
+
+                    if (other.shapeType === ShapeType.CIRCLE) {
+                        const circleShape = other.shape as CircleShape;
+                        const intersections = edgeCircleIntersection(
+                            currentPos,
+                            nextPos,
+                            other.position,
+                            circleShape.radius,
+                        );
+
+                        for (const int of intersections) {
+                            const distanceSquared = int.subNew(currentPos).magnitudeSquared();
+
+                            if (distanceSquared < minDistanceSquared) {
+                                closestIntersection = int.copy();
+                                minDistanceSquared = distanceSquared;
                             }
                         }
                     }
                 }
 
-                if (closestIntersection && hitEdge) {
-                    const [v0, v1] = hitEdge;
-                    const edgeVector = v0.subNew(v1);
-                    const edgeNormal = edgeVector.perpNew().unitVector();
-
-                    // Make sure normal points away from the bullet's current position
+                if (closestIntersection) {
                     const toBullet = currentPos.subNew(closestIntersection).unitVector();
-                    if (edgeNormal.dot(toBullet) < 0) {
-                        edgeNormal.negate(); // flip to point outward
-                    }
-
-                    const bulletNewPos = closestIntersection.addNew(edgeNormal.scaleNew(bulletShape.radius));
+                    const bulletNewPos = closestIntersection.addNew(toBullet.scaleNew(bulletShape.radius));
                     body.position = bulletNewPos.copy();
                     body.shape.updateAABB(body);
                     body.hasCCD = true;
