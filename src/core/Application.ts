@@ -1,9 +1,9 @@
+import Force from '../force/Force';
 import AssetStore, { TEXTURES } from '../graphics/AssetStore';
 import Graphics from '../graphics/Graphics';
 import InputManager, { MouseButton } from '../input/InputManager';
 import { DistanceJoint } from '../joint/DistanceJoint';
 import Vec2 from '../math/Vec2';
-import Force from '../force/Force';
 import Demo from '../samples/Demo';
 import { BoxShape } from '../shapes/BoxShape';
 import { CapsuleShape } from '../shapes/CapsuleShape';
@@ -239,6 +239,7 @@ export default class Application {
 
                         this.world.clear();
                         this.player = null;
+                        Graphics.resetView();
                         demo(this.world, this);
                     }
 
