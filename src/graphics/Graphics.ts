@@ -55,6 +55,12 @@ export default class Graphics {
         }
     }
 
+    static resetView(): void {
+        this.zoom = 1;
+        this.pan.x = 0;
+        this.pan.y = 0;
+    }
+
     static clearScreen(): void {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
