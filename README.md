@@ -1,6 +1,10 @@
 # Gravity.js
 
-A Javascript 2d game physics engine, rendering in a Canvas on the browser. Inspired by the C++ game physics engine featured in the related Pikuma course. Learn more at [pikuma.com](https://pikuma.com/).
+A 2D physics engine written in JavaScript and rendered in the browser using the HTML5 Canvas API.
+
+The project is inspired by the C++ physics engine developed in the Pikuma Game Physics course, as well as engines such as Box2D-Lite and other open-source physics implementations referenced in the credits.
+
+Learn more at [pikuma.com](https://pikuma.com/).
 
 # Features
 
@@ -13,10 +17,6 @@ A Javascript 2d game physics engine, rendering in a Canvas on the browser. Inspi
 - Texture rendering for shapes
 - Set of demos showcasing different scenarios
 - Generation of various forces: attraction, explosion, drag, friction
-
-Example of simulation with 5.000 circle particles orbiting around a gravitational field:
-
-![gravity](images/gravity.png)
 
 # How to run
 
@@ -37,6 +37,16 @@ npm start
 ```
 
 Now open the browser at http://localhost:1234
+
+# Example scenarios
+
+The engine features a set of basic example scenarios with sprites based on the angry birds game.
+
+![game](images/game.png)
+
+In addition to the classic physics demos you can play around with some interesting simulations, for example these 5.000 circle particles orbiting around a gravitational field using the attraction force generation feature:
+
+![gravity](images/gravity.png)
 
 # References
 
