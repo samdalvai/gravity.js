@@ -15,14 +15,6 @@ export default class Graphics {
     static zoom = 1;
     static pan = new Vec2(0, 0);
 
-    static width(): number {
-        return this.windowWidth;
-    }
-
-    static height(): number {
-        return this.windowHeight;
-    }
-
     static openWindow(): boolean {
         const canvas = document.getElementById('gamePhysicsCanvas') as HTMLCanvasElement;
         const ctx = canvas.getContext('2d');
@@ -32,15 +24,30 @@ export default class Graphics {
             return false;
         }
 
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-
         this.canvas = canvas;
         this.ctx = ctx;
-        this.windowWidth = window.innerWidth;
-        this.windowHeight = window.innerHeight;
+        this.resize(canvas);
+
+        window.addEventListener('resize', () => {
+            this.resize(canvas);
+        });
 
         return true;
+    }
+
+    static resize(canvas: HTMLCanvasElement): void {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        this.windowWidth = window.innerWidth;
+        this.windowHeight = window.innerHeight;
+    }
+
+    static width(): number {
+        return this.windowWidth;
+    }
+
+    static height(): number {
+        return this.windowHeight;
     }
 
     static increaseZoom(): void {
