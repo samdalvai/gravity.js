@@ -48,6 +48,11 @@ In addition to the classic physics demos you can play around with some interesti
 
 ![gravity](images/gravity.png)
 
+
+# App demo
+
+A desktop live version of the app can be found at this [link](https://samdalvai.github.io/gravity.js/)
+
 # References
 
 - https://pikuma.com/courses/game-physics-engine-programming
