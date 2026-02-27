@@ -376,11 +376,13 @@ export default class Graphics {
 
                     if (debug) {
                         this.drawLine(v0.x, v0.y, v1.x, v1.y, color);
+                        this.drawFillCircle(0, 0, 3, color);
                     } else if (body.texture) {
                         // TODO: to be implemented?
                         //this.drawTexture(polygonShape.width, polygonShape.height, body.texture);
                     } else {
                         this.drawLine(v0.x, v0.y, v1.x, v1.y, color);
+                        this.drawFillCircle(0, 0, 3, color);
                     }
                 }
                 break;
