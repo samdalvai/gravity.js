@@ -10,9 +10,9 @@
 import * as CCD from '../collision/CCD';
 import * as Collision from '../collision/Collision';
 import { ContactManifold } from '../collision/ContactManifold';
+import Force from '../force/Force';
 import { Joint } from '../joint/Joint';
 import Vec2 from '../math/Vec2';
-import Force from '../force/Force';
 import * as Utils from '../utils/Utils';
 import { BODY_REMOVAL_THRESHOLD, MIN_BULLET_SPEED, SETTINGS } from './Constants';
 import RigidBody from './RigidBody';
@@ -172,8 +172,13 @@ export default class World {
 
     ccd(dt: number) {
         for (const body of this.bodies) {
-            if (body.isBullet && body.velocity.magnitudeSquared() > MIN_BULLET_SPEED) {
-                CCD.resolveCCD(body, this.bodies, dt);
+            if (body.isBullet) {
+                if (body.velocity.magnitudeSquared() > MIN_BULLET_SPEED) {
+                    CCD.resolveCCD(body, this.bodies, dt);
+                } else {
+                    // If a bullet stopped moving fast enugh downgrade to normal dynamic body
+                    body.isBullet = false;
+                }
             }
         }
     }
