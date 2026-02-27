@@ -27,6 +27,9 @@
     "parcel": "^2.13.3",
     "typescript": "^5.7.2"
   },
+  "optionalDependencies": {
+    "@parcel/rust-linux-x64-gnu": "2.13.3"
+  },
   "babel": {
     "presets": [
       "@babel/preset-env",
