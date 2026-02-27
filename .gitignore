@@ -5,3 +5,5 @@ dist/*
 
 !dist/assets/
 .vercel
+
+*.sh
