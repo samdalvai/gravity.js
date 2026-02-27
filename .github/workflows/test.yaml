@@ -1,10 +1,16 @@
 name: Node.js CI
 
+# on:
+#     push:
+#         branches: ['**']
+#     pull_request:
+#         branches: ['**']
+
 on:
-    push:
-        branches: ['**']
-    pull_request:
-        branches: ['**']
+  push:
+    branches:
+      - main
+      - deploy-github-pages
 
 jobs:
     test:
