@@ -367,6 +367,23 @@ export default class Graphics {
                     }
                 }
                 break;
+            case ShapeType.EDGE:
+                {
+                    const edgeShape = body.shape as CapsuleShape;
+                    const vertices = edgeShape.localVertices;
+                    const v0 = vertices[0];
+                    const v1 = vertices[1];
+
+                    if (debug) {
+                        this.drawLine(v0.x, v0.y, v1.x, v1.y, color);
+                    } else if (body.texture) {
+                        // TODO: to be implemented?
+                        //this.drawTexture(polygonShape.width, polygonShape.height, body.texture);
+                    } else {
+                        this.drawLine(v0.x, v0.y, v1.x, v1.y, color);
+                    }
+                }
+                break;
         }
 
         this.ctx.restore();

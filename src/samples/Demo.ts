@@ -12,6 +12,7 @@ import { DistanceJoint } from '../joint/DistanceJoint';
 import Vec2 from '../math/Vec2';
 import { BoxShape } from '../shapes/BoxShape';
 import { CircleShape } from '../shapes/CircleShape';
+import { EdgeShape } from '../shapes/EdgeShape';
 import { PolygonShape } from '../shapes/PolygonShape';
 
 const FLOOR_WIDTH = 3200;
@@ -69,10 +70,14 @@ export default class Demo {
         this.generateFloor(world);
         this.generateFences(world);
 
-        const box = new RigidBody(new BoxShape(60, 60), 0, 0, 1);
-        box.angularVelocity = 5;
-        box.setTexture('crate');
-        world.addBody(box);
+        // const box = new RigidBody(new BoxShape(60, 60), 0, 0, 1);
+        // box.angularVelocity = 5;
+        // box.setTexture('crate');
+        // world.addBody(box);
+
+        const edge = new RigidBody(new EdgeShape(new Vec2(-100, 0), new Vec2(100, 0)), 0, 0, 1);
+        edge.angularVelocity = 5;
+        world.addBody(edge);
     };
 
     static demo2 = (world: World, app: Application) => {
