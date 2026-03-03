@@ -8,7 +8,7 @@ Learn more at [pikuma.com](https://pikuma.com/).
 
 # Features
 
-- Collision detection between different shape: Circles, Boxes, Polygons and Capsules
+- Collision detection between different shapes: Circles, Boxes, Polygons and Capsules
 - Broad Phase using prune & sweep algorithm with AABB partitioning
 - Warm starting with contact caching
 - Distance joints
