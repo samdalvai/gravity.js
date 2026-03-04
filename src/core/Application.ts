@@ -213,7 +213,7 @@ export default class Application {
                         this.world.addBody(capsule);
                     }
 
-                    if (inputEvent.key === 'r' && !this.controlPressed) {
+                    if (inputEvent.key === 'r' && !inputEvent.ctrlKey && !inputEvent.metaKey) {
                         if (this.world.getBodies().length >= MAX_BODIES) {
                             continue;
                         }
