@@ -15,8 +15,10 @@ export function detectCollision(a: RigidBody, b: RigidBody): ContactManifold | n
         return detectCollisionCircleCircle(a, b);
     }
 
-    const aIsPolygon = a.shapeType === ShapeType.BOX || a.shapeType === ShapeType.POLYGON;
-    const bIsPolygon = b.shapeType === ShapeType.BOX || b.shapeType === ShapeType.POLYGON;
+    const aIsPolygon =
+        a.shapeType === ShapeType.BOX || a.shapeType === ShapeType.POLYGON || a.shapeType === ShapeType.EDGE;
+    const bIsPolygon =
+        b.shapeType === ShapeType.BOX || b.shapeType === ShapeType.POLYGON || b.shapeType === ShapeType.EDGE;
 
     if (aIsPolygon && bIsPolygon) {
         return detectCollisionPolygonPolygon(a, b);

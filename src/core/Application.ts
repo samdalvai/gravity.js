@@ -33,6 +33,9 @@ export default class Application {
 
     private player: RigidBody | null = null;
 
+    private testBodyA: RigidBody | null = null;
+    private testBodyB: RigidBody | null = null;
+
     // Inputs
     private leftButtonPressed: boolean = false;
     private rightButtonPressed: boolean = false;
@@ -424,6 +427,14 @@ export default class Application {
                 particle.setTexture('rockRound');
                 this.world.addBody(particle);
             }
+        }
+
+        // Test body for collision testing
+        if (this.testBodyB) {
+            const x = InputManager.mousePosition.x;
+            const y = InputManager.mousePosition.y;
+            this.testBodyB.position.x = x;
+            this.testBodyB.position.y = y;
         }
     }
 
