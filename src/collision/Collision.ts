@@ -59,11 +59,11 @@ export function detectCollision(a: RigidBody, b: RigidBody): ContactManifold | n
     const bIsEdge = b.shapeType === ShapeType.EDGE;
 
     if (aIsEdge && bIsCircle) {
-        //return detectCollisionEdgeCircle(a, b);
+        return detectCollisionEdgeCircle(a, b);
     }
 
     if (aIsCircle && bIsEdge) {
-        //return detectCollisionEdgeCircle(b, a);
+        return detectCollisionEdgeCircle(b, a);
     }
 
     return null;
@@ -399,9 +399,7 @@ export function detectCollisionEdgeCircle(edge: RigidBody, circle: RigidBody): C
     const diff = C.subNew(closestPoint);
     const distanceSquared = diff.dot(diff);
 
-    if (distanceSquared < r * r) {
-        return null;
-    }
+    if (distanceSquared > r * r) return null;
 
     const distance = Math.sqrt(distanceSquared);
     let normal: Vec2;
@@ -417,7 +415,6 @@ export function detectCollisionEdgeCircle(edge: RigidBody, circle: RigidBody): C
         penetration = r - distance;
     }
 
-    const contactPoint = closestPoint;
-
-    return null;
+    const contact = new ContactManifold(edge, circle, [{ point: closestPoint, id: -1 }], penetration, normal, false);
+    return contact;
 }
