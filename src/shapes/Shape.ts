@@ -6,6 +6,7 @@ export enum ShapeType {
     POLYGON,
     BOX,
     CAPSULE,
+    EDGE,
 }
 
 
