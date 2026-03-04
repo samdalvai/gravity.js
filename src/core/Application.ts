@@ -572,6 +572,8 @@ export default class Application {
                 }
 
                 const contactPoint = closestPoint;
+                const normalEnd = contactPoint.addNew(normal.scaleNew(penetration));
+                Graphics.drawLine(contactPoint.x, contactPoint.y, normalEnd.x, normalEnd.y, 'yellow');
             }
         }
 
