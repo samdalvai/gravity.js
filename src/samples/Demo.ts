@@ -15,7 +15,8 @@ import { CircleShape } from '../shapes/CircleShape';
 import { EdgeShape } from '../shapes/EdgeShape';
 import { PolygonShape } from '../shapes/PolygonShape';
 
-const FLOOR_WIDTH = 3200;
+// const FLOOR_WIDTH = 3200;
+const FLOOR_WIDTH = 1000;
 const FLOOR_HEIGHT = 50;
 const FLOOR_POSITION_Y = -350;
 
@@ -67,13 +68,39 @@ export default class Demo {
         app.setBackground('background');
 
         // Demo 1: Single box demo
-        this.generateFloor(world);
-        this.generateFences(world);
+        // this.generateFloor(world);
+        // this.generateFences(world);
 
         // const box = new RigidBody(new BoxShape(60, 60), 0, 0, 1);
         // box.angularVelocity = 5;
         // box.setTexture('crate');
         // world.addBody(box);
+
+        // Edge testing
+        const floor = new RigidBody(
+            new EdgeShape(new Vec2(-FLOOR_WIDTH / 2, 0), new Vec2(FLOOR_WIDTH / 2, 0)),
+            0,
+            FLOOR_POSITION_Y,
+            0.0,
+        );
+        floor.setTexture('transparent');
+        world.addBody(floor);
+
+        const fenceHeight = 1000;
+        const fenceLeft = new RigidBody(
+            new EdgeShape(new Vec2(0, -fenceHeight / 2), new Vec2(0, fenceHeight / 2)),
+            -FLOOR_WIDTH / 2,
+            FLOOR_POSITION_Y + fenceHeight / 2,
+            0.0,
+        );
+        const fenceRight = new RigidBody(
+            new EdgeShape(new Vec2(0, -fenceHeight / 2), new Vec2(0, fenceHeight / 2)),
+            FLOOR_WIDTH / 2,
+            FLOOR_POSITION_Y + fenceHeight / 2,
+            0.0,
+        );
+        world.addBody(fenceLeft);
+        world.addBody(fenceRight);
     };
 
     static demo2 = (world: World, app: Application) => {
