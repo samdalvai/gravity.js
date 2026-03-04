@@ -90,6 +90,7 @@ export class Mat2 {
         let det = this.determinant;
 
         if (det == 0) throw 'Determinant 0';
+        // if (det == 0) det = 1;
 
         det = 1.0 / det;
         res.m00 = det * this.m11;

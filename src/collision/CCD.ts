@@ -21,7 +21,7 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
     for (const other of bodies) {
         if (bullet.id === other.id || other.isBullet) continue;
 
-        if (other.shapeType === ShapeType.BOX || other.shapeType === ShapeType.POLYGON) {
+        if (other.shapeType === ShapeType.BOX || other.shapeType === ShapeType.POLYGON || other.shapeType === ShapeType.EDGE) {
             const polygonShape = other.shape as PolygonShape;
             const vertices = polygonShape.worldVertices;
 
