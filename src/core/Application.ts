@@ -81,7 +81,8 @@ export default class Application {
         this.testBodyA.rotation = 0.5;
         this.world.addBody(this.testBodyA);
 
-        this.testBodyB = new RigidBody(new CircleShape(30), 0, 0, 0);
+        // this.testBodyB = new RigidBody(new CircleShape(30), 0, 0, 0);
+        this.testBodyB = new RigidBody(new BoxShape(60, 60), 0, 0, 0);
         this.world.addBody(this.testBodyB);
     }
 
@@ -527,54 +528,7 @@ export default class Application {
 
         // Test body for collision testing
         if (this.testBodyA && this.testBodyB) {
-            // const edge = this.testBodyA;
-            // const circle = this.testBodyB;
-
-            // const edgeShape = edge.shape as EdgeShape;
-            // const circleShape = circle.shape as CircleShape;
-
-            // const A = edgeShape.worldVertices[0];
-            // const B = edgeShape.worldVertices[1];
-            // const C = circle.position.copy();
-            // const r = circleShape.radius;
-
-            // const AB = B.subNew(A);
-            // const AC = C.subNew(A);
-
-            // // Project AC onto AB
-            // let t = AC.dot(AB) / AB.dot(AB);
-
-            // // Clamp t so projection stays on the segment
-            // t = Utils.clamp(t, 0, 1);
-
-            // // Closest point on segment to circle center
-            // const closestPoint = A.addNew(AB.scaleNew(t));
-            // Graphics.drawFillCircle(closestPoint.x, closestPoint.y, 3, 'yellow');
-
-            // // Vector from closest point to circle center
-            // const diff = C.subNew(closestPoint);
-            // const distanceSquared = diff.dot(diff);
-
-            // if (distanceSquared < r * r) {
-            //     // console.log('Collision');
-            //     const distance = Math.sqrt(distanceSquared);
-            //     let normal: Vec2;
-            //     let penetration: number;
-
-            //     if (distance === 0) {
-            //         // Circle center exactly on edge
-            //         // Choose edge normal (perpendicular to AB)
-            //         normal = AB.perpNew().normalize();
-            //         penetration = r;
-            //     } else {
-            //         normal = diff.divNew(distance);
-            //         penetration = r - distance;
-            //     }
-
-            //     const contactPoint = closestPoint;
-            //     const normalEnd = contactPoint.addNew(normal.scaleNew(penetration));
-            //     Graphics.drawLine(contactPoint.x, contactPoint.y, normalEnd.x, normalEnd.y, 'yellow');
-            // }
+            //
         }
 
         Graphics.endWorld();
