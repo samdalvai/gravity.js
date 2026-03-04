@@ -528,7 +528,10 @@ export default class Application {
 
         // Test body for collision testing
         if (this.testBodyA && this.testBodyB) {
-            //
+            const edgeShape = this.testBodyA.shape as EdgeShape;
+            const circleShape = this.testBodyB.shape as CircleShape;
+
+            // ...
         }
 
         Graphics.endWorld();
