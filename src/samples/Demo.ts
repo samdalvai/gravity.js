@@ -75,8 +75,8 @@ export default class Demo {
         // box.setTexture('crate');
         // world.addBody(box);
 
-        const edge = new RigidBody(new EdgeShape(new Vec2(-100, 0), new Vec2(100, 0)), 0, 0, 1);
-        edge.angularVelocity = 5;
+        const edge = new RigidBody(new EdgeShape(new Vec2(-100, 0), new Vec2(100, 0)), 0, 0, 0);
+        edge.rotation = 0.5;
         world.addBody(edge);
     };
 
