@@ -3,6 +3,7 @@ import RigidBody from '../core/RigidBody';
 import Vec2 from '../math/Vec2';
 import { CapsuleShape } from '../shapes/CapsuleShape';
 import { CircleShape } from '../shapes/CircleShape';
+import { edgeEdgeIntersection } from '../shapes/Edge';
 import { EdgeShape } from '../shapes/EdgeShape';
 import { PolygonShape } from '../shapes/PolygonShape';
 import { ShapeType } from '../shapes/Shape';
@@ -64,6 +65,14 @@ export function detectCollision(a: RigidBody, b: RigidBody): ContactManifold | n
 
     if (aIsCircle && bIsEdge) {
         return detectCollisionEdgeCircle(b, a);
+    }
+
+    if (aIsEdge && bIsPolygon) {
+        return detectCollisionEdgePolygon(a, b);
+    }
+
+    if (aIsPolygon && bIsEdge) {
+        return detectCollisionEdgePolygon(b, a);
     }
 
     return null;
@@ -421,5 +430,63 @@ export function detectCollisionEdgeCircle(edge: RigidBody, circle: RigidBody): C
     }
 
     const contact = new ContactManifold(edge, circle, [{ point: closestPoint, id: -1 }], penetration, normal, false);
+    return contact;
+}
+
+export function detectCollisionEdgePolygon(edge: RigidBody, polygon: RigidBody): ContactManifold | null {
+    const edgeShape = edge.shape as EdgeShape;
+    const polygonShape = polygon.shape as PolygonShape;
+    const polygonVertices = polygonShape.worldVertices;
+
+    const A = edgeShape.worldVertices[0];
+    const B = edgeShape.worldVertices[1];
+
+    const intersections: Vec2[] = [];
+
+    for (let i = 0; i < polygonVertices.length; i++) {
+        const v0 = polygonVertices[i];
+        const v1 = polygonVertices[(i + 1) % polygonVertices.length];
+
+        const intersection = edgeEdgeIntersection(A, B, v0, v1);
+
+        if (intersection) {
+            intersections.push(intersection);
+        }
+    }
+
+    if (intersections.length === 0) return null;
+
+    const edgeDir = B.subNew(A);
+    let normal = edgeDir.perpNew().normalize();
+
+    let centroid = new Vec2(0, 0);
+
+    for (let i = 0; i < polygonVertices.length; i++) {
+        centroid = centroid.addNew(polygonVertices[i]);
+    }
+    centroid = centroid.scaleNew(1 / polygonVertices.length);
+
+    if (centroid.subNew(A).dot(normal) < 0) {
+        normal = normal.scaleNew(-1);
+    }
+
+    let maxPenetration = 0;
+
+    for (let i = 0; i < polygonVertices.length; i++) {
+        const v = polygonVertices[i];
+        const distance = v.subNew(A).dot(normal);
+
+        if (distance < 0) {
+            maxPenetration = Math.max(maxPenetration, -distance);
+        }
+    }
+
+    const contactPoints: ContactPoint[] = [];
+
+    for (let i = 0; i < intersections.length; i++) {
+        contactPoints.push({ point: intersections[i], id: i });
+    }
+
+    const contact = new ContactManifold(edge, polygon, contactPoints, maxPenetration, normal, false);
     return contact;
 }
