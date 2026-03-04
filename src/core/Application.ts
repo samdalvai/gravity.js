@@ -431,6 +431,7 @@ export default class Application {
             }
         }
 
+        // Test body for collision testing
         if (this.testBody) {
             const x = InputManager.mousePosition.x;
             const y = InputManager.mousePosition.y;
