@@ -8,7 +8,9 @@ import Demo from '../samples/Demo';
 import { BoxShape } from '../shapes/BoxShape';
 import { CapsuleShape } from '../shapes/CapsuleShape';
 import { CircleShape } from '../shapes/CircleShape';
+import { edgeEdgeIntersection } from '../shapes/Edge';
 import { EdgeShape } from '../shapes/EdgeShape';
+import { PolygonShape } from '../shapes/PolygonShape';
 import * as Utils from '../utils/Utils';
 import {
     FIXED_DELTA_TIME,
@@ -82,8 +84,8 @@ export default class Application {
         this.world.addBody(this.testBodyA);
 
         // this.testBodyB = new RigidBody(new CircleShape(30), 0, 0, 0);
-        this.testBodyB = new RigidBody(new BoxShape(60, 60), 0, 0, 0);
-        this.world.addBody(this.testBodyB);
+        this.testBodyB = new RigidBody(new BoxShape(60, 60), 100, 100, 0);
+        // this.world.addBody(this.testBodyB);
     }
 
     input(): void {
@@ -528,10 +530,59 @@ export default class Application {
 
         // Test body for collision testing
         if (this.testBodyA && this.testBodyB) {
-            const edgeShape = this.testBodyA.shape as EdgeShape;
-            const circleShape = this.testBodyB.shape as CircleShape;
+            // const edgeShape = this.testBodyA.shape as EdgeShape;
+            // const polygonShape = this.testBodyB.shape as PolygonShape;
+            // const polygonVertices = polygonShape.worldVertices;
 
-            // ...
+            // const A = edgeShape.worldVertices[0];
+            // const B = edgeShape.worldVertices[1];
+
+            // const intersections: Vec2[] = [];
+
+            // for (let i = 0; i < polygonVertices.length; i++) {
+            //     const v0 = polygonVertices[i];
+            //     const v1 = polygonVertices[(i + 1) % polygonVertices.length];
+
+            //     const intersection = edgeEdgeIntersection(A, B, v0, v1);
+
+            //     if (intersection) {
+            //         intersections.push(intersection);
+            //         // Graphics.drawFillCircle(intersection.x, intersection.y, 3, 'red');
+            //     }
+            // }
+
+            // for (const int of intersections) {
+            //     Graphics.drawFillCircle(int.x, int.y, 3, 'red');
+            // }
+
+            // const edgeDir = B.subNew(A);
+            // let normal = edgeDir.perpNew().normalize();
+
+            // let centroid = new Vec2(0, 0);
+
+            // for (let i = 0; i < polygonVertices.length; i++) {
+            //     centroid = centroid.addNew(polygonVertices[i]);
+            // }
+            // centroid = centroid.scaleNew(1 / polygonVertices.length);
+
+            // if (centroid.subNew(A).dot(normal) < 0) {
+            //     normal = normal.scaleNew(-1);
+            // }
+
+            // let maxPenetration = 0;
+
+            // for (let i = 0; i < polygonVertices.length; i++) {
+            //     const v = polygonVertices[i];
+            //     const distance = v.subNew(A).dot(normal);
+
+            //     if (distance < 0) {
+            //         maxPenetration = Math.max(maxPenetration, -distance);
+            //     }
+            // }
+
+            // const testNormal = normal.scaleNew(maxPenetration);
+
+            // Graphics.drawLine(this.testBodyA.position.x, this.testBodyA.position.y, testNormal.x, testNormal.y, 'red');
         }
 
         Graphics.endWorld();
