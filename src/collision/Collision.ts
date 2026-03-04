@@ -375,6 +375,11 @@ export function detectCollisionCapsulePolygon(capsule: RigidBody, polygon: Rigid
 }
 
 export function detectCollisionEdgeCircle(edge: RigidBody, circle: RigidBody): ContactManifold | null {
+    // TODO: If your edge is terrain and you want to ignore back-face hits:
+    // edgeNormal = normalize(perpendicular(AB))
+    // if dot(C - A, edgeNormal) < 0:
+    //      return null
+
     const edgeShape = edge.shape as EdgeShape;
     const circleShape = circle.shape as CircleShape;
 
