@@ -8,6 +8,7 @@ import Demo from '../samples/Demo';
 import { BoxShape } from '../shapes/BoxShape';
 import { CapsuleShape } from '../shapes/CapsuleShape';
 import { CircleShape } from '../shapes/CircleShape';
+import { EdgeShape } from '../shapes/EdgeShape';
 import * as Utils from '../utils/Utils';
 import {
     FIXED_DELTA_TIME,
@@ -32,7 +33,9 @@ export default class Application {
     private demoIndex = 1;
 
     private player: RigidBody | null = null;
-    private testBody: RigidBody | null = null;
+
+    private testBodyA: RigidBody | null = null;
+    private testBodyB: RigidBody | null = null;
 
     // Inputs
     private leftButtonPressed: boolean = false;
@@ -74,8 +77,12 @@ export default class Application {
         demo(this.world, this);
 
         // Test body for collision testing
-        this.testBody = new RigidBody(new CircleShape(30), 0, 0, 0);
-        this.world.addBody(this.testBody);
+        this.testBodyA = new RigidBody(new EdgeShape(new Vec2(-100, 0), new Vec2(100, 0)), 0, 0, 0);
+        this.testBodyA.rotation = 0.5;
+        this.world.addBody(this.testBodyA);
+
+        this.testBodyB = new RigidBody(new CircleShape(30), 0, 0, 0);
+        this.world.addBody(this.testBodyB);
     }
 
     input(): void {
@@ -432,11 +439,11 @@ export default class Application {
         }
 
         // Test body for collision testing
-        if (this.testBody) {
+        if (this.testBodyB) {
             const x = InputManager.mousePosition.x;
             const y = InputManager.mousePosition.y;
-            this.testBody.position.x = x;
-            this.testBody.position.y = y;
+            this.testBodyB.position.x = x;
+            this.testBodyB.position.y = y;
         }
     }
 
@@ -516,6 +523,56 @@ export default class Application {
 
             Graphics.drawLine(-50, 0, 50, 0, 'gray');
             Graphics.drawLine(0, -50, 0, 50, 'gray');
+        }
+
+        // Test body for collision testing
+        if (this.testBodyA && this.testBodyB) {
+            const edge = this.testBodyA;
+            const circle = this.testBodyB;
+
+            const edgeShape = edge.shape as EdgeShape;
+            const circleShape = circle.shape as CircleShape;
+
+            const A = edgeShape.worldVertices[0];
+            const B = edgeShape.worldVertices[1];
+            const C = circle.position.copy();
+            const r = circleShape.radius;
+
+            const AB = B.subNew(A);
+            const AC = C.subNew(A);
+
+            // Project AC onto AB
+            let t = AC.dot(AB) / AB.dot(AB);
+
+            // Clamp t so projection stays on the segment
+            t = Utils.clamp(t, 0, 1);
+
+            // Closest point on segment to circle center
+            const closestPoint = A.addNew(AB.scaleNew(t));
+            Graphics.drawFillCircle(closestPoint.x, closestPoint.y, 3, 'yellow');
+
+            // Vector from closest point to circle center
+            const diff = C.subNew(closestPoint);
+            const distanceSquared = diff.dot(diff);
+
+            if (distanceSquared < r * r) {
+                console.log('Collision');
+                const distance = Math.sqrt(distanceSquared);
+                let normal: Vec2;
+                let penetration: number;
+
+                if (distance === 0) {
+                    // Circle center exactly on edge
+                    // Choose edge normal (perpendicular to AB)
+                    normal = AB.perpNew().normalize();
+                    penetration = r;
+                } else {
+                    normal = diff.divNew(distance);
+                    penetration = r - distance;
+                }
+
+                const contactPoint = closestPoint;
+            }
         }
 
         Graphics.endWorld();

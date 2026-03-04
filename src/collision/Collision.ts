@@ -3,8 +3,10 @@ import RigidBody from '../core/RigidBody';
 import Vec2 from '../math/Vec2';
 import { CapsuleShape } from '../shapes/CapsuleShape';
 import { CircleShape } from '../shapes/CircleShape';
+import { EdgeShape } from '../shapes/EdgeShape';
 import { PolygonShape } from '../shapes/PolygonShape';
 import { ShapeType } from '../shapes/Shape';
+import * as Utils from '../utils/Utils';
 import { ContactManifold } from './ContactManifold';
 
 export function detectCollision(a: RigidBody, b: RigidBody): ContactManifold | null {
@@ -51,6 +53,17 @@ export function detectCollision(a: RigidBody, b: RigidBody): ContactManifold | n
 
     if (aIsPolygon && bIsCapsule) {
         return detectCollisionCapsulePolygon(b, a);
+    }
+
+    const aIsEdge = a.shapeType === ShapeType.EDGE;
+    const bIsEdge = b.shapeType === ShapeType.EDGE;
+
+    if (aIsEdge && bIsCircle) {
+        //return detectCollisionEdgeCircle(a, b);
+    }
+
+    if (aIsCircle && bIsEdge) {
+        //return detectCollisionEdgeCircle(b, a);
     }
 
     return null;
@@ -359,4 +372,52 @@ export function detectCollisionCapsulePolygon(capsule: RigidBody, polygon: Rigid
 
     // Test bottom circle
     return polygonCircleTest(polygon, bottomPos, capsuleShape.radius, capsule);
+}
+
+export function detectCollisionEdgeCircle(edge: RigidBody, circle: RigidBody): ContactManifold | null {
+    const edgeShape = edge.shape as EdgeShape;
+    const circleShape = circle.shape as CircleShape;
+
+    const A = edgeShape.worldVertices[0];
+    const B = edgeShape.worldVertices[1];
+    const C = circle.position.copy();
+    const r = circleShape.radius;
+
+    const AB = B.subNew(A);
+    const AC = C.subNew(A);
+
+    // Project AC onto AB
+    let t = AC.dot(AB) / AB.dot(AB);
+
+    // Clamp t so projection stays on the segment
+    t = Utils.clamp(t, 0, 1);
+
+    // Closest point on segment to circle center
+    const closestPoint = A.addNew(AB.scaleNew(t));
+
+    // Vector from closest point to circle center
+    const diff = C.subNew(closestPoint);
+    const distanceSquared = diff.dot(diff);
+
+    if (distanceSquared < r * r) {
+        return null;
+    }
+
+    const distance = Math.sqrt(distanceSquared);
+    let normal: Vec2;
+    let penetration: number;
+
+    if (distance === 0) {
+        // Circle center exactly on edge
+        // Choose edge normal (perpendicular to AB)
+        normal = AB.perpNew().normalize();
+        penetration = r;
+    } else {
+        normal = diff.divNew(distance);
+        penetration = r - distance;
+    }
+
+    const contactPoint = closestPoint;
+
+    return null;
 }
