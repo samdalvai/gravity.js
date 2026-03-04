@@ -32,6 +32,7 @@ export default class Application {
     private demoIndex = 1;
 
     private player: RigidBody | null = null;
+    private testBody: RigidBody | null = null;
 
     // Inputs
     private leftButtonPressed: boolean = false;
@@ -71,6 +72,10 @@ export default class Application {
         const demo = Demo.demoFunctions[this.demoIndex];
         this.world.clear();
         demo(this.world, this);
+
+        // Test body for collision testing
+        this.testBody = new RigidBody(new CircleShape(30), 0, 0, 0);
+        this.world.addBody(this.testBody);
     }
 
     input(): void {
@@ -424,6 +429,13 @@ export default class Application {
                 particle.setTexture('rockRound');
                 this.world.addBody(particle);
             }
+        }
+
+        if (this.testBody) {
+            const x = InputManager.mousePosition.x;
+            const y = InputManager.mousePosition.y;
+            this.testBody.position.x = x;
+            this.testBody.position.y = y;
         }
     }
 
