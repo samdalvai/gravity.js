@@ -3,6 +3,10 @@ import Vec2 from '../math/Vec2';
 import { PolygonShape } from './PolygonShape';
 import { ShapeType } from './Shape';
 
+/**
+ * Edge shapes are very thin and are meant to be used as static objects,
+ * using them as dynamic objects makes them prone to collision tunneling
+ */
 export class EdgeShape extends PolygonShape {
     constructor(vertexA: Vec2, vertexB: Vec2) {
         const verts = [vertexA.copy(), vertexB.copy()];
