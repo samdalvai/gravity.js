@@ -13,9 +13,17 @@ export class EdgeShape extends PolygonShape {
     getType(): ShapeType {
         return ShapeType.EDGE;
     }
+
     getMomentOfInertia(): number {
-        // TODO: to be implemented
-        return 0.5;
+        const a = this.localVertices[0];
+        const b = this.localVertices[1];
+
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+
+        const lengthSq = dx * dx + dy * dy;
+
+        return lengthSq * 0.083333;
     }
     updateVertices(angle: number, position: Vec2): void {
         super.updateVertices(angle, position);
