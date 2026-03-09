@@ -33,8 +33,7 @@ export default class Application {
 
     private player: RigidBody | null = null;
 
-    private testBodyA: RigidBody | null = null;
-    private testBodyB: RigidBody | null = null;
+    private testBody: RigidBody | null = null;
 
     // Inputs
     private leftButtonPressed: boolean = false;
@@ -430,11 +429,11 @@ export default class Application {
         }
 
         // Test body for collision testing
-        if (this.testBodyB) {
+        if (this.testBody) {
             const x = InputManager.mousePosition.x;
             const y = InputManager.mousePosition.y;
-            this.testBodyB.position.x = x;
-            this.testBodyB.position.y = y;
+            this.testBody.position.x = x;
+            this.testBody.position.y = y;
         }
     }
 
