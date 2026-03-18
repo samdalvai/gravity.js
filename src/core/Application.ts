@@ -109,10 +109,6 @@ export default class Application {
                     }
 
                     if (inputEvent.key === 'f') {
-                        if (this.world.blackHole) {
-                            this.world.blackHole = null;
-                        }
-
                         const x = InputManager.mousePosition.x;
                         const y = InputManager.mousePosition.y;
                         const blackHole = new RigidBody(new CircleShape(0.0001), x, y, 50_000);
@@ -444,6 +440,22 @@ export default class Application {
         // Draw background texture
         if (this.bgTexture && !this.debug) {
             Graphics.drawTexture(this.bgTexture.width, this.bgTexture.height, this.bgTexture, 0, 100);
+        }
+
+        if (this.world.blackHole) {
+            const blackHole = this.world.blackHole;
+            if (!blackHole) {
+                return;
+            }
+
+            const { x, y } = blackHole.position;
+            const radius = 100;
+
+            Graphics.drawFillCircle(x, y, radius, 'rgba(86, 185, 255, 0.05)');
+            Graphics.drawFillCircle(x, y, radius * 0.66, 'rgba(86, 185, 255, 0.05)');
+            Graphics.drawFillCircle(x, y, radius * 0.33, 'rgba(86, 185, 255, 0.05)');
+            Graphics.drawFillCircle(x, y, 10, 'rgba(149, 224, 255, 0.95)');
+            Graphics.drawFillCircle(x, y, 4, 'white');
         }
 
         // Draw all bodies
