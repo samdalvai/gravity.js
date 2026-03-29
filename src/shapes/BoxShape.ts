@@ -1,5 +1,5 @@
-import Vec2 from '../math/Vec2';
-import RigidBody from '../core/RigidBody';
+import { RigidBody } from '../core/RigidBody';
+import { Vec2 } from '../math/Vec2';
 import { PolygonShape } from './PolygonShape';
 import { ShapeType } from './Shape';
 

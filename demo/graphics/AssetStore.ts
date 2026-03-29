@@ -67,9 +67,17 @@ export default class AssetStore {
 
     /** Preload multiple textures at once */
     static async loadTextures(): Promise<void> {
-        const promises = Object.entries(TEXTURES).map(([name, path]) =>
-            this.loadTexture(name as keyof typeof TEXTURES, path),
-        );
+        const promises: Promise<void>[] = [];
+
+        for (const key in TEXTURES) {
+            if (!Object.prototype.hasOwnProperty.call(TEXTURES, key)) {
+                continue;
+            }
+
+            const name = key as keyof typeof TEXTURES;
+            promises.push(this.loadTexture(name, TEXTURES[name]));
+        }
+
         await Promise.all(promises);
     }
 }

@@ -1,33 +1,38 @@
-import Force from '../force/Force';
-import AssetStore, { TEXTURES } from '../graphics/AssetStore';
-import Graphics from '../graphics/Graphics';
-import InputManager, { MouseButton } from '../input/InputManager';
-import { DistanceJoint } from '../joint/DistanceJoint';
-import Vec2 from '../math/Vec2';
-import Demo from '../samples/Demo';
-import { BoxShape } from '../shapes/BoxShape';
-import { CapsuleShape } from '../shapes/CapsuleShape';
-import { CircleShape } from '../shapes/CircleShape';
-import * as Utils from '../utils/Utils';
 import {
+    BoxShape,
+    CapsuleShape,
+    CircleShape,
+    DistanceJoint,
     FIXED_DELTA_TIME,
+    Force,
     GRAVITY,
     MAX_BODIES,
     PIXELS_PER_METER,
-    PLAYER_ACCELERATION,
-    PLAYER_JUMP_IMPULSE,
-    PLAYER_MAX_SPEED,
     REAL_DELTA_TIME,
+    RigidBody,
     SETTINGS,
-} from './Constants';
-import RigidBody from './RigidBody';
-import World from './World';
+    SegmentShape,
+    Vec2,
+    World,
+} from '../src';
+import { Utils } from '../src';
+import AssetStore, { TEXTURES } from './graphics/AssetStore';
+import Graphics from './graphics/Graphics';
+import InputManager, { MouseButton } from './input/InputManager';
+import BodyRenderRegistry from './render/BodyRenderRegistry';
+import Demo from './samples/Demo';
+
+const BODY_REMOVAL_THRESHOLD = 25_000;
+const PLAYER_MAX_SPEED = 350;
+const PLAYER_ACCELERATION = 10;
+const PLAYER_JUMP_IMPULSE = 600;
 
 export default class Application {
     private running = false;
     private paused = false;
     private world: World;
     private bgTexture: ImageBitmap | null = null;
+    private readonly bodyRenderRegistry = new BodyRenderRegistry();
     private generateParticle = false;
     private demoIndex = 1;
 
@@ -47,6 +52,7 @@ export default class Application {
     private lastFPSUpdate = 0;
     private showContacts = true;
     private showAABB = false;
+    private showIslandColors = false;
 
     constructor() {
         this.world = new World(GRAVITY);
@@ -60,8 +66,16 @@ export default class Application {
         this.running = newValue;
     }
 
-    setBackground(texture: keyof typeof TEXTURES) {
+    setBackground(texture: keyof typeof TEXTURES): void {
         this.bgTexture = AssetStore.getTexture(texture);
+    }
+
+    setBodyTexture(body: RigidBody, texture: keyof typeof TEXTURES): void {
+        this.bodyRenderRegistry.setTexture(body, texture);
+    }
+
+    setBodyFillColor(body: RigidBody, fillColor: string): void {
+        this.bodyRenderRegistry.setFillColor(body, fillColor);
     }
 
     async setup(): Promise<void> {
@@ -72,6 +86,8 @@ export default class Application {
         this.running = Graphics.openWindow();
         const demo = Demo.demoFunctions[this.demoIndex];
         this.world.clear();
+        this.bgTexture = null;
+        this.bodyRenderRegistry.clear();
         demo(this.world, this);
     }
 
@@ -131,6 +147,10 @@ export default class Application {
                         this.showContacts = !this.showContacts;
                     }
 
+                    if (inputEvent.key === 'i') {
+                        this.showIslandColors = !this.showIslandColors;
+                    }
+
                     if (inputEvent.key === 'b') {
                         // Emit bullet
                         const x = InputManager.mousePosition.x;
@@ -144,7 +164,7 @@ export default class Application {
                         const bullet = new RigidBody(new CircleShape(5), 0, 0, 0.1);
                         bullet.velocity = direction.scaleNew(bulletForce);
                         bullet.isBullet = true;
-                        bullet.setTexture('rockRound');
+                        this.setBodyTexture(bullet, 'rockRound');
                         this.world.addBody(bullet);
                     }
 
@@ -183,17 +203,16 @@ export default class Application {
                         const y = InputManager.mousePosition.y;
 
                         if (this.player) {
+                            this.bodyRenderRegistry.delete(this.player);
                             this.world.removeBody(this.player);
                             this.player = null;
                         }
 
-                        this.player = new RigidBody(new CapsuleShape(40, 20), x, y, 1);
-                        // this.player = new RigidBody(new CircleShape(40), x, y, 1);
-                        // this.player = new RigidBody(new BoxShape(40, 40), x, y, 1);
+                        this.player = new RigidBody(new CapsuleShape(30, 25), x, y, 1);
                         this.player.canRotate = false;
                         this.player.restitution = 0.0;
                         this.player.friction = 0.8;
-                        this.player.shapeFillColor = 'orange';
+                        this.setBodyFillColor(this.player, 'orange');
                         this.world.addBody(this.player);
                     }
 
@@ -209,6 +228,20 @@ export default class Application {
                         capsule.restitution = 0.2;
                         capsule.friction = 0.7;
                         this.world.addBody(capsule);
+                    }
+
+                    if (inputEvent.key === 'z') {
+                        if (this.world.getBodies().length >= MAX_BODIES) {
+                            continue;
+                        }
+
+                        const x = InputManager.mousePosition.x;
+                        const y = InputManager.mousePosition.y;
+
+                        const segment = new RigidBody(new SegmentShape(new Vec2(-100, 0), new Vec2(100, 0)), x, y, 1);
+                        segment.restitution = 0.2;
+                        segment.friction = 0.7;
+                        this.world.addBody(segment);
                     }
 
                     if (inputEvent.key === 'r' && !inputEvent.ctrlKey && !inputEvent.metaKey) {
@@ -236,6 +269,8 @@ export default class Application {
                         }
 
                         this.world.clear();
+                        this.bgTexture = null;
+                        this.bodyRenderRegistry.clear();
                         this.player = null;
                         Graphics.resetView();
                         demo(this.world, this);
@@ -328,7 +363,7 @@ export default class Application {
                                     const ball = new RigidBody(new CircleShape(30), x, y, 1.0);
                                     ball.restitution = 0.8;
                                     ball.friction = 0.7;
-                                    ball.setTexture('basketball');
+                                    this.setBodyTexture(ball, 'basketball');
                                     this.world.addBody(ball);
                                 }
                                 break;
@@ -340,7 +375,7 @@ export default class Application {
                                     const box = new RigidBody(new BoxShape(60, 60), x, y, 1.0);
                                     box.restitution = 0.3;
                                     box.friction = 0.7;
-                                    box.setTexture('crate');
+                                    this.setBodyTexture(box, 'crate');
                                     this.world.addBody(box);
                                 }
                                 break;
@@ -419,7 +454,7 @@ export default class Application {
                 const particle = new RigidBody(new CircleShape(5), x + positionOffset.x, y + positionOffset.y, 0.01);
                 particle.restitution = 0.0;
                 particle.friction = 0.5;
-                particle.setTexture('rockRound');
+                this.setBodyTexture(particle, 'rockRound');
                 this.world.addBody(particle);
             }
         }
@@ -431,6 +466,8 @@ export default class Application {
             this.testBody.position.x = x;
             this.testBody.position.y = y;
         }
+
+        this.removeOutOfBoundsBodies();
     }
 
     render(): void {
@@ -460,7 +497,7 @@ export default class Application {
 
         // Draw all bodies
         for (const body of this.world.getBodies()) {
-            Graphics.drawBody(body, this.debug);
+            Graphics.drawBody(body, this.bodyRenderRegistry.getStyle(body), this.debug);
         }
 
         // Draw all joints
@@ -497,6 +534,8 @@ export default class Application {
             }
 
             if (this.showContacts) {
+                const contactNormalLength = PIXELS_PER_METER * 0.25;
+
                 for (const joint of this.world.getJoints()) {
                     if (joint instanceof DistanceJoint) {
                         const anchorA = joint.localAnchorA;
@@ -515,10 +554,20 @@ export default class Application {
                         const endPoint = contact.point.subNew(
                             manifold.contactNormal.scaleNew(manifold.penetrationDepth),
                         );
+                        // const normalEndPoint = contact.point.addNew(
+                        //     manifold.contactNormal.scaleNew(contactNormalLength),
+                        // );
 
                         Graphics.drawFillCircle(startPoint.x, startPoint.y, 5, 'red');
                         Graphics.drawFillCircle(endPoint.x, endPoint.y, 3, 'red');
-                        Graphics.drawLine(startPoint.x, startPoint.y, endPoint.x, endPoint.y, 'red');
+                        // Graphics.drawLine(startPoint.x, startPoint.y, endPoint.x, endPoint.y, 'red');
+                        // Graphics.drawLine(
+                        //     startPoint.x,
+                        //     startPoint.y,
+                        //     normalEndPoint.x,
+                        //     normalEndPoint.y,
+                        //     'red',
+                        // );
                     }
                 }
             }
@@ -554,6 +603,7 @@ export default class Application {
             // Debug related info
             `[ A ] show AABB: ${this.showAABB ? 'ON' : 'OFF'}`,
             `[ S ] show contacts and joints: ${this.showContacts ? 'ON' : 'OFF'}`,
+            `[ I ] show island colors: ${this.showIslandColors ? 'ON' : 'OFF'}`,
             `Solver Iterations  [ - ] decrease [ + ] increase : ${SETTINGS.solverIterations}`,
             `Substeps [ / ] decrease [ * ] increase : ${SETTINGS.subSteps}`,
             `Num objects: ${this.world.getBodies().length} / ${MAX_BODIES} (max)`,
@@ -568,6 +618,26 @@ export default class Application {
 
         for (let i = 0; i < text.length; i++) {
             Graphics.drawText(text[i], 50, 50 + i * 25, 18, 'arial', this.debug ? 'orange' : 'black');
+        }
+    }
+
+    private removeOutOfBoundsBodies(): void {
+        const bodies = this.world.getBodies().slice();
+
+        for (const body of bodies) {
+            if (
+                Math.abs(body.position.x) <= BODY_REMOVAL_THRESHOLD &&
+                Math.abs(body.position.y) <= BODY_REMOVAL_THRESHOLD
+            ) {
+                continue;
+            }
+
+            this.bodyRenderRegistry.delete(body);
+            this.world.removeBody(body);
+
+            if (this.player?.id === body.id) {
+                this.player = null;
+            }
         }
     }
 }

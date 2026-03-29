@@ -1,10 +1,5 @@
-import RigidBody from '../core/RigidBody';
-import Vec2 from '../math/Vec2';
-import { BoxShape } from '../shapes/BoxShape';
-import { CapsuleShape } from '../shapes/CapsuleShape';
-import { CircleShape } from '../shapes/CircleShape';
-import { PolygonShape } from '../shapes/PolygonShape';
-import { ShapeType } from '../shapes/Shape';
+import { BoxShape, CapsuleShape, CircleShape, PolygonShape, RigidBody, SegmentShape, ShapeType, Vec2 } from '../../src';
+import type { BodyRenderStyle } from '../render/BodyRenderRegistry';
 
 export default class Graphics {
     static windowWidth: number;
@@ -297,10 +292,17 @@ export default class Graphics {
         this.ctx.restore();
     }
 
-    static drawBody(body: RigidBody, debug = false): void {
+    static drawBody(
+        body: RigidBody,
+        renderStyle?: BodyRenderStyle,
+        debug = false,
+        debugFillColor: string | null = null,
+    ): void {
         const x = body.position.x;
         const y = body.position.y;
         const rotation = body.rotation;
+        const fillColor = renderStyle?.fillColor ?? 'gray';
+        const texture = renderStyle?.texture ?? null;
 
         this.ctx.save();
         this.ctx.translate(x, y);
@@ -314,11 +316,14 @@ export default class Graphics {
                 {
                     const circleShape = body.shape as CircleShape;
                     if (debug) {
+                        if (debugFillColor) {
+                            this.drawFillCircle(0, 0, circleShape.radius, debugFillColor);
+                        }
                         this.drawCircle(circleShape.radius, color);
-                    } else if (body.texture) {
-                        this.drawTexture(circleShape.radius * 2, circleShape.radius * 2, body.texture);
+                    } else if (texture) {
+                        this.drawTexture(circleShape.radius * 2, circleShape.radius * 2, texture);
                     } else {
-                        this.drawFillCircle(0, 0, circleShape.radius, 'gray');
+                        this.drawFillCircle(0, 0, circleShape.radius, fillColor);
                     }
                 }
                 break;
@@ -327,11 +332,14 @@ export default class Graphics {
                     const polygonShape = body.shape as PolygonShape;
 
                     if (debug) {
+                        if (debugFillColor) {
+                            this.drawFillPolygon(0, 0, polygonShape.localVertices, debugFillColor);
+                        }
                         this.drawPolygon(polygonShape.localVertices, color);
-                    } else if (body.texture) {
-                        this.drawTexture(polygonShape.width, polygonShape.height, body.texture);
+                    } else if (texture) {
+                        this.drawTexture(polygonShape.width, polygonShape.height, texture);
                     } else {
-                        this.drawFillPolygon(0, 0, polygonShape.localVertices, body.shapeFillColor);
+                        this.drawFillPolygon(0, 0, polygonShape.localVertices, fillColor);
                     }
                 }
                 break;
@@ -340,11 +348,14 @@ export default class Graphics {
                     const boxShape = body.shape as BoxShape;
 
                     if (debug) {
+                        if (debugFillColor) {
+                            this.drawFillBox(boxShape.width, boxShape.height, debugFillColor);
+                        }
                         this.drawBox(boxShape.width, boxShape.height, color);
-                    } else if (body.texture) {
-                        this.drawTexture(boxShape.width, boxShape.height, body.texture);
+                    } else if (texture) {
+                        this.drawTexture(boxShape.width, boxShape.height, texture);
                     } else {
-                        this.drawFillBox(boxShape.width, boxShape.height, body.shapeFillColor);
+                        this.drawFillBox(boxShape.width, boxShape.height, fillColor);
                     }
                 }
                 break;
@@ -353,36 +364,33 @@ export default class Graphics {
                     const capsuleShape = body.shape as CapsuleShape;
 
                     if (debug) {
+                        if (debugFillColor) {
+                            this.drawFillCapsule(capsuleShape, debugFillColor);
+                        }
                         this.drawCapsule(capsuleShape, color);
-                    } else if (body.texture) {
-                        const polygonShape = body.shape as PolygonShape;
+                    } else if (texture) {
                         // TODO: draw texture without stretching it
-                        this.drawTexture(
-                            polygonShape.width,
-                            polygonShape.height + capsuleShape.radius * 2,
-                            body.texture,
-                        );
+                        this.drawTexture(capsuleShape.width, capsuleShape.height + capsuleShape.radius * 2, texture);
                     } else {
-                        this.drawFillCapsule(capsuleShape, body.shapeFillColor);
+                        this.drawFillCapsule(capsuleShape, fillColor);
                     }
                 }
                 break;
-            case ShapeType.EDGE:
+            case ShapeType.SEGMENT:
                 {
-                    const edgeShape = body.shape as CapsuleShape;
-                    const vertices = edgeShape.localVertices;
+                    const segmentShape = body.shape as SegmentShape;
+                    const vertices = segmentShape.localVertices;
                     const v0 = vertices[0];
                     const v1 = vertices[1];
 
                     if (debug) {
                         this.drawLine(v0.x, v0.y, v1.x, v1.y, color);
-                        this.drawFillCircle(0, 0, 3, color);
-                    } else if (body.texture) {
-                        // TODO: to be implemented?
-                        //this.drawTexture(polygonShape.width, polygonShape.height, body.texture);
+                        this.drawFillCircle(0, 0, 2, color);
+                    } else if (texture) {
+                        // TODO: support textured segment rendering if needed
                     } else {
                         this.drawLine(v0.x, v0.y, v1.x, v1.y, color);
-                        this.drawFillCircle(0, 0, 3, color);
+                        this.drawFillCircle(0, 0, 2, color);
                     }
                 }
                 break;

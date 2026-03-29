@@ -1,14 +1,13 @@
-import Vec2 from '../math/Vec2';
-import RigidBody from '../core/RigidBody';
+import { RigidBody } from '../core/RigidBody';
+import { Vec2 } from '../math/Vec2';
 
 export enum ShapeType {
     CIRCLE,
     POLYGON,
     BOX,
     CAPSULE,
-    EDGE,
+    SEGMENT,
 }
-
 
 export abstract class Shape {
     abstract getType(): ShapeType;
@@ -16,5 +15,3 @@ export abstract class Shape {
     abstract updateVertices(angle: number, position: Vec2): void;
     abstract updateAABB(body: RigidBody): void;
 }
-
-

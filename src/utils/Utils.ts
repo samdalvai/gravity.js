@@ -1,5 +1,5 @@
-import RigidBody from '../core/RigidBody';
-import Vec2 from '../math/Vec2';
+import { RigidBody } from '../core/RigidBody';
+import { Vec2 } from '../math/Vec2';
 import { PolygonShape } from '../shapes/PolygonShape';
 
 export function randomNumber(min: number = 1.0, max: number = 10.0): number {

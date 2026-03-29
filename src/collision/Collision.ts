@@ -1,6 +1,6 @@
 import { CONTACT_MERGE_THRESHOLD } from '../core/Constants';
-import RigidBody from '../core/RigidBody';
-import Vec2 from '../math/Vec2';
+import { RigidBody } from '../core/RigidBody';
+import { Vec2 } from '../math/Vec2';
 import { CapsuleShape } from '../shapes/CapsuleShape';
 import { CircleShape } from '../shapes/CircleShape';
 import { PolygonShape } from '../shapes/PolygonShape';
@@ -16,9 +16,9 @@ export function detectCollision(a: RigidBody, b: RigidBody): ContactManifold | n
     }
 
     const aIsPolygon =
-        a.shapeType === ShapeType.BOX || a.shapeType === ShapeType.POLYGON || a.shapeType === ShapeType.EDGE;
+        a.shapeType === ShapeType.BOX || a.shapeType === ShapeType.POLYGON || a.shapeType === ShapeType.SEGMENT;
     const bIsPolygon =
-        b.shapeType === ShapeType.BOX || b.shapeType === ShapeType.POLYGON || b.shapeType === ShapeType.EDGE;
+        b.shapeType === ShapeType.BOX || b.shapeType === ShapeType.POLYGON || b.shapeType === ShapeType.SEGMENT;
 
     if (aIsPolygon && bIsPolygon) {
         return detectCollisionPolygonPolygon(a, b);

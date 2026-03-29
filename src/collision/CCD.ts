@@ -1,5 +1,5 @@
-import RigidBody from '../core/RigidBody';
-import Vec2 from '../math/Vec2';
+import { RigidBody } from '../core/RigidBody';
+import { Vec2 } from '../math/Vec2';
 import { CapsuleShape } from '../shapes/CapsuleShape';
 import { CircleShape } from '../shapes/CircleShape';
 import { edgeCircleIntersection, edgeEdgeIntersection } from '../shapes/Edge';
@@ -21,7 +21,11 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
     for (const other of bodies) {
         if (bullet.id === other.id || other.isBullet) continue;
 
-        if (other.shapeType === ShapeType.BOX || other.shapeType === ShapeType.POLYGON || other.shapeType === ShapeType.EDGE) {
+        if (
+            other.shapeType === ShapeType.BOX ||
+            other.shapeType === ShapeType.POLYGON ||
+            other.shapeType === ShapeType.SEGMENT
+        ) {
             const polygonShape = other.shape as PolygonShape;
             const vertices = polygonShape.worldVertices;
 
