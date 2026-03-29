@@ -52,7 +52,6 @@ export default class Application {
     private lastFPSUpdate = 0;
     private showContacts = true;
     private showAABB = false;
-    private showIslandColors = false;
 
     constructor() {
         this.world = new World(GRAVITY);
@@ -145,10 +144,6 @@ export default class Application {
 
                     if (inputEvent.key === 's') {
                         this.showContacts = !this.showContacts;
-                    }
-
-                    if (inputEvent.key === 'i') {
-                        this.showIslandColors = !this.showIslandColors;
                     }
 
                     if (inputEvent.key === 'b') {
@@ -534,8 +529,6 @@ export default class Application {
             }
 
             if (this.showContacts) {
-                const contactNormalLength = PIXELS_PER_METER * 0.25;
-
                 for (const joint of this.world.getJoints()) {
                     if (joint instanceof DistanceJoint) {
                         const anchorA = joint.localAnchorA;
@@ -554,20 +547,9 @@ export default class Application {
                         const endPoint = contact.point.subNew(
                             manifold.contactNormal.scaleNew(manifold.penetrationDepth),
                         );
-                        // const normalEndPoint = contact.point.addNew(
-                        //     manifold.contactNormal.scaleNew(contactNormalLength),
-                        // );
 
                         Graphics.drawFillCircle(startPoint.x, startPoint.y, 5, 'red');
                         Graphics.drawFillCircle(endPoint.x, endPoint.y, 3, 'red');
-                        // Graphics.drawLine(startPoint.x, startPoint.y, endPoint.x, endPoint.y, 'red');
-                        // Graphics.drawLine(
-                        //     startPoint.x,
-                        //     startPoint.y,
-                        //     normalEndPoint.x,
-                        //     normalEndPoint.y,
-                        //     'red',
-                        // );
                     }
                 }
             }
@@ -603,7 +585,6 @@ export default class Application {
             // Debug related info
             `[ A ] show AABB: ${this.showAABB ? 'ON' : 'OFF'}`,
             `[ S ] show contacts and joints: ${this.showContacts ? 'ON' : 'OFF'}`,
-            `[ I ] show island colors: ${this.showIslandColors ? 'ON' : 'OFF'}`,
             `Solver Iterations  [ - ] decrease [ + ] increase : ${SETTINGS.solverIterations}`,
             `Substeps [ / ] decrease [ * ] increase : ${SETTINGS.subSteps}`,
             `Num objects: ${this.world.getBodies().length} / ${MAX_BODIES} (max)`,

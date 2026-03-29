@@ -17,14 +17,16 @@ interface JointTuning {
     dampingRatio: number;
 }
 
-const JOINT_TUNING = {
+type JointTuningMap = Record<string, JointTuning>;
+
+const JOINT_TUNING: JointTuningMap = {
     bridge: { frequency: 14, dampingRatio: 0.9 },
     whip: { frequency: 11, dampingRatio: 0.7 },
     ragdoll: { frequency: 18, dampingRatio: 0.9 },
     plank: { frequency: 28, dampingRatio: 1.0 },
     cloth: { frequency: 16, dampingRatio: 0.95 },
     stressBridge: { frequency: 16, dampingRatio: 0.92 },
-} satisfies Record<string, JointTuning>;
+};
 
 export default class Demo {
     static demoStrings = [
