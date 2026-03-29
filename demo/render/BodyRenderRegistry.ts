@@ -3,7 +3,7 @@ import AssetStore, { TEXTURES } from '../graphics/AssetStore';
 
 export interface BodyRenderStyle {
     fillColor?: string;
-    texture?: CanvasImageSource | null;
+    texture?: ImageBitmap | null;
 }
 
 export default class BodyRenderRegistry {
