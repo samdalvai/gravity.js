@@ -1,4 +1,4 @@
-import RigidBody from '../../src/core/RigidBody';
+import { RigidBody } from '../../src/core/RigidBody';
 import { CircleShape } from '../../src/shapes/CircleShape';
 import * as Utils from '../../src/utils/Utils';
 

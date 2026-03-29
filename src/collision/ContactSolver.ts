@@ -8,8 +8,8 @@
  * https://github.com/Sopiro
  */
 import { SETTINGS } from '../core/Constants';
-import RigidBody from '../core/RigidBody';
-import Vec2 from '../math/Vec2';
+import { RigidBody } from '../core/RigidBody';
+import { Vec2 } from '../math/Vec2';
 import * as Utils from '../utils/Utils';
 import { ContactManifold, ContactType, Jacobian } from './ContactManifold';
 

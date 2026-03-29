@@ -1,4 +1,4 @@
-import Vec2 from '../../src/math/Vec2';
+import { Vec2 } from '../../src/math/Vec2';
 import { BoxShape } from '../../src/shapes/BoxShape';
 
 describe('Shape', () => {
