@@ -9,8 +9,8 @@
  */
 import { Constraint } from '../constraint/Constraint';
 import { SETTINGS } from '../core/Constants';
-import RigidBody from '../core/RigidBody';
-import Vec2 from '../math/Vec2';
+import { RigidBody } from '../core/RigidBody';
+import { Vec2 } from '../math/Vec2';
 import { BlockSolver } from './BlockSolver';
 import { ContactPoint } from './Collision';
 import { ContactSolver } from './ContactSolver';

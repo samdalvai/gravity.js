@@ -7,7 +7,7 @@
  * Original project:
  * https://github.com/Sopiro
  */
-import Vec2 from './Vec2';
+import { Vec2 } from './Vec2';
 
 export class Mat2 {
     m00: number;
