@@ -46,6 +46,7 @@ export class RigidBody {
     shape: Shape;
     shapeType: ShapeType;
 
+    // AABB
     minX!: number;
     maxX!: number;
     minY!: number;
