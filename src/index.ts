@@ -1,61 +1,28 @@
-import Application from './core/Application';
-import { FIXED_DELTA_TIME } from './core/Constants';
+export { default as Force } from './force/Force';
 
-async function run() {
-    const app = new Application();
-    await app.setup();
+export {
+    FIXED_DELTA_TIME,
+    GRAVITY,
+    MAX_BODIES,
+    MIN_BULLET_SPEED,
+    PIXELS_PER_METER,
+    REAL_DELTA_TIME,
+    SETTINGS,
+} from './core/Constants';
 
-    console.log('Setup finished, starting loop');
+export { RigidBody } from './core/RigidBody';
+export { World } from './core/World';
 
-    let timePreviousFrame = performance.now();
-    let accumulator = 0;
+export { DistanceJoint } from './joint/DistanceJoint';
+export { Joint } from './joint/Joint';
 
-    document.addEventListener('visibilitychange', () => {
-        app.setRunning(!document.hidden);
-        if (!document.hidden) {
-            // Reset previous frame time to avoid a huge deltaTime spike
-            timePreviousFrame = performance.now();
-        }
-    });
+export { Vec2 } from './math/Vec2';
 
-    function loop(now: number) {
-        let frameTime = (now - timePreviousFrame) / 1000;
-        timePreviousFrame = now;
+export { BoxShape } from './shapes/BoxShape';
+export { CapsuleShape } from './shapes/CapsuleShape';
+export { CircleShape } from './shapes/CircleShape';
+export { PolygonShape } from './shapes/PolygonShape';
+export { SegmentShape } from './shapes/SegmentShape';
+export { ShapeType } from './shapes/Shape';
 
-        // Avoid spiral of death
-        frameTime = Math.min(frameTime, 0.25);
-
-        accumulator += frameTime;
-
-        if (app.isRunning()) {
-            app.input();
-
-            while (accumulator >= FIXED_DELTA_TIME) {
-                app.update(frameTime);
-                accumulator -= FIXED_DELTA_TIME;
-            }
-
-            // Optional: interpolation (for smooth rendering)
-            // TODO: to be implemented if appropriate
-            // Store previous position and current one and interpolate position and rotation, e.g.
-            // function lerp(a, b, t) {
-            //     return a + (b - a) * t;
-            // }
-
-            // function lerpVec2(a, b, t) {
-            //     return {
-            //         x: lerp(a.x, b.x, t),
-            //         y: lerp(a.y, b.y, t),
-            //     };
-            // }
-            // const alpha = accumulator / DELTA_TIME;
-            app.render();
-        }
-
-        requestAnimationFrame(loop);
-    }
-
-    requestAnimationFrame(loop);
-}
-
-run();
+export * as Utils from './utils/Utils';

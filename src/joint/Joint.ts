@@ -9,7 +9,7 @@
  */
 import { Constraint } from '../constraint/Constraint';
 import { REAL_DELTA_TIME } from '../core/Constants';
-import RigidBody from '../core/RigidBody';
+import { RigidBody } from '../core/RigidBody';
 import * as Utils from '../utils/Utils';
 
 export abstract class Joint extends Constraint {

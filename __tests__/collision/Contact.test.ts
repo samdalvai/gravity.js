@@ -1,5 +1,5 @@
 import * as Collision from '../../src/collision/Collision';
-import RigidBody from '../../src/core/RigidBody';
+import { RigidBody } from '../../src/core/RigidBody';
 import { CircleShape } from '../../src/shapes/CircleShape';
 
 describe('Contact', () => {

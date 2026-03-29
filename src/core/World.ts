@@ -12,12 +12,12 @@ import * as Collision from '../collision/Collision';
 import { ContactManifold } from '../collision/ContactManifold';
 import Force from '../force/Force';
 import { Joint } from '../joint/Joint';
-import Vec2 from '../math/Vec2';
+import { Vec2 } from '../math/Vec2';
 import * as Utils from '../utils/Utils';
 import { BODY_REMOVAL_THRESHOLD, MIN_BULLET_SPEED, SETTINGS } from './Constants';
-import RigidBody from './RigidBody';
+import { RigidBody } from './RigidBody';
 
-export default class World {
+export class World {
     private readonly up = new Vec2(0, 1);
     private G: number;
     private _blackHole: RigidBody | null = null;

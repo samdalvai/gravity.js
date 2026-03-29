@@ -1,11 +1,10 @@
-import AssetStore, { TEXTURES } from '../graphics/AssetStore';
-import Vec2 from '../math/Vec2';
+import { Vec2 } from '../math/Vec2';
 import { CircleShape } from '../shapes/CircleShape';
 import { Shape, ShapeType } from '../shapes/Shape';
 import * as Utils from '../utils/Utils';
 import { SETTINGS } from './Constants';
 
-export default class RigidBody {
+export class RigidBody {
     static nextId = 0;
     id: number;
 
@@ -46,9 +45,6 @@ export default class RigidBody {
     // Pointer to the shape/geometry of this rigid body
     shape: Shape;
     shapeType: ShapeType;
-    shapeFillColor = 'gray';
-
-    texture: CanvasImageSource | null = null;
 
     minX!: number;
     maxX!: number;
@@ -126,10 +122,6 @@ export default class RigidBody {
     set friction(value: number) {
         Utils.assert(value >= 0 && value <= 1);
         this._friction = value;
-    }
-
-    setTexture(texture: keyof typeof TEXTURES): void {
-        this.texture = AssetStore.getTexture(texture);
     }
 
     isStatic(): boolean {

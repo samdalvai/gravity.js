@@ -7,7 +7,7 @@
  * Original project:
  * https://github.com/Sopiro
  */
-import RigidBody from '../core/RigidBody';
+import { RigidBody } from '../core/RigidBody';
 import { Mat2 } from '../math/Mat2';
 import * as Utils from '../utils/Utils';
 import { ContactManifold, Jacobian } from './ContactManifold';
