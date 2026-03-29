@@ -292,12 +292,7 @@ export default class Graphics {
         this.ctx.restore();
     }
 
-    static drawBody(
-        body: RigidBody,
-        renderStyle?: BodyRenderStyle,
-        debug = false,
-        debugFillColor: string | null = null,
-    ): void {
+    static drawBody(body: RigidBody, renderStyle?: BodyRenderStyle, debug = false): void {
         const x = body.position.x;
         const y = body.position.y;
         const rotation = body.rotation;
@@ -316,9 +311,6 @@ export default class Graphics {
                 {
                     const circleShape = body.shape as CircleShape;
                     if (debug) {
-                        if (debugFillColor) {
-                            this.drawFillCircle(0, 0, circleShape.radius, debugFillColor);
-                        }
                         this.drawCircle(circleShape.radius, color);
                     } else if (texture) {
                         this.drawTexture(circleShape.radius * 2, circleShape.radius * 2, texture);
@@ -332,9 +324,6 @@ export default class Graphics {
                     const polygonShape = body.shape as PolygonShape;
 
                     if (debug) {
-                        if (debugFillColor) {
-                            this.drawFillPolygon(0, 0, polygonShape.localVertices, debugFillColor);
-                        }
                         this.drawPolygon(polygonShape.localVertices, color);
                     } else if (texture) {
                         this.drawTexture(polygonShape.width, polygonShape.height, texture);
@@ -348,9 +337,6 @@ export default class Graphics {
                     const boxShape = body.shape as BoxShape;
 
                     if (debug) {
-                        if (debugFillColor) {
-                            this.drawFillBox(boxShape.width, boxShape.height, debugFillColor);
-                        }
                         this.drawBox(boxShape.width, boxShape.height, color);
                     } else if (texture) {
                         this.drawTexture(boxShape.width, boxShape.height, texture);
@@ -364,9 +350,6 @@ export default class Graphics {
                     const capsuleShape = body.shape as CapsuleShape;
 
                     if (debug) {
-                        if (debugFillColor) {
-                            this.drawFillCapsule(capsuleShape, debugFillColor);
-                        }
                         this.drawCapsule(capsuleShape, color);
                     } else if (texture) {
                         // TODO: draw texture without stretching it
