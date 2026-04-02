@@ -1,6 +1,6 @@
-import * as Collision from '../src/collision/Collision';
-import { RigidBody } from '../src/core/RigidBody';
-import { CircleShape } from '../src/shapes/CircleShape';
+import * as Collision from '../src_new/collision/Collision';
+import { RigidBody } from '../src_new/core/RigidBody';
+import { CircleShape } from '../src_new/shapes/CircleShape';
 
 describe('Performance', () => {
     test('', () => {
