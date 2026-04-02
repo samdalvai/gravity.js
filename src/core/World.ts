@@ -138,17 +138,7 @@ export class World {
 
         this.narrowPhase();
 
-        // Presolve constraints
-        for (let i = 0; i < this.manifolds.length; i++) this.manifolds[i].preSolve(invDt);
-
-        for (let i = 0; i < this.joints.length; i++) this.joints[i].preSolve(invDt);
-
-        // Solve constraints
-        for (let i = 0; i < SETTINGS.solverIterations; i++) {
-            for (let j = 0; j < this.manifolds.length; j++) this.manifolds[j].solve();
-
-            for (let j = 0; j < this.joints.length; j++) this.joints[j].solve();
-        }
+        this.solveConstraints(invDt);
 
         // Integrate all the velocities
         for (const body of this.bodies) {
@@ -240,6 +230,20 @@ export class World {
 
         this.manifoldMap = newManifoldMap;
         this.manifolds = newManifolds;
+    }
+
+    solveConstraints(invDt: number) {
+        // Presolve constraints
+        for (let i = 0; i < this.manifolds.length; i++) this.manifolds[i].preSolve(invDt);
+
+        for (let i = 0; i < this.joints.length; i++) this.joints[i].preSolve(invDt);
+
+        // Solve constraints
+        for (let i = 0; i < SETTINGS.solverIterations; i++) {
+            for (let j = 0; j < this.manifolds.length; j++) this.manifolds[j].solve();
+
+            for (let j = 0; j < this.joints.length; j++) this.joints[j].solve();
+        }
     }
 
     setGrounded(bodyA: RigidBody, bodyB: RigidBody, contactNormal: Vec2) {
