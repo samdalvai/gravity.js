@@ -9,7 +9,7 @@
  */
 import * as CCD from '../collision/CCD';
 import * as Collision from '../collision/Collision';
-import { ContactManifold } from '../collision/contact';
+import { ContactManifold } from '../collision/Contact';
 import Force from '../force/Force';
 import { Joint } from '../joint/Joint';
 import { Vec2 } from '../math/Vec2';
