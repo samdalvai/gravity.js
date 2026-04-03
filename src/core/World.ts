@@ -206,7 +206,6 @@ export class World {
 
         // Narrow phase check, potential pairs may still not collide
         for (let [a, b] of this.potentialPairs) {
-            // TODO: to be enabled
             if (a.isStatic() && b.isStatic()) continue;
 
             // Improve coherence
