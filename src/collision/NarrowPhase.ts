@@ -5,7 +5,6 @@
  * Copyright (c) 2024 Phaser Studio Inc
  * Licensed under the MIT License
  */
-import { PIXELS_PER_METER } from '../core/Constants';
 import { RigidBody } from '../core/RigidBody';
 import { Vec2 } from '../math/Vec2';
 import { CapsuleShape } from '../shapes/CapsuleShape';
@@ -13,20 +12,7 @@ import { CircleShape } from '../shapes/CircleShape';
 import { PolygonShape } from '../shapes/PolygonShape';
 import { ShapeType } from '../shapes/Shape';
 import * as Utils from '../utils/Utils';
-import { ContactManifold } from './Contact';
-
-const EPSILON = 1.0e-10;
-const EPSILON_SQUARED = EPSILON * EPSILON;
-const LINEAR_SLOP = 0.005 * PIXELS_PER_METER;
-const SPECULATIVE_DISTANCE = 4.0 * LINEAR_SLOP;
-
-const MAKE_ID = (a: number, b: number): number => ((a & 0xff) << 8) | (b & 0xff);
-
-interface ContactPoint {
-    point: Vec2;
-    separation: number;
-    id: number;
-}
+import { ContactManifold, ContactPoint } from './Contact';
 
 function isPolygonShape(shapeType: ShapeType): boolean {
     return shapeType === ShapeType.BOX || shapeType === ShapeType.POLYGON;
@@ -34,6 +20,69 @@ function isPolygonShape(shapeType: ShapeType): boolean {
 
 function isPolygonLikeShape(shapeType: ShapeType): boolean {
     return isPolygonShape(shapeType) || shapeType === ShapeType.SEGMENT;
+}
+
+export function detectCollision(bodyA: RigidBody, bodyB: RigidBody): ContactManifold | null {
+    const aType = bodyA.shapeType;
+    const bType = bodyB.shapeType;
+    const aIsPolygon = isPolygonShape(aType);
+    const bIsPolygon = isPolygonShape(bType);
+    const aIsPolygonLike = isPolygonLikeShape(aType);
+    const bIsPolygonLike = isPolygonLikeShape(bType);
+
+    if (aType === ShapeType.CIRCLE && bType === ShapeType.CIRCLE) {
+        return collideCircles(bodyA, bodyB);
+    }
+
+    if (aType === ShapeType.CAPSULE && bType === ShapeType.CAPSULE) {
+        return collideCapsules(bodyA, bodyB);
+    }
+
+    if (aType === ShapeType.SEGMENT && bType === ShapeType.SEGMENT) {
+        return collideSegments(bodyA, bodyB);
+    }
+
+    if (aType === ShapeType.CAPSULE && bType === ShapeType.CIRCLE) {
+        return collideCapsuleCircle(bodyA, bodyB);
+    }
+
+    if (aType === ShapeType.CIRCLE && bType === ShapeType.CAPSULE) {
+        return collideCapsuleCircle(bodyB, bodyA);
+    }
+
+    if (aType === ShapeType.SEGMENT && bType === ShapeType.CIRCLE) {
+        return collideSegmentCircle(bodyA, bodyB);
+    }
+
+    if (aType === ShapeType.CIRCLE && bType === ShapeType.SEGMENT) {
+        return collideSegmentCircle(bodyB, bodyA);
+    }
+
+    if (aIsPolygon && bType === ShapeType.CIRCLE) {
+        return collidePolygonCircle(bodyA, bodyB);
+    }
+
+    if (aType === ShapeType.CIRCLE && bIsPolygon) {
+        return collidePolygonCircle(bodyB, bodyA);
+    }
+
+    if (aIsPolygonLike && bIsPolygonLike) {
+        return collidePolygonLikeBodies(bodyA, bodyB);
+    }
+
+    if (aIsPolygonLike && bType === ShapeType.CAPSULE) {
+        return collidePolygonLikeAndCapsule(bodyA, bodyB);
+    }
+
+    if (aType === ShapeType.CAPSULE && bIsPolygonLike) {
+        return collidePolygonLikeAndCapsule(bodyB, bodyA);
+    }
+
+    return null;
+}
+
+function makeId(a: number, b: number): number {
+    return ((a & 0xff) << 8) | (b & 0xff);
 }
 
 function getWorldPolygonNormals(body: RigidBody, shape: PolygonShape): Vec2[] {
@@ -48,7 +97,7 @@ function getWorldPolygonNormals(body: RigidBody, shape: PolygonShape): Vec2[] {
 
 function getSegmentNormals(start: Vec2, end: Vec2): [Vec2, Vec2] {
     const axis = end.subNew(start);
-    const normal = axis.magnitudeSquared() > EPSILON_SQUARED ? axis.rightPerpNew().normalizeNew() : new Vec2(1, 0);
+    const normal = axis.magnitudeSquared() > 0 ? axis.rightPerpNew().normalizeNew() : new Vec2(1, 0);
 
     return [normal, normal.negateNew()];
 }
@@ -100,11 +149,11 @@ function segmentDistance(
     const rd2 = rX * d2X + rY * d2Y;
     const rd1 = rX * d1X + rY * d1Y;
 
-    if (dd1 < EPSILON_SQUARED || dd2 < EPSILON_SQUARED) {
-        if (dd1 >= EPSILON_SQUARED) {
+    if (dd1 < 0 || dd2 < 0) {
+        if (dd1 >= 0) {
             fraction1 = Utils.clamp(-rd1 / dd1, 0.0, 1.0);
             fraction2 = 0.0;
-        } else if (dd2 >= EPSILON_SQUARED) {
+        } else if (dd2 >= 0) {
             fraction1 = 0.0;
             fraction2 = Utils.clamp(rd2 / dd2, 0.0, 1.0);
         }
@@ -150,10 +199,10 @@ export function collideCircles(bodyA: RigidBody, bodyB: RigidBody): ContactManif
     const circleB = bodyB.shape as CircleShape;
     const separationVector = bodyB.position.subNew(bodyA.position);
     const distance = separationVector.magnitude();
-    const normal = distance >= EPSILON ? separationVector.divNew(distance) : new Vec2(1, 0);
+    const normal = distance >= 0 ? separationVector.divNew(distance) : new Vec2(1, 0);
     const separation = distance - circleA.radius - circleB.radius;
 
-    if (separation > SPECULATIVE_DISTANCE) {
+    if (separation > 0) {
         return null;
     }
 
@@ -193,12 +242,11 @@ function collideSegmentRadiusAndCircle(
         pointA = startA.addNew(edge.scaleNew(t));
     }
 
-    const fallbackNormal =
-        edge.magnitudeSquared() > EPSILON_SQUARED ? edge.leftPerpNew().normalizeNew() : new Vec2(1, 0);
-    const result = bodyB.position.subNew(pointA).lengthAndNormalize(EPSILON, fallbackNormal);
+    const fallbackNormal = edge.magnitudeSquared() > 0 ? edge.leftPerpNew().normalizeNew() : new Vec2(1, 0);
+    const result = bodyB.position.subNew(pointA).lengthAndNormalize(0, fallbackNormal);
     const separation = result.length - radiusA - circleB.radius;
 
-    if (separation > SPECULATIVE_DISTANCE) {
+    if (separation > 0) {
         return null;
     }
 
@@ -233,7 +281,7 @@ export function collidePolygonCircle(bodyA: RigidBody, bodyB: RigidBody): Contac
         }
     }
 
-    if (separation > radius + SPECULATIVE_DISTANCE) {
+    if (separation > radius + 0) {
         return null;
     }
 
@@ -242,12 +290,12 @@ export function collidePolygonCircle(bodyA: RigidBody, bodyB: RigidBody): Contac
     const u1 = bodyB.position.subNew(vertex1).dot(vertex2.subNew(vertex1));
     const u2 = bodyB.position.subNew(vertex2).dot(vertex1.subNew(vertex2));
 
-    if (u1 < 0.0 && separation > EPSILON) {
+    if (u1 < 0.0 && separation > 0) {
         const delta = bodyB.position.subNew(vertex1);
-        const result = delta.lengthAndNormalize(EPSILON);
+        const result = delta.lengthAndNormalize(0);
         const vertexSeparation = delta.dot(result.normal);
 
-        if (vertexSeparation > radius + SPECULATIVE_DISTANCE) {
+        if (vertexSeparation > radius + 0) {
             return null;
         }
 
@@ -263,12 +311,12 @@ export function collidePolygonCircle(bodyA: RigidBody, bodyB: RigidBody): Contac
         ]);
     }
 
-    if (u2 < 0.0 && separation > EPSILON) {
+    if (u2 < 0.0 && separation > 0) {
         const delta = bodyB.position.subNew(vertex2);
-        const result = delta.lengthAndNormalize(EPSILON);
+        const result = delta.lengthAndNormalize(0);
         const vertexSeparation = delta.dot(result.normal);
 
-        if (vertexSeparation > radius + SPECULATIVE_DISTANCE) {
+        if (vertexSeparation > radius + 0) {
             return null;
         }
 
@@ -329,9 +377,8 @@ function clipConvexEdges(
     const upper2 = v21.dotSub(v11, tangent);
     const lower2 = v22.dotSub(v11, tangent);
 
-    const vLower = lower2 < 0.0 && upper2 - lower2 > EPSILON ? v22.lerp(v21, (0.0 - lower2) / (upper2 - lower2)) : v22;
-    const vUpper =
-        upper2 > upper1 && upper2 - lower2 > EPSILON ? v22.lerp(v21, (upper1 - lower2) / (upper2 - lower2)) : v21;
+    const vLower = lower2 < 0.0 && upper2 - lower2 > 0 ? v22.lerp(v21, (0.0 - lower2) / (upper2 - lower2)) : v22;
+    const vUpper = upper2 > upper1 && upper2 - lower2 > 0 ? v22.lerp(v21, (upper1 - lower2) / (upper2 - lower2)) : v21;
 
     const separationLower = vLower.dotSub(v11, normal);
     const separationUpper = vUpper.dotSub(v11, normal);
@@ -343,12 +390,12 @@ function clipConvexEdges(
         {
             point: pointLower,
             separation: separationLower - radius,
-            id: MAKE_ID(i11, i22),
+            id: makeId(i11, i22),
         },
         {
             point: pointUpper,
             separation: separationUpper - radius,
-            id: MAKE_ID(i12, i21),
+            id: makeId(i12, i21),
         },
     ];
 
@@ -356,12 +403,9 @@ function clipConvexEdges(
         [points[0], points[1]] = [points[1], points[0]];
     }
 
-    const filteredPoints = points.filter(point => point.separation <= SPECULATIVE_DISTANCE);
+    const filteredPoints = points.filter(point => point.separation <= 0);
 
-    if (
-        filteredPoints.length === 2 &&
-        filteredPoints[0].point.distanceSquared(filteredPoints[1].point) <= LINEAR_SLOP * LINEAR_SLOP
-    ) {
+    if (filteredPoints.length === 2 && filteredPoints[0].point.distanceSquared(filteredPoints[1].point) <= 0) {
         filteredPoints.length = 1;
     }
 
@@ -411,7 +455,7 @@ function collideConvexPolygons(
     const { edgeIndex: initialEdgeB, maxSeparation: separationB } = findMaxSeparation(verticesB, normalsB, verticesA);
     const radius = radiusA + radiusB;
 
-    if (separationA > SPECULATIVE_DISTANCE + radius || separationB > SPECULATIVE_DISTANCE + radius) {
+    if (separationA > 0 + radius || separationB > 0 + radius) {
         return null;
     }
 
@@ -446,7 +490,7 @@ function collideConvexPolygons(
         }
     }
 
-    if (separationA > 0.1 * LINEAR_SLOP || separationB > 0.1 * LINEAR_SLOP) {
+    if (separationA > 0 || separationB > 0) {
         const i11 = edgeA;
         const i12 = (edgeA + 1) % verticesA.length;
         const i21 = edgeB;
@@ -460,11 +504,11 @@ function collideConvexPolygons(
         if (result.fraction1 === 0.0 && result.fraction2 === 0.0) {
             const delta = v21.subNew(v11);
             const distance = delta.magnitude();
-            if (distance > SPECULATIVE_DISTANCE + radius) {
+            if (distance > 0 + radius) {
                 return null;
             }
 
-            const normal = distance > EPSILON ? delta.divNew(distance) : normalsA[edgeA].copy();
+            const normal = distance > 0 ? delta.divNew(distance) : normalsA[edgeA].copy();
             const pointA = v11.addNew(normal.scaleNew(radiusA));
             const pointB = v21.subNew(normal.scaleNew(radiusB));
 
@@ -472,7 +516,7 @@ function collideConvexPolygons(
                 {
                     point: pointA.lerp(pointB, 0.5),
                     separation: distance - radius,
-                    id: MAKE_ID(i11, i21),
+                    id: makeId(i11, i21),
                 },
             ]);
         }
@@ -480,11 +524,11 @@ function collideConvexPolygons(
         if (result.fraction1 === 0.0 && result.fraction2 === 1.0) {
             const delta = v22.subNew(v11);
             const distance = delta.magnitude();
-            if (distance > SPECULATIVE_DISTANCE + radius) {
+            if (distance > 0 + radius) {
                 return null;
             }
 
-            const normal = distance > EPSILON ? delta.divNew(distance) : normalsA[edgeA].copy();
+            const normal = distance > 0 ? delta.divNew(distance) : normalsA[edgeA].copy();
             const pointA = v11.addNew(normal.scaleNew(radiusA));
             const pointB = v22.subNew(normal.scaleNew(radiusB));
 
@@ -492,7 +536,7 @@ function collideConvexPolygons(
                 {
                     point: pointA.lerp(pointB, 0.5),
                     separation: distance - radius,
-                    id: MAKE_ID(i11, i22),
+                    id: makeId(i11, i22),
                 },
             ]);
         }
@@ -500,11 +544,11 @@ function collideConvexPolygons(
         if (result.fraction1 === 1.0 && result.fraction2 === 0.0) {
             const delta = v21.subNew(v12);
             const distance = delta.magnitude();
-            if (distance > SPECULATIVE_DISTANCE + radius) {
+            if (distance > 0 + radius) {
                 return null;
             }
 
-            const normal = distance > EPSILON ? delta.divNew(distance) : normalsA[edgeA].copy();
+            const normal = distance > 0 ? delta.divNew(distance) : normalsA[edgeA].copy();
             const pointA = v12.addNew(normal.scaleNew(radiusA));
             const pointB = v21.subNew(normal.scaleNew(radiusB));
 
@@ -512,7 +556,7 @@ function collideConvexPolygons(
                 {
                     point: pointA.lerp(pointB, 0.5),
                     separation: distance - radius,
-                    id: MAKE_ID(i12, i21),
+                    id: makeId(i12, i21),
                 },
             ]);
         }
@@ -520,11 +564,11 @@ function collideConvexPolygons(
         if (result.fraction1 === 1.0 && result.fraction2 === 1.0) {
             const delta = v22.subNew(v12);
             const distance = delta.magnitude();
-            if (distance > SPECULATIVE_DISTANCE + radius) {
+            if (distance > 0 + radius) {
                 return null;
             }
 
-            const normal = distance > EPSILON ? delta.divNew(distance) : normalsA[edgeA].copy();
+            const normal = distance > 0 ? delta.divNew(distance) : normalsA[edgeA].copy();
             const pointA = v12.addNew(normal.scaleNew(radiusA));
             const pointB = v22.subNew(normal.scaleNew(radiusB));
 
@@ -532,7 +576,7 @@ function collideConvexPolygons(
                 {
                     point: pointA.lerp(pointB, 0.5),
                     separation: distance - radius,
-                    id: MAKE_ID(i12, i22),
+                    id: makeId(i12, i22),
                 },
             ]);
         }
@@ -587,16 +631,16 @@ function collideSegmentRadiusPairs(
     const closest1 = p1.addNew(d1.scaleNew(f1));
     const closest2 = p2.addNew(d2.scaleNew(f2));
     const radius = radiusA + radiusB;
-    const maxDistance = radius + SPECULATIVE_DISTANCE;
+    const maxDistance = radius + 0;
 
     if (result.distanceSquared > maxDistance * maxDistance) {
         return null;
     }
 
     const length1 = d1.magnitude();
-    const u1 = length1 > EPSILON ? d1.divNew(length1) : new Vec2(0, 1);
+    const u1 = length1 > 0 ? d1.divNew(length1) : new Vec2(0, 1);
     const length2 = d2.magnitude();
-    const u2 = length2 > EPSILON ? d2.divNew(length2) : new Vec2(0, 1);
+    const u2 = length2 > 0 ? d2.divNew(length2) : new Vec2(0, 1);
     const fp2 = p2.subNew(p1).dot(u1);
     const fq2 = q2.subNew(p1).dot(u1);
     const outsideA = (fp2 <= 0.0 && fq2 <= 0.0) || (fp2 >= length1 && fq2 >= length1);
@@ -645,17 +689,17 @@ function collideSegmentRadiusPairs(
             const sp = cp.subNew(p1).dot(normalA);
             const sq = cq.subNew(p1).dot(normalA);
 
-            if (sp <= closestDistance + LINEAR_SLOP || sq <= closestDistance + LINEAR_SLOP) {
+            if (sp <= closestDistance || sq <= closestDistance) {
                 return createCollisionManifold(bodyA, bodyB, normalA, [
                     {
                         point: cp.addNew(normalA.scaleNew(0.5 * (radiusA - radiusB - sp))),
                         separation: sp - radius,
-                        id: MAKE_ID(0, 0),
+                        id: makeId(0, 0),
                     },
                     {
                         point: cq.addNew(normalA.scaleNew(0.5 * (radiusA - radiusB - sq))),
                         separation: sq - radius,
-                        id: MAKE_ID(0, 1),
+                        id: makeId(0, 1),
                     },
                 ]);
             }
@@ -679,17 +723,17 @@ function collideSegmentRadiusPairs(
             const sp = cp.subNew(p2).dot(normalB);
             const sq = cq.subNew(p2).dot(normalB);
 
-            if (sp <= closestDistance + LINEAR_SLOP || sq <= closestDistance + LINEAR_SLOP) {
+            if (sp <= closestDistance || sq <= closestDistance) {
                 return createCollisionManifold(bodyA, bodyB, manifoldNormal, [
                     {
                         point: cp.addNew(normalB.scaleNew(0.5 * (radiusB - radiusA - sp))),
                         separation: sp - radius,
-                        id: MAKE_ID(0, 0),
+                        id: makeId(0, 0),
                     },
                     {
                         point: cq.addNew(normalB.scaleNew(0.5 * (radiusB - radiusA - sq))),
                         separation: sq - radius,
-                        id: MAKE_ID(1, 0),
+                        id: makeId(1, 0),
                     },
                 ]);
             }
@@ -698,7 +742,7 @@ function collideSegmentRadiusPairs(
 
     const fallbackNormal = u1.leftPerpNew().normalizeNew();
     const delta = closest2.subNew(closest1);
-    const closestResult = delta.lengthAndNormalize(EPSILON, fallbackNormal);
+    const closestResult = delta.lengthAndNormalize(0, fallbackNormal);
     const pointA = closest1.addNew(closestResult.normal.scaleNew(radiusA));
     const pointB = closest2.subNew(closestResult.normal.scaleNew(radiusB));
     const idA = f1 === 0.0 ? 0 : 1;
@@ -708,7 +752,7 @@ function collideSegmentRadiusPairs(
         {
             point: pointA.lerp(pointB, 0.5),
             separation: closestResult.length - radius,
-            id: MAKE_ID(idA, idB),
+            id: makeId(idA, idB),
         },
     ]);
 }
@@ -773,63 +817,4 @@ function collidePolygonLikeAndCapsule(bodyA: RigidBody, bodyB: RigidBody): Conta
         capsuleNormals,
         capsuleB.radius,
     );
-}
-
-export function collideBodies(bodyA: RigidBody, bodyB: RigidBody): ContactManifold | null {
-    const aType = bodyA.shapeType;
-    const bType = bodyB.shapeType;
-    const aIsPolygon = isPolygonShape(aType);
-    const bIsPolygon = isPolygonShape(bType);
-    const aIsPolygonLike = isPolygonLikeShape(aType);
-    const bIsPolygonLike = isPolygonLikeShape(bType);
-
-    if (aType === ShapeType.CIRCLE && bType === ShapeType.CIRCLE) {
-        return collideCircles(bodyA, bodyB);
-    }
-
-    if (aType === ShapeType.CAPSULE && bType === ShapeType.CAPSULE) {
-        return collideCapsules(bodyA, bodyB);
-    }
-
-    if (aType === ShapeType.SEGMENT && bType === ShapeType.SEGMENT) {
-        return collideSegments(bodyA, bodyB);
-    }
-
-    if (aType === ShapeType.CAPSULE && bType === ShapeType.CIRCLE) {
-        return collideCapsuleCircle(bodyA, bodyB);
-    }
-
-    if (aType === ShapeType.CIRCLE && bType === ShapeType.CAPSULE) {
-        return collideCapsuleCircle(bodyB, bodyA);
-    }
-
-    if (aType === ShapeType.SEGMENT && bType === ShapeType.CIRCLE) {
-        return collideSegmentCircle(bodyA, bodyB);
-    }
-
-    if (aType === ShapeType.CIRCLE && bType === ShapeType.SEGMENT) {
-        return collideSegmentCircle(bodyB, bodyA);
-    }
-
-    if (aIsPolygon && bType === ShapeType.CIRCLE) {
-        return collidePolygonCircle(bodyA, bodyB);
-    }
-
-    if (aType === ShapeType.CIRCLE && bIsPolygon) {
-        return collidePolygonCircle(bodyB, bodyA);
-    }
-
-    if (aIsPolygonLike && bIsPolygonLike) {
-        return collidePolygonLikeBodies(bodyA, bodyB);
-    }
-
-    if (aIsPolygonLike && bType === ShapeType.CAPSULE) {
-        return collidePolygonLikeAndCapsule(bodyA, bodyB);
-    }
-
-    if (aType === ShapeType.CAPSULE && bIsPolygonLike) {
-        return collidePolygonLikeAndCapsule(bodyB, bodyA);
-    }
-
-    return null;
 }

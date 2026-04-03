@@ -8,7 +8,7 @@ import {
     SegmentShape as CurrentSegmentShape,
     Vec2 as CurrentVec2,
 } from '../src';
-import * as CurrentCollision from '../src/collision/Collision_old';
+import * as CurrentCollision from '../src/collision/NarrowPhase';
 import {
     BoxShape as NewBoxShape,
     CapsuleShape as NewCapsuleShape,
