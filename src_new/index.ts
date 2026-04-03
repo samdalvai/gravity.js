@@ -27,4 +27,4 @@ export { ShapeType } from './shapes/Shape';
 
 export type { WorldStats } from './core/World';
 
-export * as Utils from '../src/utils/Utils';
+export * as Utils from './utils/Utils';
