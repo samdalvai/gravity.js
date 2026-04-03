@@ -8,9 +8,9 @@
  * https://github.com/Sopiro
  */
 import * as CCD from '../collision/CCD';
-// import * as Collision from '../collision/Collision_old';
-import * as Collision from '../collision/Collision_new';
 import { ContactManifold } from '../collision/Contact';
+// import * as Collision from '../collision/Collision_old';
+import * as NarrowPhase from '../collision/NarrowPhase';
 import Force from '../force/Force';
 import { Joint } from '../joint/Joint';
 import { Vec2 } from '../math/Vec2';
@@ -214,7 +214,7 @@ export class World {
                 [a, b] = [b, a];
             }
 
-            const newManifold = Collision.detectCollision(a, b);
+            const newManifold = NarrowPhase.collideBodies(a, b);
             if (newManifold == null) continue;
 
             const key = Utils.pairKey(a, b);
