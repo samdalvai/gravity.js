@@ -276,10 +276,44 @@ import * as Collision from '../src_new/collision/Collision';
 // });
 
 // New wins
-describe('Performance box vs capsule', () => {
-    test('collision box vs capsule', () => {
+// describe('Performance box vs capsule', () => {
+//     test('collision box vs capsule', () => {
+//         console.time('collision');
+//         const a = new RigidBody(new BoxShape(60, 60), 100, 100, 5);
+//         const b = new RigidBody(new CapsuleShape(30, 30), 100, 100, 5);
+
+//         for (let i = 0; i < 100000; i++) {
+//             Collision.detectCollision(a, b);
+//         }
+
+//         console.timeEnd('collision');
+//     });
+
+//     test('resolution box vs capsule', () => {
+//         console.time('resolution');
+//         const dt = 1 / 60;
+//         const invDt = 1 / dt;
+//         const a = new RigidBody(new BoxShape(60, 60), 100, 100, 5);
+//         const b = new RigidBody(new CapsuleShape(30, 30), 100, 100, 5);
+//         const manifold = Collision.detectCollision(a, b)!;
+
+//         for (let i = 0; i < 100000; i++) {
+//             manifold.preSolve(invDt);
+
+//             for (let j = 0; j < 10; j++) {
+//                 manifold.solve();
+//             }
+//         }
+
+//         console.timeEnd('resolution');
+//     });
+// });
+
+// New wins
+describe('Performance capsule vs segment', () => {
+    test('collision capsule vs segment', () => {
         console.time('collision');
-        const a = new RigidBody(new BoxShape(60, 60), 100, 100, 5);
+        const a = new RigidBody(new SegmentShape(new Vec2(0, -50), new Vec2(0, 50)), 100, 100, 5);
         const b = new RigidBody(new CapsuleShape(30, 30), 100, 100, 5);
 
         for (let i = 0; i < 100000; i++) {
@@ -289,11 +323,11 @@ describe('Performance box vs capsule', () => {
         console.timeEnd('collision');
     });
 
-    test('resolution box vs capsule', () => {
+    test('resolution capsule vs segment', () => {
         console.time('resolution');
         const dt = 1 / 60;
         const invDt = 1 / dt;
-        const a = new RigidBody(new BoxShape(60, 60), 100, 100, 5);
+        const a = new RigidBody(new SegmentShape(new Vec2(0, -50), new Vec2(0, 50)), 100, 100, 5);
         const b = new RigidBody(new CapsuleShape(30, 30), 100, 100, 5);
         const manifold = Collision.detectCollision(a, b)!;
 
