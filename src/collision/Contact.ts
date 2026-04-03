@@ -1,10 +1,10 @@
-import { Constraint } from '../constraint/Constraint.js';
-import { SETTINGS } from '../core/Constants.js';
-import { RigidBody } from '../core/RigidBody.js';
-import { Mat2 } from '../math/Mat2.js';
-import { Vec2 } from '../math/Vec2.js';
-import * as Utils from '../utils/Utils.js';
-import { ContactPoint } from './Collision.js';
+import { Constraint } from '../constraint/Constraint';
+import { SETTINGS } from '../core/Constants';
+import { RigidBody } from '../core/RigidBody';
+import { Mat2 } from '../math/Mat2';
+import { Vec2 } from '../math/Vec2';
+import * as Utils from '../utils/Utils';
+import { ContactPoint } from './Collision';
 
 enum ContactType {
     Normal,
