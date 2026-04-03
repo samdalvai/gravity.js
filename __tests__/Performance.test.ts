@@ -16,8 +16,8 @@ import {
     RigidBody as NewRigidBody,
     SegmentShape as NewSegmentShape,
     Vec2 as NewVec2,
-} from '../src_new';
-import * as NewCollision from '../src_new/collision/Collision';
+} from '../src';
+import * as OldCollision from '../src/collision/Collision_old';
 
 interface BenchmarkBodyPair {
     bodyA: unknown;
@@ -96,7 +96,7 @@ const NEW_API: BenchmarkApi = {
     SegmentShape: NewSegmentShape,
     RigidBody: NewRigidBody,
     Vec2: NewVec2,
-    detectCollision: NewCollision.detectCollision,
+    detectCollision: OldCollision.detectCollision,
 };
 
 const SCENARIOS: BenchmarkScenario[] = [
@@ -333,8 +333,8 @@ function formatSummary(results: ComparisonResult[]): string {
     );
 
     const summaryLines = [
-        `Collision wins  | current=${collisionWins.current} | new=${collisionWins.next} | ties=${collisionWins.tie}`,
-        `Resolution wins | current=${resolutionWins.current} | new=${resolutionWins.next} | ties=${resolutionWins.tie}`,
+        `Collision wins  | current=${collisionWins.current} | old=${collisionWins.next} | ties=${collisionWins.tie}`,
+        `Resolution wins | current=${resolutionWins.current} | old=${resolutionWins.next} | ties=${resolutionWins.tie}`,
     ];
 
     if (mismatchedContacts.length === 0) {
@@ -364,7 +364,7 @@ function countWinners(
         const winner = getWinner(left, right);
 
         if (winner === 'current') current++;
-        else if (winner === 'new') next++;
+        else if (winner === 'old') next++;
         else tie++;
     }
 
@@ -398,7 +398,7 @@ function formatWinner(current: BenchmarkStats | null, next: BenchmarkStats | nul
     return `${winner} ${ratio.toFixed(2)}x`;
 }
 
-function getWinner(current: BenchmarkStats | null, next: BenchmarkStats | null): 'current' | 'new' | 'tie' {
+function getWinner(current: BenchmarkStats | null, next: BenchmarkStats | null): 'current' | 'old' | 'tie' {
     if (current === null || next === null) {
         return 'tie';
     }
@@ -410,7 +410,7 @@ function getWinner(current: BenchmarkStats | null, next: BenchmarkStats | null):
         return 'tie';
     }
 
-    return current.microsecondsPerIteration < next.microsecondsPerIteration ? 'current' : 'new';
+    return current.microsecondsPerIteration < next.microsecondsPerIteration ? 'current' : 'old';
 }
 
 function formatRow(columns: string[], widths: number[]): string {
