@@ -30,10 +30,6 @@ export function detectCollision(bodyA: RigidBody, bodyB: RigidBody): ContactMani
         return collideCapsules(bodyA, bodyB);
     }
 
-    if (aType === ShapeType.SEGMENT && bType === ShapeType.SEGMENT) {
-        return collideSegments(bodyA, bodyB);
-    }
-
     if (aType === ShapeType.CAPSULE && bType === ShapeType.CIRCLE) {
         return collideCapsuleCircle(bodyA, bodyB);
     }
@@ -221,6 +217,8 @@ export function collideCircles(bodyA: RigidBody, bodyB: RigidBody): ContactManif
         },
     ]);
 }
+
+
 
 function collideSegmentRadiusAndCircle(
     bodyA: RigidBody,
@@ -787,22 +785,6 @@ function collideSegmentCircle(bodyA: RigidBody, bodyB: RigidBody): ContactManifo
     const segmentA = bodyA.shape as PolygonShape;
 
     return collideSegmentRadiusAndCircle(bodyA, bodyB, segmentA.worldVertices[0], segmentA.worldVertices[1], 0);
-}
-
-function collideSegments(bodyA: RigidBody, bodyB: RigidBody): ContactManifold | null {
-    const segmentA = bodyA.shape as PolygonShape;
-    const segmentB = bodyB.shape as PolygonShape;
-
-    return collideSegmentRadiusPairs(
-        bodyA,
-        bodyB,
-        segmentA.worldVertices[0],
-        segmentA.worldVertices[1],
-        0,
-        segmentB.worldVertices[0],
-        segmentB.worldVertices[1],
-        0,
-    );
 }
 
 function collidePolygonLikeAndCapsule(bodyA: RigidBody, bodyB: RigidBody): ContactManifold | null {
