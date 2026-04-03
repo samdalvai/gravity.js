@@ -24,8 +24,14 @@ export function clamp(value: number, low: number, high: number): number {
     return Math.max(low, Math.min(value, high));
 }
 
-export function assert(...test: boolean[]): void {
-    for (let i = 0; i < test.length; i++) if (!test[i]) throw new Error('Assertion failed');
+export function assert(...args: (boolean | string)[]): void {
+    const message = typeof args[args.length - 1] === 'string' ? (args.pop() as string) : 'Assertion failed';
+
+    const tests = args as boolean[];
+
+    for (let i = 0; i < tests.length; i++) {
+        if (!tests[i]) throw new Error(message);
+    }
 }
 
 export function randomConvexBody(x: number, y: number, radius: number, numVertices: number = -1): RigidBody {
