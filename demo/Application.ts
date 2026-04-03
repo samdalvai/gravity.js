@@ -233,7 +233,7 @@ export default class Application {
                         const x = InputManager.mousePosition.x;
                         const y = InputManager.mousePosition.y;
 
-                        const segment = new RigidBody(new SegmentShape(new Vec2(-100, 0), new Vec2(100, 0)), x, y, 1);
+                        const segment = new RigidBody(new SegmentShape(new Vec2(-100, 0), new Vec2(100, 0)), x, y, 0);
                         segment.restitution = 0.2;
                         segment.friction = 0.7;
                         this.world.addBody(segment);
