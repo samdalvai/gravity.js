@@ -58,6 +58,8 @@ export class RigidBody {
         this.shape = shape;
         this.shapeType = shape.getType();
 
+        Utils.assert(this.shapeType !== ShapeType.SEGMENT || mass === 0);
+
         this.position = new Vec2(x, y);
         this.velocity = new Vec2(0, 0);
         this.acceleration = new Vec2(0, 0);
