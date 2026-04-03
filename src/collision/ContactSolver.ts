@@ -96,19 +96,10 @@ export class ContactSolver {
         // Calculate corrective impulse: Pc
         // Jacobian * velocity vector (Normal velocity)
 
-        /*
         const jv: number =
-            +this.jacobian.va.dot(this.bodyA.linearVelocity) +
+            +this.jacobian.va.dot(this.bodyA.velocity) +
             this.jacobian.wa * this.bodyA.angularVelocity +
-            this.jacobian.vb.dot(this.bodyB.linearVelocity) +
-            this.jacobian.wb * this.bodyB.angularVelocity;
-        */
-        const jv: number =
-            this.jacobian.va.x * this.bodyA.velocity.x +
-            this.jacobian.va.y * this.bodyA.velocity.y +
-            this.jacobian.wa * this.bodyA.angularVelocity +
-            this.jacobian.vb.x * this.bodyB.velocity.x +
-            this.jacobian.vb.y * this.bodyB.velocity.y +
+            this.jacobian.vb.dot(this.bodyB.velocity) +
             this.jacobian.wb * this.bodyB.angularVelocity;
 
         let lambda = this.effectiveMass * -(jv + this.bias);
@@ -145,24 +136,10 @@ export class ContactSolver {
     }
 
     private applyImpulse(lambda: number) {
-        /*
-        this.bodyA.linearVelocity = this.bodyA.linearVelocity.addNew(
-            this.jacobian.va.scaleNew(this.bodyA.inverseMass * lambda),
-        );
-        this.bodyA.angularVelocity = this.bodyA.angularVelocity + this.bodyA.inverseInertia * this.jacobian.wa * lambda;
-        */
-        this.bodyA.velocity.x = this.bodyA.velocity.x + this.jacobian.va.x * this.bodyA.invMass * lambda;
-        this.bodyA.velocity.y = this.bodyA.velocity.y + this.jacobian.va.y * this.bodyA.invMass * lambda;
+        this.bodyA.velocity = this.bodyA.velocity.addNew(this.jacobian.va.scaleNew(this.bodyA.invMass * lambda));
         this.bodyA.angularVelocity = this.bodyA.angularVelocity + this.bodyA.invI * this.jacobian.wa * lambda;
 
-        /*
-        this.bodyB.linearVelocity = this.bodyB.linearVelocity.addNew(
-            this.jacobian.vb.scaleNew(this.bodyB.inverseMass * lambda),
-        );
-        this.bodyB.angularVelocity = this.bodyB.angularVelocity + this.bodyB.inverseInertia * this.jacobian.wb * lambda;
-        */
-        this.bodyB.velocity.x = this.bodyB.velocity.x + this.jacobian.vb.x * this.bodyB.invMass * lambda;
-        this.bodyB.velocity.y = this.bodyB.velocity.y + this.jacobian.vb.y * this.bodyB.invMass * lambda;
+        this.bodyB.velocity = this.bodyB.velocity.addNew(this.jacobian.vb.scaleNew(this.bodyB.invMass * lambda));
         this.bodyB.angularVelocity = this.bodyB.angularVelocity + this.bodyB.invI * this.jacobian.wb * lambda;
     }
 }
