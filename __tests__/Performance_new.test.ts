@@ -1,11 +1,7 @@
 import { describe, expect, test } from '@jest/globals';
 
-import { CapsuleShape, Vec2 } from '../src_new';
-import { SegmentShape } from '../src_new';
+import { BoxShape, CapsuleShape, CircleShape, RigidBody, SegmentShape, Vec2 } from '../src_new';
 import * as Collision from '../src_new/collision/Collision';
-import { RigidBody } from '../src_new/core/RigidBody';
-import { BoxShape } from '../src_new/shapes/BoxShape';
-import { CircleShape } from '../src_new/shapes/CircleShape';
 
 // describe('Performance circle vs circle', () => {
 //     test('collision circle vs circle', () => {
