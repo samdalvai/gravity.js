@@ -121,13 +121,6 @@ const SCENARIOS: BenchmarkScenario[] = [
             bodyB: new RigidBody(new CapsuleShape(30, 30), 100, 100, 5),
         }),
     },
-    // {
-    //     name: 'segment-segment',
-    //     createBodies: ({ RigidBody, SegmentShape, Vec2 }) => ({
-    //         bodyA: new RigidBody(new SegmentShape(new Vec2(-50, 0), new Vec2(50, 0)), 120, 100, 5),
-    //         bodyB: new RigidBody(new SegmentShape(new Vec2(0, -50), new Vec2(0, 50)), 100, 100, 5),
-    //     }),
-    // },
     {
         name: 'circle-box',
         createBodies: ({ BoxShape, CircleShape, RigidBody }) => ({
