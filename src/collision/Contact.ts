@@ -423,7 +423,7 @@ export class ContactManifold extends Constraint {
             this.blockSolver.solve();
         }
     }
-    
+
     tryWarmStart(oldManifold: ContactManifold) {
         for (let n = 0; n < this.numContacts; n++) {
             let o = 0;
