@@ -56,3 +56,7 @@ export function pairKey(a: RigidBody, b: RigidBody): number {
         return (b.id << 16) | (a.id & 0xffff);
     }
 }
+
+export function squaredDistance(a: Vec2, b: Vec2): number {
+    return (a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y);
+}
