@@ -76,22 +76,13 @@ export class DistanceJoint extends Joint {
     override solve(): void {
         // Calculate corrective impulse: Pc
 
-        /*
-        const jv = this.bodyB.linearVelocity
-            .addNew(Util.cross(this.bodyB.angularVelocity, this.rb))
-            .subNew(this.bodyA.linearVelocity.addNew(Util.cross(this.bodyA.angularVelocity, this.ra)))
+        const jv = this.bodyB.velocity
+            .addNew(this.rb.crossScalar(this.bodyB.angularVelocity))
+            .subNew(this.bodyA.velocity.addNew(this.ra.crossScalar(this.bodyA.angularVelocity)))
             .dot(this.n);
-        */
-        const jv =
-            (this.bodyB.velocity.x +
-                -this.bodyB.angularVelocity * this.rb.y -
-                (this.bodyA.velocity.x + -this.bodyA.angularVelocity)) *
-                this.n.x +
-            (this.bodyB.velocity.y +
-                this.bodyB.angularVelocity * this.rb.x -
-                (this.bodyA.velocity.y + this.bodyA.angularVelocity * this.ra.x)) *
-                this.n.y;
 
+        // Check out below for the reason why the (accumulated impulse * gamma) term is on the right hand side
+        // https://pybullet.org/Bullet/phpBB3/viewtopic.php?f=4&t=1354
         const lambda = this.m * -(jv + this.bias + this.impulseSum * this.gamma);
 
         this.applyImpulse(lambda);
@@ -100,26 +91,12 @@ export class DistanceJoint extends Joint {
     }
 
     private applyImpulse(lambda: number): void {
-        /*
-        this.bodyA.linearVelocity = this.bodyA.linearVelocity.subNew(this.n.scaleNew(lambda * this.bodyA.inverseMass));
+        this.bodyA.velocity = this.bodyA.velocity.subNew(this.n.scaleNew(lambda * this.bodyA.invMass));
         this.bodyA.angularVelocity =
-            this.bodyA.angularVelocity - this.n.dot(Util.cross(lambda, this.ra)) * this.bodyA.inverseInertia;
-        */
-        this.bodyA.velocity.x = this.bodyA.velocity.x - this.n.x * (lambda * this.bodyA.invMass);
-        this.bodyA.velocity.y = this.bodyA.velocity.y - this.n.y * (lambda * this.bodyA.invMass);
-        this.bodyA.angularVelocity =
-            this.bodyA.angularVelocity -
-            (this.n.x * (-lambda * this.ra.y) + this.n.y * (lambda * this.ra.x)) * this.bodyA.invI;
+            this.bodyA.angularVelocity - this.n.dot(this.ra.crossScalar(lambda)) * this.bodyA.invI;
 
-        /*
-        this.bodyB.linearVelocity = this.bodyB.linearVelocity.addNew(this.n.scaleNew(lambda * this.bodyB.inverseMass));
+        this.bodyB.velocity = this.bodyB.velocity.addNew(this.n.scaleNew(lambda * this.bodyB.invMass));
         this.bodyB.angularVelocity =
-            this.bodyB.angularVelocity + this.n.dot(Util.cross(lambda, this.rb)) * this.bodyB.inverseInertia;
-        */
-        this.bodyB.velocity.x = this.bodyB.velocity.x + this.n.x * (lambda * this.bodyB.invMass);
-        this.bodyB.velocity.y = this.bodyB.velocity.y + this.n.y * (lambda * this.bodyB.invMass);
-        this.bodyB.angularVelocity =
-            this.bodyB.angularVelocity +
-            (this.n.x * (-lambda * this.rb.y) + this.n.y * (lambda * this.rb.x)) * this.bodyB.invI;
+            this.bodyB.angularVelocity + this.n.dot(this.rb.crossScalar(lambda)) * this.bodyB.invI;
     }
 }
