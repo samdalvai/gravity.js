@@ -1,4 +1,4 @@
-import * as Collision from '../../src/collision/Collision';
+import * as Collision from '../../src/collision/Collision_old';
 import { RigidBody } from '../../src/core/RigidBody';
 import { Vec2 } from '../../src/math/Vec2';
 import { BoxShape } from '../../src/shapes/BoxShape';

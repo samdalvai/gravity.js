@@ -4,7 +4,7 @@ import { RigidBody } from '../core/RigidBody';
 import { Mat2 } from '../math/Mat2';
 import { Vec2 } from '../math/Vec2';
 import * as Utils from '../utils/Utils';
-import { ContactPoint } from './Collision';
+import { ContactPoint } from './Collision_old';
 
 enum ContactType {
     Normal,
