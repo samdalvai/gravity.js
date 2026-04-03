@@ -4,7 +4,6 @@ import { RigidBody } from '../core/RigidBody';
 import { Mat2 } from '../math/Mat2';
 import { Vec2 } from '../math/Vec2';
 import * as Utils from '../utils/Utils';
-import { ContactPoint } from './Collision_old';
 
 enum ContactType {
     Normal,
@@ -347,6 +346,12 @@ class BlockSolver {
         this.bodyB.angularVelocity =
             this.bodyB.angularVelocity + this.bodyB.invI * (this.j1.wb * lambda.x + this.j2.wb * lambda.y);
     }
+}
+
+export interface ContactPoint {
+    point: Vec2;
+    separation: number;
+    id: number;
 }
 
 export interface ContactInfo {
