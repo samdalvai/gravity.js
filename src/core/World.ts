@@ -214,7 +214,7 @@ export class World {
                 [a, b] = [b, a];
             }
 
-            const newManifold = NarrowPhase.collideBodies(a, b);
+            const newManifold = NarrowPhase.detectCollision(a, b);
             if (newManifold == null) continue;
 
             const key = Utils.pairKey(a, b);
