@@ -1,4 +1,4 @@
-import * as Collision from '../../src/collision/Collision';
+import * as Collision from '../../src/collision/Collision_old';
 import { RigidBody } from '../../src/core/RigidBody';
 import { CircleShape } from '../../src/shapes/CircleShape';
 
