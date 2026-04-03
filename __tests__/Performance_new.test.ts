@@ -1,3 +1,4 @@
+import { describe, expect, test } from '@jest/globals';
 import * as Collision from '../src_new/collision/Collision';
 import { RigidBody } from '../src_new/core/RigidBody';
 import { CircleShape } from '../src_new/shapes/CircleShape';
