@@ -5,7 +5,7 @@ import { CapsuleShape } from '../shapes/CapsuleShape';
 import { CircleShape } from '../shapes/CircleShape';
 import { PolygonShape } from '../shapes/PolygonShape';
 import { ShapeType } from '../shapes/Shape';
-import { ContactManifold } from './ContactManifold';
+import { ContactManifold } from './contact';
 
 export function detectCollision(a: RigidBody, b: RigidBody): ContactManifold | null {
     const aIsCircle = a.shapeType === ShapeType.CIRCLE;
