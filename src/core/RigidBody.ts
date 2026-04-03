@@ -58,7 +58,8 @@ export class RigidBody {
         this.shape = shape;
         this.shapeType = shape.getType();
 
-        Utils.assert(this.shapeType !== ShapeType.SEGMENT || mass === 0);
+        // TODO: enable this, we don't want to have dynamic segments
+        // Utils.assert(this.shapeType !== ShapeType.SEGMENT || mass === 0);
 
         this.position = new Vec2(x, y);
         this.velocity = new Vec2(0, 0);
