@@ -40,6 +40,12 @@ export class Vec2 {
         return this.x * this.x + this.y * this.y;
     }
 
+    distanceSquared(v: Vec2): number {
+        const dx = this.x - v.x;
+        const dy = this.y - v.y;
+        return dx * dx + dy * dy;
+    }
+
     normalize(): this {
         const length = this.magnitude();
         if (length !== 0.0) {
@@ -76,12 +82,24 @@ export class Vec2 {
         return this.x * v.x + this.y * v.y;
     }
 
+    dotSub(v: Vec2, dotWith: Vec2): number {
+        return (this.x - v.x) * dotWith.x + (this.y - v.y) * dotWith.y;
+    }
+
     cross(v: Vec2): number {
         return this.x * v.y - this.y * v.x;
     }
 
-    perpNew(): Vec2 {
+    leftPerpNew(): Vec2 {
         return new Vec2(-this.y, this.x);
+    }
+
+    rightPerpNew(): Vec2 {
+        return new Vec2(this.y, -this.x);
+    }
+
+    perpNew(): Vec2 {
+        return this.leftPerpNew();
     }
 
     /** Vector in the -90° (clockwise) perpendicular direction scaled by n */
@@ -119,6 +137,10 @@ export class Vec2 {
         return new Vec2(this.x - v.x, this.y - v.y);
     }
 
+    lerp(v: Vec2, t: number): Vec2 {
+        return new Vec2(this.x + (v.x - this.x) * t, this.y + (v.y - this.y) * t);
+    }
+
     /** operator * (scalar) */
     scaleNew(n: number): Vec2 {
         const result = new Vec2();
@@ -133,6 +155,16 @@ export class Vec2 {
         result.x = this.x / n;
         result.y = this.y / n;
         return result;
+    }
+
+    lengthAndNormalize(epsilon = 0.0, fallback = new Vec2(1, 0)): { length: number; normal: Vec2 } {
+        const length = this.magnitude();
+
+        if (length < epsilon) {
+            return { length, normal: fallback.copy() };
+        }
+
+        return { length, normal: this.divNew(length) };
     }
 
     /** operator += */
@@ -175,9 +207,5 @@ export class Vec2 {
         result.x = -this.x;
         result.y = -this.y;
         return result;
-    }
-
-    lerp(v: Vec2, t: number): Vec2 {
-        return new Vec2(this.x + (v.x - this.x) * t, this.y + (v.y - this.y) * t);
     }
 }
