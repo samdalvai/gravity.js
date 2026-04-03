@@ -99,7 +99,7 @@ const NEW_API: BenchmarkApi = {
     detectCollision: OldCollision.detectCollision,
 };
 
-const SCENARIOS: BenchmarkScenario[] = [
+const COLLIDING_SCENARIOS: BenchmarkScenario[] = [
     {
         name: 'circle-circle',
         createBodies: ({ CircleShape, RigidBody }) => ({
@@ -165,11 +165,84 @@ const SCENARIOS: BenchmarkScenario[] = [
     },
 ];
 
+const SEPARATED_SCENARIOS: BenchmarkScenario[] = [
+    {
+        name: 'circle-circle',
+        createBodies: ({ CircleShape, RigidBody }) => ({
+            bodyA: new RigidBody(new CircleShape(30), 100, 220, 5),
+            bodyB: new RigidBody(new CircleShape(30), 100, 100, 5),
+        }),
+    },
+    {
+        name: 'box-box',
+        createBodies: ({ BoxShape, RigidBody }) => ({
+            bodyA: new RigidBody(new BoxShape(60, 60), 100, 220, 5),
+            bodyB: new RigidBody(new BoxShape(60, 60), 100, 100, 5),
+        }),
+    },
+    {
+        name: 'capsule-capsule',
+        createBodies: ({ CapsuleShape, RigidBody }) => ({
+            bodyA: new RigidBody(new CapsuleShape(30, 30), 500, 100, 5),
+            bodyB: new RigidBody(new CapsuleShape(30, 30), 100, 100, 5),
+        }),
+    },
+    {
+        name: 'segment-segment',
+        createBodies: ({ RigidBody, SegmentShape, Vec2 }) => ({
+            bodyA: new RigidBody(new SegmentShape(new Vec2(0, -50), new Vec2(0, 50)), 100, 100, 0),
+            bodyB: new RigidBody(new SegmentShape(new Vec2(0, -50), new Vec2(0, 50)), 240, 100, 0),
+        }),
+    },
+    {
+        name: 'circle-box',
+        createBodies: ({ BoxShape, CircleShape, RigidBody }) => ({
+            bodyA: new RigidBody(new CircleShape(30), 100, 220, 5),
+            bodyB: new RigidBody(new BoxShape(60, 60), 100, 100, 5),
+        }),
+    },
+    {
+        name: 'circle-capsule',
+        createBodies: ({ CapsuleShape, CircleShape, RigidBody }) => ({
+            bodyA: new RigidBody(new CircleShape(30), 500, 100, 5),
+            bodyB: new RigidBody(new CapsuleShape(30, 30), 100, 100, 5),
+        }),
+    },
+    {
+        name: 'circle-segment',
+        createBodies: ({ CircleShape, RigidBody, SegmentShape, Vec2 }) => ({
+            bodyA: new RigidBody(new CircleShape(30), 220, 100, 5),
+            bodyB: new RigidBody(new SegmentShape(new Vec2(0, -50), new Vec2(0, 50)), 100, 100, 0),
+        }),
+    },
+    {
+        name: 'box-segment',
+        createBodies: ({ BoxShape, RigidBody, SegmentShape, Vec2 }) => ({
+            bodyA: new RigidBody(new SegmentShape(new Vec2(0, -50), new Vec2(0, 50)), 100, 100, 0),
+            bodyB: new RigidBody(new BoxShape(60, 60), 220, 100, 5),
+        }),
+    },
+    {
+        name: 'box-capsule',
+        createBodies: ({ BoxShape, CapsuleShape, RigidBody }) => ({
+            bodyA: new RigidBody(new BoxShape(60, 60), 100, 100, 5),
+            bodyB: new RigidBody(new CapsuleShape(30, 30), 240, 100, 5),
+        }),
+    },
+    {
+        name: 'capsule-segment',
+        createBodies: ({ CapsuleShape, RigidBody, SegmentShape, Vec2 }) => ({
+            bodyA: new RigidBody(new SegmentShape(new Vec2(0, -50), new Vec2(0, 50)), 100, 100, 0),
+            bodyB: new RigidBody(new CapsuleShape(30, 30), 240, 100, 5),
+        }),
+    },
+];
+
 describePerformance('Performance comparison: current vs new collision pairs', () => {
     test(
         'prints one table with collision and resolution timings for every pair',
         () => {
-            const results = SCENARIOS.map((scenario) => runComparison(scenario));
+            const results = COLLIDING_SCENARIOS.map((scenario) => runComparison(scenario));
             const missingCollisionPairs = results.filter(
                 ({ current, next }) => !current.inspection.hasCollision || !next.inspection.hasCollision,
             );
@@ -194,7 +267,38 @@ describePerformance('Performance comparison: current vs new collision pairs', ()
                 ].join('\n'),
             );
 
-            expect(results).toHaveLength(SCENARIOS.length);
+            expect(results).toHaveLength(COLLIDING_SCENARIOS.length);
+        },
+        PERF_TIMEOUT_MS,
+    );
+
+    test(
+        'prints one table with collision timings for separated pairs',
+        () => {
+            const results = SEPARATED_SCENARIOS.map((scenario) => runComparison(scenario));
+            const unexpectedCollisionPairs = results.filter(
+                ({ current, next }) => current.inspection.hasCollision || next.inspection.hasCollision,
+            );
+
+            if (unexpectedCollisionPairs.length > 0) {
+                const labels = unexpectedCollisionPairs.map(({ name }) => name).join(', ');
+                throw new Error(`Expected separated benchmark scenarios to stay apart in both implementations: ${labels}`);
+            }
+
+            console.log(
+                [
+                    [
+                        'Separated collision benchmark comparison',
+                        `samples=${PERF_SAMPLES}`,
+                        `warmup=${PERF_WARMUP_SAMPLES}`,
+                        `collisionIterations=${PERF_COLLISION_ITERATIONS}`,
+                    ].join(' | '),
+                    formatCollisionOnlyTable(results),
+                    formatCollisionOnlySummary(results),
+                ].join('\n'),
+            );
+
+            expect(results).toHaveLength(SEPARATED_SCENARIOS.length);
         },
         PERF_TIMEOUT_MS,
     );
@@ -318,6 +422,31 @@ function formatTable(results: ComparisonResult[]): string {
     return lines.join('\n');
 }
 
+function formatCollisionOnlyTable(results: ComparisonResult[]): string {
+    const headers = ['Pair', 'Collided C/O', 'Coll C us', 'Coll O us', 'Coll Win'];
+
+    const rows = results.map((result) => [
+        result.name,
+        `${formatCollisionState(result.current.inspection.hasCollision)}/${formatCollisionState(result.next.inspection.hasCollision)}`,
+        formatMicroseconds(result.current.collision),
+        formatMicroseconds(result.next.collision),
+        formatWinner(result.current.collision, result.next.collision),
+    ]);
+
+    const widths = headers.map((header, index) =>
+        Math.max(header.length, ...rows.map((row) => row[index].length)),
+    );
+
+    const border = widths.map((width) => '-'.repeat(width)).join('-+-');
+    const lines = [formatRow(headers, widths), border];
+
+    for (const row of rows) {
+        lines.push(formatRow(row, widths));
+    }
+
+    return lines.join('\n');
+}
+
 function formatSummary(results: ComparisonResult[]): string {
     const collisionWins = countWinners(results, 'collision');
     const resolutionWins = countWinners(results, 'resolution');
@@ -337,6 +466,27 @@ function formatSummary(results: ComparisonResult[]): string {
             `Contact counts | mismatches=${mismatchedContacts
                 .map(({ name, current, next }) => `${name} (${current.inspection.contactCount}/${next.inspection.contactCount})`)
                 .join(', ')}`,
+        );
+    }
+
+    return summaryLines.join('\n');
+}
+
+function formatCollisionOnlySummary(results: ComparisonResult[]): string {
+    const collisionWins = countWinners(results, 'collision');
+    const unexpectedCollisionPairs = results.filter(
+        ({ current, next }) => current.inspection.hasCollision || next.inspection.hasCollision,
+    );
+
+    const summaryLines = [
+        `Collision wins | current=${collisionWins.current} | old=${collisionWins.next} | ties=${collisionWins.tie}`,
+    ];
+
+    if (unexpectedCollisionPairs.length === 0) {
+        summaryLines.push('Separation     | all pairs stayed separated');
+    } else {
+        summaryLines.push(
+            `Separation     | unexpected collisions=${unexpectedCollisionPairs.map(({ name }) => name).join(', ')}`,
         );
     }
 
@@ -408,6 +558,10 @@ function getWinner(current: BenchmarkStats | null, next: BenchmarkStats | null):
 
 function formatRow(columns: string[], widths: number[]): string {
     return columns.map((column, index) => column.padEnd(widths[index])).join(' | ');
+}
+
+function formatCollisionState(hasCollision: boolean): string {
+    return hasCollision ? 'yes' : 'no';
 }
 
 function readPositiveInteger(name: string, fallback: number): number {
