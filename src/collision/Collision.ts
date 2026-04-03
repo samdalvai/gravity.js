@@ -12,6 +12,14 @@ export interface ContactPoint {
     id: number;
 }
 
+function isPolygonShape(shapeType: ShapeType): boolean {
+    return shapeType === ShapeType.BOX || shapeType === ShapeType.POLYGON;
+}
+
+function isPolygonLikeShape(shapeType: ShapeType): boolean {
+    return isPolygonShape(shapeType) || shapeType === ShapeType.SEGMENT;
+}
+
 export function detectCollision(a: RigidBody, b: RigidBody): ContactManifold | null {
     const aIsCircle = a.shapeType === ShapeType.CIRCLE;
     const bIsCircle = b.shapeType === ShapeType.CIRCLE;
@@ -391,12 +399,4 @@ export function collideCircles(bodyA: RigidBody, bodyB: RigidBody): ContactManif
     const contactPoint = pointA.addNew(pointB).scaleNew(0.5);
 
     return new ContactManifold(bodyA, bodyB, [{ point: contactPoint, id: 0 }], penetrationDepth, normal, false);
-}
-
-function isPolygonShape(shapeType: ShapeType): boolean {
-    return shapeType === ShapeType.BOX || shapeType === ShapeType.POLYGON;
-}
-
-function isPolygonLikeShape(shapeType: ShapeType): boolean {
-    return isPolygonShape(shapeType) || shapeType === ShapeType.SEGMENT;
 }
