@@ -7,10 +7,6 @@ import { PolygonShape } from '../shapes/PolygonShape';
 import { ShapeType } from '../shapes/Shape';
 import { ContactManifold } from './contact';
 
-const EPSILON = 1.0e-10;
-const EPSILON_SQUARED = EPSILON * EPSILON;
-const LINEAR_SLOP = 0.005 * PIXELS_PER_METER;
-const SPECULATIVE_DISTANCE = 4.0 * LINEAR_SLOP;
 
 export function detectCollision(a: RigidBody, b: RigidBody): ContactManifold | null {
     const aIsCircle = a.shapeType === ShapeType.CIRCLE;
