@@ -1,4 +1,4 @@
-import { CONTACT_MERGE_THRESHOLD } from '../core/Constants';
+import { CONTACT_MERGE_THRESHOLD, PIXELS_PER_METER } from '../core/Constants';
 import { RigidBody } from '../core/RigidBody';
 import { Vec2 } from '../math/Vec2';
 import { CapsuleShape } from '../shapes/CapsuleShape';
@@ -7,12 +7,17 @@ import { PolygonShape } from '../shapes/PolygonShape';
 import { ShapeType } from '../shapes/Shape';
 import { ContactManifold } from './contact';
 
+const EPSILON = 1.0e-10;
+const EPSILON_SQUARED = EPSILON * EPSILON;
+const LINEAR_SLOP = 0.005 * PIXELS_PER_METER;
+const SPECULATIVE_DISTANCE = 4.0 * LINEAR_SLOP;
+
 export function detectCollision(a: RigidBody, b: RigidBody): ContactManifold | null {
     const aIsCircle = a.shapeType === ShapeType.CIRCLE;
     const bIsCircle = b.shapeType === ShapeType.CIRCLE;
 
     if (aIsCircle && bIsCircle) {
-        return detectCollisionCircleCircle(a, b);
+        return collideCircles(a, b);
     }
 
     const aIsPolygon =
@@ -361,4 +366,31 @@ export function detectCollisionCapsulePolygon(capsule: RigidBody, polygon: Rigid
 
     // Test bottom circle
     return polygonCircleTest(polygon, bottomPos, capsuleShape.radius, capsule);
+}
+
+// ------------------- New implementation ---------------------- //
+
+export function collideCircles(bodyA: RigidBody, bodyB: RigidBody): ContactManifold | null {
+    const circleA = bodyA.shape as CircleShape;
+    const circleB = bodyB.shape as CircleShape;
+    const radiusA = circleA.radius;
+    const radiusB = circleB.radius;
+    const posA = bodyA.position;
+    const posB = bodyB.position;
+
+    const ab = posB.subNew(posA);
+    const radiusSum = radiusA + radiusB;
+    const distSq = ab.magnitudeSquared();
+
+    if (distSq > radiusSum * radiusSum) {
+        return null;
+    }
+
+    const normal = distSq > 0 ? ab.normalizeNew() : new Vec2(1, 0);
+    const penetrationDepth = radiusSum - ab.magnitude();
+    const pointA = posA.addNew(normal.scaleNew(radiusA));
+    const pointB = posB.subNew(normal.scaleNew(radiusB));
+    const contactPoint = pointA.addNew(pointB).scaleNew(0.5);
+
+    return new ContactManifold(bodyA, bodyB, [{ point: contactPoint, id: 0 }], penetrationDepth, normal, false);
 }

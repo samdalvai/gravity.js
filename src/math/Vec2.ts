@@ -176,4 +176,8 @@ export class Vec2 {
         result.y = -this.y;
         return result;
     }
+
+    lerp(v: Vec2, t: number): Vec2 {
+        return new Vec2(this.x + (v.x - this.x) * t, this.y + (v.y - this.y) * t);
+    }
 }
