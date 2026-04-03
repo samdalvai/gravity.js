@@ -1,42 +1,44 @@
 import { describe, expect, test } from '@jest/globals';
+
+import { CapsuleShape, Vec2 } from '../src_new';
+import { SegmentShape } from '../src_new';
 import * as Collision from '../src_new/collision/Collision';
 import { RigidBody } from '../src_new/core/RigidBody';
-import { CircleShape } from '../src_new/shapes/CircleShape';
 import { BoxShape } from '../src_new/shapes/BoxShape';
-import { CapsuleShape } from '../src_new';
+import { CircleShape } from '../src_new/shapes/CircleShape';
 
-describe('Performance circle vs circle', () => {
-    test('collision circle vs circle', () => {
-        console.time('collision');
-        const a = new RigidBody(new CircleShape(30), 100, 120, 5);
-        const b = new RigidBody(new CircleShape(30), 100, 100, 5);
+// describe('Performance circle vs circle', () => {
+//     test('collision circle vs circle', () => {
+//         console.time('collision');
+//         const a = new RigidBody(new CircleShape(30), 100, 120, 5);
+//         const b = new RigidBody(new CircleShape(30), 100, 100, 5);
 
-        for (let i = 0; i < 100000; i++) {
-            Collision.detectCollision(a, b);
-        }
+//         for (let i = 0; i < 100000; i++) {
+//             Collision.detectCollision(a, b);
+//         }
 
-        console.timeEnd('collision');
-    });
+//         console.timeEnd('collision');
+//     });
 
-    test('resolution circle vs circle', () => {
-        console.time('resolution');
-        const dt = 1 / 60;
-        const invDt = 1 / dt;
-        const a = new RigidBody(new CircleShape(30), 100, 120, 5);
-        const b = new RigidBody(new CircleShape(30), 100, 100, 5);
-        const manifold = Collision.detectCollision(a, b)!;
+//     test('resolution circle vs circle', () => {
+//         console.time('resolution');
+//         const dt = 1 / 60;
+//         const invDt = 1 / dt;
+//         const a = new RigidBody(new CircleShape(30), 100, 120, 5);
+//         const b = new RigidBody(new CircleShape(30), 100, 100, 5);
+//         const manifold = Collision.detectCollision(a, b)!;
 
-        for (let i = 0; i < 100000; i++) {
-            manifold.preSolve(invDt);
+//         for (let i = 0; i < 100000; i++) {
+//             manifold.preSolve(invDt);
 
-            for (let j = 0; j < 10; j++) {
-                manifold.solve();
-            }
-        }
+//             for (let j = 0; j < 10; j++) {
+//                 manifold.solve();
+//             }
+//         }
 
-        console.timeEnd('resolution');
-    });
-});
+//         console.timeEnd('resolution');
+//     });
+// });
 
 // describe('Performance box vs box', () => {
 //     test('collision box vs box', () => {
@@ -103,3 +105,36 @@ describe('Performance circle vs circle', () => {
 //         console.timeEnd('resolution');
 //     });
 // });
+
+describe('Performance segment vs segment', () => {
+    test('collision segment vs segment', () => {
+        console.time('collision');
+        const a = new RigidBody(new SegmentShape(new Vec2(-50, 0), new Vec2(50, 0)), 120, 100, 5);
+        const b = new RigidBody(new SegmentShape(new Vec2(0, -50), new Vec2(0, 50)), 100, 100, 5);
+
+        for (let i = 0; i < 100000; i++) {
+            Collision.detectCollision(a, b);
+        }
+
+        console.timeEnd('collision');
+    });
+
+    test('resolution segment vs segment', () => {
+        console.time('resolution');
+        const dt = 1 / 60;
+        const invDt = 1 / dt;
+        const a = new RigidBody(new SegmentShape(new Vec2(-50, 0), new Vec2(50, 0)), 120, 100, 5);
+        const b = new RigidBody(new SegmentShape(new Vec2(0, -50), new Vec2(0, 50)), 100, 100, 5);
+        const manifold = Collision.detectCollision(a, b)!;
+
+        for (let i = 0; i < 100000; i++) {
+            manifold.preSolve(invDt);
+
+            for (let j = 0; j < 10; j++) {
+                manifold.solve();
+            }
+        }
+
+        console.timeEnd('resolution');
+    });
+});
