@@ -20,20 +20,18 @@ export function detectCollision(a: RigidBody, b: RigidBody): ContactManifold | n
         return collideCircles(a, b);
     }
 
-    const aIsPolygon =
-        a.shapeType === ShapeType.BOX || a.shapeType === ShapeType.POLYGON || a.shapeType === ShapeType.SEGMENT;
-    const bIsPolygon =
-        b.shapeType === ShapeType.BOX || b.shapeType === ShapeType.POLYGON || b.shapeType === ShapeType.SEGMENT;
+    const aIsPolygonLike = isPolygonLikeShape(a.shapeType);
+    const bIsPolygonLike = isPolygonLikeShape(b.shapeType);
 
-    if (aIsPolygon && bIsPolygon) {
+    if (aIsPolygonLike && bIsPolygonLike) {
         return detectCollisionPolygonPolygon(a, b);
     }
 
-    if (aIsPolygon && bIsCircle) {
+    if (aIsPolygonLike && bIsCircle) {
         return detectCollisionPolygonCircle(a, b);
     }
 
-    if (aIsCircle && bIsPolygon) {
+    if (aIsCircle && bIsPolygonLike) {
         return detectCollisionPolygonCircle(b, a);
     }
 
@@ -52,11 +50,11 @@ export function detectCollision(a: RigidBody, b: RigidBody): ContactManifold | n
         return detectCollisionCapsuleCircle(b, a);
     }
 
-    if (aIsCapsule && bIsPolygon) {
+    if (aIsCapsule && bIsPolygonLike) {
         return detectCollisionCapsulePolygon(a, b);
     }
 
-    if (aIsPolygon && bIsCapsule) {
+    if (aIsPolygonLike && bIsCapsule) {
         return detectCollisionCapsulePolygon(b, a);
     }
 
@@ -393,4 +391,12 @@ export function collideCircles(bodyA: RigidBody, bodyB: RigidBody): ContactManif
     const contactPoint = pointA.addNew(pointB).scaleNew(0.5);
 
     return new ContactManifold(bodyA, bodyB, [{ point: contactPoint, id: 0 }], penetrationDepth, normal, false);
+}
+
+function isPolygonShape(shapeType: ShapeType): boolean {
+    return shapeType === ShapeType.BOX || shapeType === ShapeType.POLYGON;
+}
+
+function isPolygonLikeShape(shapeType: ShapeType): boolean {
+    return isPolygonShape(shapeType) || shapeType === ShapeType.SEGMENT;
 }
