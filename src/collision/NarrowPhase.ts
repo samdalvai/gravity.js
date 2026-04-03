@@ -39,6 +39,7 @@ export function detectCollision(bodyA: RigidBody, bodyB: RigidBody): ContactMani
     }
 
     if (aType === ShapeType.CIRCLE && bType === ShapeType.CAPSULE) {
+        // TODO: should be flipped?
         return collideCapsuleCircle(bodyB, bodyA);
     }
 
@@ -47,6 +48,7 @@ export function detectCollision(bodyA: RigidBody, bodyB: RigidBody): ContactMani
     }
 
     if (aType === ShapeType.CIRCLE && bType === ShapeType.SEGMENT) {
+        // TODO: should be flipped?
         return collideSegmentCircle(bodyB, bodyA);
     }
 
@@ -55,6 +57,7 @@ export function detectCollision(bodyA: RigidBody, bodyB: RigidBody): ContactMani
     }
 
     if (aType === ShapeType.CIRCLE && bIsPolygon) {
+        // TODO: should be flipped?
         return collidePolygonCircle(bodyB, bodyA);
     }
 
@@ -67,6 +70,7 @@ export function detectCollision(bodyA: RigidBody, bodyB: RigidBody): ContactMani
     }
 
     if (aType === ShapeType.CAPSULE && bIsPolygonLike) {
+        // TODO: should be flipped?
         return collidePolygonLikeAndCapsule(bodyB, bodyA);
     }
 
