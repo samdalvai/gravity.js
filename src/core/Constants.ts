@@ -21,6 +21,8 @@ export const SETTINGS = {
     positionCorrection: true,
     impulseAccumulation: true,
     warmStarting: true,
+    warmStartingThreshold: 0.5 * 0.5,
+    applyWarmStartingThreshold: true,
     blockSolve: true,
     penetrationSlop: 0.5,
     restitutionSlop: 50,
