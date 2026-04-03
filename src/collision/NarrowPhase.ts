@@ -14,14 +14,6 @@ import { ShapeType } from '../shapes/Shape';
 import * as Utils from '../utils/Utils';
 import { ContactManifold, ContactPoint } from './Contact';
 
-function isPolygonShape(shapeType: ShapeType): boolean {
-    return shapeType === ShapeType.BOX || shapeType === ShapeType.POLYGON;
-}
-
-function isPolygonLikeShape(shapeType: ShapeType): boolean {
-    return isPolygonShape(shapeType) || shapeType === ShapeType.SEGMENT;
-}
-
 export function detectCollision(bodyA: RigidBody, bodyB: RigidBody): ContactManifold | null {
     const aType = bodyA.shapeType;
     const bType = bodyB.shapeType;
@@ -79,6 +71,14 @@ export function detectCollision(bodyA: RigidBody, bodyB: RigidBody): ContactMani
     }
 
     return null;
+}
+
+function isPolygonShape(shapeType: ShapeType): boolean {
+    return shapeType === ShapeType.BOX || shapeType === ShapeType.POLYGON;
+}
+
+function isPolygonLikeShape(shapeType: ShapeType): boolean {
+    return isPolygonShape(shapeType) || shapeType === ShapeType.SEGMENT;
 }
 
 function makeId(a: number, b: number): number {
