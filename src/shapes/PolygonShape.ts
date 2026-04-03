@@ -13,12 +13,17 @@ export class PolygonShape extends Shape {
     width: number;
     height: number;
 
+    localNormals: Vec2[] = [];
+    radius = 0;
+
     constructor(vertices: Vec2[]) {
         super();
         let minX = Infinity;
         let minY = Infinity;
         let maxX = -Infinity;
         let maxY = -Infinity;
+
+        // TODO: handle offset for polygons (random ones can be off center)
 
         // Initialize the vertices of the polygon shape and set width and height
         for (const v of vertices) {
@@ -35,6 +40,8 @@ export class PolygonShape extends Shape {
 
         this.width = maxX - minX;
         this.height = maxY - minY;
+
+        this.recomputeNormals();
     }
 
     getType(): ShapeType {
@@ -140,6 +147,20 @@ export class PolygonShape extends Shape {
         return w
             ? new Edge(b.localPointToWorld(prev), curr, (idx - 1 + count) % count, idx)
             : new Edge(curr, b.localPointToWorld(next), idx, (idx + 1) % count);
+    }
+
+    localEdgeAt(index: number): Vec2 {
+        const currVertex = index;
+        const nextVertex = (index + 1) % this.localVertices.length;
+        return this.localVertices[nextVertex].subNew(this.localVertices[currVertex]);
+    }
+
+    private recomputeNormals(): void {
+        this.localNormals.length = 0;
+
+        for (let i = 0; i < this.localVertices.length; i++) {
+            this.localNormals.push(this.localEdgeAt(i).normal());
+        }
     }
 
     updateAABB(body: RigidBody): void {
