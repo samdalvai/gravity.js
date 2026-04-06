@@ -76,12 +76,6 @@ export class PolygonShape extends Shape {
         }
     }
 
-    localEdgeAt(index: number): Vec2 {
-        const currVertex = index;
-        const nextVertex = (index + 1) % this.localVertices.length;
-        return this.localVertices[nextVertex].subNew(this.localVertices[currVertex]);
-    }
-
     updateAABB(body: RigidBody): void {
         let minX = Infinity;
         let minY = Infinity;
@@ -99,6 +93,12 @@ export class PolygonShape extends Shape {
         body.maxX = maxX;
         body.minY = minY;
         body.maxY = maxY;
+    }
+
+    private localEdgeAt(index: number): Vec2 {
+        const currVertex = index;
+        const nextVertex = (index + 1) % this.localVertices.length;
+        return this.localVertices[nextVertex].subNew(this.localVertices[currVertex]);
     }
 
     private computeNormals(): void {
