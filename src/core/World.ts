@@ -216,6 +216,8 @@ export class World {
             const newManifold = NarrowPhase.detectCollision(a, b);
             if (newManifold == null) continue;
 
+            console.log('Nr. of contacts: ', newManifold.contactPoints.length);
+
             const key = Utils.pairKey(a, b);
             if (SETTINGS.warmStarting && this.manifoldMap.has(key)) {
                 const oldManifold = this.manifoldMap.get(key)!;
