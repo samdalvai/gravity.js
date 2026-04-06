@@ -23,6 +23,7 @@ export const SETTINGS = {
     warmStarting: true,
     warmStartingThreshold: 0.5 * 0.5,
     applyWarmStartingThreshold: true,
+    contactMergeThreshold: 0.005 * 0.005,
     blockSolve: true,
     penetrationSlop: 0.5,
     restitutionSlop: 50,
