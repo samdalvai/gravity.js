@@ -100,22 +100,22 @@ export default class Demo {
         this.generateFloor(world, app);
         this.generateFences(world, app);
 
+        const body = new RigidBody(new BoxShape(60, 60), 0, 0, 1);
         // const body = new RigidBody(new CircleShape(30), 0, 0, 0);
-        // const body = new RigidBody(new BoxShape(60, 60), 0, 0, 0);
         // const body = new RigidBody(new CapsuleShape(30, 15), 0, 0, 0);
-        const body = new RigidBody(new SegmentShape(200, true), 0, 0, 0);
-        body.angularVelocity = 5;
+        // const body = new RigidBody(new SegmentShape(200, true), 0, 0, 0);
+        body.angularVelocity = 4.13625;
         body.rotation = 0.7;
         app.setBodyTexture(body, 'crate');
         world.addBody(body);
 
-        // const testBody = new RigidBody(new CircleShape(30), 0, 0, 0);
         // const testBody = new RigidBody(new BoxShape(60, 60), 100, 0, 0);
-        const testBody = new RigidBody(new CapsuleShape(30, 15), 100, 0, 0);
-        testBody.angularVelocity = 5;
+        // const testBody = new RigidBody(new CircleShape(30), 0, 0, 0);
+        // const testBody = new RigidBody(new CapsuleShape(30, 15), 100, 0, 0);
+        // testBody.angularVelocity = 5;
         // testBody.rotation = 0.5
-        world.addBody(testBody);
-        app.setTestBody(testBody);
+        // world.addBody(testBody);
+        // app.setTestBody(testBody);
     };
 
     static demo2 = (world: World, app: Application) => {
