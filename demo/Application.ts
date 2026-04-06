@@ -551,14 +551,14 @@ export default class Application {
                         const endPoint = contact.point.subNew(
                             manifold.contactNormal.scaleNew(manifold.penetrationDepth),
                         );
-                        const normalEndPoint = contact.point.addNew(
-                            manifold.contactNormal.scaleNew(PIXELS_PER_METER * 0.25),
-                        );
+                        // const normalEndPoint = contact.point.addNew(
+                        //     manifold.contactNormal.scaleNew(PIXELS_PER_METER * 0.25),
+                        // );
 
                         Graphics.drawFillCircle(startPoint.x, startPoint.y, 5, 'red');
-                        // Graphics.drawFillCircle(endPoint.x, endPoint.y, 3, 'red');
+                        Graphics.drawFillCircle(endPoint.x, endPoint.y, 3, 'red');
                         // Graphics.drawLine(startPoint.x, startPoint.y, endPoint.x, endPoint.y, 'red');
-                        Graphics.drawLine(startPoint.x, startPoint.y, normalEndPoint.x, normalEndPoint.y, 'red', 2);
+                        // Graphics.drawLine(startPoint.x, startPoint.y, normalEndPoint.x, normalEndPoint.y, 'red', 2);
                     }
                 }
             }
