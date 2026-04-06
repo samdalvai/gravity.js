@@ -435,8 +435,14 @@ function clipConvexEdges(
         [points[0], points[1]] = [points[1], points[0]];
     }
 
-    // TODO: don't use filter and map functions
-    const filteredPoints = points.filter(point => point.separation <= 0);
+    const filteredPoints: ContactPoint[] = [];
+
+    for (let i = 0; i < points.length; i++) {
+        const p = points[i];
+        if (p.separation <= 0) {
+            filteredPoints.push(p);
+        }
+    }
 
     if (
         filteredPoints.length === 2 &&
