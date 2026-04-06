@@ -17,6 +17,9 @@ import { ContactManifold, ContactPoint } from './Contact';
 export function detectCollision(bodyA: RigidBody, bodyB: RigidBody): ContactManifold | null {
     const aType = bodyA.shapeType;
     const bType = bodyB.shapeType;
+
+    // TODO: this check can be moved after circle vs circle,
+    // most common collision after circle/circle is polygon/polygon
     const aIsPolygon = isPolygonShape(aType);
     const bIsPolygon = isPolygonShape(bType);
     const aIsPolygonLike = isPolygonLikeShape(aType);
