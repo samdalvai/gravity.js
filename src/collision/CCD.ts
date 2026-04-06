@@ -2,7 +2,6 @@ import { RigidBody } from '../core/RigidBody';
 import { Vec2 } from '../math/Vec2';
 import { CapsuleShape } from '../shapes/CapsuleShape';
 import { CircleShape } from '../shapes/CircleShape';
-import { edgeCircleIntersection, edgeEdgeIntersection } from '../shapes/Edge';
 import { PolygonShape } from '../shapes/PolygonShape';
 import { ShapeType } from '../shapes/Shape';
 import * as Utils from '../utils/Utils';
@@ -62,8 +61,8 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
 
         if (other.shapeType === ShapeType.CAPSULE) {
             const capsuleShape = other.shape as CapsuleShape;
-            const topCirclePosition = capsuleShape.getTopCirclePosition(other);
-            const bottomCirclePosition = capsuleShape.getBottomCirclePosition(other);
+            const topCirclePosition = capsuleShape.getTopCirclePosition();
+            const bottomCirclePosition = capsuleShape.getBottomCirclePosition();
 
             const axis = bottomCirclePosition.subNew(topCirclePosition);
             const axisDir = axis.normalizeNew();
@@ -139,4 +138,52 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
         bullet.shape.updateAABB(bullet);
         bullet.hasCCD = true;
     }
+}
+
+function edgeEdgeIntersection(A: Vec2, B: Vec2, C: Vec2, D: Vec2): Vec2 | null {
+    const r = B.subNew(A); // vector along first segment
+    const s = D.subNew(C); // vector along second segment
+    const rxs = r.x * s.y - r.y * s.x;
+    if (rxs === 0) return null; // parallel or collinear
+
+    const t = (C.subNew(A).x * s.y - C.subNew(A).y * s.x) / rxs;
+    const u = (C.subNew(A).x * r.y - C.subNew(A).y * r.x) / rxs;
+
+    if (t >= 0 && t <= 1 && u >= 0 && u <= 1) {
+        return A.addNew(r.scaleNew(t));
+    }
+
+    return null; // no intersection on the segments
+}
+
+function edgeCircleIntersection(A: Vec2, B: Vec2, C: Vec2, r: number): Vec2[] {
+    const d = B.subNew(A);
+    const f = A.subNew(C);
+
+    const a = d.dot(d);
+    const b = 2 * f.dot(d);
+    const c = f.dot(f) - r * r;
+
+    let discriminant = b * b - 4 * a * c;
+
+    if (discriminant < 0) {
+        return []; // no intersection
+    }
+
+    discriminant = Math.sqrt(discriminant);
+
+    const t1 = (-b - discriminant) / (2 * a);
+    const t2 = (-b + discriminant) / (2 * a);
+
+    const intersections: Vec2[] = [];
+
+    if (0 <= t1 && t1 <= 1) {
+        intersections.push(A.addNew(d.scaleNew(t1)));
+    }
+
+    if (0 <= t2 && t2 <= 1 && t2 != t1) {
+        intersections.push(A.addNew(d.scaleNew(t2)));
+    }
+
+    return intersections;
 }
