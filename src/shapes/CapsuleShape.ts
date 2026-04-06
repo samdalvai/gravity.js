@@ -1,6 +1,5 @@
 import { RigidBody } from '../core/RigidBody';
 import { Vec2 } from '../math/Vec2';
-import { PolygonShape } from './PolygonShape';
 import { Shape, ShapeType } from './Shape';
 
 export class CapsuleShape extends Shape {
@@ -28,6 +27,10 @@ export class CapsuleShape extends Shape {
         this.worldCenter2 = this.center2.copy();
     }
 
+    get worldVertices() {
+        return [this.worldCenter1, this.worldCenter2];
+    }
+
     getType(): ShapeType {
         return ShapeType.CAPSULE;
     }
@@ -53,46 +56,23 @@ export class CapsuleShape extends Shape {
         return iRect + iCircle;
     }
 
-    getTopCirclePosition(body: RigidBody): Vec2 {
-        return new Vec2(0, this.halfHeight).rotate(body.rotation).addNew(body.position);
-    }
-
-    getBottomCirclePosition(body: RigidBody): Vec2 {
-        return new Vec2(0, -this.halfHeight).rotate(body.rotation).addNew(body.position);
-    }
-
     updateVertices(angle: number, position: Vec2): void {
         this.worldCenter1 = this.center1.rotate(angle).addNew(position);
         this.worldCenter2 = this.center2.rotate(angle).addNew(position);
     }
 
     updateAABB(body: RigidBody): void {
-        const radius = this.radius;
-
-        const topCirclePos = this.getTopCirclePosition(body);
-        const bottomCirclePos = this.getBottomCirclePosition(body);
-
-        const topCircleMinX = topCirclePos.x - radius;
-        const topCircleMinY = topCirclePos.y - radius;
-        const topCircleMaxX = topCirclePos.x + radius;
-        const topCircleMaxY = topCirclePos.y + radius;
-
-        const bottomCircleMinX = bottomCirclePos.x - radius;
-        const bottomCircleMinY = bottomCirclePos.y - radius;
-        const bottomCircleMaxX = bottomCirclePos.x + radius;
-        const bottomCircleMaxY = bottomCirclePos.y + radius;
-
-        body.minX = Math.min(topCircleMinX, bottomCircleMinX);
-        body.minY = Math.min(topCircleMinY, bottomCircleMinY);
-        body.maxX = Math.max(topCircleMaxX, bottomCircleMaxX);
-        body.maxY = Math.max(topCircleMaxY, bottomCircleMaxY);
+        body.minX = Math.min(this.worldCenter1.x, this.worldCenter2.x) - this.radius;
+        body.minY = Math.min(this.worldCenter1.y, this.worldCenter2.y) - this.radius;
+        body.maxX = Math.max(this.worldCenter1.x, this.worldCenter2.x) + this.radius;
+        body.maxY = Math.max(this.worldCenter1.y, this.worldCenter2.y) + this.radius;
     }
 
-    get localVertices() {
-        return [this.center1, this.center2];
+    getTopCirclePosition(): Vec2 {
+        return this.worldCenter1;
     }
 
-    get worldVertices() {
-        return [this.worldCenter1, this.worldCenter2];
+    getBottomCirclePosition(): Vec2 {
+        return this.worldCenter2;
     }
 }
