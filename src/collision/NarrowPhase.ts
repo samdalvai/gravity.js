@@ -85,16 +85,6 @@ function isPolygonLikeShape(shapeType: ShapeType): boolean {
     return isPolygonShape(shapeType) || shapeType === ShapeType.SEGMENT;
 }
 
-function getWorldPolygonNormals(body: RigidBody, shape: PolygonShape): Vec2[] {
-    const normals = new Array<Vec2>(shape.localNormals.length);
-
-    for (let i = 0; i < shape.localNormals.length; ++i) {
-        normals[i] = shape.localNormals[i].rotate(body.rotation);
-    }
-
-    return normals;
-}
-
 function getSegmentNormals(start: Vec2, end: Vec2): [Vec2, Vec2] {
     const axis = end.subNew(start);
     const normal = axis.magnitudeSquared() > 0 ? axis.rightPerpNew().normalizeNew() : new Vec2(1, 0);
@@ -285,7 +275,7 @@ export function collidePolygonCircle(bodyA: RigidBody, bodyB: RigidBody): Contac
     const polygonA = bodyA.shape as PolygonShape;
     const circleB = bodyB.shape as CircleShape;
     const vertices = polygonA.worldVertices;
-    const normals = getWorldPolygonNormals(bodyA, polygonA);
+    const normals = polygonA.worldNormals;
     const radius = polygonA.radius + circleB.radius;
 
     let normalIndex = 0;
@@ -637,10 +627,10 @@ function collidePolygonLikeBodies(bodyA: RigidBody, bodyB: RigidBody): ContactMa
         bodyA,
         bodyB,
         shapeA.worldVertices,
-        getWorldPolygonNormals(bodyA, shapeA),
+        shapeA.worldNormals,
         shapeA.radius,
         shapeB.worldVertices,
-        getWorldPolygonNormals(bodyB, shapeB),
+        shapeB.worldNormals,
         shapeB.radius,
     );
 }
@@ -827,7 +817,7 @@ function collidePolygonLikeAndCapsule(bodyA: RigidBody, bodyB: RigidBody): Conta
         bodyA,
         bodyB,
         shapeA.worldVertices,
-        getWorldPolygonNormals(bodyA, shapeA),
+        shapeA.worldNormals,
         shapeA.radius,
         capsuleVertices,
         capsuleNormals,
