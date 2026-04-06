@@ -4,6 +4,7 @@ import { Shape, ShapeType } from '../shapes/Shape';
 import * as Utils from '../utils/Utils';
 import { SETTINGS } from './Constants';
 
+// TODO: make this an abstract class and make shapes extend this
 export class RigidBody {
     static nextId = 0;
     id: number;
@@ -20,8 +21,8 @@ export class RigidBody {
     canRotate: boolean;
 
     // Forces and torque
-    private sumForces: Vec2;
-    private sumTorque: number;
+    private _sumForces: Vec2;
+    private _sumTorque: number;
 
     // Mass and Moment of Inertia
     mass: number;
@@ -69,8 +70,8 @@ export class RigidBody {
         this.angularAcceleration = 0.0;
         this.canRotate = true;
 
-        this.sumForces = new Vec2(0, 0);
-        this.sumTorque = 0.0;
+        this._sumForces = new Vec2(0, 0);
+        this._sumTorque = 0.0;
 
         this._restitution = 0.2;
         this._friction = 0.7;
@@ -133,19 +134,19 @@ export class RigidBody {
     }
 
     addForce(force: Vec2): void {
-        this.sumForces.addAssign(force);
+        this._sumForces.addAssign(force);
     }
 
     addTorque(torque: number): void {
-        this.sumTorque += torque;
+        this._sumTorque += torque;
     }
 
     clearForces(): void {
-        this.sumForces = new Vec2(0.0, 0.0);
+        this._sumForces = new Vec2(0.0, 0.0);
     }
 
     clearTorque(): void {
-        this.sumTorque = 0.0;
+        this._sumTorque = 0.0;
     }
 
     localPointToWorld(point: Vec2): Vec2 {
@@ -210,15 +211,15 @@ export class RigidBody {
         }
 
         // Find the acceleration based on the forces that are being applied and the mass
-        this.acceleration.x = this.sumForces.x * this.invMass;
-        this.acceleration.y = this.sumForces.y * this.invMass;
+        this.acceleration.x = this._sumForces.x * this.invMass;
+        this.acceleration.y = this._sumForces.y * this.invMass;
 
         // Integrate the acceleration to find the new velocity
         this.velocity.x += this.acceleration.x * dt;
         this.velocity.y += this.acceleration.y * dt;
 
         // Find the angular acceleration based on the torque that is being applied and the moment of inertia
-        this.angularAcceleration = this.sumTorque * this.invI;
+        this.angularAcceleration = this._sumTorque * this.invI;
 
         // Integrate the angular acceleration to find the new angular velocity
         this.angularVelocity += this.angularAcceleration * dt;
