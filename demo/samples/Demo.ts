@@ -4,7 +4,17 @@
  *
  * https://github.com/erincatto/box2d-lite
  */
-import { BoxShape, CapsuleShape, CircleShape, DistanceJoint, PolygonShape, RigidBody, Vec2, World } from '../../src';
+import {
+    BoxShape,
+    CapsuleShape,
+    CircleShape,
+    DistanceJoint,
+    PolygonShape,
+    RigidBody,
+    SegmentShape,
+    Vec2,
+    World,
+} from '../../src';
 import Application from '../Application';
 import Graphics from '../graphics/Graphics';
 
@@ -92,7 +102,8 @@ export default class Demo {
 
         // const body = new RigidBody(new CircleShape(30), 0, 0, 0);
         // const body = new RigidBody(new BoxShape(60, 60), 0, 0, 0);
-        const body = new RigidBody(new CapsuleShape(60, 30), 0, 0, 0);
+        // const body = new RigidBody(new CapsuleShape(60, 30), 0, 0, 0);
+        const body = new RigidBody(new SegmentShape(200, true), 0, 0, 0);
         body.angularVelocity = 5;
         app.setBodyTexture(body, 'crate');
         world.addBody(body);
