@@ -392,7 +392,9 @@ function clipConvexEdges(
 ): ContactManifold | null {
     const referenceVertices = flip ? verticesB : verticesA;
     const referenceNormals = flip ? normalsB : normalsA;
+    const referenceRadius = flip ? radiusB : radiusA;
     const incidentVertices = flip ? verticesA : verticesB;
+    const incidentRadius = flip ? radiusA : radiusB;
     const i11 = flip ? edgeB : edgeA;
     const i12 = (i11 + 1) % referenceVertices.length;
     const i21 = flip ? edgeA : edgeB;
@@ -415,8 +417,8 @@ function clipConvexEdges(
     const separationLower = vLower.dotSub(v11, normal);
     const separationUpper = vUpper.dotSub(v11, normal);
     const radius = radiusA + radiusB;
-    const pointLower = vLower.addNew(normal.scaleNew(0.5 * (radiusA - radiusB - separationLower)));
-    const pointUpper = vUpper.addNew(normal.scaleNew(0.5 * (radiusA - radiusB - separationUpper)));
+    const pointLower = vLower.addNew(normal.scaleNew(0.5 * (referenceRadius - incidentRadius - separationLower)));
+    const pointUpper = vUpper.addNew(normal.scaleNew(0.5 * (referenceRadius - incidentRadius - separationUpper)));
 
     const points: ContactPoint[] = [
         {
