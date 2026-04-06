@@ -313,7 +313,7 @@ export default class Graphics {
                 {
                     const circleShape = body.shape as CircleShape;
                     if (debug) {
-                        this.drawCircle(circleShape.radius, color);
+                        this.drawCircle(circleShape.radius, body.isBullet ? 'red' : color);
                     } else if (texture) {
                         this.drawTexture(circleShape.radius * 2, circleShape.radius * 2, texture);
                     } else {
