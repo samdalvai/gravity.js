@@ -5,6 +5,7 @@
  * Copyright (c) 2024 Phaser Studio Inc
  * Licensed under the MIT License
  */
+import { SETTINGS } from '../core/Constants';
 import { RigidBody } from '../core/RigidBody';
 import { Vec2 } from '../math/Vec2';
 import { CapsuleShape } from '../shapes/CapsuleShape';
@@ -434,9 +435,13 @@ function clipConvexEdges(
         [points[0], points[1]] = [points[1], points[0]];
     }
 
+    // TODO: don't use filter and map functions
     const filteredPoints = points.filter(point => point.separation <= 0);
 
-    if (filteredPoints.length === 2 && filteredPoints[0].point.distanceSquared(filteredPoints[1].point) <= 0) {
+    if (
+        filteredPoints.length === 2 &&
+        filteredPoints[0].point.distanceSquared(filteredPoints[1].point) <= SETTINGS.contactMergeThreshold
+    ) {
         filteredPoints.length = 1;
     }
 
