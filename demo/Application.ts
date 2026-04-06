@@ -553,7 +553,7 @@ export default class Application {
                         );
 
                         Graphics.drawFillCircle(startPoint.x, startPoint.y, 5, 'red');
-                        Graphics.drawFillCircle(endPoint.x, endPoint.y, 3, 'red');
+                        Graphics.drawLine(startPoint.x, startPoint.y, endPoint.x, endPoint.y, 'red');
                     }
                 }
             }
