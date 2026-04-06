@@ -18,15 +18,8 @@ export class PolygonShape extends Shape {
         let maxX = -Infinity;
         let maxY = -Infinity;
 
-        // TODO: handle offset for polygons (random ones can be off center)
-
         // Initialize the vertices of the polygon shape and set width and height
         for (const v of vertices) {
-            this.localVertices.push(v);
-            // Need to clone this vector, otherwise both arrays are aliasing the same vector
-            this.worldVertices.push(v.copy());
-
-            // Find min and max X and Y to calculate polygon width and height
             minX = Math.min(minX, v.x);
             minY = Math.min(minY, v.y);
             maxX = Math.max(maxX, v.x);
@@ -36,7 +29,17 @@ export class PolygonShape extends Shape {
         this.width = maxX - minX;
         this.height = maxY - minY;
 
-        this.recomputeNormals();
+        const centerX = (minX + maxX) * 0.5;
+        const centerY = (minY + maxY) * 0.5;
+
+        // Recenter vertices
+        for (const v of vertices) {
+            const centered = new Vec2(v.x - centerX, v.y - centerY);
+            this.localVertices.push(centered);
+            this.worldVertices.push(centered.copy());
+        }
+
+        this.computeNormals();
     }
 
     getType(): ShapeType {
@@ -73,24 +76,10 @@ export class PolygonShape extends Shape {
         }
     }
 
-    edgeAt(index: number): Vec2 {
-        const currVertex = index;
-        const nextVertex = (index + 1) % this.worldVertices.length;
-        return this.worldVertices[nextVertex].subNew(this.worldVertices[currVertex]);
-    }
-
     localEdgeAt(index: number): Vec2 {
         const currVertex = index;
         const nextVertex = (index + 1) % this.localVertices.length;
         return this.localVertices[nextVertex].subNew(this.localVertices[currVertex]);
-    }
-
-    private recomputeNormals(): void {
-        this.localNormals.length = 0;
-
-        for (let i = 0; i < this.localVertices.length; i++) {
-            this.localNormals.push(this.localEdgeAt(i).normal());
-        }
     }
 
     updateAABB(body: RigidBody): void {
@@ -110,5 +99,13 @@ export class PolygonShape extends Shape {
         body.maxX = maxX;
         body.minY = minY;
         body.maxY = maxY;
+    }
+
+    private computeNormals(): void {
+        this.localNormals.length = 0;
+
+        for (let i = 0; i < this.localVertices.length; i++) {
+            this.localNormals.push(this.localEdgeAt(i).normal());
+        }
     }
 }
