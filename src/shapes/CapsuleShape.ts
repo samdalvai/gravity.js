@@ -57,8 +57,14 @@ export class CapsuleShape extends Shape {
     }
 
     updateVertices(angle: number, position: Vec2): void {
-        this.worldCenter1 = this.center1.rotate(angle).addNew(position);
-        this.worldCenter2 = this.center2.rotate(angle).addNew(position);
+        const cos = Math.cos(angle);
+        const sin = Math.sin(angle);
+
+        this.worldCenter1.x = this.center1.x * cos - this.center1.y * sin + position.x;
+        this.worldCenter1.y = this.center1.x * sin + this.center1.y * cos + position.y;
+
+        this.worldCenter2.x = this.center2.x * cos - this.center2.y * sin + position.x;
+        this.worldCenter2.y = this.center2.x * sin + this.center2.y * cos + position.y;
     }
 
     updateAABB(body: RigidBody): void {
