@@ -1,4 +1,6 @@
-import * as Collision from '../../src/collision/Collision_old';
+import { describe, expect, test } from '@jest/globals';
+
+import * as Collision from '../../src/collision/NarrowPhase';
 import { RigidBody } from '../../src/core/RigidBody';
 import { CircleShape } from '../../src/shapes/CircleShape';
 
@@ -11,7 +13,7 @@ describe('Contact', () => {
         const numFrames = 60;
         const solverIterations = 20;
 
-        const manifold = Collision.detectCollisionCircleCircle(a, b)!;
+        const manifold = Collision.detectCollision(a, b)!;
 
         const deltaTime = 1 / 60;
         for (let i = 0; i < numFrames; i++) {
