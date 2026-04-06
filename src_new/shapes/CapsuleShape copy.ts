@@ -27,17 +27,13 @@ export class CapsuleShape extends Shape {
         this.worldCenter2 = this.center2.copy();
     }
 
-    get worldVertices() {
-        return [this.worldCenter1, this.worldCenter2];
-    }
-
     getType(): ShapeType {
         return ShapeType.CAPSULE;
     }
 
     getMomentOfInertia(): number {
-        // For solid capsules, the moment of inertia is the sum of the two half circles and box body inertia, accounting fot heir position
-        // Still needs to be multiplied by the rigidbody's mass
+        // For solid capsules, the moment of inertia is the sum of the two half circles
+        // and the rectangular center section, weighted by their normalized area.
         const r = this.radius;
         const l = this.halfHeight * 2;
 
@@ -45,13 +41,15 @@ export class CapsuleShape extends Shape {
         const areaCircle = Math.PI * r * r;
         const areaTotal = areaRect + areaCircle;
 
-        if (areaTotal === 0) return 0;
+        if (areaTotal === 0) {
+            return 0;
+        }
 
         const mRect = areaRect / areaTotal;
         const mCircle = areaCircle / areaTotal;
 
         const iRect = (1 / 12) * mRect * (l * l + 4 * r * r);
-        const iCircle = 0.5 * mCircle * r * r + (mCircle * (l * l)) / 4;
+        const iCircle = 0.5 * mCircle * r * r + (mCircle * l * l) / 4;
 
         return iRect + iCircle;
     }
