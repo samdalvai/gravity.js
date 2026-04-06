@@ -98,7 +98,7 @@ export default class Demo {
 
         // Demo 1: Single box demo
         this.generateFloor(world, app);
-        // this.generateFences(world, app);
+        this.generateFences(world, app);
 
         // const body = new RigidBody(new CircleShape(30), 0, 0, 0);
         // const body = new RigidBody(new BoxShape(60, 60), 0, 0, 0);
