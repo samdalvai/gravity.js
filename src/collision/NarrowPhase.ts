@@ -19,13 +19,6 @@ export function detectCollision(bodyA: RigidBody, bodyB: RigidBody): ContactMani
     const aType = bodyA.shapeType;
     const bType = bodyB.shapeType;
 
-    // TODO: this check can be moved after circle vs circle,
-    // most common collision after circle/circle is polygon/polygon
-    const aIsPolygon = isPolygonShape(aType);
-    const bIsPolygon = isPolygonShape(bType);
-    const aIsPolygonLike = isPolygonLikeShape(aType);
-    const bIsPolygonLike = isPolygonLikeShape(bType);
-
     if (aType === ShapeType.CIRCLE && bType === ShapeType.CIRCLE) {
         return collideCircles(bodyA, bodyB);
     }
@@ -39,7 +32,6 @@ export function detectCollision(bodyA: RigidBody, bodyB: RigidBody): ContactMani
     }
 
     if (aType === ShapeType.CIRCLE && bType === ShapeType.CAPSULE) {
-        // TODO: should be flipped?
         return collideCapsuleCircle(bodyB, bodyA);
     }
 
@@ -48,18 +40,22 @@ export function detectCollision(bodyA: RigidBody, bodyB: RigidBody): ContactMani
     }
 
     if (aType === ShapeType.CIRCLE && bType === ShapeType.SEGMENT) {
-        // TODO: should be flipped?
         return collideSegmentCircle(bodyB, bodyA);
     }
+
+    const aIsPolygon = isPolygonShape(aType);
+    const bIsPolygon = isPolygonShape(bType);
 
     if (aIsPolygon && bType === ShapeType.CIRCLE) {
         return collidePolygonCircle(bodyA, bodyB);
     }
 
     if (aType === ShapeType.CIRCLE && bIsPolygon) {
-        // TODO: should be flipped?
         return collidePolygonCircle(bodyB, bodyA);
     }
+
+    const aIsPolygonLike = isPolygonLikeShape(aType);
+    const bIsPolygonLike = isPolygonLikeShape(bType);
 
     if (aIsPolygonLike && bIsPolygonLike) {
         return collidePolygonLikeBodies(bodyA, bodyB);
@@ -70,7 +66,6 @@ export function detectCollision(bodyA: RigidBody, bodyB: RigidBody): ContactMani
     }
 
     if (aType === ShapeType.CAPSULE && bIsPolygonLike) {
-        // TODO: should be flipped?
         return collidePolygonLikeAndCapsule(bodyB, bodyA);
     }
 
