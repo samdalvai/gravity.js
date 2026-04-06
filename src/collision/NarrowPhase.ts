@@ -194,30 +194,60 @@ function segmentDistance(
 }
 
 export function collideCircles(bodyA: RigidBody, bodyB: RigidBody): ContactManifold | null {
+    // const circleA = bodyA.shape as CircleShape;
+    // const circleB = bodyB.shape as CircleShape;
+    // const separationVector = bodyB.position.subNew(bodyA.position);
+    // const distance = separationVector.magnitude();
+    // const normal = distance >= 0 ? separationVector.divNew(distance) : new Vec2(1, 0);
+    // const separation = distance - circleA.radius - circleB.radius;
+
+    // if (separation > 0) {
+    //     return null;
+    // }
+
+    // const pointA = bodyA.position.addNew(normal.scaleNew(circleA.radius));
+    // const pointB = bodyB.position.subNew(normal.scaleNew(circleB.radius));
+
+    // return createCollisionManifold(bodyA, bodyB, normal, [
+    //     {
+    //         point: pointA.lerp(pointB, 0.5),
+    //         separation,
+    //         id: 0,
+    //     },
+    // ]);
+
     const circleA = bodyA.shape as CircleShape;
     const circleB = bodyB.shape as CircleShape;
-    const separationVector = bodyB.position.subNew(bodyA.position);
-    const distance = separationVector.magnitude();
-    const normal = distance >= 0 ? separationVector.divNew(distance) : new Vec2(1, 0);
-    const separation = distance - circleA.radius - circleB.radius;
+    const radiusA = circleA.radius;
+    const radiusB = circleB.radius;
+    const posA = bodyA.position;
+    const posB = bodyB.position;
 
-    if (separation > 0) {
+    const ab = posB.subNew(posA);
+    const radiusSum = radiusA + radiusB;
+    const distSq = ab.magnitudeSquared();
+
+    if (distSq > radiusSum * radiusSum) {
         return null;
     }
 
-    const pointA = bodyA.position.addNew(normal.scaleNew(circleA.radius));
-    const pointB = bodyB.position.subNew(normal.scaleNew(circleB.radius));
+    const normal = distSq > 0 ? ab.normalizeNew() : new Vec2(1, 0);
+    const distance = ab.magnitude();
+    const penetrationDepth = radiusSum - distance;
+    const pointA = posA.addNew(normal.scaleNew(radiusA));
+    const pointB = posB.subNew(normal.scaleNew(radiusB));
+    const contactPoint = pointA.addNew(pointB).scaleNew(0.5);
 
-    return createCollisionManifold(bodyA, bodyB, normal, [
-        {
-            point: pointA.lerp(pointB, 0.5),
-            separation,
-            id: 0,
-        },
-    ]);
+    // TODO: separation is not needed here
+    return new ContactManifold(
+        bodyA,
+        bodyB,
+        [{ point: contactPoint, separation: distance - radiusSum, id: 0 }],
+        penetrationDepth,
+        normal,
+        false,
+    );
 }
-
-
 
 function collideSegmentRadiusAndCircle(
     bodyA: RigidBody,
