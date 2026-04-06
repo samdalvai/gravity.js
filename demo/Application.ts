@@ -77,6 +77,10 @@ export default class Application {
         this.bodyRenderRegistry.setFillColor(body, fillColor);
     }
 
+    setTestBody(body: RigidBody) {
+        this.testBody = body;
+    }
+
     async setup(): Promise<void> {
         InputManager.initialize();
 
