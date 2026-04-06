@@ -101,13 +101,15 @@ export default class Demo {
         this.generateFences(world, app);
 
         const body = new RigidBody(new BoxShape(60, 60), 0, 0, 1);
-        // const body = new RigidBody(new CircleShape(30), 0, 0, 0);
-        // const body = new RigidBody(new CapsuleShape(30, 15), 0, 0, 0);
-        // const body = new RigidBody(new SegmentShape(200, true), 0, 0, 0);
         body.angularVelocity = 4.13625;
         body.rotation = 0.7;
         app.setBodyTexture(body, 'crate');
         world.addBody(body);
+
+        // Bodies for collision testing
+        // const body = new RigidBody(new CircleShape(30), 0, 0, 0);
+        // const body = new RigidBody(new CapsuleShape(30, 15), 0, 0, 0);
+        // const body = new RigidBody(new SegmentShape(200, true), 0, 0, 0);
 
         // const testBody = new RigidBody(new BoxShape(60, 60), 100, 0, 0);
         // const testBody = new RigidBody(new CircleShape(30), 0, 0, 0);
