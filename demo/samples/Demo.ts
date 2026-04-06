@@ -90,13 +90,14 @@ export default class Demo {
         this.generateFloor(world, app);
         // this.generateFences(world, app);
 
-        // const body = new RigidBody(new BoxShape(60, 60), 0, 0, 1);
-        const body = new RigidBody(new CircleShape(30), 0, 0, 0);
+        // const body = new RigidBody(new CircleShape(30), 0, 0, 0);
+        const body = new RigidBody(new BoxShape(60, 60), 0, 0, 0);
         body.angularVelocity = 5;
         app.setBodyTexture(body, 'crate');
         world.addBody(body);
 
-        const testBody = new RigidBody(new CircleShape(30), 0, 0, 0);
+        // const testBody = new RigidBody(new CircleShape(30), 0, 0, 0);
+        const testBody = new RigidBody(new BoxShape(60, 60), 100, 0, 0);
         testBody.angularVelocity = 5;
         world.addBody(testBody);
         app.setTestBody(testBody);
