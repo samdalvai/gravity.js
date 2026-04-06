@@ -95,8 +95,10 @@ export default class Graphics {
         this.ctx.restore();
     }
 
-    static drawLine(x0: number, y0: number, x1: number, y1: number, color = 'white'): void {
+    // TODO: move width as second last parameter
+    static drawLine(x0: number, y0: number, x1: number, y1: number, color = 'white', width = 1): void {
         this.ctx.strokeStyle = color;
+        this.ctx.lineWidth = width;
         this.ctx.beginPath();
         this.ctx.moveTo(x0, y0);
         this.ctx.lineTo(x1, y1);
