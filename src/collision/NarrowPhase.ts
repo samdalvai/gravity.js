@@ -102,6 +102,7 @@ function getSegmentNormals(start: Vec2, end: Vec2): [Vec2, Vec2] {
     return [normal, normal.negateNew()];
 }
 
+// TODO: can we avoid calling this method for each collision?
 function createCollisionManifold(
     bodyA: RigidBody,
     bodyB: RigidBody,
