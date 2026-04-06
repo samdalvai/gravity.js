@@ -43,9 +43,11 @@ export class SegmentShape extends PolygonShape {
 
         return lengthSq * 0.083333;
     }
+
     updateVertices(angle: number, position: Vec2): void {
         super.updateVertices(angle, position);
     }
+
     updateAABB(body: RigidBody): void {
         super.updateAABB(body);
     }
