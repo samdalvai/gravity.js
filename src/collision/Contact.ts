@@ -200,7 +200,10 @@ class BlockSolver {
 
         this.k.m10 = this.k.m01;
 
-        Utils.assert(this.k.determinant != 0, 'Determinant is 0');
+        Utils.assert(
+            this.k.determinant != 0,
+            `Determinant is 0, shapes: ${this.bodyA}/${this.bodyB}`,
+        );
         this.m = this.k.inverted();
     }
 
