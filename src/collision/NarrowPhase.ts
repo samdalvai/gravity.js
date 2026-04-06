@@ -85,13 +85,6 @@ function isPolygonLikeShape(shapeType: ShapeType): boolean {
     return isPolygonShape(shapeType) || shapeType === ShapeType.SEGMENT;
 }
 
-function getSegmentNormals(start: Vec2, end: Vec2): [Vec2, Vec2] {
-    const axis = end.subNew(start);
-    const normal = axis.magnitudeSquared() > 0 ? axis.rightPerpNew().normalizeNew() : new Vec2(1, 0);
-
-    return [normal, normal.negateNew()];
-}
-
 // TODO: can we avoid calling this method for each collision?
 function createCollisionManifold(
     bodyA: RigidBody,
@@ -811,7 +804,9 @@ function collidePolygonLikeAndCapsule(bodyA: RigidBody, bodyB: RigidBody): Conta
     const shapeA = bodyA.shape as PolygonShape;
     const capsuleB = bodyB.shape as CapsuleShape;
     const capsuleVertices = [capsuleB.worldCenter1, capsuleB.worldCenter2];
-    const capsuleNormals = getSegmentNormals(capsuleB.worldCenter1, capsuleB.worldCenter2);
+    const axis = capsuleB.worldCenter1.subNew(capsuleB.worldCenter2);
+    const normal = axis.magnitudeSquared() > 0 ? axis.rightPerpNew().normalizeNew() : new Vec2(1, 0);
+    const capsuleNormals = [normal, normal.negateNew()];
 
     return collideConvexPolygons(
         bodyA,
