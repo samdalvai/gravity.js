@@ -81,10 +81,6 @@ function isPolygonLikeShape(shapeType: ShapeType): boolean {
     return isPolygonShape(shapeType) || shapeType === ShapeType.SEGMENT;
 }
 
-function makeId(a: number, b: number): number {
-    return ((a & 0xff) << 8) | (b & 0xff);
-}
-
 function getWorldPolygonNormals(body: RigidBody, shape: PolygonShape): Vec2[] {
     const normals = new Array<Vec2>(shape.localNormals.length);
 
@@ -392,12 +388,12 @@ function clipConvexEdges(
         {
             point: pointLower,
             separation: separationLower - radius,
-            id: makeId(i11, i22),
+            id: Utils.makeId(i11, i22),
         },
         {
             point: pointUpper,
             separation: separationUpper - radius,
-            id: makeId(i12, i21),
+            id: Utils.makeId(i12, i21),
         },
     ];
 
@@ -518,7 +514,7 @@ function collideConvexPolygons(
                 {
                     point: pointA.lerp(pointB, 0.5),
                     separation: distance - radius,
-                    id: makeId(i11, i21),
+                    id: Utils.makeId(i11, i21),
                 },
             ]);
         }
@@ -538,7 +534,7 @@ function collideConvexPolygons(
                 {
                     point: pointA.lerp(pointB, 0.5),
                     separation: distance - radius,
-                    id: makeId(i11, i22),
+                    id: Utils.makeId(i11, i22),
                 },
             ]);
         }
@@ -558,7 +554,7 @@ function collideConvexPolygons(
                 {
                     point: pointA.lerp(pointB, 0.5),
                     separation: distance - radius,
-                    id: makeId(i12, i21),
+                    id: Utils.makeId(i12, i21),
                 },
             ]);
         }
@@ -578,7 +574,7 @@ function collideConvexPolygons(
                 {
                     point: pointA.lerp(pointB, 0.5),
                     separation: distance - radius,
-                    id: makeId(i12, i22),
+                    id: Utils.makeId(i12, i22),
                 },
             ]);
         }
@@ -696,12 +692,12 @@ function collideSegmentRadiusPairs(
                     {
                         point: cp.addNew(normalA.scaleNew(0.5 * (radiusA - radiusB - sp))),
                         separation: sp - radius,
-                        id: makeId(0, 0),
+                        id: Utils.makeId(0, 0),
                     },
                     {
                         point: cq.addNew(normalA.scaleNew(0.5 * (radiusA - radiusB - sq))),
                         separation: sq - radius,
-                        id: makeId(0, 1),
+                        id: Utils.makeId(0, 1),
                     },
                 ]);
             }
@@ -730,12 +726,12 @@ function collideSegmentRadiusPairs(
                     {
                         point: cp.addNew(normalB.scaleNew(0.5 * (radiusB - radiusA - sp))),
                         separation: sp - radius,
-                        id: makeId(0, 0),
+                        id: Utils.makeId(0, 0),
                     },
                     {
                         point: cq.addNew(normalB.scaleNew(0.5 * (radiusB - radiusA - sq))),
                         separation: sq - radius,
-                        id: makeId(1, 0),
+                        id: Utils.makeId(1, 0),
                     },
                 ]);
             }
@@ -754,7 +750,7 @@ function collideSegmentRadiusPairs(
         {
             point: pointA.lerp(pointB, 0.5),
             separation: closestResult.length - radius,
-            id: makeId(idA, idB),
+            id: Utils.makeId(idA, idB),
         },
     ]);
 }
