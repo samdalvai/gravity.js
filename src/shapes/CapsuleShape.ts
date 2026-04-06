@@ -1,13 +1,8 @@
 import { RigidBody } from '../core/RigidBody';
 import { Vec2 } from '../math/Vec2';
-import Edge from './Edge';
 import { PolygonShape } from './PolygonShape';
 import { Shape, ShapeType } from './Shape';
 
-interface SupportResult {
-    vertex: Vec2;
-    index: number;
-}
 export class CapsuleShape extends Shape {
     halfHeight: number;
     radius: number;
@@ -93,83 +88,11 @@ export class CapsuleShape extends Shape {
         body.maxY = Math.max(topCircleMaxY, bottomCircleMaxY);
     }
 
-    // TODO: to be deleted
-    edgeAt(index: number): Vec2 {
-        const currVertex = index;
-        const nextVertex = (index + 1) % this.worldVertices.length;
-        return this.worldVertices[nextVertex].subNew(this.worldVertices[currVertex]);
-    }
-
-    findMinSeparation(other: PolygonShape): [number, number] {
-        let separation = -Infinity;
-        let indexReferenceEdge = 0;
-
-        // Loop all the vertices of "this" polygon
-        for (let i = 0; i < this.worldVertices.length; i++) {
-            const va = this.worldVertices[i];
-            const normal = this.edgeAt(i).normal();
-
-            // Loop all the vertices of the "other" polygon
-            let minSep = Infinity;
-
-            for (let j = 0; j < other.worldVertices.length; j++) {
-                const vb = other.worldVertices[j];
-                const proj = vb.subNew(va).dot(normal);
-                if (proj < minSep) {
-                    minSep = proj;
-                }
-            }
-
-            if (minSep > separation) {
-                separation = minSep;
-                indexReferenceEdge = i;
-            }
-        }
-        return [separation, indexReferenceEdge];
-    }
-
     get localVertices() {
         return [this.center1, this.center2];
     }
 
     get worldVertices() {
         return [this.worldCenter1, this.worldCenter2];
-    }
-
-    support(dir: Vec2): SupportResult {
-        let idx = 0;
-        let maxValue = dir.dot(this.localVertices[idx]);
-
-        for (let i = 1; i < this.localVertices.length; i++) {
-            const value = dir.dot(this.localVertices[i]);
-            if (value > maxValue) {
-                idx = i;
-                maxValue = value;
-            }
-        }
-
-        return { vertex: this.localVertices[idx], index: idx };
-    }
-
-    findFarthestEdge(b: RigidBody, dir: Vec2): Edge {
-        const localDir = b.worldDirToLocal(dir);
-        const farthest = this.support(localDir);
-        let curr = farthest.vertex;
-        const idx = farthest.index;
-
-        const count = this.localVertices.length;
-        const prev = this.localVertices[(idx - 1 + count) % count];
-        const next = this.localVertices[(idx + 1) % count];
-
-        const e1 = curr.subNew(prev).normalizeNew();
-        const e2 = curr.subNew(next).normalizeNew();
-
-        const w = Math.abs(e1.dot(localDir)) <= Math.abs(e2.dot(localDir));
-
-        curr = b.localPointToWorld(curr);
-
-        return w
-            ? new Edge(b.localPointToWorld(prev), curr, (idx - 1 + count) % count, idx)
-            : new Edge(curr, b.localPointToWorld(next), idx, (idx + 1) % count);
     }
 }
