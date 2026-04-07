@@ -31,6 +31,8 @@ export const SETTINGS = {
     angularVelocitySlop: 0.05,
     solverIterations: 10,
     subSteps: 1,
-};
 
-export const REAL_DELTA_TIME = () => FIXED_DELTA_TIME / SETTINGS.subSteps;
+    get dt() {
+        return FIXED_DELTA_TIME / this.subSteps;
+    },
+};

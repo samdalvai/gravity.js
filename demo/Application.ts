@@ -8,7 +8,6 @@ import {
     GRAVITY,
     MAX_BODIES,
     PIXELS_PER_METER,
-    REAL_DELTA_TIME,
     RigidBody,
     SETTINGS,
     SegmentShape,
@@ -172,13 +171,13 @@ export default class Application {
                     }
 
                     if (inputEvent.key === '.') {
-                        this.world.update(REAL_DELTA_TIME());
+                        this.world.update(SETTINGS.dt);
                     }
 
                     if (inputEvent.key === ',') {
                         // Note: this is not physically accurate, as contacts cannot work correctly with
                         // negative delta time, this is just used for testing purposes
-                        this.world.update(-REAL_DELTA_TIME());
+                        this.world.update(-SETTINGS.dt);
                     }
 
                     if (inputEvent.key === '+') {
@@ -276,7 +275,7 @@ export default class Application {
                     }
 
                     if (inputEvent.code === 'Space') {
-                        const JUMP_TIME_TOLERANCE = REAL_DELTA_TIME() * 6;
+                        const JUMP_TIME_TOLERANCE = SETTINGS.dt * 6;
                         if (
                             this.player &&
                             (this.player.isGrounded || this.player.lastGroundedTime <= JUMP_TIME_TOLERANCE)
@@ -435,7 +434,7 @@ export default class Application {
         }
 
         for (let i = 0; i < SETTINGS.subSteps; i++) {
-            this.world.update(REAL_DELTA_TIME());
+            this.world.update(SETTINGS.dt);
         }
 
         if (this.generateParticle) {

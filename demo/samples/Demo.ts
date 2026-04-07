@@ -101,7 +101,7 @@ export default class Demo {
         this.generateFences(world, app);
 
         const body = new RigidBody(new BoxShape(60, 60), 0, 0, 1);
-        body.angularVelocity = 4.13625;
+        body.angularVelocity = 2;
         body.rotation = 0.7;
         app.setBodyTexture(body, 'crate');
         world.addBody(body);
