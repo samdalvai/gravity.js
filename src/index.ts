@@ -6,7 +6,6 @@ export {
     MAX_BODIES,
     MIN_BULLET_SPEED,
     PIXELS_PER_METER,
-    REAL_DELTA_TIME,
     SETTINGS,
 } from './core/Constants';
 
