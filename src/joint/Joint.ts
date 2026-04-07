@@ -8,7 +8,7 @@
  * https://github.com/Sopiro
  */
 import { Constraint } from '../constraint/Constraint';
-import { REAL_DELTA_TIME } from '../core/Constants';
+import { SETTINGS } from '../core/Constants';
 import { RigidBody } from '../core/RigidBody';
 import * as Utils from '../utils/Utils';
 
@@ -60,7 +60,7 @@ export abstract class Joint extends Constraint {
         const omega = 2 * Math.PI * this.frequency;
         const d = 2 * this.jointMass * this.dampingRatio * omega; // Damping coefficient
         const k = this.jointMass * omega * omega; // Spring constant
-        const h = REAL_DELTA_TIME();
+        const h = SETTINGS.dt;
 
         this.beta = (h * k) / (d + h * k);
         this.gamma = 1.0 / ((d + h * k) * h);
