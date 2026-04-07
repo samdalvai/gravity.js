@@ -15,7 +15,7 @@ import Force from '../force/Force';
 import { Joint } from '../joint/Joint';
 import { Vec2 } from '../math/Vec2';
 import * as Utils from '../utils/Utils';
-import { BODY_REMOVAL_THRESHOLD, MIN_BULLET_SPEED, SETTINGS } from './Constants';
+import { MIN_BULLET_SPEED, SETTINGS } from './Constants';
 import { RigidBody } from './RigidBody';
 
 export class World {
@@ -144,20 +144,6 @@ export class World {
         // Integrate all the velocities
         for (const body of this.bodies) {
             body.integrateVelocities(dt);
-        }
-
-        // Kill objects that went out of the screen
-        for (let i = 0; i < this.bodies.length; i++) {
-            const body = this.bodies[i];
-
-            // It suffices to look for the position going below the screen
-            if (
-                Math.abs(body.position.x) > BODY_REMOVAL_THRESHOLD ||
-                Math.abs(body.position.y) > BODY_REMOVAL_THRESHOLD
-            ) {
-                this.bodies[i] = this.bodies[this.bodies.length - 1];
-                this.bodies.pop();
-            }
         }
     }
 
