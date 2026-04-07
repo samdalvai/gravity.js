@@ -74,12 +74,16 @@ class ContactSolver {
                 .subNew(this.bodyA.velocity.addNew(this.ra.crossScalar(this.bodyA.angularVelocity)));
             const normalVelocity = this.manifold.contactNormal.dot(relativeVelocity);
 
-            if (SETTINGS.positionCorrection)
+            if (SETTINGS.positionCorrection) {
                 this.bias =
                     -(this.beta * invDt) * Math.max(this.manifold.penetrationDepth! - SETTINGS.penetrationSlop, 0.0);
+            }
 
-            this.bias += this.restitution * Math.min(normalVelocity + SETTINGS.restitutionSlop, 0.0);
-            // if (approachingVelocity + SETTINGS.restitutionSlop < 0) this.bias += this.restitution * approachingVelocity;
+            // Only apply restitution on the initial impact. Reapplying it on persistent
+            // contacts can inject energy into resting stacks when warm starting is enabled.
+            if (!this.manifold.persistent && normalVelocity + SETTINGS.restitutionSlop < 0.0) {
+                this.bias += this.restitution * normalVelocity;
+            }
         } else {
             // Bias for surface speed that enables the conveyor belt-like behavior
             this.bias = -(this.bodyB.surfaceSpeed - this.bodyA.surfaceSpeed);
