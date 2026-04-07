@@ -1,3 +1,4 @@
+import { describe, expect, test } from '@jest/globals';
 import { Vec2 } from '../../src/math/Vec2';
 
 describe('Vec2', () => {
