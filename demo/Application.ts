@@ -359,7 +359,7 @@ export default class Application {
                                         continue;
                                     }
                                     const ball = new RigidBody(new CircleShape(30), x, y, 1.0);
-                                    ball.restitution = 0.8;
+                                    ball.restitution = 0.5;
                                     ball.friction = 0.7;
                                     this.setBodyTexture(ball, 'basketball');
                                     this.world.addBody(ball);
