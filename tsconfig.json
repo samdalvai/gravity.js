@@ -9,8 +9,8 @@
   },
   "include": [
     "src/**/*",
-    "src_new/**/*",
-    "__tests__/**/*"
+    "__tests__/**/*",
+    "demo/**/*"
   ],
   "exclude": [
     "node_modules"
