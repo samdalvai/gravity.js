@@ -6,13 +6,14 @@ import { SETTINGS } from './Constants';
 
 // TODO: make this an abstract class and make shapes extend this
 export class RigidBody {
-    static nextId = 0;
-    id: number;
+    private static nextId = 0;
+
+    readonly id: number;
 
     // Linear motion
     position: Vec2;
     velocity: Vec2;
-    acceleration: Vec2;
+    private _acceleration: Vec2;
 
     // Angular motion
     rotation: number;
@@ -30,7 +31,7 @@ export class RigidBody {
     I: number;
     invI: number;
 
-    // Coefficient of restitution (elasticity)
+    // Material properties
     private _restitution: number;
     private _friction: number;
     surfaceSpeed: number;
@@ -44,14 +45,14 @@ export class RigidBody {
     hasCCD = false;
 
     // Pointer to the shape/geometry of this rigid body
-    shape: Shape;
-    shapeType: ShapeType;
+    readonly shape: Shape;
+    readonly shapeType: ShapeType;
 
     // AABB
-    minX!: number;
-    maxX!: number;
-    minY!: number;
-    maxY!: number;
+    minX = 0;
+    maxX = 0;
+    minY = 0;
+    maxY = 0;
 
     constructor(shape: Shape, x: number, y: number, mass: number) {
         this.id = RigidBody.nextId++;
@@ -63,7 +64,7 @@ export class RigidBody {
 
         this.position = new Vec2(x, y);
         this.velocity = new Vec2(0, 0);
-        this.acceleration = new Vec2(0, 0);
+        this._acceleration = new Vec2(0, 0);
 
         this.rotation = 0.0;
         this.angularVelocity = 0.0;
@@ -73,49 +74,23 @@ export class RigidBody {
         this._sumForces = new Vec2(0, 0);
         this._sumTorque = 0.0;
 
+        this.mass = mass;
+        this.invMass = 0.0;
+        this.I = 0.0;
+        this.invI = 0.0;
+
         this._restitution = 0.2;
         this._friction = 0.7;
         this.surfaceSpeed = 0;
 
-        this.mass = mass;
-
-        if (mass != 0.0) {
-            this.invMass = 1.0 / mass;
-        } else {
-            this.invMass = 0.0;
-        }
-
-        this.I = shape.getMomentOfInertia() * mass;
-
-        if (this.I != 0.0) {
-            this.invI = 1.0 / this.I;
-        } else {
-            this.invI = 0.0;
-        }
+        this.updateMassProperties();
 
         this.shape.updateVertices(this.rotation, this.position);
         this.shape.updateAABB(this);
     }
 
-    get isBullet() {
-        return this._isBullet;
-    }
-
-    /** Set this to true if you want to run CCD for this object, use splaringly because
-     *  CCD is expensive
-     */
-    set isBullet(value: boolean) {
-        Utils.assert(this.shapeType === ShapeType.CIRCLE);
-        Utils.assert(this.shape instanceof CircleShape);
-        this._isBullet = value;
-    }
-
-    get restitution() {
+    get restitution(): number {
         return this._restitution;
-    }
-
-    get friction() {
-        return this._friction;
     }
 
     set restitution(value: number) {
@@ -123,9 +98,38 @@ export class RigidBody {
         this._restitution = value;
     }
 
+    get friction(): number {
+        return this._friction;
+    }
+
     set friction(value: number) {
         Utils.assert(value >= 0 && value <= 1);
         this._friction = value;
+    }
+
+    get isBullet(): boolean {
+        return this._isBullet;
+    }
+
+    /** Set this to true if you want to run CCD for this object, use splaringly because
+     *  CCD is expensive
+     */
+    set isBullet(value: boolean) {
+        if (value) {
+            Utils.assert(this.shapeType === ShapeType.CIRCLE);
+            Utils.assert(this.shape instanceof CircleShape);
+        }
+
+        this._isBullet = value;
+    }
+
+    private updateMassProperties(): void {
+        Utils.assert(this.mass >= 0, 'Mass must be non-negative');
+        Utils.assert(this.shapeType !== ShapeType.SEGMENT || this.mass === 0, 'Segments can only be static');
+
+        this.invMass = this.mass !== 0.0 ? 1.0 / this.mass : 0.0;
+        this.I = this.shape.getMomentOfInertia() * this.mass;
+        this.invI = this.I !== 0.0 ? 1.0 / this.I : 0.0;
     }
 
     isStatic(): boolean {
@@ -142,7 +146,8 @@ export class RigidBody {
     }
 
     clearForces(): void {
-        this._sumForces = new Vec2(0.0, 0.0);
+        this._sumForces.x = 0.0;
+        this._sumForces.y = 0.0;
     }
 
     clearTorque(): void {
@@ -211,12 +216,12 @@ export class RigidBody {
         }
 
         // Find the acceleration based on the forces that are being applied and the mass
-        this.acceleration.x = this._sumForces.x * this.invMass;
-        this.acceleration.y = this._sumForces.y * this.invMass;
+        this._acceleration.x = this._sumForces.x * this.invMass;
+        this._acceleration.y = this._sumForces.y * this.invMass;
 
         // Integrate the acceleration to find the new velocity
-        this.velocity.x += this.acceleration.x * dt;
-        this.velocity.y += this.acceleration.y * dt;
+        this.velocity.x += this._acceleration.x * dt;
+        this.velocity.y += this._acceleration.y * dt;
 
         // Find the angular acceleration based on the torque that is being applied and the moment of inertia
         this.angularAcceleration = this._sumTorque * this.invI;
