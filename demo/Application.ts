@@ -610,22 +610,62 @@ export default class Application {
             numContacts += manifold.numContacts;
         }
 
+        if (!this.debug) {
+            return;
+        }
+
         const x = InputManager.mousePosition.x;
         const y = InputManager.mousePosition.y;
 
-        const debugText = [
-            `FPS: ${this.FPS.toFixed(2)}`,
-            `Mouse position: {${x.toFixed(2)}, ${y.toFixed(2)}}`,
-            `Zoom: ${Graphics.zoom.toFixed(2)}`,
-            '-------------------------------------------------------------------------------',
-            `Num objects: ${this.world.getBodies().length} / ${MAX_BODIES} (max)`,
-            `Num contacts: ${numContacts}`,
+        const stats: Array<[string, string]> = [
+            ['Demo', Demo.demoStrings[this.demoIndex].replace(/^Demo \d+:\s*/, '')],
+            ['Gravity', SETTINGS.applyGravity ? 'ON' : 'OFF'],
+            ['Paused', this.paused ? 'ON' : 'OFF'],
+            ['AABB', this.showAABB ? 'ON' : 'OFF'],
+            ['Contacts', this.showContacts ? 'ON' : 'OFF'],
+            ['Bodies', `${this.world.getBodies().length}/${MAX_BODIES}`],
+            ['Collisions', `${numContacts}`],
+            ['FPS', this.FPS.toFixed(2)],
+            ['Zoom', Graphics.zoom.toFixed(2)],
+            ['Mouse', `${x.toFixed(1)}, ${y.toFixed(1)}`],
         ];
 
-        const textTop = (this.toolbar?.offsetHeight ?? 0) + 24;
+        const panelX = 20;
+        const panelY = (this.toolbar?.offsetHeight ?? 0) + 16;
+        const panelWidth = 320;
+        const panelPaddingX = 14;
+        const panelPaddingY = 14;
+        const titleHeight = 22;
+        const subtitleHeight = 20;
+        const rowHeight = 22;
+        const panelHeight = panelPaddingY * 2 + titleHeight + subtitleHeight + stats.length * rowHeight;
 
-        for (let i = 0; i < debugText.length; i++) {
-            Graphics.drawText(debugText[i], 24, textTop + i * 25, 18, 'arial', this.debug ? 'orange' : 'black');
+        Graphics.drawFillRect(panelX, panelY, panelWidth, panelHeight, 'rgba(10, 12, 16, 0.78)');
+        Graphics.drawStrokeRect(panelX, panelY, panelWidth, panelHeight, 'rgba(255, 255, 255, 0.14)');
+        Graphics.drawFillRect(panelX, panelY, panelWidth, 3, '#ff9d2e');
+
+        Graphics.drawText('DEBUG', panelX + panelPaddingX, panelY + 18, 15, 'Arial', '#ffb15c', 'left', 'middle');
+        Graphics.drawText(
+            'Runtime Stats',
+            panelX + panelPaddingX,
+            panelY + 40,
+            13,
+            'Arial',
+            'rgba(255, 255, 255, 0.7)',
+            'left',
+            'middle',
+        );
+
+        const labelX = panelX + panelPaddingX;
+        const valueX = panelX + panelWidth - panelPaddingX;
+        const rowsTop = panelY + panelPaddingY + titleHeight + subtitleHeight + 10;
+
+        for (let i = 0; i < stats.length; i++) {
+            const [label, value] = stats[i];
+            const rowY = rowsTop + i * rowHeight;
+
+            Graphics.drawText(label, labelX, rowY, 14, 'Arial', 'rgba(255, 255, 255, 0.72)', 'left', 'middle');
+            Graphics.drawText(value, valueX, rowY, 14, 'Arial', '#ffffff', 'right', 'middle');
         }
     }
 
