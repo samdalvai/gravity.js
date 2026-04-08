@@ -828,22 +828,26 @@ export default class Application {
     }
 
     private setSolverIterations(value: number): void {
-        if (!Number.isFinite(value)) {
+        const clampedValue = Utils.clamp(value, 1, 30);
+
+        if (!Number.isFinite(clampedValue)) {
             this.syncUI();
             return;
         }
 
-        SETTINGS.solverIterations = Math.max(1, Math.round(value));
+        SETTINGS.solverIterations = Math.max(1, Math.round(clampedValue));
         this.syncUI();
     }
 
     private setSubSteps(value: number): void {
-        if (!Number.isFinite(value)) {
+        const clampedValue = Utils.clamp(value, 1, 10);
+
+        if (!Number.isFinite(clampedValue)) {
             this.syncUI();
             return;
         }
 
-        SETTINGS.subSteps = Math.max(1, Math.round(value));
+        SETTINGS.subSteps = Math.max(1, Math.round(clampedValue));
         this.syncUI();
     }
 
