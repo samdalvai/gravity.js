@@ -1,4 +1,4 @@
-export { default as Force } from './force/Force';
+export { Force } from './force/Force';
 
 export {
     FIXED_DELTA_TIME,
