@@ -56,6 +56,10 @@ canvas {
   color: #fff;
 }
 
+.toolbar-control input[type='number'] {
+  max-width: 100;
+}
+
 .toolbar-control input[type='checkbox'] {
   accent-color: #ff8c1a;
 }
