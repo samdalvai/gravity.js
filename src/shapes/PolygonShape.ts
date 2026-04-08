@@ -11,7 +11,6 @@ export class PolygonShape extends Shape {
 
     width: number;
     height: number;
-    radius = 0;
 
     constructor(vertices: Vec2[]) {
         super();
