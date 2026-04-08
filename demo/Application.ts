@@ -20,53 +20,12 @@ import Graphics from './graphics/Graphics';
 import InputManager, { MouseButton } from './input/InputManager';
 import BodyRenderRegistry from './render/BodyRenderRegistry';
 import Demo from './samples/Demo';
+import UIManager, { UIState } from './ui/UIManager';
 
 const BODY_REMOVAL_THRESHOLD = 25_000;
 const PLAYER_MAX_SPEED = 350;
 const PLAYER_ACCELERATION = 10;
 const PLAYER_JUMP_IMPULSE = 600;
-
-const SHORTCUT_SECTIONS = [
-    {
-        title: 'Scene',
-        items: [
-            '[ 0-9 ] Select demo',
-            '[ G ] Toggle gravity',
-            '[ D ] Toggle debug rendering',
-            '[ A ] Toggle AABB debug',
-            '[ S ] Toggle contact and joint debug',
-            '[ P ] Pause simulation',
-            '[ . ] Step simulation',
-            '[ , ] Step backward (testing only)',
-            '[ + ] [ - ] Increase or decrease solver iterations',
-            '[ * ] [ / ] Increase or decrease substeps',
-        ],
-    },
-    {
-        title: 'Spawn',
-        items: [
-            '[ Left Mouse ] Spawn circle',
-            '[ Right Mouse ] Spawn box',
-            '[ C ] Spawn particles while held',
-            '[ X ] Spawn capsule',
-            '[ Z ] Spawn segment',
-            '[ R ] Spawn random convex polygon',
-            '[ B ] Shoot bullet',
-            '[ E ] Trigger explosion at mouse',
-            '[ F ] Spawn gravitational field at mouse',
-        ],
-    },
-    {
-        title: 'Player And Camera',
-        items: [
-            '[ Q ] Spawn player at mouse',
-            '[ Space ] Jump',
-            '[ Left Arrow ] [ Right Arrow ] Move player',
-            '[ Middle Mouse ] Drag camera',
-            '[ Mouse Wheel ] Zoom camera',
-        ],
-    },
-] as const;
 
 export default class Application {
     private running = false;
@@ -93,20 +52,7 @@ export default class Application {
     private lastFPSUpdate = 0;
     private showContacts = true;
     private showAABB = false;
-
-    private toolbar: HTMLElement | null = null;
-    private demoSelect: HTMLSelectElement | null = null;
-    private debugCheckbox: HTMLInputElement | null = null;
-    private showAABBCheckbox: HTMLInputElement | null = null;
-    private showContactsCheckbox: HTMLInputElement | null = null;
-    private gravityCheckbox: HTMLInputElement | null = null;
-    private pausedCheckbox: HTMLInputElement | null = null;
-    private solverIterationsInput: HTMLInputElement | null = null;
-    private subStepsInput: HTMLInputElement | null = null;
-    private stepButton: HTMLButtonElement | null = null;
-    private restartButton: HTMLButtonElement | null = null;
-    private shortcutsButton: HTMLButtonElement | null = null;
-    private shortcutsDialog: HTMLDialogElement | null = null;
+    private readonly uiManager = new UIManager();
 
     constructor() {
         this.world = new World(GRAVITY);
@@ -142,7 +88,18 @@ export default class Application {
         await AssetStore.loadTextures();
 
         this.running = Graphics.openWindow();
-        this.setupToolbar();
+        this.uiManager.initialize(this.getUIState(), {
+            onSelectDemo: index => this.loadDemo(index),
+            onRestartDemo: () => this.loadDemo(this.demoIndex),
+            onSetDebug: value => this.setDebug(value),
+            onSetShowAABB: value => this.setShowAABB(value),
+            onSetShowContacts: value => this.setShowContacts(value),
+            onSetApplyGravity: value => this.setApplyGravity(value),
+            onSetPaused: value => this.setPaused(value),
+            onSetSolverIterations: value => this.setSolverIterations(value),
+            onSetSubSteps: value => this.setSubSteps(value),
+            onStep: () => this.stepSimulation(),
+        });
         this.loadDemo(this.demoIndex);
     }
 
@@ -631,7 +588,7 @@ export default class Application {
         ];
 
         const panelX = 20;
-        const panelY = (this.toolbar?.offsetHeight ?? 0) + 16;
+        const panelY = this.uiManager.headerHeight + 16;
         const panelWidth = 320;
         const panelPaddingX = 14;
         const panelPaddingY = 14;
@@ -693,7 +650,7 @@ export default class Application {
         const demo = Demo.demoFunctions[index];
 
         if (!demo) {
-            this.syncToolbar();
+            this.syncUI();
             return;
         }
 
@@ -710,235 +667,73 @@ export default class Application {
         this.controlPressed = false;
         Graphics.resetView();
         demo(this.world, this);
-        this.syncToolbar();
+        this.syncUI();
     }
 
     private setDebug(value: boolean): void {
         this.debug = value;
-        this.syncToolbar();
+        this.syncUI();
     }
 
     private setShowAABB(value: boolean): void {
         this.showAABB = value;
-        this.syncToolbar();
+        this.syncUI();
     }
 
     private setShowContacts(value: boolean): void {
         this.showContacts = value;
-        this.syncToolbar();
+        this.syncUI();
     }
 
     private setPaused(value: boolean): void {
         this.paused = value;
-        this.syncToolbar();
+        this.syncUI();
     }
 
     private setApplyGravity(value: boolean): void {
         SETTINGS.applyGravity = value;
-        this.syncToolbar();
+        this.syncUI();
     }
 
     private setSolverIterations(value: number): void {
         if (!Number.isFinite(value)) {
-            this.syncToolbar();
+            this.syncUI();
             return;
         }
 
         SETTINGS.solverIterations = Math.max(1, Math.round(value));
-        this.syncToolbar();
+        this.syncUI();
     }
 
     private setSubSteps(value: number): void {
         if (!Number.isFinite(value)) {
-            this.syncToolbar();
+            this.syncUI();
             return;
         }
 
         SETTINGS.subSteps = Math.max(1, Math.round(value));
-        this.syncToolbar();
+        this.syncUI();
     }
 
     private stepSimulation(): void {
         this.world.update(SETTINGS.dt);
     }
 
-    private setupToolbar(): void {
-        const toolbar = document.getElementById('demo-toolbar');
-        if (!(toolbar instanceof HTMLElement)) {
-            return;
-        }
-
-        this.toolbar = toolbar;
-        toolbar.replaceChildren();
-
-        const createGroup = () => {
-            const group = document.createElement('div');
-            group.className = 'toolbar-group';
-            toolbar.appendChild(group);
-            return group;
+    private getUIState(): UIState {
+        return {
+            demoIndex: this.demoIndex,
+            demoLabels: Demo.demoStrings,
+            debug: this.debug,
+            showAABB: this.showAABB,
+            showContacts: this.showContacts,
+            applyGravity: SETTINGS.applyGravity,
+            paused: this.paused,
+            solverIterations: SETTINGS.solverIterations,
+            subSteps: SETTINGS.subSteps,
         };
-
-        const createLabeledControl = (group: HTMLElement, labelText: string, control: HTMLElement) => {
-            const label = document.createElement('label');
-            label.className = 'toolbar-control';
-
-            const text = document.createElement('span');
-            text.textContent = labelText;
-
-            label.append(text, control);
-            group.appendChild(label);
-        };
-
-        const createCheckbox = (group: HTMLElement, labelText: string, onChange: (checked: boolean) => void) => {
-            const label = document.createElement('label');
-            label.className = 'toolbar-control';
-
-            const input = document.createElement('input');
-            input.type = 'checkbox';
-            input.addEventListener('change', () => onChange(input.checked));
-
-            label.append(input, document.createTextNode(labelText));
-            group.appendChild(label);
-
-            return input;
-        };
-
-        const createNumberInput = (group: HTMLElement, labelText: string, onChange: (value: number) => void) => {
-            const input = document.createElement('input');
-            input.type = 'number';
-            input.min = '1';
-            input.step = '1';
-            input.addEventListener('change', () => onChange(Number.parseInt(input.value)));
-            createLabeledControl(group, labelText, input);
-            return input;
-        };
-
-        const demoGroup = createGroup();
-        this.demoSelect = document.createElement('select');
-        Demo.demoStrings.forEach((label, index) => {
-            const option = document.createElement('option');
-            option.value = `${index}`;
-            option.textContent = label;
-            this.demoSelect!.appendChild(option);
-        });
-        this.demoSelect.addEventListener('change', () => this.loadDemo(Number.parseInt(this.demoSelect!.value)));
-        createLabeledControl(demoGroup, 'Demo', this.demoSelect);
-
-        this.restartButton = document.createElement('button');
-        this.restartButton.type = 'button';
-        this.restartButton.className = 'toolbar-button';
-        this.restartButton.textContent = 'Restart';
-        this.restartButton.addEventListener('click', () => this.loadDemo(Number.parseInt(this.demoSelect!.value)));
-        demoGroup.appendChild(this.restartButton);
-
-        const toggleGroup = createGroup();
-        this.debugCheckbox = createCheckbox(toggleGroup, 'Debug', checked => this.setDebug(checked));
-        this.showAABBCheckbox = createCheckbox(toggleGroup, 'Show AABB', checked => this.setShowAABB(checked));
-        this.showContactsCheckbox = createCheckbox(toggleGroup, 'Show Contacts', checked =>
-            this.setShowContacts(checked),
-        );
-        this.gravityCheckbox = createCheckbox(toggleGroup, 'Gravity', checked => this.setApplyGravity(checked));
-        this.pausedCheckbox = createCheckbox(toggleGroup, 'Paused', checked => this.setPaused(checked));
-
-        const numericGroup = createGroup();
-        this.solverIterationsInput = createNumberInput(numericGroup, 'Iterations', value =>
-            this.setSolverIterations(value),
-        );
-        this.subStepsInput = createNumberInput(numericGroup, 'Substeps', value => this.setSubSteps(value));
-
-        this.stepButton = document.createElement('button');
-        this.stepButton.type = 'button';
-        this.stepButton.className = 'toolbar-button';
-        this.stepButton.textContent = 'Step';
-        this.stepButton.addEventListener('click', () => this.stepSimulation());
-        numericGroup.appendChild(this.stepButton);
-
-        const actionsGroup = createGroup();
-        this.shortcutsButton = document.createElement('button');
-        this.shortcutsButton.type = 'button';
-        this.shortcutsButton.className = 'toolbar-button';
-        this.shortcutsButton.textContent = 'Shortcuts';
-        this.shortcutsButton.addEventListener('click', () => this.shortcutsDialog?.showModal());
-        actionsGroup.appendChild(this.shortcutsButton);
-
-        this.shortcutsDialog = document.createElement('dialog');
-        this.shortcutsDialog.id = 'demo-shortcuts-modal';
-        this.shortcutsDialog.addEventListener('click', event => {
-            if (event.target === this.shortcutsDialog) {
-                this.shortcutsDialog?.close();
-            }
-        });
-
-        const dialogHeader = document.createElement('div');
-        dialogHeader.className = 'shortcuts-modal-header';
-
-        const dialogTitle = document.createElement('h2');
-        dialogTitle.textContent = 'Keyboard And Mouse Shortcuts';
-
-        const closeButton = document.createElement('button');
-        closeButton.type = 'button';
-        closeButton.className = 'toolbar-button';
-        closeButton.textContent = 'Close';
-        closeButton.addEventListener('click', () => this.shortcutsDialog?.close());
-
-        dialogHeader.append(dialogTitle, closeButton);
-        this.shortcutsDialog.appendChild(dialogHeader);
-
-        const dialogContent = document.createElement('div');
-        dialogContent.className = 'shortcuts-modal-content';
-
-        SHORTCUT_SECTIONS.forEach(section => {
-            const sectionEl = document.createElement('section');
-            sectionEl.className = 'shortcuts-section';
-
-            const title = document.createElement('h3');
-            title.textContent = section.title;
-            sectionEl.appendChild(title);
-
-            const list = document.createElement('ul');
-            section.items.forEach(item => {
-                const listItem = document.createElement('li');
-                listItem.textContent = item;
-                list.appendChild(listItem);
-            });
-
-            sectionEl.appendChild(list);
-            dialogContent.appendChild(sectionEl);
-        });
-
-        this.shortcutsDialog.appendChild(dialogContent);
-        toolbar.appendChild(this.shortcutsDialog);
-
-        this.syncToolbar();
     }
 
-    private syncToolbar(): void {
-        if (
-            !this.demoSelect ||
-            !this.debugCheckbox ||
-            !this.showAABBCheckbox ||
-            !this.showContactsCheckbox ||
-            !this.gravityCheckbox ||
-            !this.pausedCheckbox ||
-            !this.solverIterationsInput ||
-            !this.subStepsInput
-        ) {
-            return;
-        }
-
-        this.demoSelect.value = `${this.demoIndex}`;
-        this.debugCheckbox.checked = this.debug;
-        this.showAABBCheckbox.checked = this.showAABB;
-        this.showContactsCheckbox.checked = this.showContacts;
-        this.gravityCheckbox.checked = SETTINGS.applyGravity;
-        this.pausedCheckbox.checked = this.paused;
-        this.solverIterationsInput.value = `${SETTINGS.solverIterations}`;
-        this.subStepsInput.value = `${SETTINGS.subSteps}`;
-        this.showAABBCheckbox.disabled = !this.debug;
-        this.showContactsCheckbox.disabled = !this.debug;
-
-        if (this.stepButton) {
-            this.stepButton.disabled = !this.paused;
-        }
+    private syncUI(): void {
+        this.uiManager.sync(this.getUIState());
     }
 }
