@@ -793,6 +793,7 @@ export default class Application {
         this.middleMousePressed = false;
         this.controlPressed = false;
         Graphics.resetView();
+        SETTINGS.applyGravity = true;
         demo(this.world, this);
         this.syncUI();
     }
