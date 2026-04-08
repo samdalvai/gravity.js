@@ -36,7 +36,15 @@ export default class InputManager {
         });
     };
 
+    static isToolbarEventTarget = (target: EventTarget | null) => {
+        return target instanceof Element && target.closest('#demo-toolbar') !== null;
+    };
+
     static handleKeyboardEvent = (event: KeyboardEvent) => {
+        if (event.type === 'keydown' && this.isToolbarEventTarget(event.target)) {
+            return;
+        }
+
         this.keyboardInputBuffer.push(event);
     };
 
@@ -45,10 +53,18 @@ export default class InputManager {
     };
 
     static handleMouseClick = (event: MouseEvent) => {
+        if (event.type === 'mousedown' && this.isToolbarEventTarget(event.target)) {
+            return;
+        }
+
         this.mouseInputBuffer.push(event);
     };
 
     static handleWheelEvent = (event: MouseEvent) => {
+        if (this.isToolbarEventTarget(event.target)) {
+            return;
+        }
+
         // Wheel events for mousepads are triggered much faster compared to mouse wheels
         // whith this logic we prevent scrolling too fast on mouse pads
         if (performance.now() - this.lastWheelEventTime < 25) {
