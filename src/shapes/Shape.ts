@@ -10,6 +10,8 @@ export enum ShapeType {
 }
 
 export abstract class Shape {
+    radius = 0;
+
     abstract getType(): ShapeType;
     abstract getMomentOfInertia(): number;
     abstract updateVertices(angle: number, position: Vec2): void;

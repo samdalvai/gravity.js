@@ -4,7 +4,6 @@ import { Shape, ShapeType } from './Shape';
 
 export class CapsuleShape extends Shape {
     halfHeight: number;
-    radius: number;
     width: number;
     height: number;
 
