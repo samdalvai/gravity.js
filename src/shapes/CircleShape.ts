@@ -3,8 +3,6 @@ import { Vec2 } from '../math/Vec2';
 import { Shape, ShapeType } from './Shape';
 
 export class CircleShape extends Shape {
-    radius: number = 0;
-
     constructor(radius: number) {
         super();
         this.radius = radius;
