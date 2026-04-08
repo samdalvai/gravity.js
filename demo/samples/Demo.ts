@@ -11,6 +11,7 @@ import {
     DistanceJoint,
     PolygonShape,
     RigidBody,
+    Utils,
     Vec2,
     World,
 } from '../../src';
@@ -20,6 +21,14 @@ import Graphics from '../graphics/Graphics';
 const FLOOR_WIDTH = 3200;
 const FLOOR_HEIGHT = 50;
 const FLOOR_POSITION_Y = -350;
+const STRESS_DEMO_COLUMNS = 25;
+const STRESS_DEMO_ROWS = 40;
+const SQUARE_CAGE_INNER_SIZE = 1000;
+
+interface CageBounds {
+    innerBottom: number;
+    innerTop: number;
+}
 
 interface JointTuning {
     frequency: number;
@@ -49,6 +58,10 @@ export default class Demo {
         'Demo 7: A plank',
         'Demo 8: Cloth simulation',
         'Demo 9: Stress test',
+        'Demo 10: 1000 Circles',
+        'Demo 11: 1000 Boxes',
+        'Demo 12: 1000 Capsules',
+        'Demo 13: 1000 Random convex shapes',
     ];
 
     static generateFloor(world: World, app: Application): RigidBody {
@@ -81,6 +94,74 @@ export default class Demo {
         app.setBodyTexture(rightFence, 'transparent');
         world.addBody(leftFence);
         world.addBody(rightFence);
+    }
+
+    static generateSquareCage(world: World, app: Application): CageBounds {
+        const wallThickness = FLOOR_HEIGHT;
+        const innerBottom = FLOOR_POSITION_Y + wallThickness / 2;
+        const innerTop = innerBottom + SQUARE_CAGE_INNER_SIZE;
+        const wallSpan = SQUARE_CAGE_INNER_SIZE + wallThickness * 2;
+        const wallColor = '#4d5a72';
+        const walls = [
+            Bodies.box({
+                width: wallSpan,
+                height: wallThickness,
+                x: 0,
+                y: innerBottom - wallThickness / 2,
+                mass: 0,
+            }),
+            Bodies.box({
+                width: wallSpan,
+                height: wallThickness,
+                x: 0,
+                y: innerTop + wallThickness / 2,
+                mass: 0,
+            }),
+            Bodies.box({
+                width: wallThickness,
+                height: wallSpan,
+                x: -(SQUARE_CAGE_INNER_SIZE / 2 + wallThickness / 2),
+                y: (innerBottom + innerTop) / 2,
+                mass: 0,
+            }),
+            Bodies.box({
+                width: wallThickness,
+                height: wallSpan,
+                x: SQUARE_CAGE_INNER_SIZE / 2 + wallThickness / 2,
+                y: (innerBottom + innerTop) / 2,
+                mass: 0,
+            }),
+        ];
+
+        for (const wall of walls) {
+            app.setBodyFillColor(wall, wallColor);
+            world.addBody(wall);
+        }
+
+        return { innerBottom, innerTop };
+    }
+
+    static populateStressDemo(
+        world: World,
+        bounds: CageBounds,
+        createBody: (x: number, y: number, index: number) => RigidBody,
+    ): void {
+        const stepX = 34;
+        const stepY = 23;
+        const totalWidth = (STRESS_DEMO_COLUMNS - 1) * stepX;
+        const totalHeight = (STRESS_DEMO_ROWS - 1) * stepY;
+        const startX = -totalWidth / 2;
+        const startY = bounds.innerBottom + (bounds.innerTop - bounds.innerBottom - totalHeight) / 2;
+
+        for (let row = 0; row < STRESS_DEMO_ROWS; row++) {
+            for (let col = 0; col < STRESS_DEMO_COLUMNS; col++) {
+                const index = row * STRESS_DEMO_COLUMNS + col;
+                const body = createBody(startX + col * stepX, startY + row * stepY, index);
+                body.restitution = 0.05;
+                body.friction = 0.6;
+                world.addBody(body);
+            }
+        }
     }
 
     static createDistanceJoint(
@@ -559,6 +640,64 @@ export default class Demo {
         }
     };
 
+    static demo10 = (world: World, app: Application) => {
+        app.setBackground('darkBackground');
+
+        // Demo 10: 1000 circles inside a square cage
+        const cage = this.generateSquareCage(world, app);
+
+        this.populateStressDemo(world, cage, (x, y) => {
+            const body = Bodies.circle({ radius: 10, x, y, mass: 1 });
+            app.setBodyFillColor(body, '#7bdff2');
+            return body;
+        });
+    };
+
+    static demo11 = (world: World, app: Application) => {
+        app.setBackground('darkBackground');
+
+        // Demo 11: 1000 boxes inside a square cage
+        const cage = this.generateSquareCage(world, app);
+
+        this.populateStressDemo(world, cage, (x, y) => {
+            const body = Bodies.box({ width: 18, height: 18, x, y, mass: 1 });
+            app.setBodyFillColor(body, '#f4a261');
+            return body;
+        });
+    };
+
+    static demo12 = (world: World, app: Application) => {
+        app.setBackground('darkBackground');
+
+        // Demo 12: 1000 capsules inside a square cage
+        const cage = this.generateSquareCage(world, app);
+
+        this.populateStressDemo(world, cage, (x, y) => {
+            const body = Bodies.capsule({ halfHeight: 6, radius: 6, x, y, mass: 1 });
+            app.setBodyFillColor(body, '#b8f2e6');
+            return body;
+        });
+    };
+
+    static demo13 = (world: World, app: Application) => {
+        app.setBackground('darkBackground');
+
+        // Demo 13: 1000 random convex shapes inside a square cage
+        const cage = this.generateSquareCage(world, app);
+        const palette = ['#f94144', '#f8961e', '#f9c74f', '#43aa8b', '#577590'];
+
+        this.populateStressDemo(world, cage, (x, y, index) => {
+            const radius = Utils.randomNumber(8, 12);
+            const vertices = Math.round(Utils.randomNumber(3, 8));
+            const body = Utils.randomConvexBody(x, y, radius, vertices);
+            body.rotation = Utils.randomNumber(0, Math.PI * 2);
+            body.shape.updateVertices(body.rotation, body.position);
+            body.shape.updateAABB(body);
+            app.setBodyFillColor(body, palette[index % palette.length]);
+            return body;
+        });
+    };
+
     static demo0 = (world: World, app: Application) => {
         app.setBackground('background');
 
@@ -728,5 +867,9 @@ export default class Demo {
         this.demo7,
         this.demo8,
         this.demo9,
+        this.demo10,
+        this.demo11,
+        this.demo12,
+        this.demo13,
     ];
 }
