@@ -62,6 +62,7 @@ export default class Application {
     private solverIterationsInput: HTMLInputElement | null = null;
     private subStepsInput: HTMLInputElement | null = null;
     private stepButton: HTMLButtonElement | null = null;
+    private restartButton: HTMLButtonElement | null = null;
 
     constructor() {
         this.world = new World(GRAVITY);
@@ -757,10 +758,19 @@ export default class Application {
         this.demoSelect.addEventListener('change', () => this.loadDemo(Number.parseInt(this.demoSelect!.value)));
         createLabeledControl(demoGroup, 'Demo', this.demoSelect);
 
+        this.restartButton = document.createElement('button');
+        this.restartButton.type = 'button';
+        this.restartButton.className = 'toolbar-button';
+        this.restartButton.textContent = 'Restart';
+        this.restartButton.addEventListener('click', () => this.loadDemo(Number.parseInt(this.demoSelect!.value)));
+        demoGroup.appendChild(this.restartButton);
+
         const toggleGroup = createGroup();
         this.debugCheckbox = createCheckbox(toggleGroup, 'Debug', checked => this.setDebug(checked));
         this.showAABBCheckbox = createCheckbox(toggleGroup, 'Show AABB', checked => this.setShowAABB(checked));
-        this.showContactsCheckbox = createCheckbox(toggleGroup, 'Show Contacts', checked => this.setShowContacts(checked));
+        this.showContactsCheckbox = createCheckbox(toggleGroup, 'Show Contacts', checked =>
+            this.setShowContacts(checked),
+        );
         this.gravityCheckbox = createCheckbox(toggleGroup, 'Gravity', checked => this.setApplyGravity(checked));
         this.pausedCheckbox = createCheckbox(toggleGroup, 'Paused', checked => this.setPaused(checked));
 
