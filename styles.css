@@ -57,7 +57,7 @@ canvas {
 }
 
 .toolbar-control input[type='number'] {
-  max-width: 100;
+  width: 72px;
 }
 
 .toolbar-control input[type='checkbox'] {
@@ -73,4 +73,65 @@ canvas {
 .toolbar-control select:disabled {
   opacity: 0.55;
   cursor: default;
+}
+
+#demo-shortcuts-modal {
+  width: min(720px, calc(100vw - 32px));
+  max-height: min(80vh, 700px);
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 12px;
+  background: #161616;
+  color: #fff;
+  box-sizing: border-box;
+  margin: auto;
+}
+
+#demo-shortcuts-modal[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+#demo-shortcuts-modal::backdrop {
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.shortcuts-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.shortcuts-modal-header h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.shortcuts-modal-content {
+  display: grid;
+  flex: 1 1 auto;
+  min-height: 0;
+  gap: 18px;
+  padding: 18px;
+  overflow-y: auto;
+}
+
+.shortcuts-section h3 {
+  margin: 0 0 8px;
+  font-size: 16px;
+  color: #ffb15c;
+}
+
+.shortcuts-section ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.shortcuts-section li {
+  margin: 6px 0;
+  line-height: 1.35;
 }
