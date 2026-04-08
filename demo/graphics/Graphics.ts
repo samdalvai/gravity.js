@@ -105,6 +105,27 @@ export default class Graphics {
         this.ctx.stroke();
     }
 
+    static drawArrow(
+        x0: number,
+        y0: number,
+        x1: number,
+        y1: number,
+        color = 'white',
+        width = 1,
+        headSize = 6,
+    ): void {
+        this.drawLine(x0, y0, x1, y1, color, width);
+
+        const angle = Math.atan2(y1 - y0, x1 - x0);
+        const leftX = x1 - headSize * Math.cos(angle - Math.PI / 6);
+        const leftY = y1 - headSize * Math.sin(angle - Math.PI / 6);
+        const rightX = x1 - headSize * Math.cos(angle + Math.PI / 6);
+        const rightY = y1 - headSize * Math.sin(angle + Math.PI / 6);
+
+        this.drawLine(x1, y1, leftX, leftY, color, width);
+        this.drawLine(x1, y1, rightX, rightY, color, width);
+    }
+
     static drawCircle(radius: number, color = 'white'): void {
         // Draw the circle
         this.ctx.beginPath();
