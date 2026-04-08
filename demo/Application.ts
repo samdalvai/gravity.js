@@ -26,6 +26,48 @@ const PLAYER_MAX_SPEED = 350;
 const PLAYER_ACCELERATION = 10;
 const PLAYER_JUMP_IMPULSE = 600;
 
+const SHORTCUT_SECTIONS = [
+    {
+        title: 'Scene',
+        items: [
+            '[ 0-9 ] Select demo',
+            '[ G ] Toggle gravity',
+            '[ D ] Toggle debug rendering',
+            '[ A ] Toggle AABB debug',
+            '[ S ] Toggle contact and joint debug',
+            '[ P ] Pause simulation',
+            '[ . ] Step simulation',
+            '[ , ] Step backward (testing only)',
+            '[ + ] [ - ] Increase or decrease solver iterations',
+            '[ * ] [ / ] Increase or decrease substeps',
+        ],
+    },
+    {
+        title: 'Spawn',
+        items: [
+            '[ Left Mouse ] Spawn circle',
+            '[ Right Mouse ] Spawn box',
+            '[ C ] Spawn particles while held',
+            '[ X ] Spawn capsule',
+            '[ Z ] Spawn segment',
+            '[ R ] Spawn random convex polygon',
+            '[ B ] Shoot bullet',
+            '[ E ] Trigger explosion at mouse',
+            '[ F ] Spawn gravitational field at mouse',
+        ],
+    },
+    {
+        title: 'Player And Camera',
+        items: [
+            '[ Q ] Spawn player at mouse',
+            '[ Space ] Jump',
+            '[ Left Arrow ] [ Right Arrow ] Move player',
+            '[ Middle Mouse ] Drag camera',
+            '[ Mouse Wheel ] Zoom camera',
+        ],
+    },
+] as const;
+
 export default class Application {
     private running = false;
     private paused = false;
@@ -63,6 +105,8 @@ export default class Application {
     private subStepsInput: HTMLInputElement | null = null;
     private stepButton: HTMLButtonElement | null = null;
     private restartButton: HTMLButtonElement | null = null;
+    private shortcutsButton: HTMLButtonElement | null = null;
+    private shortcutsDialog: HTMLDialogElement | null = null;
 
     constructor() {
         this.world = new World(GRAVITY);
@@ -566,37 +610,22 @@ export default class Application {
             numContacts += manifold.numContacts;
         }
 
-        const defaultText = [
-            // General info
-            '[ 1-9 ] select demo, [ Left Mouse ] to generate circles, [ Right Mouse ] to generate boxes',
-            '[ C ] to generate particles, [ X ] to generate capsules, [ R ] to generate random convex polygon',
-            '[ E ] to generate explosion, [ F ] to generate gravitational field, [ B ] to shoot bullet',
-            '[ Q ] to spawn player object, [ Space ] to jump, [Left arrow / Right arrow] to move',
-            `[ G ] apply gravity: ${SETTINGS.applyGravity ? 'ON' : 'OFF'}`,
-            `[ D ] debug mode: ${this.debug ? 'ON' : 'OFF'}`,
-            `[ P ] pause simulation: ${this.paused ? 'ON' : 'OFF'}, [ . ] step simulation`,
-        ];
-
         const x = InputManager.mousePosition.x;
         const y = InputManager.mousePosition.y;
 
         const debugText = [
-            // Debug related info
-            `[ A ] show AABB: ${this.showAABB ? 'ON' : 'OFF'}`,
-            `[ S ] show contacts and joints: ${this.showContacts ? 'ON' : 'OFF'}`,
-            `Num objects: ${this.world.getBodies().length} / ${MAX_BODIES} (max)`,
-            `Num contacts: ${numContacts}`,
-            '-------------------------------------------------------------------------------',
             `FPS: ${this.FPS.toFixed(2)}`,
             `Mouse position: {${x.toFixed(2)}, ${y.toFixed(2)}}`,
             `Zoom: ${Graphics.zoom.toFixed(2)}`,
+            '-------------------------------------------------------------------------------',
+            `Num objects: ${this.world.getBodies().length} / ${MAX_BODIES} (max)`,
+            `Num contacts: ${numContacts}`,
         ];
 
-        const text = [...defaultText, ...(this.debug ? debugText : [])];
         const textTop = (this.toolbar?.offsetHeight ?? 0) + 24;
 
-        for (let i = 0; i < text.length; i++) {
-            Graphics.drawText(text[i], 24, textTop + i * 25, 18, 'arial', this.debug ? 'orange' : 'black');
+        for (let i = 0; i < debugText.length; i++) {
+            Graphics.drawText(debugText[i], 24, textTop + i * 25, 18, 'arial', this.debug ? 'orange' : 'black');
         }
     }
 
@@ -783,6 +812,62 @@ export default class Application {
         this.stepButton.textContent = 'Step';
         this.stepButton.addEventListener('click', () => this.stepSimulation());
         numericGroup.appendChild(this.stepButton);
+
+        const actionsGroup = createGroup();
+        this.shortcutsButton = document.createElement('button');
+        this.shortcutsButton.type = 'button';
+        this.shortcutsButton.className = 'toolbar-button';
+        this.shortcutsButton.textContent = 'Shortcuts';
+        this.shortcutsButton.addEventListener('click', () => this.shortcutsDialog?.showModal());
+        actionsGroup.appendChild(this.shortcutsButton);
+
+        this.shortcutsDialog = document.createElement('dialog');
+        this.shortcutsDialog.id = 'demo-shortcuts-modal';
+        this.shortcutsDialog.addEventListener('click', event => {
+            if (event.target === this.shortcutsDialog) {
+                this.shortcutsDialog?.close();
+            }
+        });
+
+        const dialogHeader = document.createElement('div');
+        dialogHeader.className = 'shortcuts-modal-header';
+
+        const dialogTitle = document.createElement('h2');
+        dialogTitle.textContent = 'Keyboard And Mouse Shortcuts';
+
+        const closeButton = document.createElement('button');
+        closeButton.type = 'button';
+        closeButton.className = 'toolbar-button';
+        closeButton.textContent = 'Close';
+        closeButton.addEventListener('click', () => this.shortcutsDialog?.close());
+
+        dialogHeader.append(dialogTitle, closeButton);
+        this.shortcutsDialog.appendChild(dialogHeader);
+
+        const dialogContent = document.createElement('div');
+        dialogContent.className = 'shortcuts-modal-content';
+
+        SHORTCUT_SECTIONS.forEach(section => {
+            const sectionEl = document.createElement('section');
+            sectionEl.className = 'shortcuts-section';
+
+            const title = document.createElement('h3');
+            title.textContent = section.title;
+            sectionEl.appendChild(title);
+
+            const list = document.createElement('ul');
+            section.items.forEach(item => {
+                const listItem = document.createElement('li');
+                listItem.textContent = item;
+                list.appendChild(listItem);
+            });
+
+            sectionEl.appendChild(list);
+            dialogContent.appendChild(sectionEl);
+        });
+
+        this.shortcutsDialog.appendChild(dialogContent);
+        toolbar.appendChild(this.shortcutsDialog);
 
         this.syncToolbar();
     }
