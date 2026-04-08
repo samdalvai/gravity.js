@@ -85,6 +85,10 @@ export default class Application {
         this.testBody = body;
     }
 
+    setBlackHole(body: RigidBody | null): void {
+        this.blackHole = body;
+    }
+
     async setup(): Promise<void> {
         InputManager.initialize();
 
@@ -150,11 +154,11 @@ export default class Application {
                     }
 
                     if (key === 'f' && inputEvent.shiftKey) {
-                        this.blackHole = null;
+                        this.setBlackHole(null);
                     } else if (key === 'f') {
                         const x = InputManager.mousePosition.x;
                         const y = InputManager.mousePosition.y;
-                        this.blackHole = Bodies.circle({ radius: 0.0001, x, y, mass: 50_000 });
+                        this.setBlackHole(Bodies.circle({ radius: 0.0001, x, y, mass: 1_000_000 }));
                     }
 
                     if (inputEvent.key === 'c') {
@@ -475,10 +479,7 @@ export default class Application {
             this.player.velocity.x = Utils.clamp(this.player.velocity.x, -PLAYER_MAX_SPEED, PLAYER_MAX_SPEED);
         }
 
-        for (let i = 0; i < SETTINGS.subSteps; i++) {
-            this.applyBlackHoleForce();
-            this.world.update(SETTINGS.dt);
-        }
+        this.advanceSimulation();
 
         if (this.generateParticle) {
             const x = InputManager.mousePosition.x;
@@ -526,13 +527,13 @@ export default class Application {
         }
 
         if (this.blackHole) {
-            const blackHole = this.blackHole;
-            const { x, y } = blackHole.position;
-            const radius = 100;
+            const { x, y } = this.blackHole.position;
 
-            Graphics.drawFillCircle(x, y, radius, 'rgba(86, 185, 255, 0.05)');
-            Graphics.drawFillCircle(x, y, radius * 0.66, 'rgba(86, 185, 255, 0.05)');
-            Graphics.drawFillCircle(x, y, radius * 0.33, 'rgba(86, 185, 255, 0.05)');
+            Graphics.drawFillCircle(x, y, 150, 'rgba(122, 190, 255, 0.045)');
+            Graphics.drawFillCircle(x, y, 110, 'rgba(122, 190, 255, 0.045)');
+            Graphics.drawFillCircle(x, y, 78, 'rgba(122, 190, 255, 0.045)');
+            Graphics.drawFillCircle(x, y, 52, '#07090f');
+            Graphics.drawFillCircle(x, y, 36, '#000000');
             Graphics.drawFillCircle(x, y, 10, 'rgba(149, 224, 255, 0.95)');
             Graphics.drawFillCircle(x, y, 4, 'white');
         }
@@ -697,13 +698,22 @@ export default class Application {
             return;
         }
 
+        const blackHole = this.blackHole;
+
         for (const body of this.world.getBodies()) {
-            if (body.id === this.blackHole.id) {
+            if (body.id === blackHole.id) {
                 continue;
             }
 
-            const attraction = Force.generateGravitationalForce(body, this.blackHole, GRAVITY, 1, 200);
+            const attraction = Force.generateGravitationalForce(body, blackHole, GRAVITY, 80 * 80, 950 * 950);
             body.addForce(attraction);
+        }
+    }
+
+    private advanceSimulation(): void {
+        for (let i = 0; i < SETTINGS.subSteps; i++) {
+            this.applyBlackHoleForce();
+            this.world.update(SETTINGS.dt);
         }
     }
 
@@ -838,7 +848,7 @@ export default class Application {
     }
 
     private stepSimulation(): void {
-        this.world.update(SETTINGS.dt);
+        this.advanceSimulation();
     }
 
     private getUIState(): UIState {
