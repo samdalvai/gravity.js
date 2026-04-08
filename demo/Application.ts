@@ -36,6 +36,7 @@ export default class Application {
     private player: RigidBody | null = null;
 
     private testBody: RigidBody | null = null;
+    private blackHole: RigidBody | null = null;
 
     // Inputs
     private leftButtonPressed: boolean = false;
@@ -138,8 +139,7 @@ export default class Application {
                     if (inputEvent.key === 'f') {
                         const x = InputManager.mousePosition.x;
                         const y = InputManager.mousePosition.y;
-                        const blackHole = Bodies.circle({ radius: 0.0001, x, y, mass: 50_000 });
-                        this.world.blackHole = blackHole;
+                        this.blackHole = Bodies.circle({ radius: 0.0001, x, y, mass: 50_000 });
                     }
 
                     if (inputEvent.key === 'c') {
@@ -465,6 +465,7 @@ export default class Application {
         }
 
         for (let i = 0; i < SETTINGS.subSteps; i++) {
+            this.applyBlackHoleForce();
             this.world.update(SETTINGS.dt);
         }
 
@@ -513,12 +514,8 @@ export default class Application {
             Graphics.drawTexture(this.bgTexture.width, this.bgTexture.height, this.bgTexture, 0, 100);
         }
 
-        if (this.world.blackHole) {
-            const blackHole = this.world.blackHole;
-            if (!blackHole) {
-                return;
-            }
-
+        if (this.blackHole) {
+            const blackHole = this.blackHole;
             const { x, y } = blackHole.position;
             const radius = 100;
 
@@ -684,6 +681,21 @@ export default class Application {
         }
     }
 
+    private applyBlackHoleForce(): void {
+        if (!this.blackHole) {
+            return;
+        }
+
+        for (const body of this.world.getBodies()) {
+            if (body.id === this.blackHole.id) {
+                continue;
+            }
+
+            const attraction = Force.generateGravitationalForce(body, this.blackHole, GRAVITY, 1, 200);
+            body.addForce(attraction);
+        }
+    }
+
     private loadDemo(index: number): void {
         const demo = Demo.demoFunctions[index];
 
@@ -698,6 +710,7 @@ export default class Application {
         this.bodyRenderRegistry.clear();
         this.player = null;
         this.testBody = null;
+        this.blackHole = null;
         this.generateParticle = false;
         this.leftButtonPressed = false;
         this.rightButtonPressed = false;
