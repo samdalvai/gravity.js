@@ -52,6 +52,7 @@ export default class Application {
     private lastFPSUpdate = 0;
     private showContacts = true;
     private showAABB = false;
+    private showRuntimeStatsHud = true;
     private readonly uiManager = new UIManager();
 
     constructor() {
@@ -94,6 +95,7 @@ export default class Application {
             onSetDebug: value => this.setDebug(value),
             onSetShowAABB: value => this.setShowAABB(value),
             onSetShowContacts: value => this.setShowContacts(value),
+            onSetShowRuntimeStatsHud: value => this.setShowRuntimeStatsHud(value),
             onSetApplyGravity: value => this.setApplyGravity(value),
             onSetPaused: value => this.setPaused(value),
             onSetSolverIterations: value => this.setSolverIterations(value),
@@ -567,7 +569,7 @@ export default class Application {
             numContacts += manifold.numContacts;
         }
 
-        if (!this.debug) {
+        if (!this.debug || !this.showRuntimeStatsHud) {
             return;
         }
 
@@ -690,6 +692,11 @@ export default class Application {
         this.syncUI();
     }
 
+    private setShowRuntimeStatsHud(value: boolean): void {
+        this.showRuntimeStatsHud = value;
+        this.syncUI();
+    }
+
     private setApplyGravity(value: boolean): void {
         SETTINGS.applyGravity = value;
         this.syncUI();
@@ -726,6 +733,7 @@ export default class Application {
             debug: this.debug,
             showAABB: this.showAABB,
             showContacts: this.showContacts,
+            showRuntimeStatsHud: this.showRuntimeStatsHud,
             applyGravity: SETTINGS.applyGravity,
             paused: this.paused,
             solverIterations: SETTINGS.solverIterations,

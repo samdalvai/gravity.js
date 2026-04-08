@@ -37,6 +37,10 @@ canvas {
   align-items: center;
 }
 
+.toolbar-group-actions {
+  margin-left: auto;
+}
+
 .toolbar-control {
   display: inline-flex;
   align-items: center;
