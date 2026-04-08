@@ -211,7 +211,7 @@ export class World {
             newManifoldMap.set(key, newManifold);
             newManifolds.push(newManifold);
 
-            this.setGrounded(a, b, newManifold.contactNormal);
+            this.setGrounded(newManifold);
         }
 
         this.manifoldMap = newManifoldMap;
@@ -232,12 +232,16 @@ export class World {
         }
     }
 
-    setGrounded(bodyA: RigidBody, bodyB: RigidBody, contactNormal: Vec2) {
+    setGrounded(manifold: ContactManifold) {
+        const bodyA = manifold.bodyA;
+        const bodyB = manifold.bodyB;
+        const contactNormal = manifold.contactNormal;
+
         const dotA = contactNormal.negateNew().dot(this.up);
         const dotB = contactNormal.dot(this.up);
 
-        if (dotA > 0.5) bodyA.isGrounded = true;
-        if (dotB > 0.5) bodyB.isGrounded = true;
+        if (!bodyA.isStatic() && dotA > 0.5) bodyA.isGrounded = true;
+        if (!bodyB.isStatic() && dotB > 0.5) bodyB.isGrounded = true;
     }
 
     clear() {
