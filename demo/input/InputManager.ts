@@ -36,12 +36,12 @@ export default class InputManager {
         });
     };
 
-    static isToolbarEventTarget = (target: EventTarget | null) => {
-        return target instanceof Element && target.closest('#demo-toolbar') !== null;
+    static isUiEventTarget = (target: EventTarget | null) => {
+        return target instanceof Element && target.closest('#demo-toolbar, #demo-shortcuts-modal') !== null;
     };
 
     static handleKeyboardEvent = (event: KeyboardEvent) => {
-        if (event.type === 'keydown' && this.isToolbarEventTarget(event.target)) {
+        if (event.type === 'keydown' && this.isUiEventTarget(event.target)) {
             return;
         }
 
@@ -49,11 +49,15 @@ export default class InputManager {
     };
 
     static handleMouseMove = (event: MouseEvent) => {
+        if (this.isUiEventTarget(event.target)) {
+            return;
+        }
+
         this.mouseMoveBuffer.push(event);
     };
 
     static handleMouseClick = (event: MouseEvent) => {
-        if (event.type === 'mousedown' && this.isToolbarEventTarget(event.target)) {
+        if (event.type === 'mousedown' && this.isUiEventTarget(event.target)) {
             return;
         }
 
@@ -61,7 +65,7 @@ export default class InputManager {
     };
 
     static handleWheelEvent = (event: MouseEvent) => {
-        if (this.isToolbarEventTarget(event.target)) {
+        if (this.isUiEventTarget(event.target)) {
             return;
         }
 
