@@ -568,7 +568,6 @@ export default class Application {
 
         const defaultText = [
             // General info
-            `${Demo.demoStrings[this.demoIndex]}`,
             '[ 1-9 ] select demo, [ Left Mouse ] to generate circles, [ Right Mouse ] to generate boxes',
             '[ C ] to generate particles, [ X ] to generate capsules, [ R ] to generate random convex polygon',
             '[ E ] to generate explosion, [ F ] to generate gravitational field, [ B ] to shoot bullet',
@@ -585,8 +584,6 @@ export default class Application {
             // Debug related info
             `[ A ] show AABB: ${this.showAABB ? 'ON' : 'OFF'}`,
             `[ S ] show contacts and joints: ${this.showContacts ? 'ON' : 'OFF'}`,
-            `Solver Iterations  [ - ] decrease [ + ] increase : ${SETTINGS.solverIterations}`,
-            `Substeps [ / ] decrease [ * ] increase : ${SETTINGS.subSteps}`,
             `Num objects: ${this.world.getBodies().length} / ${MAX_BODIES} (max)`,
             `Num contacts: ${numContacts}`,
             '-------------------------------------------------------------------------------',
