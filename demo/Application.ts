@@ -20,6 +20,8 @@ import Demo from './samples/Demo';
 import UIManager, { UIState } from './ui/UIManager';
 
 const BODY_REMOVAL_THRESHOLD = 25_000;
+const DEMO_SHORTCUT_DELAY_MS = 350;
+const MAX_DEMO_SHORTCUT_DIGITS = 2;
 const PLAYER_MAX_SPEED = 350;
 const PLAYER_ACCELERATION = 10;
 const PLAYER_JUMP_IMPULSE = 600;
@@ -32,6 +34,8 @@ export default class Application {
     private readonly bodyRenderRegistry = new BodyRenderRegistry();
     private generateParticle = false;
     private demoIndex = 1;
+    private demoShortcutBuffer = '';
+    private demoShortcutTimer: number | null = null;
 
     private player: RigidBody | null = null;
 
@@ -112,6 +116,13 @@ export default class Application {
             switch (inputEvent.type) {
                 case 'keydown': {
                     const key = inputEvent.key.toLowerCase();
+
+                    if (/^\d$/.test(inputEvent.key)) {
+                        this.handleDemoShortcutDigit(inputEvent.key);
+                        break;
+                    }
+
+                    this.flushDemoShortcut();
 
                     if (inputEvent.key === 'd') {
                         this.setDebug(!this.debug);
@@ -291,11 +302,6 @@ export default class Application {
 
                         const body = Utils.randomConvexBody(x, y, radius, vertices);
                         this.world.addBody(body);
-                    }
-
-                    if (!Number.isNaN(Number.parseInt(inputEvent.key))) {
-                        const index = Number.parseInt(inputEvent.key);
-                        this.loadDemo(index);
                     }
 
                     if (inputEvent.code === 'Space') {
@@ -701,14 +707,69 @@ export default class Application {
         }
     }
 
+    private handleDemoShortcutDigit(digit: string): void {
+        const nextBuffer = `${this.demoShortcutBuffer}${digit}`;
+        const matchingDemoIndexes = Demo.demoFunctions
+            .map((_demo, index) => `${index}`)
+            .filter(index => index.startsWith(nextBuffer));
+
+        if (matchingDemoIndexes.length === 0) {
+            this.flushDemoShortcut();
+            return;
+        }
+
+        this.demoShortcutBuffer = nextBuffer;
+        const hasExactMatch = matchingDemoIndexes.includes(nextBuffer);
+        const hasLongerMatch = matchingDemoIndexes.some(index => index.length > nextBuffer.length);
+
+        this.clearDemoShortcutTimer();
+
+        if (hasExactMatch && (!hasLongerMatch || nextBuffer.length >= MAX_DEMO_SHORTCUT_DIGITS)) {
+            this.flushDemoShortcut();
+            return;
+        }
+
+        this.demoShortcutTimer = window.setTimeout(() => this.flushDemoShortcut(), DEMO_SHORTCUT_DELAY_MS);
+    }
+
+    private clearDemoShortcutTimer(): void {
+        if (this.demoShortcutTimer === null) {
+            return;
+        }
+
+        window.clearTimeout(this.demoShortcutTimer);
+        this.demoShortcutTimer = null;
+    }
+
+    private flushDemoShortcut(): void {
+        if (this.demoShortcutBuffer === '') {
+            this.clearDemoShortcutTimer();
+            return;
+        }
+
+        const index = Number.parseInt(this.demoShortcutBuffer, 10);
+        this.demoShortcutBuffer = '';
+        this.clearDemoShortcutTimer();
+
+        if (!Demo.demoFunctions[index]) {
+            return;
+        }
+
+        this.loadDemo(index);
+    }
+
     private loadDemo(index: number): void {
         const demo = Demo.demoFunctions[index];
 
         if (!demo) {
+            this.demoShortcutBuffer = '';
+            this.clearDemoShortcutTimer();
             this.syncUI();
             return;
         }
 
+        this.demoShortcutBuffer = '';
+        this.clearDemoShortcutTimer();
         this.demoIndex = index;
         this.world.clear();
         this.bgTexture = null;
