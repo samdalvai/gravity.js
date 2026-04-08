@@ -1,7 +1,7 @@
 export const FIXED_DELTA_TIME = 1 / 60;
 
 export const PIXELS_PER_METER = 100;
-export const MAX_BODIES = 10_000;
+export const MAX_BODIES = 5_000;
 export const GRAVITY = 9.8;
 
 export const MIN_BULLET_SPEED = 1_000_000;
