@@ -147,7 +147,7 @@ export class World {
         }
     }
 
-    ccd(dt: number) {
+    private ccd(dt: number) {
         for (const body of this.bodies) {
             if (body.isBullet) {
                 if (body.velocity.magnitudeSquared() > MIN_BULLET_SPEED) {
@@ -160,7 +160,7 @@ export class World {
         }
     }
 
-    broadPhase() {
+    private broadPhase() {
         this.bodies.sort((a, b) => a.minX - b.minX);
         this.potentialPairs.length = 0;
 
@@ -186,7 +186,7 @@ export class World {
         }
     }
 
-    narrowPhase() {
+    private narrowPhase() {
         const newManifolds: ContactManifold[] = [];
         const newManifoldMap: Map<number, ContactManifold> = new Map();
 
@@ -218,7 +218,7 @@ export class World {
         this.manifolds = newManifolds;
     }
 
-    solveConstraints(invDt: number) {
+    private solveConstraints(invDt: number) {
         // Presolve constraints
         for (let i = 0; i < this.manifolds.length; i++) this.manifolds[i].preSolve(invDt);
 
@@ -232,7 +232,7 @@ export class World {
         }
     }
 
-    setGrounded(manifold: ContactManifold) {
+    private setGrounded(manifold: ContactManifold) {
         const bodyA = manifold.bodyA;
         const bodyB = manifold.bodyB;
         const contactNormal = manifold.contactNormal;
