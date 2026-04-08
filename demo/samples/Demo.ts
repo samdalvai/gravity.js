@@ -4,14 +4,7 @@
  *
  * https://github.com/erincatto/box2d-lite
  */
-import {
-    Bodies,
-    DistanceJoint,
-    RigidBody,
-    Utils,
-    Vec2,
-    World,
-} from '../../src';
+import { Bodies, DistanceJoint, GRAVITY, RigidBody, SETTINGS, Utils, Vec2, World } from '../../src';
 import Application from '../Application';
 import Graphics from '../graphics/Graphics';
 
@@ -59,6 +52,7 @@ export default class Demo {
         'Demo 11: 1000 Boxes',
         'Demo 12: 1000 Capsules',
         'Demo 13: 1000 Random convex shapes',
+        'Demo 14: Black hole orbit',
     ];
 
     static generateFloor(world: World, app: Application): RigidBody {
@@ -400,10 +394,34 @@ export default class Demo {
         // Add ragdoll parts (rigid bodies)
         const torso = Bodies.box({ width: 50, height: 100, x: 0, y: -100, mass: 3.0 });
         const head = Bodies.circle({ radius: 25, x: torso.position.x, y: torso.position.y + 50 + 25, mass: 5.0 });
-        const leftArm = Bodies.box({ width: 15, height: 70, x: torso.position.x - 32, y: torso.position.y + 10, mass: 1.0 });
-        const rightArm = Bodies.box({ width: 15, height: 70, x: torso.position.x + 32, y: torso.position.y + 10, mass: 1.0 });
-        const leftLeg = Bodies.box({ width: 20, height: 90, x: torso.position.x - 20, y: torso.position.y - 97, mass: 1.0 });
-        const rightLeg = Bodies.box({ width: 20, height: 90, x: torso.position.x + 20, y: torso.position.y - 97, mass: 1.0 });
+        const leftArm = Bodies.box({
+            width: 15,
+            height: 70,
+            x: torso.position.x - 32,
+            y: torso.position.y + 10,
+            mass: 1.0,
+        });
+        const rightArm = Bodies.box({
+            width: 15,
+            height: 70,
+            x: torso.position.x + 32,
+            y: torso.position.y + 10,
+            mass: 1.0,
+        });
+        const leftLeg = Bodies.box({
+            width: 20,
+            height: 90,
+            x: torso.position.x - 20,
+            y: torso.position.y - 97,
+            mass: 1.0,
+        });
+        const rightLeg = Bodies.box({
+            width: 20,
+            height: 90,
+            x: torso.position.x + 20,
+            y: torso.position.y - 97,
+            mass: 1.0,
+        });
         app.setBodyTexture(head, 'head');
         app.setBodyTexture(torso, 'torso');
         app.setBodyTexture(leftArm, 'leftArm');
@@ -483,9 +501,27 @@ export default class Demo {
         app.setBodyTexture(triangle, 'woodTriangle');
         world.addBody(triangle);
 
-        const box1 = Bodies.box({ width: 25, height: 25, x: plank.position.x - 350, y: plank.position.y + 25, mass: 1 });
-        const box2 = Bodies.box({ width: 25, height: 25, x: plank.position.x - 325, y: plank.position.y + 25, mass: 1 });
-        const box3 = Bodies.box({ width: 25, height: 25, x: plank.position.x - 337.5, y: plank.position.y + 50, mass: 1 });
+        const box1 = Bodies.box({
+            width: 25,
+            height: 25,
+            x: plank.position.x - 350,
+            y: plank.position.y + 25,
+            mass: 1,
+        });
+        const box2 = Bodies.box({
+            width: 25,
+            height: 25,
+            x: plank.position.x - 325,
+            y: plank.position.y + 25,
+            mass: 1,
+        });
+        const box3 = Bodies.box({
+            width: 25,
+            height: 25,
+            x: plank.position.x - 337.5,
+            y: plank.position.y + 50,
+            mass: 1,
+        });
         app.setBodyTexture(box1, 'crate');
         app.setBodyTexture(box2, 'crate');
         app.setBodyTexture(box3, 'crate');
@@ -716,6 +752,50 @@ export default class Demo {
         });
     };
 
+    static demo14 = (world: World, app: Application) => {
+        app.setBackground('darkBackground');
+
+        const BLACK_HOLE_ORBIT_PARTICLE_COUNT = 2_000;
+
+        // Demo 14: orbiting particles around a central black hole
+        SETTINGS.applyGravity = false;
+
+        const blackHole = Bodies.circle({ radius: 0.0001, x: 0, y: 0, mass: 600_000 });
+        app.setBlackHole(blackHole);
+
+        const particleRadius = 2.5;
+        const particleMass = 0.02;
+        const minOrbitRadius = 180;
+        const maxOrbitRadius = 900;
+        const particlePalette = ['#f8fbff', '#cdeeff', '#93dcff', '#ffe7a3'];
+
+        for (let i = 0; i < BLACK_HOLE_ORBIT_PARTICLE_COUNT; i++) {
+            const orbitRadius = Math.sqrt(
+                Utils.randomNumber(minOrbitRadius * minOrbitRadius, maxOrbitRadius * maxOrbitRadius),
+            );
+            const angle = Utils.randomNumber(0, Math.PI * 2);
+            const radialDirection = new Vec2(Math.cos(angle), Math.sin(angle));
+            const position = radialDirection.scaleNew(orbitRadius);
+            const orbitDirection = Math.random() < 0.85 ? 1 : -1;
+            const orbitSpeed = Math.sqrt((GRAVITY * blackHole.mass) / orbitRadius) * Utils.randomNumber(0.9, 1.12);
+            const tangentialVelocity = radialDirection.leftPerpNew().scaleNew(orbitSpeed * orbitDirection);
+            const radialVelocity = radialDirection.scaleNew(orbitSpeed * Utils.randomNumber(-0.18, 0.12));
+            const velocity = tangentialVelocity.addNew(radialVelocity);
+            const particle = Bodies.circle({
+                radius: particleRadius,
+                x: position.x,
+                y: position.y,
+                mass: particleMass,
+                velocity,
+                restitution: 0,
+                friction: 0,
+            });
+
+            app.setBodyFillColor(particle, particlePalette[Math.floor(Utils.randomNumber(0, particlePalette.length))]);
+            world.addBody(particle);
+        }
+    };
+
     static demo0 = (world: World, app: Application) => {
         app.setBackground('background');
 
@@ -829,7 +909,13 @@ export default class Demo {
         }
 
         // Final anchor
-        const endStep = Bodies.box({ width: 80, height: stepHeight, x: last.position.x + 60, y: startStep.position.y, mass: 0.0 });
+        const endStep = Bodies.box({
+            width: 80,
+            height: stepHeight,
+            x: last.position.x + 60,
+            y: startStep.position.y,
+            mass: 0.0,
+        });
         app.setBodyTexture(endStep, 'rockBridgeAnchor');
         world.addBody(endStep);
 
@@ -887,5 +973,6 @@ export default class Demo {
         this.demo11,
         this.demo12,
         this.demo13,
+        this.demo14,
     ];
 }
