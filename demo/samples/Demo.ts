@@ -97,18 +97,19 @@ export default class Demo {
         const wallThickness = FLOOR_HEIGHT;
         const innerBottom = FLOOR_POSITION_Y + wallThickness / 2;
         const innerTop = innerBottom + SQUARE_CAGE_INNER_SIZE;
-        const wallSpan = SQUARE_CAGE_INNER_SIZE + wallThickness * 2;
+        const wallSpanHorizontal = SQUARE_CAGE_INNER_SIZE;
+        const wallSpanVertical = SQUARE_CAGE_INNER_SIZE + wallThickness * 2;
         const wallColor = '#4d5a72';
         const walls = [
             Bodies.box({
-                width: wallSpan,
+                width: wallSpanHorizontal,
                 height: wallThickness,
                 x: 0,
                 y: innerBottom - wallThickness / 2,
                 mass: 0,
             }),
             Bodies.box({
-                width: wallSpan,
+                width: wallSpanHorizontal,
                 height: wallThickness,
                 x: 0,
                 y: innerTop + wallThickness / 2,
@@ -116,14 +117,14 @@ export default class Demo {
             }),
             Bodies.box({
                 width: wallThickness,
-                height: wallSpan,
+                height: wallSpanVertical,
                 x: -(SQUARE_CAGE_INNER_SIZE / 2 + wallThickness / 2),
                 y: (innerBottom + innerTop) / 2,
                 mass: 0,
             }),
             Bodies.box({
                 width: wallThickness,
-                height: wallSpan,
+                height: wallSpanVertical,
                 x: SQUARE_CAGE_INNER_SIZE / 2 + wallThickness / 2,
                 y: (innerBottom + innerTop) / 2,
                 mass: 0,
