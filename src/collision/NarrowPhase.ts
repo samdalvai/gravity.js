@@ -465,7 +465,7 @@ function collideConvexPolygons(
     const { edgeIndex: initialEdgeB, maxSeparation: separationB } = findMaxSeparation(verticesB, normalsB, verticesA);
     const radius = radiusA + radiusB;
 
-    if (separationA > 0 + radius || separationB > 0 + radius) {
+    if (separationA > radius || separationB > radius) {
         return null;
     }
 
@@ -514,7 +514,7 @@ function collideConvexPolygons(
         if (result.fraction1 === 0.0 && result.fraction2 === 0.0) {
             const delta = v21.subNew(v11);
             const distance = delta.magnitude();
-            if (distance > 0 + radius) {
+            if (distance > radius) {
                 return null;
             }
 
@@ -534,7 +534,7 @@ function collideConvexPolygons(
         if (result.fraction1 === 0.0 && result.fraction2 === 1.0) {
             const delta = v22.subNew(v11);
             const distance = delta.magnitude();
-            if (distance > 0 + radius) {
+            if (distance > radius) {
                 return null;
             }
 
@@ -554,7 +554,7 @@ function collideConvexPolygons(
         if (result.fraction1 === 1.0 && result.fraction2 === 0.0) {
             const delta = v21.subNew(v12);
             const distance = delta.magnitude();
-            if (distance > 0 + radius) {
+            if (distance > radius) {
                 return null;
             }
 
@@ -574,7 +574,7 @@ function collideConvexPolygons(
         if (result.fraction1 === 1.0 && result.fraction2 === 1.0) {
             const delta = v22.subNew(v12);
             const distance = delta.magnitude();
-            if (distance > 0 + radius) {
+            if (distance > radius) {
                 return null;
             }
 
