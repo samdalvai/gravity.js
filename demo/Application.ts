@@ -52,6 +52,17 @@ export default class Application {
     private showContacts = true;
     private showAABB = false;
 
+    private toolbar: HTMLElement | null = null;
+    private demoSelect: HTMLSelectElement | null = null;
+    private debugCheckbox: HTMLInputElement | null = null;
+    private showAABBCheckbox: HTMLInputElement | null = null;
+    private showContactsCheckbox: HTMLInputElement | null = null;
+    private gravityCheckbox: HTMLInputElement | null = null;
+    private pausedCheckbox: HTMLInputElement | null = null;
+    private solverIterationsInput: HTMLInputElement | null = null;
+    private subStepsInput: HTMLInputElement | null = null;
+    private stepButton: HTMLButtonElement | null = null;
+
     constructor() {
         this.world = new World(GRAVITY);
     }
@@ -86,11 +97,8 @@ export default class Application {
         await AssetStore.loadTextures();
 
         this.running = Graphics.openWindow();
-        const demo = Demo.demoFunctions[this.demoIndex];
-        this.world.clear();
-        this.bgTexture = null;
-        this.bodyRenderRegistry.clear();
-        demo(this.world, this);
+        this.setupToolbar();
+        this.loadDemo(this.demoIndex);
     }
 
     input(): void {
@@ -102,7 +110,7 @@ export default class Application {
             switch (inputEvent.type) {
                 case 'keydown':
                     if (inputEvent.key === 'd') {
-                        this.debug = !this.debug;
+                        this.setDebug(!this.debug);
                     }
 
                     if (inputEvent.key === 'e') {
@@ -138,15 +146,15 @@ export default class Application {
                     }
 
                     if (inputEvent.key === 'g') {
-                        SETTINGS.applyGravity = !SETTINGS.applyGravity;
+                        this.setApplyGravity(!SETTINGS.applyGravity);
                     }
 
                     if (inputEvent.key === 'a') {
-                        this.showAABB = !this.showAABB;
+                        this.setShowAABB(!this.showAABB);
                     }
 
                     if (inputEvent.key === 's') {
-                        this.showContacts = !this.showContacts;
+                        this.setShowContacts(!this.showContacts);
                     }
 
                     if (inputEvent.key === 'b') {
@@ -167,11 +175,11 @@ export default class Application {
                     }
 
                     if (inputEvent.key === 'p') {
-                        this.paused = !this.paused;
+                        this.setPaused(!this.paused);
                     }
 
                     if (inputEvent.key === '.') {
-                        this.world.update(SETTINGS.dt);
+                        this.stepSimulation();
                     }
 
                     if (inputEvent.key === ',') {
@@ -181,19 +189,19 @@ export default class Application {
                     }
 
                     if (inputEvent.key === '+') {
-                        SETTINGS.solverIterations++;
+                        this.setSolverIterations(SETTINGS.solverIterations + 1);
                     }
 
                     if (inputEvent.key === '-') {
-                        SETTINGS.solverIterations = Math.max(1, SETTINGS.solverIterations - 1);
+                        this.setSolverIterations(SETTINGS.solverIterations - 1);
                     }
 
                     if (inputEvent.key === '*') {
-                        SETTINGS.subSteps++;
+                        this.setSubSteps(SETTINGS.subSteps + 1);
                     }
 
                     if (inputEvent.key === '/') {
-                        SETTINGS.subSteps = Math.max(1, SETTINGS.subSteps - 1);
+                        this.setSubSteps(SETTINGS.subSteps - 1);
                     }
 
                     if (inputEvent.key === 'q') {
@@ -259,19 +267,7 @@ export default class Application {
 
                     if (!Number.isNaN(Number.parseInt(inputEvent.key))) {
                         const index = Number.parseInt(inputEvent.key);
-                        this.demoIndex = index;
-                        const demo = Demo.demoFunctions[this.demoIndex];
-
-                        if (!demo) {
-                            throw new Error(`Demo ${index} does not exist`);
-                        }
-
-                        this.world.clear();
-                        this.bgTexture = null;
-                        this.bodyRenderRegistry.clear();
-                        this.player = null;
-                        Graphics.resetView();
-                        demo(this.world, this);
+                        this.loadDemo(index);
                     }
 
                     if (inputEvent.code === 'Space') {
@@ -599,9 +595,10 @@ export default class Application {
         ];
 
         const text = [...defaultText, ...(this.debug ? debugText : [])];
+        const textTop = (this.toolbar?.offsetHeight ?? 0) + 24;
 
         for (let i = 0; i < text.length; i++) {
-            Graphics.drawText(text[i], 50, 50 + i * 25, 18, 'arial', this.debug ? 'orange' : 'black');
+            Graphics.drawText(text[i], 24, textTop + i * 25, 18, 'arial', this.debug ? 'orange' : 'black');
         }
     }
 
@@ -622,6 +619,194 @@ export default class Application {
             if (this.player?.id === body.id) {
                 this.player = null;
             }
+        }
+    }
+
+    private loadDemo(index: number): void {
+        const demo = Demo.demoFunctions[index];
+
+        if (!demo) {
+            this.syncToolbar();
+            return;
+        }
+
+        this.demoIndex = index;
+        this.world.clear();
+        this.bgTexture = null;
+        this.bodyRenderRegistry.clear();
+        this.player = null;
+        this.testBody = null;
+        this.generateParticle = false;
+        this.leftButtonPressed = false;
+        this.rightButtonPressed = false;
+        this.middleMousePressed = false;
+        this.controlPressed = false;
+        Graphics.resetView();
+        demo(this.world, this);
+        this.syncToolbar();
+    }
+
+    private setDebug(value: boolean): void {
+        this.debug = value;
+        this.syncToolbar();
+    }
+
+    private setShowAABB(value: boolean): void {
+        this.showAABB = value;
+        this.syncToolbar();
+    }
+
+    private setShowContacts(value: boolean): void {
+        this.showContacts = value;
+        this.syncToolbar();
+    }
+
+    private setPaused(value: boolean): void {
+        this.paused = value;
+        this.syncToolbar();
+    }
+
+    private setApplyGravity(value: boolean): void {
+        SETTINGS.applyGravity = value;
+        this.syncToolbar();
+    }
+
+    private setSolverIterations(value: number): void {
+        if (!Number.isFinite(value)) {
+            this.syncToolbar();
+            return;
+        }
+
+        SETTINGS.solverIterations = Math.max(1, Math.round(value));
+        this.syncToolbar();
+    }
+
+    private setSubSteps(value: number): void {
+        if (!Number.isFinite(value)) {
+            this.syncToolbar();
+            return;
+        }
+
+        SETTINGS.subSteps = Math.max(1, Math.round(value));
+        this.syncToolbar();
+    }
+
+    private stepSimulation(): void {
+        this.world.update(SETTINGS.dt);
+    }
+
+    private setupToolbar(): void {
+        const toolbar = document.getElementById('demo-toolbar');
+        if (!(toolbar instanceof HTMLElement)) {
+            return;
+        }
+
+        this.toolbar = toolbar;
+        toolbar.replaceChildren();
+
+        const createGroup = () => {
+            const group = document.createElement('div');
+            group.className = 'toolbar-group';
+            toolbar.appendChild(group);
+            return group;
+        };
+
+        const createLabeledControl = (group: HTMLElement, labelText: string, control: HTMLElement) => {
+            const label = document.createElement('label');
+            label.className = 'toolbar-control';
+
+            const text = document.createElement('span');
+            text.textContent = labelText;
+
+            label.append(text, control);
+            group.appendChild(label);
+        };
+
+        const createCheckbox = (group: HTMLElement, labelText: string, onChange: (checked: boolean) => void) => {
+            const label = document.createElement('label');
+            label.className = 'toolbar-control';
+
+            const input = document.createElement('input');
+            input.type = 'checkbox';
+            input.addEventListener('change', () => onChange(input.checked));
+
+            label.append(input, document.createTextNode(labelText));
+            group.appendChild(label);
+
+            return input;
+        };
+
+        const createNumberInput = (group: HTMLElement, labelText: string, onChange: (value: number) => void) => {
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.min = '1';
+            input.step = '1';
+            input.addEventListener('change', () => onChange(Number.parseInt(input.value)));
+            createLabeledControl(group, labelText, input);
+            return input;
+        };
+
+        const demoGroup = createGroup();
+        this.demoSelect = document.createElement('select');
+        Demo.demoStrings.forEach((label, index) => {
+            const option = document.createElement('option');
+            option.value = `${index}`;
+            option.textContent = label;
+            this.demoSelect!.appendChild(option);
+        });
+        this.demoSelect.addEventListener('change', () => this.loadDemo(Number.parseInt(this.demoSelect!.value)));
+        createLabeledControl(demoGroup, 'Demo', this.demoSelect);
+
+        const toggleGroup = createGroup();
+        this.debugCheckbox = createCheckbox(toggleGroup, 'Debug', checked => this.setDebug(checked));
+        this.showAABBCheckbox = createCheckbox(toggleGroup, 'Show AABB', checked => this.setShowAABB(checked));
+        this.showContactsCheckbox = createCheckbox(toggleGroup, 'Show Contacts', checked => this.setShowContacts(checked));
+        this.gravityCheckbox = createCheckbox(toggleGroup, 'Gravity', checked => this.setApplyGravity(checked));
+        this.pausedCheckbox = createCheckbox(toggleGroup, 'Paused', checked => this.setPaused(checked));
+
+        const numericGroup = createGroup();
+        this.solverIterationsInput = createNumberInput(numericGroup, 'Iterations', value =>
+            this.setSolverIterations(value),
+        );
+        this.subStepsInput = createNumberInput(numericGroup, 'Substeps', value => this.setSubSteps(value));
+
+        this.stepButton = document.createElement('button');
+        this.stepButton.type = 'button';
+        this.stepButton.className = 'toolbar-button';
+        this.stepButton.textContent = 'Step';
+        this.stepButton.addEventListener('click', () => this.stepSimulation());
+        numericGroup.appendChild(this.stepButton);
+
+        this.syncToolbar();
+    }
+
+    private syncToolbar(): void {
+        if (
+            !this.demoSelect ||
+            !this.debugCheckbox ||
+            !this.showAABBCheckbox ||
+            !this.showContactsCheckbox ||
+            !this.gravityCheckbox ||
+            !this.pausedCheckbox ||
+            !this.solverIterationsInput ||
+            !this.subStepsInput
+        ) {
+            return;
+        }
+
+        this.demoSelect.value = `${this.demoIndex}`;
+        this.debugCheckbox.checked = this.debug;
+        this.showAABBCheckbox.checked = this.showAABB;
+        this.showContactsCheckbox.checked = this.showContacts;
+        this.gravityCheckbox.checked = SETTINGS.applyGravity;
+        this.pausedCheckbox.checked = this.paused;
+        this.solverIterationsInput.value = `${SETTINGS.solverIterations}`;
+        this.subStepsInput.value = `${SETTINGS.subSteps}`;
+        this.showAABBCheckbox.disabled = !this.debug;
+        this.showContactsCheckbox.disabled = !this.debug;
+
+        if (this.stepButton) {
+            this.stepButton.disabled = !this.paused;
         }
     }
 }
