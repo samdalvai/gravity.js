@@ -25,7 +25,8 @@ const SHORTCUT_SECTIONS = [
             '[ R ] Spawn random convex polygon',
             '[ B ] Shoot bullet',
             '[ E ] Trigger explosion at mouse',
-            '[ F ] Spawn gravitational field at mouse',
+            '[ F ] Spawn black hole at mouse',
+            '[ Shift + F ] Clear black hole',
         ],
     },
     {

@@ -110,7 +110,9 @@ export default class Application {
             if (!inputEvent) return;
 
             switch (inputEvent.type) {
-                case 'keydown':
+                case 'keydown': {
+                    const key = inputEvent.key.toLowerCase();
+
                     if (inputEvent.key === 'd') {
                         this.setDebug(!this.debug);
                     }
@@ -136,7 +138,9 @@ export default class Application {
                         }
                     }
 
-                    if (inputEvent.key === 'f') {
+                    if (key === 'f' && inputEvent.shiftKey) {
+                        this.blackHole = null;
+                    } else if (key === 'f') {
                         const x = InputManager.mousePosition.x;
                         const y = InputManager.mousePosition.y;
                         this.blackHole = Bodies.circle({ radius: 0.0001, x, y, mass: 50_000 });
@@ -317,6 +321,7 @@ export default class Application {
                     }
 
                     break;
+                }
                 case 'keyup':
                     if (inputEvent.key === 'c') {
                         this.generateParticle = false;
