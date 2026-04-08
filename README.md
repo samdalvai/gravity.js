@@ -48,7 +48,6 @@ In addition to the classic physics demos you can play around with some interesti
 
 ![gravity](images/gravity.png)
 
-
 # App demo
 
 A desktop live version of the app can be found at this [link](https://samdalvai.github.io/gravity.js/)
@@ -57,4 +56,6 @@ A desktop live version of the app can be found at this [link](https://samdalvai.
 
 - https://pikuma.com/courses/game-physics-engine-programming
 - https://github.com/erincatto/box2d-lite
+- https://github.com/erincatto/box2d
 - https://github.com/Sopiro/Physics
+- https://github.com/phaserjs/phaser-box2d
