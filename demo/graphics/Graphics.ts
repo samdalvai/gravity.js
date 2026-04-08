@@ -126,6 +126,17 @@ export default class Graphics {
         this.drawLine(x1, y1, rightX, rightY, color, width);
     }
 
+    static drawFillRect(x: number, y: number, width: number, height: number, color = 'white'): void {
+        this.ctx.fillStyle = color;
+        this.ctx.fillRect(x, y, width, height);
+    }
+
+    static drawStrokeRect(x: number, y: number, width: number, height: number, color = 'white', lineWidth = 1): void {
+        this.ctx.strokeStyle = color;
+        this.ctx.lineWidth = lineWidth;
+        this.ctx.strokeRect(x, y, width, height);
+    }
+
     static drawCircle(radius: number, color = 'white'): void {
         // Draw the circle
         this.ctx.beginPath();
