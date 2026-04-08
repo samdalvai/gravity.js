@@ -204,7 +204,8 @@ export default class Application {
                     }
 
                     if (inputEvent.key === '.') {
-                        this.stepSimulation();
+                        this.applyBlackHoleForce();
+                        this.world.update(SETTINGS.dt);
                     }
 
                     if (inputEvent.key === ',') {
@@ -712,8 +713,7 @@ export default class Application {
 
     private advanceSimulation(): void {
         for (let i = 0; i < SETTINGS.subSteps; i++) {
-            this.applyBlackHoleForce();
-            this.world.update(SETTINGS.dt);
+            this.stepSimulation();
         }
     }
 
@@ -852,7 +852,8 @@ export default class Application {
     }
 
     private stepSimulation(): void {
-        this.advanceSimulation();
+        this.applyBlackHoleForce();
+        this.world.update(SETTINGS.dt);
     }
 
     private getUIState(): UIState {
