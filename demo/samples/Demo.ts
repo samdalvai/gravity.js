@@ -755,7 +755,7 @@ export default class Demo {
     static demo14 = (world: World, app: Application) => {
         app.setBackground('darkBackground');
 
-        const BLACK_HOLE_ORBIT_PARTICLE_COUNT = 2_000;
+        const BLACK_HOLE_ORBIT_PARTICLE_COUNT = 2_500;
 
         // Demo 14: orbiting particles around a central black hole
         SETTINGS.applyGravity = false;
@@ -766,7 +766,9 @@ export default class Demo {
         const particleRadius = 2.5;
         const particleMass = 0.02;
         const minOrbitRadius = 180;
-        const maxOrbitRadius = 900;
+        const maxOrbitRadius = 1000;
+        const minGravityDistanceSquared = 80 * 80;
+        const maxGravityDistanceSquared = 950 * 950;
         const particlePalette = ['#f8fbff', '#cdeeff', '#93dcff', '#ffe7a3'];
 
         for (let i = 0; i < BLACK_HOLE_ORBIT_PARTICLE_COUNT; i++) {
@@ -776,9 +778,15 @@ export default class Demo {
             const angle = Utils.randomNumber(0, Math.PI * 2);
             const radialDirection = new Vec2(Math.cos(angle), Math.sin(angle));
             const position = radialDirection.scaleNew(orbitRadius);
-            const orbitDirection = Math.random() < 0.85 ? 1 : -1;
-            const orbitSpeed = Math.sqrt((GRAVITY * blackHole.mass) / orbitRadius) * Utils.randomNumber(0.9, 1.12);
-            const tangentialVelocity = radialDirection.leftPerpNew().scaleNew(orbitSpeed * orbitDirection);
+            const effectiveDistanceSquared = Utils.clamp(
+                orbitRadius * orbitRadius,
+                minGravityDistanceSquared,
+                maxGravityDistanceSquared,
+            );
+            const orbitSpeed =
+                Math.sqrt((GRAVITY * blackHole.mass * orbitRadius) / effectiveDistanceSquared) *
+                Utils.randomNumber(0.9, 1.12);
+            const tangentialVelocity = radialDirection.leftPerpNew().scaleNew(orbitSpeed);
             const radialVelocity = radialDirection.scaleNew(orbitSpeed * Utils.randomNumber(-0.18, 0.12));
             const velocity = tangentialVelocity.addNew(radialVelocity);
             const particle = Bodies.circle({
