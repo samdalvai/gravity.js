@@ -46,6 +46,7 @@ export interface UIState {
     debug: boolean;
     showAABB: boolean;
     showContacts: boolean;
+    showRuntimeStatsHud: boolean;
     applyGravity: boolean;
     paused: boolean;
     solverIterations: number;
@@ -58,6 +59,7 @@ export interface UIActions {
     onSetDebug(value: boolean): void;
     onSetShowAABB(value: boolean): void;
     onSetShowContacts(value: boolean): void;
+    onSetShowRuntimeStatsHud(value: boolean): void;
     onSetApplyGravity(value: boolean): void;
     onSetPaused(value: boolean): void;
     onSetSolverIterations(value: number): void;
@@ -66,6 +68,7 @@ export interface UIActions {
 }
 
 export default class UIManager {
+    private currentState: UIState | null = null;
     private toolbar: HTMLElement | null = null;
     private demoSelect: HTMLSelectElement | null = null;
     private debugCheckbox: HTMLInputElement | null = null;
@@ -77,10 +80,12 @@ export default class UIManager {
     private subStepsInput: HTMLInputElement | null = null;
     private stepButton: HTMLButtonElement | null = null;
     private restartButton: HTMLButtonElement | null = null;
+    private runtimeStatsButton: HTMLButtonElement | null = null;
     private shortcutsButton: HTMLButtonElement | null = null;
     private shortcutsDialog: HTMLDialogElement | null = null;
 
     initialize(state: UIState, actions: UIActions): void {
+        this.currentState = state;
         const toolbar = document.getElementById('demo-toolbar');
         if (!(toolbar instanceof HTMLElement)) {
             return;
@@ -172,6 +177,15 @@ export default class UIManager {
         numericGroup.appendChild(this.stepButton);
 
         const actionsGroup = createGroup();
+        actionsGroup.classList.add('toolbar-group-actions');
+        this.runtimeStatsButton = document.createElement('button');
+        this.runtimeStatsButton.type = 'button';
+        this.runtimeStatsButton.className = 'toolbar-button';
+        this.runtimeStatsButton.addEventListener('click', () =>
+            actions.onSetShowRuntimeStatsHud(!this.currentState?.showRuntimeStatsHud),
+        );
+        actionsGroup.appendChild(this.runtimeStatsButton);
+
         this.shortcutsButton = document.createElement('button');
         this.shortcutsButton.type = 'button';
         this.shortcutsButton.className = 'toolbar-button';
@@ -231,6 +245,7 @@ export default class UIManager {
     }
 
     sync(state: UIState): void {
+        this.currentState = state;
         if (
             !this.demoSelect ||
             !this.debugCheckbox ||
@@ -257,6 +272,11 @@ export default class UIManager {
 
         if (this.stepButton) {
             this.stepButton.disabled = !state.paused;
+        }
+
+        if (this.runtimeStatsButton) {
+            this.runtimeStatsButton.textContent = state.showRuntimeStatsHud ? 'Collapse HUD' : 'Expand HUD';
+            this.runtimeStatsButton.disabled = !state.debug;
         }
     }
 
