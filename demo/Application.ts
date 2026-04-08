@@ -1,7 +1,5 @@
 import {
-    BoxShape,
-    CapsuleShape,
-    CircleShape,
+    Bodies,
     DistanceJoint,
     FIXED_DELTA_TIME,
     Force,
@@ -10,7 +8,6 @@ import {
     PIXELS_PER_METER,
     RigidBody,
     SETTINGS,
-    SegmentShape,
     Vec2,
     World,
 } from '../src';
@@ -141,7 +138,7 @@ export default class Application {
                     if (inputEvent.key === 'f') {
                         const x = InputManager.mousePosition.x;
                         const y = InputManager.mousePosition.y;
-                        const blackHole = new RigidBody(new CircleShape(0.0001), x, y, 50_000);
+                        const blackHole = Bodies.circle({ radius: 0.0001, x, y, mass: 50_000 });
                         this.world.blackHole = blackHole;
                     }
 
@@ -171,9 +168,14 @@ export default class Application {
                         const direction = target.subNew(center).normalizeNew();
                         const bulletForce = 50_000;
 
-                        const bullet = new RigidBody(new CircleShape(5), 0, 0, 0.1);
-                        bullet.velocity = direction.scaleNew(bulletForce);
-                        bullet.isBullet = true;
+                        const bullet = Bodies.circle({
+                            radius: 5,
+                            x: 0,
+                            y: 0,
+                            mass: 0.1,
+                            velocity: direction.scaleNew(bulletForce),
+                            isBullet: true,
+                        });
                         this.setBodyTexture(bullet, 'rockRound');
                         this.world.addBody(bullet);
                     }
@@ -218,10 +220,16 @@ export default class Application {
                             this.player = null;
                         }
 
-                        this.player = new RigidBody(new CapsuleShape(30, 25), x, y, 1);
-                        this.player.canRotate = false;
-                        this.player.restitution = 0.0;
-                        this.player.friction = 0.8;
+                        this.player = Bodies.capsule({
+                            halfHeight: 30,
+                            radius: 25,
+                            x,
+                            y,
+                            mass: 1,
+                            canRotate: false,
+                            restitution: 0.0,
+                            friction: 0.8,
+                        });
                         this.setBodyFillColor(this.player, 'orange');
                         this.world.addBody(this.player);
                     }
@@ -234,9 +242,15 @@ export default class Application {
                         const x = InputManager.mousePosition.x;
                         const y = InputManager.mousePosition.y;
 
-                        const capsule = new RigidBody(new CapsuleShape(40, 20), x, y, 1);
-                        capsule.restitution = 0.2;
-                        capsule.friction = 0.7;
+                        const capsule = Bodies.capsule({
+                            halfHeight: 40,
+                            radius: 20,
+                            x,
+                            y,
+                            mass: 1,
+                            restitution: 0.2,
+                            friction: 0.7,
+                        });
                         this.world.addBody(capsule);
                     }
 
@@ -248,9 +262,15 @@ export default class Application {
                         const x = InputManager.mousePosition.x;
                         const y = InputManager.mousePosition.y;
 
-                        const segment = new RigidBody(new SegmentShape(new Vec2(-100, 0), new Vec2(100, 0)), x, y, 0);
-                        segment.restitution = 0.2;
-                        segment.friction = 0.7;
+                        const segment = Bodies.segment({
+                            length: 200,
+                            horizontal: true,
+                            x,
+                            y,
+                            mass: 0,
+                            restitution: 0.2,
+                            friction: 0.7,
+                        });
                         this.world.addBody(segment);
                     }
 
@@ -358,9 +378,14 @@ export default class Application {
                                     if (this.world.getBodies().length >= MAX_BODIES) {
                                         continue;
                                     }
-                                    const ball = new RigidBody(new CircleShape(30), x, y, 1.0);
-                                    ball.restitution = 0.5;
-                                    ball.friction = 0.7;
+                                    const ball = Bodies.circle({
+                                        radius: 30,
+                                        x,
+                                        y,
+                                        mass: 1.0,
+                                        restitution: 0.5,
+                                        friction: 0.7,
+                                    });
                                     this.setBodyTexture(ball, 'basketball');
                                     this.world.addBody(ball);
                                 }
@@ -370,9 +395,15 @@ export default class Application {
                                     if (this.world.getBodies().length >= MAX_BODIES) {
                                         continue;
                                     }
-                                    const box = new RigidBody(new BoxShape(60, 60), x, y, 1.0);
-                                    box.restitution = 0.3;
-                                    box.friction = 0.7;
+                                    const box = Bodies.box({
+                                        width: 60,
+                                        height: 60,
+                                        x,
+                                        y,
+                                        mass: 1.0,
+                                        restitution: 0.3,
+                                        friction: 0.7,
+                                    });
                                     this.setBodyTexture(box, 'crate');
                                     this.world.addBody(box);
                                 }
@@ -449,9 +480,14 @@ export default class Application {
                 const angle = Math.random() * Math.PI * 2;
                 const positionOffset = new Vec2(Math.cos(angle), Math.sin(angle)).scaleNew(radius);
 
-                const particle = new RigidBody(new CircleShape(5), x + positionOffset.x, y + positionOffset.y, 0.01);
-                particle.restitution = 0.0;
-                particle.friction = 0.5;
+                const particle = Bodies.circle({
+                    radius: 5,
+                    x: x + positionOffset.x,
+                    y: y + positionOffset.y,
+                    mass: 0.01,
+                    restitution: 0.0,
+                    friction: 0.5,
+                });
                 this.setBodyTexture(particle, 'rockRound');
                 this.world.addBody(particle);
             }

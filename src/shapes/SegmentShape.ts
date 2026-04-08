@@ -8,23 +8,13 @@ import { ShapeType } from './Shape';
  * using them as dynamic objects makes them prone to collision tunneling
  */
 export class SegmentShape extends PolygonShape {
-    constructor(length: number, horizontal: boolean);
-    constructor(vertexA: Vec2, vertexB: Vec2);
-
-    constructor(arg0: number | Vec2, arg1: boolean | Vec2) {
-        if (typeof arg0 === 'number' && typeof arg1 === 'boolean') {
-            if (arg1) {
-                const verts = [new Vec2(-arg0 / 2, 0), new Vec2(arg0 / 2, 0)];
-                super(verts);
-            } else {
-                const verts = [new Vec2(0, -arg0 / 2), new Vec2(0, arg0 / 2)];
-                super(verts);
-            }
-        } else if (arg0 instanceof Vec2 && arg1 instanceof Vec2) {
-            const verts = [arg0.copy(), arg1.copy()];
+    constructor(length: number, horizontal: boolean) {
+        if (horizontal) {
+            const verts = [new Vec2(-length / 2, 0), new Vec2(length / 2, 0)];
             super(verts);
         } else {
-            throw new Error('Invalid constructor arguments');
+            const verts = [new Vec2(0, -length / 2), new Vec2(0, length / 2)];
+            super(verts);
         }
     }
 

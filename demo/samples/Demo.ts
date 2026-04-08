@@ -5,13 +5,12 @@
  * https://github.com/erincatto/box2d-lite
  */
 import {
+    Bodies,
     BoxShape,
-    CapsuleShape,
     CircleShape,
     DistanceJoint,
     PolygonShape,
     RigidBody,
-    SegmentShape,
     Vec2,
     World,
 } from '../../src';
@@ -53,7 +52,7 @@ export default class Demo {
     ];
 
     static generateFloor(world: World, app: Application): RigidBody {
-        const floor = new RigidBody(new BoxShape(FLOOR_WIDTH, FLOOR_HEIGHT), 0, FLOOR_POSITION_Y, 0.0);
+        const floor = Bodies.box({ width: FLOOR_WIDTH, height: FLOOR_HEIGHT, x: 0, y: FLOOR_POSITION_Y, mass: 0.0 });
         app.setBodyTexture(floor, 'transparent');
         world.addBody(floor);
         return floor;
@@ -62,19 +61,21 @@ export default class Demo {
     static generateFences(world: World, app: Application): void {
         const fenceWidth = 50;
         const fenceHeight = 900 + FLOOR_HEIGHT;
-        const leftFence = new RigidBody(
-            new BoxShape(fenceWidth, fenceHeight),
-            -(FLOOR_WIDTH / 2 + fenceWidth / 2),
-            FLOOR_POSITION_Y + FLOOR_HEIGHT / 2 + fenceHeight / 2 - FLOOR_HEIGHT,
-            0.0,
-        );
+        const leftFence = Bodies.box({
+            width: fenceWidth,
+            height: fenceHeight,
+            x: -(FLOOR_WIDTH / 2 + fenceWidth / 2),
+            y: FLOOR_POSITION_Y + FLOOR_HEIGHT / 2 + fenceHeight / 2 - FLOOR_HEIGHT,
+            mass: 0.0,
+        });
 
-        const rightFence = new RigidBody(
-            new BoxShape(fenceWidth, fenceHeight),
-            FLOOR_WIDTH / 2 + fenceWidth / 2,
-            FLOOR_POSITION_Y + FLOOR_HEIGHT / 2 + fenceHeight / 2 - FLOOR_HEIGHT,
-            0.0,
-        );
+        const rightFence = Bodies.box({
+            width: fenceWidth,
+            height: fenceHeight,
+            x: FLOOR_WIDTH / 2 + fenceWidth / 2,
+            y: FLOOR_POSITION_Y + FLOOR_HEIGHT / 2 + fenceHeight / 2 - FLOOR_HEIGHT,
+            mass: 0.0,
+        });
 
         app.setBodyTexture(leftFence, 'transparent');
         app.setBodyTexture(rightFence, 'transparent');
@@ -566,24 +567,48 @@ export default class Demo {
         this.generateFences(world, app);
 
         // Add bird
-        const bird = new RigidBody(new CircleShape(45), -550, -200, 3.0);
+        const bird = Bodies.circle({ radius: 45, x: -550, y: -200, mass: 3.0 });
         app.setBodyTexture(bird, 'birdRed');
         world.addBody(bird);
 
         // Add a stack of boxes
         for (let i = 1; i <= 4; i++) {
             const mass = 10.0 / i;
-            const box = new RigidBody(new BoxShape(50, 50), -300, floor.position.y + FLOOR_HEIGHT / 2 + i * 55, mass);
+            const box = Bodies.box({
+                width: 50,
+                height: 50,
+                x: -300,
+                y: floor.position.y + FLOOR_HEIGHT / 2 + i * 55,
+                mass,
+                friction: 0.9,
+                restitution: 0.1,
+            });
             app.setBodyTexture(box, 'woodBox');
-            box.friction = 0.9;
-            box.restitution = 0.1;
             world.addBody(box);
         }
 
         // Add structure with blocks
-        const plank1 = new RigidBody(new BoxShape(50, 150), -30, floor.position.y + FLOOR_HEIGHT / 2 + 100, 5.0);
-        const plank2 = new RigidBody(new BoxShape(50, 150), 130, floor.position.y + FLOOR_HEIGHT / 2 + 100, 5.0);
-        const plank3 = new RigidBody(new BoxShape(250, 25), 50, floor.position.y + FLOOR_HEIGHT / 2 + 200, 2.0);
+        const plank1 = Bodies.box({
+            width: 50,
+            height: 150,
+            x: -30,
+            y: floor.position.y + FLOOR_HEIGHT / 2 + 100,
+            mass: 5.0,
+        });
+        const plank2 = Bodies.box({
+            width: 50,
+            height: 150,
+            x: 130,
+            y: floor.position.y + FLOOR_HEIGHT / 2 + 100,
+            mass: 5.0,
+        });
+        const plank3 = Bodies.box({
+            width: 250,
+            height: 25,
+            x: 50,
+            y: floor.position.y + FLOOR_HEIGHT / 2 + 200,
+            mass: 2.0,
+        });
         app.setBodyTexture(plank1, 'woodPlankSolid');
         app.setBodyTexture(plank2, 'woodPlankSolid');
         app.setBodyTexture(plank3, 'woodPlankCracked');
@@ -593,12 +618,12 @@ export default class Demo {
 
         // Add a triangle polygon
         const triangleVertices = [new Vec2(-30, -30), new Vec2(30, -30), new Vec2(0, 30)];
-        const triangle = new RigidBody(
-            new PolygonShape(triangleVertices),
-            plank3.position.x,
-            plank3.position.y + 50,
-            0.5,
-        );
+        const triangle = Bodies.polygon({
+            vertices: triangleVertices,
+            x: plank3.position.x,
+            y: plank3.position.y + 50,
+            mass: 0.5,
+        });
         app.setBodyTexture(triangle, 'woodTriangle');
         world.addBody(triangle);
 
