@@ -1,6 +1,6 @@
+import { Bodies } from '../bodies/Bodies';
 import { RigidBody } from '../core/RigidBody';
 import { Vec2 } from '../math/Vec2';
-import { PolygonShape } from '../shapes/PolygonShape';
 
 export function randomNumber(min: number = 1.0, max: number = 10.0): number {
     return Math.random() * (max - min) + min;
@@ -49,7 +49,7 @@ export function randomConvexBody(x: number, y: number, radius: number, numVertic
         vertices.push(new Vec2(Math.cos(angle), Math.sin(angle)).scaleNew(radius));
     }
 
-    return new RigidBody(new PolygonShape(vertices), x, y, 1);
+    return Bodies.polygon({ vertices, x, y, mass: 1 });
 }
 
 // a.id << 16 → shifts a.id into the upper 16 bits of a 32-bit integer
