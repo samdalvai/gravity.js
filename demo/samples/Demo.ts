@@ -386,21 +386,18 @@ export default class Demo {
         this.generateFences(world, app);
 
         // Add ragdoll parts (rigid bodies)
-        const bob = new RigidBody(new CircleShape(5), 0, 100, 0.0);
-        const head = new RigidBody(new CircleShape(25), bob.position.x, bob.position.y - 70, 5.0);
-        const torso = new RigidBody(new BoxShape(50, 100), head.position.x, head.position.y - 80, 3.0);
+        const torso = new RigidBody(new BoxShape(50, 100), 0, -100, 3.0);
+        const head = new RigidBody(new CircleShape(25), torso.position.x, torso.position.y + 50 + 25, 5.0);
         const leftArm = new RigidBody(new BoxShape(15, 70), torso.position.x - 32, torso.position.y + 10, 1.0);
         const rightArm = new RigidBody(new BoxShape(15, 70), torso.position.x + 32, torso.position.y + 10, 1.0);
         const leftLeg = new RigidBody(new BoxShape(20, 90), torso.position.x - 20, torso.position.y - 97, 1.0);
         const rightLeg = new RigidBody(new BoxShape(20, 90), torso.position.x + 20, torso.position.y - 97, 1.0);
-        app.setBodyTexture(bob, 'bob');
         app.setBodyTexture(head, 'head');
         app.setBodyTexture(torso, 'torso');
         app.setBodyTexture(leftArm, 'leftArm');
         app.setBodyTexture(rightArm, 'rightArm');
         app.setBodyTexture(leftLeg, 'leftLeg');
         app.setBodyTexture(rightLeg, 'rightLeg');
-        world.addBody(bob);
         world.addBody(head);
         world.addBody(torso);
         world.addBody(leftArm);
@@ -408,47 +405,46 @@ export default class Demo {
         world.addBody(leftLeg);
         world.addBody(rightLeg);
 
-        const tuning = JOINT_TUNING.ragdoll;
+        const bodyTuning = JOINT_TUNING.ragdoll;
 
         // Add joints between ragdoll parts (distance constraints with one anchor point)
-        const string = this.createDistanceJoint(bob, head, tuning, bob.position, head.position);
         const neck = this.createDistanceJoint(
-            head,
             torso,
-            tuning,
-            head.position.subNew(new Vec2(0, 25)),
+            head,
+            bodyTuning,
             torso.position.addNew(new Vec2(0, 50)),
+            head.position.addNew(new Vec2(0, -25)),
+            0,
         );
         const leftShoulder = this.createDistanceJoint(
             torso,
             leftArm,
-            tuning,
+            bodyTuning,
             torso.position.addNew(new Vec2(-28, 45)),
             leftArm.position.addNew(new Vec2(5, 35)),
         );
         const rightShoulder = this.createDistanceJoint(
             torso,
             rightArm,
-            tuning,
+            bodyTuning,
             torso.position.addNew(new Vec2(28, 45)),
             rightArm.position.addNew(new Vec2(-5, 35)),
         );
         const leftHip = this.createDistanceJoint(
             torso,
             leftLeg,
-            tuning,
+            bodyTuning,
             torso.position.addNew(new Vec2(-20, -50)),
             leftLeg.position.addNew(new Vec2(0, 45)),
         );
         const rightHip = this.createDistanceJoint(
             torso,
             rightLeg,
-            tuning,
+            bodyTuning,
             torso.position.addNew(new Vec2(+20, -50)),
             rightLeg.position.addNew(new Vec2(0, 45)),
         );
 
-        world.addJoint(string);
         world.addJoint(neck);
         world.addJoint(leftShoulder);
         world.addJoint(rightShoulder);
