@@ -2,7 +2,7 @@ const SHORTCUT_SECTIONS = [
     {
         title: 'Scene',
         items: [
-            '[ 0-9 ] Select demo',
+            '[ 0-99 ] Select demo (type 2 digits quickly)',
             '[ G ] Toggle gravity',
             '[ D ] Toggle debug rendering',
             '[ A ] Toggle AABB debug',
