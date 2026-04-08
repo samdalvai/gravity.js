@@ -6,10 +6,7 @@
  */
 import {
     Bodies,
-    BoxShape,
-    CircleShape,
     DistanceJoint,
-    PolygonShape,
     RigidBody,
     Utils,
     Vec2,
@@ -182,20 +179,18 @@ export default class Demo {
         this.generateFloor(world, app);
         this.generateFences(world, app);
 
-        const body = new RigidBody(new BoxShape(60, 60), 0, 0, 1);
-        body.angularVelocity = 2;
-        body.rotation = 0.7;
+        const body = Bodies.box({ width: 60, height: 60, x: 0, y: 0, mass: 1, angularVelocity: 2, rotation: 0.7 });
         app.setBodyTexture(body, 'crate');
         world.addBody(body);
 
         // Bodies for collision testing
-        // const body = new RigidBody(new CircleShape(30), 0, 0, 0);
-        // const body = new RigidBody(new CapsuleShape(30, 15), 0, 0, 0);
-        // const body = new RigidBody(new SegmentShape(200, true), 0, 0, 0);
+        // const body = Bodies.circle({ radius: 30, x: 0, y: 0, mass: 0 });
+        // const body = Bodies.capsule({ halfHeight: 30, radius: 15, x: 0, y: 0, mass: 0 });
+        // const body = Bodies.segment({ length: 200, horizontal: true, x: 0, y: 0, mass: 0 });
 
-        // const testBody = new RigidBody(new BoxShape(60, 60), 100, 0, 0);
-        // const testBody = new RigidBody(new CircleShape(30), 0, 0, 0);
-        // const testBody = new RigidBody(new CapsuleShape(30, 15), 100, 0, 0);
+        // const testBody = Bodies.box({ width: 60, height: 60, x: 100, y: 0, mass: 0 });
+        // const testBody = Bodies.circle({ radius: 30, x: 0, y: 0, mass: 0 });
+        // const testBody = Bodies.capsule({ halfHeight: 30, radius: 15, x: 100, y: 0, mass: 0 });
         // testBody.angularVelocity = 5;
         // testBody.rotation = 0.5
         // world.addBody(testBody);
@@ -214,8 +209,14 @@ export default class Demo {
         const boxSpacing = 10;
 
         for (let i = 0; i < numOfBoxes; i++) {
-            const box = new RigidBody(new BoxShape(boxSize, boxSize), 0, -200 + (boxSize + boxSpacing) * i, 1);
-            box.restitution = 0;
+            const box = Bodies.box({
+                width: boxSize,
+                height: boxSize,
+                x: 0,
+                y: -200 + (boxSize + boxSpacing) * i,
+                mass: 1,
+                restitution: 0,
+            });
             app.setBodyTexture(box, 'crate');
             world.addBody(box);
         }
@@ -243,10 +244,8 @@ export default class Demo {
                 const x = centerX - rowWidth / 2 + boxSize / 2 + col * boxSize;
                 const y = baseY - row * (boxSize + boxSpacing);
 
-                const box = new RigidBody(new BoxShape(boxSize, boxSize), x, -y, 1);
-                box.restitution = 0.1;
+                const box = Bodies.box({ width: boxSize, height: boxSize, x, y: -y, mass: 1, restitution: 0.001 });
                 app.setBodyTexture(box, 'crate');
-                box.restitution = 0.001;
                 world.addBody(box);
             }
         }
@@ -271,8 +270,20 @@ export default class Demo {
         const pillarHeight = 400;
         const pillarPositionY = FLOOR_POSITION_Y + pillarHeight / 2 + FLOOR_HEIGHT / 2; //-pillarHeight / 2 + FLOOR_HEIGHT / 2;
 
-        const pillarLeft = new RigidBody(new BoxShape(pillarWidth, pillarHeight), -pillarOffsetX, pillarPositionY, 0);
-        const pillarRight = new RigidBody(new BoxShape(pillarWidth, pillarHeight), pillarOffsetX, pillarPositionY, 0);
+        const pillarLeft = Bodies.box({
+            width: pillarWidth,
+            height: pillarHeight,
+            x: -pillarOffsetX,
+            y: pillarPositionY,
+            mass: 0,
+        });
+        const pillarRight = Bodies.box({
+            width: pillarWidth,
+            height: pillarHeight,
+            x: pillarOffsetX,
+            y: pillarPositionY,
+            mass: 0,
+        });
 
         app.setBodyTexture(pillarLeft, 'metal');
         app.setBodyTexture(pillarRight, 'metal');
@@ -286,7 +297,7 @@ export default class Demo {
         for (let i = 0; i < stepCount; i++) {
             const x = (i - (stepCount - 1) / 2) * stepSpacing;
 
-            const step = new RigidBody(new BoxShape(stepWidth, stepHeight), x, stepPositionY, 5);
+            const step = Bodies.box({ width: stepWidth, height: stepHeight, x, y: stepPositionY, mass: 5 });
 
             app.setBodyTexture(step, 'woodBox');
             world.addBody(step);
@@ -344,7 +355,7 @@ export default class Demo {
         this.generateFloor(world, app);
         this.generateFences(world, app);
 
-        const whipAnchor = new RigidBody(new BoxShape(60, 25), 0, 350, 0);
+        const whipAnchor = Bodies.box({ width: 60, height: 25, x: 0, y: 350, mass: 0 });
         app.setBodyTexture(whipAnchor, 'rockBridgeAnchor');
         world.addBody(whipAnchor);
 
@@ -360,7 +371,7 @@ export default class Demo {
                 i === 0
                     ? whipAnchor.position.y - whipElementHeight
                     : whipAnchor.position.y - (whipElementHeight + 60 * i);
-            const whipElement = new RigidBody(new BoxShape(10, 50), x, y, 1);
+            const whipElement = Bodies.box({ width: 10, height: 50, x, y, mass: 1 });
             app.setBodyTexture(whipElement, 'crate');
             world.addBody(whipElement);
 
@@ -386,12 +397,12 @@ export default class Demo {
         this.generateFences(world, app);
 
         // Add ragdoll parts (rigid bodies)
-        const torso = new RigidBody(new BoxShape(50, 100), 0, -100, 3.0);
-        const head = new RigidBody(new CircleShape(25), torso.position.x, torso.position.y + 50 + 25, 5.0);
-        const leftArm = new RigidBody(new BoxShape(15, 70), torso.position.x - 32, torso.position.y + 10, 1.0);
-        const rightArm = new RigidBody(new BoxShape(15, 70), torso.position.x + 32, torso.position.y + 10, 1.0);
-        const leftLeg = new RigidBody(new BoxShape(20, 90), torso.position.x - 20, torso.position.y - 97, 1.0);
-        const rightLeg = new RigidBody(new BoxShape(20, 90), torso.position.x + 20, torso.position.y - 97, 1.0);
+        const torso = Bodies.box({ width: 50, height: 100, x: 0, y: -100, mass: 3.0 });
+        const head = Bodies.circle({ radius: 25, x: torso.position.x, y: torso.position.y + 50 + 25, mass: 5.0 });
+        const leftArm = Bodies.box({ width: 15, height: 70, x: torso.position.x - 32, y: torso.position.y + 10, mass: 1.0 });
+        const rightArm = Bodies.box({ width: 15, height: 70, x: torso.position.x + 32, y: torso.position.y + 10, mass: 1.0 });
+        const leftLeg = Bodies.box({ width: 20, height: 90, x: torso.position.x - 20, y: torso.position.y - 97, mass: 1.0 });
+        const rightLeg = Bodies.box({ width: 20, height: 90, x: torso.position.x + 20, y: torso.position.y - 97, mass: 1.0 });
         app.setBodyTexture(head, 'head');
         app.setBodyTexture(torso, 'torso');
         app.setBodyTexture(leftArm, 'leftArm');
@@ -459,7 +470,7 @@ export default class Demo {
         const floor = this.generateFloor(world, app);
         this.generateFences(world, app);
 
-        const plank = new RigidBody(new BoxShape(750, 20), 0, floor.position.y + 100, 10);
+        const plank = Bodies.box({ width: 750, height: 20, x: 0, y: floor.position.y + 100, mass: 10 });
         app.setBodyTexture(plank, 'woodPlankCracked');
         world.addBody(plank);
 
@@ -467,13 +478,13 @@ export default class Demo {
         world.addJoint(joint);
 
         const triangleVertices = [new Vec2(-30, -30), new Vec2(30, -30), new Vec2(0, 33.5)];
-        const triangle = new RigidBody(new PolygonShape(triangleVertices), 0, floor.position.y + 55, 0);
+        const triangle = Bodies.polygon({ vertices: triangleVertices, x: 0, y: floor.position.y + 55, mass: 0 });
         app.setBodyTexture(triangle, 'woodTriangle');
         world.addBody(triangle);
 
-        const box1 = new RigidBody(new BoxShape(25, 25), plank.position.x - 350, plank.position.y + 25, 1);
-        const box2 = new RigidBody(new BoxShape(25, 25), plank.position.x - 325, plank.position.y + 25, 1);
-        const box3 = new RigidBody(new BoxShape(25, 25), plank.position.x - 337.5, plank.position.y + 50, 1);
+        const box1 = Bodies.box({ width: 25, height: 25, x: plank.position.x - 350, y: plank.position.y + 25, mass: 1 });
+        const box2 = Bodies.box({ width: 25, height: 25, x: plank.position.x - 325, y: plank.position.y + 25, mass: 1 });
+        const box3 = Bodies.box({ width: 25, height: 25, x: plank.position.x - 337.5, y: plank.position.y + 50, mass: 1 });
         app.setBodyTexture(box1, 'crate');
         app.setBodyTexture(box2, 'crate');
         app.setBodyTexture(box3, 'crate');
@@ -481,7 +492,13 @@ export default class Demo {
         world.addBody(box2);
         world.addBody(box3);
 
-        const heavyBox = new RigidBody(new BoxShape(50, 50), plank.position.x + 350, Graphics.height() - 750, 10);
+        const heavyBox = Bodies.box({
+            width: 50,
+            height: 50,
+            x: plank.position.x + 350,
+            y: Graphics.height() - 750,
+            mass: 10,
+        });
         app.setBodyTexture(heavyBox, 'metal');
         world.addBody(heavyBox);
     };
@@ -509,7 +526,7 @@ export default class Demo {
                 const x = startX + col * spacing;
                 const y = topY - row * spacing;
                 const mass = row === 0 ? 0 : 1; // top row can be anchors (mass=0)
-                const particle = new RigidBody(new CircleShape(particleRadius), x, y, mass);
+                const particle = Bodies.circle({ radius: particleRadius, x, y, mass });
                 world.addBody(particle);
                 rowParticles.push(particle);
             }
@@ -559,12 +576,13 @@ export default class Demo {
         const startY = 0;
 
         // Start anchor (static)
-        const startAnchor = new RigidBody(
-            new BoxShape(stepWidth * 2, stepWidth * 0.5),
-            startX - stepWidth / 2,
-            startY,
-            0.0,
-        );
+        const startAnchor = Bodies.box({
+            width: stepWidth * 2,
+            height: stepWidth * 0.5,
+            x: startX - stepWidth / 2,
+            y: startY,
+            mass: 0.0,
+        });
         app.setBodyTexture(startAnchor, 'rockBridgeAnchor');
         world.addBody(startAnchor);
 
@@ -578,7 +596,7 @@ export default class Demo {
             // Optional sag: small vertical sinusoidal displacement
             const y = startY - Math.sin((i / numSteps) * Math.PI) * 10;
 
-            const step = new RigidBody(new CircleShape(stepWidth * 0.5), x, y, 3);
+            const step = Bodies.circle({ radius: stepWidth * 0.5, x, y, mass: 3 });
             app.setBodyTexture(step, 'woodBridgeStep');
             world.addBody(step);
 
@@ -590,12 +608,13 @@ export default class Demo {
         }
 
         // End anchor (static)
-        const endAnchor = new RigidBody(
-            new BoxShape(stepWidth * 2, stepWidth * 0.5),
-            lastStep.position.x + spacing + stepWidth / 2,
-            startY,
-            0.0,
-        );
+        const endAnchor = Bodies.box({
+            width: stepWidth * 2,
+            height: stepWidth * 0.5,
+            x: lastStep.position.x + spacing + stepWidth / 2,
+            y: startY,
+            mass: 0.0,
+        });
         app.setBodyTexture(endAnchor, 'rockBridgeAnchor');
         world.addBody(endAnchor);
 
@@ -608,12 +627,13 @@ export default class Demo {
 
         for (let i = 0; i < numBoxLargeHorizontal; i++) {
             for (let j = 0; j < 10; j++) {
-                const box = new RigidBody(
-                    new BoxShape(boxSizeLarge, boxSizeLarge),
-                    -(numBoxLargeHorizontal * boxSizeLarge) / 2 + boxSizeLarge / 2 + i * boxSizeLarge,
-                    500 + j * boxSizeLarge,
-                    1,
-                );
+                const box = Bodies.box({
+                    width: boxSizeLarge,
+                    height: boxSizeLarge,
+                    x: -(numBoxLargeHorizontal * boxSizeLarge) / 2 + boxSizeLarge / 2 + i * boxSizeLarge,
+                    y: 500 + j * boxSizeLarge,
+                    mass: 1,
+                });
                 app.setBodyTexture(box, 'woodBox');
                 world.addBody(box);
             }
@@ -624,12 +644,13 @@ export default class Demo {
 
         for (let i = 0; i < numBoxSmallHorizontal; i++) {
             for (let j = 0; j < 10; j++) {
-                const box = new RigidBody(
-                    new BoxShape(boxSizeSmall, boxSizeSmall),
-                    -(numBoxSmallHorizontal * boxSizeSmall) / 2 + boxSizeSmall / 2 + i * boxSizeSmall,
-                    2000 + j * boxSizeSmall,
-                    1,
-                );
+                const box = Bodies.box({
+                    width: boxSizeSmall,
+                    height: boxSizeSmall,
+                    x: -(numBoxSmallHorizontal * boxSizeSmall) / 2 + boxSizeSmall / 2 + i * boxSizeSmall,
+                    y: 2000 + j * boxSizeSmall,
+                    mass: 1,
+                });
                 app.setBodyTexture(box, 'metal');
                 world.addBody(box);
             }
@@ -769,9 +790,7 @@ export default class Demo {
                 const x = plank3.position.x + 200 + col * 50 - row * 25;
                 const y = floor.position.y + FLOOR_HEIGHT / 2 + 50 + row * 52;
                 const mass = 5 / (row + 1);
-                const box = new RigidBody(new BoxShape(50, 50), x, y, mass);
-                box.friction = 0.9;
-                box.restitution = 0.0;
+                const box = Bodies.box({ width: 50, height: 50, x, y, mass, friction: 0.9, restitution: 0.0 });
                 app.setBodyTexture(box, 'woodBox');
                 world.addBody(box);
             }
@@ -785,7 +804,7 @@ export default class Demo {
 
         // Start anchor (static)
         const stepHeight = 20;
-        const startStep = new RigidBody(new BoxShape(80, stepHeight), -500, 200, 0.0);
+        const startStep = Bodies.box({ width: 80, height: stepHeight, x: -500, y: 200, mass: 0.0 });
         app.setBodyTexture(startStep, 'rockBridgeAnchor');
         world.addBody(startStep);
 
@@ -797,7 +816,7 @@ export default class Demo {
             const y = startStep.position.y - Math.sin((i / numSteps) * Math.PI) * 10;
             const mass = 3;
 
-            const step = new RigidBody(new CircleShape(15), x, y, mass);
+            const step = Bodies.circle({ radius: 15, x, y, mass });
             app.setBodyTexture(step, 'woodBridgeStep');
             world.addBody(step);
 
@@ -809,7 +828,7 @@ export default class Demo {
         }
 
         // Final anchor
-        const endStep = new RigidBody(new BoxShape(80, stepHeight), last.position.x + 60, startStep.position.y, 0.0);
+        const endStep = Bodies.box({ width: 80, height: stepHeight, x: last.position.x + 60, y: startStep.position.y, mass: 0.0 });
         app.setBodyTexture(endStep, 'rockBridgeAnchor');
         world.addBody(endStep);
 
@@ -818,30 +837,30 @@ export default class Demo {
 
         // Add pigs
         const pigRadius = 30;
-        const pig1 = new RigidBody(
-            new CircleShape(pigRadius),
-            plank1.position.x + 80,
-            floor.position.y + FLOOR_HEIGHT / 2 + pigRadius,
-            3.0,
-        );
-        const pig2 = new RigidBody(
-            new CircleShape(pigRadius),
-            plank2.position.x + 400,
-            floor.position.y + FLOOR_HEIGHT / 2 + pigRadius,
-            3.0,
-        );
-        const pig3 = new RigidBody(
-            new CircleShape(pigRadius),
-            plank2.position.x + 460,
-            floor.position.y + FLOOR_HEIGHT / 2 + pigRadius,
-            3.0,
-        );
-        const pig4 = new RigidBody(
-            new CircleShape(pigRadius),
-            startStep.position.x,
-            startStep.position.y + stepHeight / 2 + pigRadius,
-            1.0,
-        );
+        const pig1 = Bodies.circle({
+            radius: pigRadius,
+            x: plank1.position.x + 80,
+            y: floor.position.y + FLOOR_HEIGHT / 2 + pigRadius,
+            mass: 3.0,
+        });
+        const pig2 = Bodies.circle({
+            radius: pigRadius,
+            x: plank2.position.x + 400,
+            y: floor.position.y + FLOOR_HEIGHT / 2 + pigRadius,
+            mass: 3.0,
+        });
+        const pig3 = Bodies.circle({
+            radius: pigRadius,
+            x: plank2.position.x + 460,
+            y: floor.position.y + FLOOR_HEIGHT / 2 + pigRadius,
+            mass: 3.0,
+        });
+        const pig4 = Bodies.circle({
+            radius: pigRadius,
+            x: startStep.position.x,
+            y: startStep.position.y + stepHeight / 2 + pigRadius,
+            mass: 1.0,
+        });
         app.setBodyTexture(pig1, 'pig1');
         app.setBodyTexture(pig2, 'pig2');
         app.setBodyTexture(pig3, 'pig1');
