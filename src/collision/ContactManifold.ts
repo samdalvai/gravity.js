@@ -47,6 +47,7 @@ export class ContactManifold extends Constraint {
         contactNormal: Vec2,
         featureFlipped: boolean,
     ) {
+        console.log('is normal');
         super(bodyA, bodyB);
         this.contactPoints = contactPoints;
         this.penetrationDepth = penetrationDepth;
