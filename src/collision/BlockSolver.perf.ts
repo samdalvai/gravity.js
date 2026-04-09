@@ -33,19 +33,19 @@ export class BlockSolver {
         this.k = new Mat2();
 
         this.k.m00 =
-            +this.bodyA.invMass +
+            this.bodyA.invMass +
             this.nc1.jwa * this.bodyA.invI * this.nc1.jwa +
             this.bodyB.invMass +
             this.nc1.jwb * this.bodyB.invI * this.nc1.jwb;
 
         this.k.m11 =
-            +this.bodyA.invMass +
+            this.bodyA.invMass +
             this.nc2.jwa * this.bodyA.invI * this.nc2.jwa +
             this.bodyB.invMass +
             this.nc2.jwb * this.bodyB.invI * this.nc2.jwb;
 
         this.k.m01 =
-            +this.bodyA.invMass +
+            this.bodyA.invMass +
             this.nc1.jwa * this.bodyA.invI * this.nc2.jwa +
             this.bodyB.invMass +
             this.nc1.jwb * this.bodyB.invI * this.nc2.jwb;
@@ -104,7 +104,7 @@ export class BlockSolver {
 
         // (Velocity constraint) Normal velocity: Jv = 0
         let vn1: number =
-            +this.nc1.jvaX * bodyAVelocity.x +
+            this.nc1.jvaX * bodyAVelocity.x +
             this.nc1.jvaY * bodyAVelocity.y +
             this.nc1.jwa * bodyAAngularVelocity +
             this.nc1.jvbX * bodyBVelocity.x +
@@ -112,7 +112,7 @@ export class BlockSolver {
             this.nc1.jwb * bodyBAngularVelocity;
 
         let vn2: number =
-            +this.nc2.jvaX * bodyAVelocity.x +
+            this.nc2.jvaX * bodyAVelocity.x +
             this.nc2.jvaY * bodyAVelocity.y +
             this.nc2.jwa * bodyAAngularVelocity +
             this.nc2.jvbX * bodyBVelocity.x +
