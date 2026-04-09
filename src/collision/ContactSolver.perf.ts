@@ -4,15 +4,6 @@ import { Vec2 } from '../math/Vec2';
 import * as Utils from '../utils/Utils';
 import { ContactManifold, ContactType } from './ContactManifold.perf';
 
-export interface Jacobian {
-    vaX: number;
-    vaY: number;
-    wa: number;
-    vbX: number;
-    vbY: number;
-    wb: number;
-}
-
 export class ContactSolver {
     private readonly manifold: ContactManifold;
 
@@ -31,14 +22,12 @@ export class ContactSolver {
     private rbX = 0.0;
     private rbY = 0.0;
 
-    public jacobian: Jacobian = {
-        vaX: 0.0,
-        vaY: 0.0,
-        wa: 0.0,
-        vbX: 0.0,
-        vbY: 0.0,
-        wb: 0.0,
-    };
+    public jvaX = 0.0;
+    public jvaY = 0.0;
+    public jwa = 0.0;
+    public jvbX = 0.0;
+    public jvbY = 0.0;
+    public jwb = 0.0;
     public bias = 0.0;
     public effectiveMass = 0.0;
 
@@ -72,13 +61,12 @@ export class ContactSolver {
 
         const dirX = dir.x;
         const dirY = dir.y;
-        const jacobian = this.jacobian;
-        jacobian.vaX = -dirX;
-        jacobian.vaY = -dirY;
-        jacobian.wa = this.raY * dirX - this.raX * dirY;
-        jacobian.vbX = dirX;
-        jacobian.vbY = dirY;
-        jacobian.wb = this.rbX * dirY - this.rbY * dirX;
+        this.jvaX = -dirX;
+        this.jvaY = -dirY;
+        this.jwa = this.raY * dirX - this.raX * dirY;
+        this.jvbX = dirX;
+        this.jvbY = dirY;
+        this.jwb = this.rbX * dirY - this.rbY * dirX;
 
         this.bias = 0.0;
         if (this.contactType == ContactType.Normal) {
@@ -111,10 +99,10 @@ export class ContactSolver {
         }
 
         const k: number =
-            +this.bodyA.invMass +
-            jacobian.wa * this.bodyA.invI * jacobian.wa +
+            this.bodyA.invMass +
+            this.jwa * this.bodyA.invI * this.jwa +
             this.bodyB.invMass +
-            jacobian.wb * this.bodyB.invI * jacobian.wb;
+            this.jwb * this.bodyB.invI * this.jwb;
 
         this.effectiveMass = k > 0.0 ? 1.0 / k : 0.0;
 
@@ -128,16 +116,15 @@ export class ContactSolver {
         // λ = (J · M^-1 · J^t)^-1 ⋅ -(J·v+b)
 
         // Jacobian * velocity vector (Normal velocity)
-        const jacobian = this.jacobian;
         const bodyAVelocity = this.bodyA.velocity;
         const bodyBVelocity = this.bodyB.velocity;
         const jv: number =
-            +jacobian.vaX * bodyAVelocity.x +
-            jacobian.vaY * bodyAVelocity.y +
-            jacobian.wa * this.bodyA.angularVelocity +
-            jacobian.vbX * bodyBVelocity.x +
-            jacobian.vbY * bodyBVelocity.y +
-            jacobian.wb * this.bodyB.angularVelocity;
+            this.jvaX * bodyAVelocity.x +
+            this.jvaY * bodyAVelocity.y +
+            this.jwa * this.bodyA.angularVelocity +
+            this.jvbX * bodyBVelocity.x +
+            this.jvbY * bodyBVelocity.y +
+            this.jwb * this.bodyB.angularVelocity;
 
         let lambda = this.effectiveMass * -(jv + this.bias);
 
@@ -172,15 +159,14 @@ export class ContactSolver {
             return;
         }
 
-        const jacobian = this.jacobian;
         const bodyAImpulseScale = this.bodyA.invMass * lambda;
-        this.bodyA.velocity.x += jacobian.vaX * bodyAImpulseScale;
-        this.bodyA.velocity.y += jacobian.vaY * bodyAImpulseScale;
-        this.bodyA.angularVelocity += this.bodyA.invI * jacobian.wa * lambda;
+        this.bodyA.velocity.x += this.jvaX * bodyAImpulseScale;
+        this.bodyA.velocity.y += this.jvaY * bodyAImpulseScale;
+        this.bodyA.angularVelocity += this.bodyA.invI * this.jwa * lambda;
 
         const bodyBImpulseScale = this.bodyB.invMass * lambda;
-        this.bodyB.velocity.x += jacobian.vbX * bodyBImpulseScale;
-        this.bodyB.velocity.y += jacobian.vbY * bodyBImpulseScale;
-        this.bodyB.angularVelocity += this.bodyB.invI * jacobian.wb * lambda;
+        this.bodyB.velocity.x += this.jvbX * bodyBImpulseScale;
+        this.bodyB.velocity.y += this.jvbY * bodyBImpulseScale;
+        this.bodyB.angularVelocity += this.bodyB.invI * this.jwb * lambda;
     }
 }

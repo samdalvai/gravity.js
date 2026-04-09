@@ -2,7 +2,7 @@ import { RigidBody } from '../core/RigidBody';
 import { Mat2 } from '../math/Mat2';
 import * as Utils from '../utils/Utils';
 import { ContactManifold } from './ContactManifold.perf';
-import { ContactSolver, Jacobian } from './ContactSolver.perf';
+import { ContactSolver } from './ContactSolver.perf';
 
 export class BlockSolver {
     private bodyA: RigidBody;
@@ -11,9 +11,6 @@ export class BlockSolver {
     // Normal contacts
     private nc1!: ContactSolver;
     private nc2!: ContactSolver;
-    // Jacobians
-    private j1!: Jacobian;
-    private j2!: Jacobian;
 
     private k!: Mat2;
     private m!: Mat2;
@@ -33,28 +30,25 @@ export class BlockSolver {
         this.nc1 = normalContacts[0];
         this.nc2 = normalContacts[1];
 
-        this.j1 = normalContacts[0].jacobian;
-        this.j2 = normalContacts[1].jacobian;
-
         this.k = new Mat2();
 
         this.k.m00 =
             +this.bodyA.invMass +
-            this.j1.wa * this.bodyA.invI * this.j1.wa +
+            this.nc1.jwa * this.bodyA.invI * this.nc1.jwa +
             this.bodyB.invMass +
-            this.j1.wb * this.bodyB.invI * this.j1.wb;
+            this.nc1.jwb * this.bodyB.invI * this.nc1.jwb;
 
         this.k.m11 =
             +this.bodyA.invMass +
-            this.j2.wa * this.bodyA.invI * this.j2.wa +
+            this.nc2.jwa * this.bodyA.invI * this.nc2.jwa +
             this.bodyB.invMass +
-            this.j2.wb * this.bodyB.invI * this.j2.wb;
+            this.nc2.jwb * this.bodyB.invI * this.nc2.jwb;
 
         this.k.m01 =
             +this.bodyA.invMass +
-            this.j1.wa * this.bodyA.invI * this.j2.wa +
+            this.nc1.jwa * this.bodyA.invI * this.nc2.jwa +
             this.bodyB.invMass +
-            this.j1.wb * this.bodyB.invI * this.j2.wb;
+            this.nc1.jwb * this.bodyB.invI * this.nc2.jwb;
 
         this.k.m10 = this.k.m01;
 
@@ -110,20 +104,20 @@ export class BlockSolver {
 
         // (Velocity constraint) Normal velocity: Jv = 0
         let vn1: number =
-            +this.nc1.jacobian.vaX * bodyAVelocity.x +
-            this.nc1.jacobian.vaY * bodyAVelocity.y +
-            this.nc1.jacobian.wa * bodyAAngularVelocity +
-            this.nc1.jacobian.vbX * bodyBVelocity.x +
-            this.nc1.jacobian.vbY * bodyBVelocity.y +
-            this.nc1.jacobian.wb * bodyBAngularVelocity;
+            +this.nc1.jvaX * bodyAVelocity.x +
+            this.nc1.jvaY * bodyAVelocity.y +
+            this.nc1.jwa * bodyAAngularVelocity +
+            this.nc1.jvbX * bodyBVelocity.x +
+            this.nc1.jvbY * bodyBVelocity.y +
+            this.nc1.jwb * bodyBAngularVelocity;
 
         let vn2: number =
-            +this.nc2.jacobian.vaX * bodyAVelocity.x +
-            this.nc2.jacobian.vaY * bodyAVelocity.y +
-            this.nc2.jacobian.wa * bodyAAngularVelocity +
-            this.nc2.jacobian.vbX * bodyBVelocity.x +
-            this.nc2.jacobian.vbY * bodyBVelocity.y +
-            this.nc2.jacobian.wb * bodyBAngularVelocity;
+            +this.nc2.jvaX * bodyAVelocity.x +
+            this.nc2.jvaY * bodyAVelocity.y +
+            this.nc2.jwa * bodyAAngularVelocity +
+            this.nc2.jvbX * bodyBVelocity.x +
+            this.nc2.jvbY * bodyBVelocity.y +
+            this.nc2.jwb * bodyBAngularVelocity;
 
         let bX = vn1 + this.nc1.bias;
         let bY = vn2 + this.nc2.bias;
@@ -212,15 +206,17 @@ export class BlockSolver {
 
         const linearImpulse = lambdaX + lambdaY;
         const bodyAImpulseScale = this.bodyA.invMass * linearImpulse;
-        this.bodyA.velocity.x += this.j1.vaX * bodyAImpulseScale;
-        this.bodyA.velocity.y += this.j1.vaY * bodyAImpulseScale;
+        // Both normal constraints share the same contact normal, so their linear impulses
+        // add before being applied to the bodies.
+        this.bodyA.velocity.x += this.nc1.jvaX * bodyAImpulseScale;
+        this.bodyA.velocity.y += this.nc1.jvaY * bodyAImpulseScale;
         this.bodyA.angularVelocity =
-            this.bodyA.angularVelocity + this.bodyA.invI * (this.j1.wa * lambdaX + this.j2.wa * lambdaY);
+            this.bodyA.angularVelocity + this.bodyA.invI * (this.nc1.jwa * lambdaX + this.nc2.jwa * lambdaY);
 
         const bodyBImpulseScale = this.bodyB.invMass * linearImpulse;
-        this.bodyB.velocity.x += this.j1.vbX * bodyBImpulseScale;
-        this.bodyB.velocity.y += this.j1.vbY * bodyBImpulseScale;
+        this.bodyB.velocity.x += this.nc1.jvbX * bodyBImpulseScale;
+        this.bodyB.velocity.y += this.nc1.jvbY * bodyBImpulseScale;
         this.bodyB.angularVelocity =
-            this.bodyB.angularVelocity + this.bodyB.invI * (this.j1.wb * lambdaX + this.j2.wb * lambdaY);
+            this.bodyB.angularVelocity + this.bodyB.invI * (this.nc1.jwb * lambdaX + this.nc2.jwb * lambdaY);
     }
 }
