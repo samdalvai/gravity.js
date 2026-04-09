@@ -517,13 +517,10 @@ export default class Application {
         }
 
         this.removeOutOfBoundsBodies();
-
-        // Here for testing purposes
-        Graphics.clearScreen();
     }
 
     render(): void {
-        // Graphics.clearScreen();
+        Graphics.clearScreen();
         Graphics.beginWorld();
 
         // Draw background texture
