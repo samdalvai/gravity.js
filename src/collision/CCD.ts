@@ -6,7 +6,7 @@ import { PolygonShape } from '../shapes/PolygonShape';
 import { ShapeType } from '../shapes/Shape';
 import * as Utils from '../utils/Utils';
 
-export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): void {
+export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): number | null {
     Utils.assert(bullet.shape instanceof CircleShape);
 
     const bulletShape = bullet.shape as CircleShape;
@@ -148,15 +148,20 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
     }
 
     if (closestIntersection) {
+        const fraction = getFraction(currentPos, nextPos, closestIntersection);
+        console.log('fraction: ', fraction);
         // TODO: if we move bullet to closestIntersection and shoot down the bullet sticks to the floor,
         // probably something wron with polygon/circle collision, also if we move to bulletNewPos
         // the bounce angle is wrong
-        const toBullet = currentPos.subNew(closestIntersection).unitVector();
-        const bulletNewPos = closestIntersection.addNew(toBullet.scaleNew(bulletShape.radius));
-        bullet.position = bulletNewPos.copy();
-        bullet.shape.updateAABB(bullet);
-        bullet.hasCCD = true;
+        // const toBullet = currentPos.subNew(closestIntersection).unitVector();
+        // const bulletNewPos = closestIntersection.addNew(toBullet.scaleNew(bulletShape.radius));
+        // bullet.position = bulletNewPos.copy();
+        // bullet.shape.updateAABB(bullet);
+        // bullet.hasCCD = true;
+        return fraction;
     }
+
+    return null;
 }
 
 function edgeEdgeIntersection(A: Vec2, B: Vec2, C: Vec2, D: Vec2): Vec2 | null {
@@ -205,4 +210,22 @@ function edgeCircleIntersection(A: Vec2, B: Vec2, C: Vec2, r: number): Vec2[] {
     }
 
     return intersections;
+}
+
+/**
+ * Gets the fraction [0, 1] along an axis where the point lies
+ * @param position
+ * @param nextPosition
+ * @param point
+ * @returns
+ */
+function getFraction(a: Vec2, b: Vec2, point: Vec2): number {
+    const ab = b.subNew(a);
+    const ap = point.subNew(a);
+
+    const abLenSq = ab.x * ab.x + ab.y * ab.y;
+
+    if (abLenSq === 0) return 0;
+
+    return (ap.x * ab.x + ap.y * ab.y) / abLenSq;
 }
