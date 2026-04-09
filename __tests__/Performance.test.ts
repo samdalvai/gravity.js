@@ -3,7 +3,7 @@ import { describe, expect, test } from '@jest/globals';
 import { BoxShape, CircleShape, RigidBody } from '../src';
 import * as Collision from '../src/collision/NarrowPhase';
 import { DistanceJoint } from '../src/joint/DistanceJoint';
-import { DistanceJoint as DistanceJointPerf } from '../src/joint/DistanceJoint.perf';
+import { DistanceJoint as DistanceJointPerf } from '../src/joint/DistanceJoint';
 
 const DT = 1 / 60;
 const INV_DT = 1 / DT;
