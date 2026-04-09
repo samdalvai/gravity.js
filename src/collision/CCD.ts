@@ -148,7 +148,9 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
     }
 
     if (closestIntersection) {
-        const fraction = getFraction(currentPos, nextPos, closestIntersection);
+        const toBullet = currentPos.subNew(closestIntersection).unitVector();
+        const bulletNewPos = closestIntersection.addNew(toBullet.scaleNew(bulletShape.radius))
+        const fraction = getFraction(currentPos, nextPos, bulletNewPos);
         console.log('fraction: ', fraction);
         // TODO: if we move bullet to closestIntersection and shoot down the bullet sticks to the floor,
         // probably something wron with polygon/circle collision, also if we move to bulletNewPos

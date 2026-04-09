@@ -32,6 +32,8 @@ export class World {
     private forces: Vec2[] = [];
     private torques: number[] = [];
 
+    private fractions: number[] = [];
+
     constructor(gravity: number) {
         this.G = -gravity;
     }
@@ -78,8 +80,6 @@ export class World {
     }
 
     update(dt: number): void {
-        const invDt = 1 / dt;
-
         // Loop all bodies of the world applying forces
         for (const body of this.bodies) {
             if (SETTINGS.applyGravity) {
@@ -118,29 +118,45 @@ export class World {
 
         this.ccd(dt);
 
-        this.broadPhase();
+        for (const fraction of this.fractions) {
+            const invDt = 1 / fraction;
+            this.broadPhase();
 
-        this.narrowPhase();
+            this.narrowPhase();
 
-        this.solveConstraints(invDt);
+            this.solveConstraints(invDt);
 
-        // Integrate all the velocities
-        for (const body of this.bodies) {
-            body.integrateVelocities(dt);
+            // Integrate all the velocities
+            for (const body of this.bodies) {
+                body.integrateVelocities(fraction);
+            }
         }
     }
 
     private ccd(dt: number) {
+        this.fractions.length = 0;
+
         for (const body of this.bodies) {
             if (body.isBullet) {
                 if (body.velocity.magnitudeSquared() > MIN_BULLET_SPEED) {
-                    CCD.resolveCCD(body, this.bodies, dt);
+                    const fraction = CCD.resolveCCD(body, this.bodies, dt);
+                    if (fraction) this.fractions.push(fraction);
                 } else {
                     // If a bullet stopped moving fast enugh downgrade to normal dynamic body
                     body.isBullet = false;
                 }
             }
         }
+
+        this.fractions.sort((f1, f2) => f1 - f2);
+
+        // Transform fractions to real dt
+        for (let i = 0; i < this.fractions.length; i++) {
+            this.fractions[i] *= dt;
+        }
+
+        // Add final fraction equal to dt
+        this.fractions.push(dt);
     }
 
     private broadPhase() {
