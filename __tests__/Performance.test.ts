@@ -2,6 +2,7 @@ import { describe, expect, test } from '@jest/globals';
 
 import { CircleShape, RigidBody } from '../src';
 import * as Collision from '../src/collision/NarrowPhase';
+import * as CollisionPerf from '../src/collision/NarrowPhase.perf';
 
 const DT = 1 / 60;
 const INV_DT = 1 / DT;
@@ -14,15 +15,15 @@ describe('Performance test', () => {
 
         const a = new RigidBody(new CircleShape(30), 0, 0, 1.0);
         const b = new RigidBody(new CircleShape(30), 0, 0, 1.0);
-        const maifold = Collision.detectCollision(a, b)!;
-        expect(maifold).not.toBeNull();
+        const manifold = Collision.detectCollision(a, b)!;
+        expect(manifold).not.toBeNull();
 
-        maifold.preSolve(INV_DT);
+        manifold.preSolve(INV_DT);
 
         // Solve constraints
         for (let x = 0; x < TEST_ITERATIONS; x++) {
             for (let i = 0; i < SOLVER_ITERATIONS; i++) {
-                maifold.solve();
+                manifold.solve();
             }
         }
 
@@ -34,15 +35,15 @@ describe('Performance test', () => {
 
         const a = new RigidBody(new CircleShape(30), 0, 0, 1.0);
         const b = new RigidBody(new CircleShape(30), 0, 0, 1.0);
-        const maifold = Collision.detectCollision(a, b)!;
-        expect(maifold).not.toBeNull();
+        const manifold = CollisionPerf.detectCollision(a, b)!;
+        expect(manifold).not.toBeNull();
 
-        maifold.preSolve(INV_DT);
+        manifold.preSolve(INV_DT);
 
         // Solve constraints
         for (let x = 0; x < TEST_ITERATIONS; x++) {
             for (let i = 0; i < SOLVER_ITERATIONS; i++) {
-                maifold.solve();
+                manifold.solve();
             }
         }
 

@@ -3,8 +3,8 @@ import { SETTINGS } from '../core/Constants';
 import { RigidBody } from '../core/RigidBody';
 import { Vec2 } from '../math/Vec2';
 import * as Utils from '../utils/Utils';
-import { BlockSolver } from './BlockSolver';
-import { ContactSolver } from './ContactSolver';
+import { BlockSolver } from './BlockSolver.perf';
+import { ContactSolver } from './ContactSolver.perf';
 
 export enum ContactType {
     Normal,
@@ -47,7 +47,7 @@ export class ContactManifold extends Constraint {
         contactNormal: Vec2,
         featureFlipped: boolean,
     ) {
-        console.log('is normal');
+        console.log('is perf');
         super(bodyA, bodyB);
         this.contactPoints = contactPoints;
         this.penetrationDepth = penetrationDepth;
