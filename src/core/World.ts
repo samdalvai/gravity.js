@@ -9,7 +9,6 @@
  */
 import * as CCD from '../collision/CCD';
 import { ContactManifold } from '../collision/ContactManifold';
-// import * as Collision from '../collision/Collision_old';
 import * as NarrowPhase from '../collision/NarrowPhase';
 import { Force } from '../force/Force';
 import { Joint } from '../joint/Joint';
