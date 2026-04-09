@@ -1,6 +1,7 @@
 import { describe, expect, test } from '@jest/globals';
 import { Vec2 } from '../../src/math/Vec2';
 import { BoxShape } from '../../src/shapes/BoxShape';
+import { PolygonShape } from '../../src/shapes/PolygonShape';
 
 describe('Shape', () => {
     test('Should rotate box world vertices by 90 degrees', () => {
@@ -73,5 +74,23 @@ describe('Shape', () => {
         expect(box.worldVertices[2].y).toBe(110);
         expect(box.worldVertices[3].x).toBe(90);
         expect(box.worldVertices[3].y).toBe(90);
+    });
+
+    test('PolygonShape normalizes clockwise vertices to counter-clockwise winding', () => {
+        const clockwisePentagon = [
+            new Vec2(0, 46),
+            new Vec2(42, 14),
+            new Vec2(26, -38),
+            new Vec2(-26, -38),
+            new Vec2(-42, 14),
+        ];
+
+        const polygon = new PolygonShape(clockwisePentagon);
+        const area = polygon.localVertices.reduce((sum, current, index) => {
+            const next = polygon.localVertices[(index + 1) % polygon.localVertices.length];
+            return sum + current.cross(next);
+        }, 0);
+
+        expect(area).toBeGreaterThan(0);
     });
 });
