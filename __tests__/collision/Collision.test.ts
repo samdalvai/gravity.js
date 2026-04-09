@@ -202,4 +202,40 @@ describe('Collision', () => {
 
         expect(result).toBeNull();
     });
+
+    test('detectCollision() detects collision for clockwise-wound convex polygons', () => {
+        const pentagonVertices = [
+            new Vec2(0, 46),
+            new Vec2(42, 14),
+            new Vec2(26, -38),
+            new Vec2(-26, -38),
+            new Vec2(-42, 14),
+        ];
+        const a = new RigidBody(new PolygonShape(pentagonVertices), 0, 0, 1.0);
+        const b = new RigidBody(new BoxShape(60, 60), 0, 0, 1.0);
+
+        const result = Collision.detectCollision(a, b);
+
+        expect(result).not.toBeNull();
+        expect(result?.contactPoints.length).toBeGreaterThan(0);
+        expect(result?.penetrationDepth).toBeGreaterThan(0);
+    });
+
+    test('detectCollision() detects collision for counter-clockwise-wound convex polygons', () => {
+        const pentagonVertices = [
+            new Vec2(-42, 14),
+            new Vec2(-26, -38),
+            new Vec2(26, -38),
+            new Vec2(42, 14),
+            new Vec2(0, 46),
+        ];
+        const a = new RigidBody(new PolygonShape(pentagonVertices), 0, 0, 1.0);
+        const b = new RigidBody(new BoxShape(60, 60), 0, 0, 1.0);
+
+        const result = Collision.detectCollision(a, b);
+
+        expect(result).not.toBeNull();
+        expect(result?.contactPoints.length).toBeGreaterThan(0);
+        expect(result?.penetrationDepth).toBeGreaterThan(0);
+    });
 });
