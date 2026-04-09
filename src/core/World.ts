@@ -8,7 +8,7 @@
  * https://github.com/Sopiro
  */
 import * as CCD from '../collision/CCD';
-import { ContactManifold } from '../collision/Contact';
+import { ContactManifold } from '../collision/ContactSolver';
 // import * as Collision from '../collision/Collision_old';
 import * as NarrowPhase from '../collision/NarrowPhase';
 import { Force } from '../force/Force';
