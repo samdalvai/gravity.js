@@ -8,10 +8,8 @@
  * https://github.com/Sopiro
  */
 import * as CCD from '../collision/CCD';
-// import { ContactManifold } from '../collision/ContactManifold';
-// import * as NarrowPhase from '../collision/NarrowPhase';
-import { ContactManifold } from '../collision/ContactManifold.perf';
-import * as NarrowPhase from '../collision/NarrowPhase.perf';
+import { ContactManifold } from '../collision/ContactManifold';
+import * as NarrowPhase from '../collision/NarrowPhase';
 import { Force } from '../force/Force';
 import { Joint } from '../joint/Joint';
 import { Vec2 } from '../math/Vec2';
