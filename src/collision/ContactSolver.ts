@@ -4,31 +4,32 @@ import { Vec2 } from '../math/Vec2';
 import * as Utils from '../utils/Utils';
 import { ContactManifold, ContactType } from './ContactManifold';
 
-export interface Jacobian {
-    va: Vec2;
-    wa: number;
-    vb: Vec2;
-    wb: number;
-}
-
 export class ContactSolver {
-    private manifold: ContactManifold;
+    private readonly manifold: ContactManifold;
 
-    private bodyA: RigidBody;
-    private bodyB: RigidBody;
-    private contactPoint: Vec2;
-    private contactType!: ContactType;
+    private readonly bodyA: RigidBody;
+    private readonly bodyB: RigidBody;
+    private readonly contactPointX: number;
+    private readonly contactPointY: number;
+    private contactType: ContactType = ContactType.Normal;
 
-    private beta: number;
-    private restitution: number;
-    private friction: number;
+    private readonly beta: number;
+    private readonly restitution: number;
+    private readonly friction: number;
 
-    private ra!: Vec2;
-    private rb!: Vec2;
+    private raX = 0.0;
+    private raY = 0.0;
+    private rbX = 0.0;
+    private rbY = 0.0;
 
-    public jacobian!: Jacobian;
-    public bias!: number;
-    public effectiveMass!: number;
+    public jvaX = 0.0;
+    public jvaY = 0.0;
+    public jwa = 0.0;
+    public jvbX = 0.0;
+    public jvbY = 0.0;
+    public jwb = 0.0;
+    public bias = 0.0;
+    public effectiveMass = 0.0;
 
     public impulseSum: number = 0.0; // For accumulated impulse
 
@@ -36,7 +37,8 @@ export class ContactSolver {
         this.manifold = manifold;
         this.bodyA = manifold.bodyA;
         this.bodyB = manifold.bodyB;
-        this.contactPoint = contactPoint;
+        this.contactPointX = contactPoint.x;
+        this.contactPointY = contactPoint.y;
 
         this.beta = SETTINGS.positionCorrectionBeta;
         this.restitution = this.bodyA.restitution * this.bodyB.restitution;
@@ -50,23 +52,35 @@ export class ContactSolver {
 
         this.contactType = contactType;
 
-        this.ra = this.contactPoint.subNew(this.bodyA.position);
-        this.rb = this.contactPoint.subNew(this.bodyB.position);
+        const bodyAPosition = this.bodyA.position;
+        const bodyBPosition = this.bodyB.position;
+        this.raX = this.contactPointX - bodyAPosition.x;
+        this.raY = this.contactPointY - bodyAPosition.y;
+        this.rbX = this.contactPointX - bodyBPosition.x;
+        this.rbY = this.contactPointY - bodyBPosition.y;
 
-        this.jacobian = {
-            va: dir.negateNew(),
-            wa: -this.ra!.cross(dir),
-            vb: dir,
-            wb: this.rb!.cross(dir),
-        };
+        const dirX = dir.x;
+        const dirY = dir.y;
+        this.jvaX = -dirX;
+        this.jvaY = -dirY;
+        this.jwa = this.raY * dirX - this.raX * dirY;
+        this.jvbX = dirX;
+        this.jvbY = dirY;
+        this.jwb = this.rbX * dirY - this.rbY * dirX;
 
         this.bias = 0.0;
         if (this.contactType == ContactType.Normal) {
             // Relative velocity at contact point
-            const relativeVelocity = this.bodyB.velocity
-                .addNew(this.rb.crossScalar(this.bodyB.angularVelocity))
-                .subNew(this.bodyA.velocity.addNew(this.ra.crossScalar(this.bodyA.angularVelocity)));
-            const normalVelocity = this.manifold.contactNormal.dot(relativeVelocity);
+            const bodyAVelocity = this.bodyA.velocity;
+            const bodyBVelocity = this.bodyB.velocity;
+            const bodyAAngularVelocity = this.bodyA.angularVelocity;
+            const bodyBAngularVelocity = this.bodyB.angularVelocity;
+            const relativeVelocityX =
+                bodyBVelocity.x - bodyBAngularVelocity * this.rbY - (bodyAVelocity.x - bodyAAngularVelocity * this.raY);
+            const relativeVelocityY =
+                bodyBVelocity.y + bodyBAngularVelocity * this.rbX - (bodyAVelocity.y + bodyAAngularVelocity * this.raX);
+            const contactNormal = this.manifold.contactNormal;
+            const normalVelocity = contactNormal.x * relativeVelocityX + contactNormal.y * relativeVelocityY;
 
             if (SETTINGS.positionCorrection) {
                 this.bias =
@@ -80,20 +94,20 @@ export class ContactSolver {
             }
         } else {
             // Bias for surface speed that enables the conveyor belt-like behavior
-            this.bias = -(this.bodyB.surfaceSpeed - this.bodyA.surfaceSpeed);
+            this.bias = this.bodyA.surfaceSpeed - this.bodyB.surfaceSpeed;
             if (featureFlipped) this.bias *= -1;
         }
 
         const k: number =
-            +this.bodyA.invMass +
-            this.jacobian.wa * this.bodyA.invI * this.jacobian.wa +
+            this.bodyA.invMass +
+            this.jwa * this.bodyA.invI * this.jwa +
             this.bodyB.invMass +
-            this.jacobian.wb * this.bodyB.invI * this.jacobian.wb;
+            this.jwb * this.bodyB.invI * this.jwb;
 
         this.effectiveMass = k > 0.0 ? 1.0 / k : 0.0;
 
         // Apply the old impulse calculated in the previous time step
-        if (SETTINGS.warmStarting) this.applyImpulse(this.impulseSum);
+        if (SETTINGS.warmStarting && this.impulseSum !== 0.0) this.applyImpulse(this.impulseSum);
     }
 
     solve(normalContact?: ContactSolver) {
@@ -102,11 +116,15 @@ export class ContactSolver {
         // λ = (J · M^-1 · J^t)^-1 ⋅ -(J·v+b)
 
         // Jacobian * velocity vector (Normal velocity)
+        const bodyAVelocity = this.bodyA.velocity;
+        const bodyBVelocity = this.bodyB.velocity;
         const jv: number =
-            +this.jacobian.va.dot(this.bodyA.velocity) +
-            this.jacobian.wa * this.bodyA.angularVelocity +
-            this.jacobian.vb.dot(this.bodyB.velocity) +
-            this.jacobian.wb * this.bodyB.angularVelocity;
+            this.jvaX * bodyAVelocity.x +
+            this.jvaY * bodyAVelocity.y +
+            this.jwa * this.bodyA.angularVelocity +
+            this.jvbX * bodyBVelocity.x +
+            this.jvbY * bodyBVelocity.y +
+            this.jwb * this.bodyB.angularVelocity;
 
         let lambda = this.effectiveMass * -(jv + this.bias);
 
@@ -137,9 +155,18 @@ export class ContactSolver {
         // V2 = V2' + M^-1 ⋅ Pc
         // Pc = J^t ⋅ λ
 
-        this.bodyA.velocity = this.bodyA.velocity.addNew(this.jacobian.va.scaleNew(this.bodyA.invMass * lambda));
-        this.bodyA.angularVelocity = this.bodyA.angularVelocity + this.bodyA.invI * this.jacobian.wa * lambda;
-        this.bodyB.velocity = this.bodyB.velocity.addNew(this.jacobian.vb.scaleNew(this.bodyB.invMass * lambda));
-        this.bodyB.angularVelocity = this.bodyB.angularVelocity + this.bodyB.invI * this.jacobian.wb * lambda;
+        if (lambda === 0.0) {
+            return;
+        }
+
+        const bodyAImpulseScale = this.bodyA.invMass * lambda;
+        this.bodyA.velocity.x += this.jvaX * bodyAImpulseScale;
+        this.bodyA.velocity.y += this.jvaY * bodyAImpulseScale;
+        this.bodyA.angularVelocity += this.bodyA.invI * this.jwa * lambda;
+
+        const bodyBImpulseScale = this.bodyB.invMass * lambda;
+        this.bodyB.velocity.x += this.jvbX * bodyBImpulseScale;
+        this.bodyB.velocity.y += this.jvbY * bodyBImpulseScale;
+        this.bodyB.angularVelocity += this.bodyB.invI * this.jwb * lambda;
     }
 }
