@@ -15,13 +15,17 @@ export class PolygonShape extends Shape {
     constructor(vertices: Vec2[]) {
         super();
 
+        // Collision routines expect convex polygon normals to point outward, which
+        // requires a counter-clockwise winding.
+        const orderedVertices = this.signedArea(vertices) < 0 ? [...vertices].reverse() : [...vertices];
+
         let minX = Infinity;
         let minY = Infinity;
         let maxX = -Infinity;
         let maxY = -Infinity;
 
         // Compute bounds
-        for (const v of vertices) {
+        for (const v of orderedVertices) {
             minX = Math.min(minX, v.x);
             minY = Math.min(minY, v.y);
             maxX = Math.max(maxX, v.x);
@@ -35,7 +39,7 @@ export class PolygonShape extends Shape {
         const centerY = (minY + maxY) * 0.5;
 
         // Recenter vertices and initialize world vertices
-        for (const v of vertices) {
+        for (const v of orderedVertices) {
             const centered = new Vec2(v.x - centerX, v.y - centerY);
             this.localVertices.push(centered);
             this.worldVertices.push(centered.copy());
@@ -117,5 +121,17 @@ export class PolygonShape extends Shape {
         const currVertex = index;
         const nextVertex = (index + 1) % this.localVertices.length;
         return this.localVertices[nextVertex].subNew(this.localVertices[currVertex]);
+    }
+
+    private signedArea(vertices: readonly Vec2[]): number {
+        let area = 0;
+
+        for (let i = 0; i < vertices.length; i++) {
+            const current = vertices[i];
+            const next = vertices[(i + 1) % vertices.length];
+            area += current.cross(next);
+        }
+
+        return area * 0.5;
     }
 }
