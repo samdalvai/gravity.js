@@ -10,16 +10,35 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
     Utils.assert(bullet.shape instanceof CircleShape);
 
     const bulletShape = bullet.shape as CircleShape;
+    const radius = bulletShape.radius;
+
     const currentPos = bullet.position.copy();
     const nextPos = currentPos.addNew(bullet.velocity.scaleNew(dt));
+
+    // Compute swept AABB for bullet
+    const minX = Math.min(currentPos.x, nextPos.x) - radius;
+    const minY = Math.min(currentPos.y, nextPos.y) - radius;
+    const maxX = Math.max(currentPos.x, nextPos.x) + radius;
+    const maxY = Math.max(currentPos.y, nextPos.y) + radius;
 
     let minDistanceSquared = Infinity;
     let closestIntersection: Vec2 | undefined;
 
-    // TODO: We could cast two rays instead of one or check intersection by shifting up and down by radius
+    const candidateBodies: RigidBody[] = [];
+
     for (const other of bodies) {
         if (bullet.id === other.id || other.isBullet) continue;
 
+        // If objects don't overlap on X axis they cannot collide
+        if (other.minX > maxX || other.maxX < minX) continue;
+
+        // If objects overlap on X axis but don't overlap on Y axis the cannot collide
+        if (other.maxY < minY || other.minY > maxY) continue;
+
+        candidateBodies.push(other);
+    }
+
+    for (const other of candidateBodies) {
         if (
             other.shapeType === ShapeType.BOX ||
             other.shapeType === ShapeType.POLYGON ||
