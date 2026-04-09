@@ -13,7 +13,7 @@ import { CircleShape } from '../shapes/CircleShape';
 import { PolygonShape } from '../shapes/PolygonShape';
 import { ShapeType } from '../shapes/Shape';
 import * as Utils from '../utils/Utils';
-import { ContactManifold, ContactPoint } from './Contact';
+import { ContactManifold, ContactPoint } from './ContactManifold';
 
 export function detectCollision(bodyA: RigidBody, bodyB: RigidBody): ContactManifold | null {
     const aType = bodyA.shapeType;
