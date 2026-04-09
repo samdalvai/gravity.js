@@ -1,5 +1,4 @@
 import { RigidBody } from '../core/RigidBody';
-import { Mat2 } from '../math/Mat2';
 import * as Utils from '../utils/Utils';
 import { ContactManifold } from './ContactManifold.perf';
 import { ContactSolver } from './ContactSolver.perf';
@@ -12,8 +11,32 @@ export class BlockSolver {
     private nc1!: ContactSolver;
     private nc2!: ContactSolver;
 
-    private k!: Mat2;
-    private m!: Mat2;
+    // Cache the two contact rows as plain scalars so solve() can stay on numbers only.
+    private j1vaX = 0.0;
+    private j1vaY = 0.0;
+    private j1wa = 0.0;
+    private j1vbX = 0.0;
+    private j1vbY = 0.0;
+    private j1wb = 0.0;
+    private j1bias = 0.0;
+    private j1effectiveMass = 0.0;
+
+    private j2vaX = 0.0;
+    private j2vaY = 0.0;
+    private j2wa = 0.0;
+    private j2vbX = 0.0;
+    private j2vbY = 0.0;
+    private j2wb = 0.0;
+    private j2bias = 0.0;
+    private j2effectiveMass = 0.0;
+
+    // The 2x2 normal block is symmetric, so one off-diagonal term is enough.
+    private k00 = 0.0;
+    private k01 = 0.0;
+    private k11 = 0.0;
+    private m00 = 0.0;
+    private m01 = 0.0;
+    private m11 = 0.0;
 
     constructor(manifold: ContactManifold) {
         this.bodyA = manifold.bodyA;
@@ -30,30 +53,42 @@ export class BlockSolver {
         this.nc1 = normalContacts[0];
         this.nc2 = normalContacts[1];
 
-        this.k = new Mat2();
+        this.j1vaX = this.nc1.jvaX;
+        this.j1vaY = this.nc1.jvaY;
+        this.j1wa = this.nc1.jwa;
+        this.j1vbX = this.nc1.jvbX;
+        this.j1vbY = this.nc1.jvbY;
+        this.j1wb = this.nc1.jwb;
+        this.j1bias = this.nc1.bias;
+        this.j1effectiveMass = this.nc1.effectiveMass;
 
-        this.k.m00 =
-            this.bodyA.invMass +
-            this.nc1.jwa * this.bodyA.invI * this.nc1.jwa +
-            this.bodyB.invMass +
-            this.nc1.jwb * this.bodyB.invI * this.nc1.jwb;
+        this.j2vaX = this.nc2.jvaX;
+        this.j2vaY = this.nc2.jvaY;
+        this.j2wa = this.nc2.jwa;
+        this.j2vbX = this.nc2.jvbX;
+        this.j2vbY = this.nc2.jvbY;
+        this.j2wb = this.nc2.jwb;
+        this.j2bias = this.nc2.bias;
+        this.j2effectiveMass = this.nc2.effectiveMass;
 
-        this.k.m11 =
-            this.bodyA.invMass +
-            this.nc2.jwa * this.bodyA.invI * this.nc2.jwa +
-            this.bodyB.invMass +
-            this.nc2.jwb * this.bodyB.invI * this.nc2.jwb;
+        const bodyAInvMass = this.bodyA.invMass;
+        const bodyAInvI = this.bodyA.invI;
+        const bodyBInvMass = this.bodyB.invMass;
+        const bodyBInvI = this.bodyB.invI;
 
-        this.k.m01 =
-            this.bodyA.invMass +
-            this.nc1.jwa * this.bodyA.invI * this.nc2.jwa +
-            this.bodyB.invMass +
-            this.nc1.jwb * this.bodyB.invI * this.nc2.jwb;
+        this.k00 = bodyAInvMass + this.j1wa * bodyAInvI * this.j1wa + bodyBInvMass + this.j1wb * bodyBInvI * this.j1wb;
 
-        this.k.m10 = this.k.m01;
+        this.k11 = bodyAInvMass + this.j2wa * bodyAInvI * this.j2wa + bodyBInvMass + this.j2wb * bodyBInvI * this.j2wb;
 
-        Utils.assert(this.k.determinant != 0, 'Determinant is 0');
-        this.m = this.k.inverted();
+        this.k01 = bodyAInvMass + this.j1wa * bodyAInvI * this.j2wa + bodyBInvMass + this.j1wb * bodyBInvI * this.j2wb;
+
+        const determinant = this.k00 * this.k11 - this.k01 * this.k01;
+        Utils.assert(determinant !== 0.0, 'Determinant is 0');
+
+        const invDeterminant = 1.0 / determinant;
+        this.m00 = invDeterminant * this.k11;
+        this.m01 = -invDeterminant * this.k01;
+        this.m11 = invDeterminant * this.k00;
     }
 
     solve() {
@@ -104,88 +139,62 @@ export class BlockSolver {
 
         // (Velocity constraint) Normal velocity: Jv = 0
         let vn1: number =
-            this.nc1.jvaX * bodyAVelocity.x +
-            this.nc1.jvaY * bodyAVelocity.y +
-            this.nc1.jwa * bodyAAngularVelocity +
-            this.nc1.jvbX * bodyBVelocity.x +
-            this.nc1.jvbY * bodyBVelocity.y +
-            this.nc1.jwb * bodyBAngularVelocity;
+            this.j1vaX * bodyAVelocity.x +
+            this.j1vaY * bodyAVelocity.y +
+            this.j1wa * bodyAAngularVelocity +
+            this.j1vbX * bodyBVelocity.x +
+            this.j1vbY * bodyBVelocity.y +
+            this.j1wb * bodyBAngularVelocity;
 
         let vn2: number =
-            this.nc2.jvaX * bodyAVelocity.x +
-            this.nc2.jvaY * bodyAVelocity.y +
-            this.nc2.jwa * bodyAAngularVelocity +
-            this.nc2.jvbX * bodyBVelocity.x +
-            this.nc2.jvbY * bodyBVelocity.y +
-            this.nc2.jwb * bodyBAngularVelocity;
+            this.j2vaX * bodyAVelocity.x +
+            this.j2vaY * bodyAVelocity.y +
+            this.j2wa * bodyAAngularVelocity +
+            this.j2vbX * bodyBVelocity.x +
+            this.j2vbY * bodyBVelocity.y +
+            this.j2wb * bodyBAngularVelocity;
 
-        let bX = vn1 + this.nc1.bias;
-        let bY = vn2 + this.nc2.bias;
+        let bX = vn1 + this.j1bias;
+        let bY = vn2 + this.j2bias;
 
         // b' = b - K * a
-        bX -= this.k.m00 * aX + this.k.m01 * aY;
-        bY -= this.k.m10 * aX + this.k.m11 * aY;
+        bX -= this.k00 * aX + this.k01 * aY;
+        bY -= this.k01 * aX + this.k11 * aY;
         let xX = 0.0;
         let xY = 0.0;
 
-        // eslint-disable-next-line no-constant-condition
-        while (true) {
-            //
-            // Case 1: vn = 0
-            // Both constraints are violated
-            //
-            // 0 = A * x + b'
-            //
-            // Solve for x:
-            //
-            // x = - inv(A) * b'
-            //
-            xX = -(this.m.m00 * bX + this.m.m01 * bY);
-            xY = -(this.m.m10 * bX + this.m.m11 * bY);
-            if (xX >= 0.0 && xY >= 0.0) break;
+        // The complementarity cases are tested in order and the first valid one wins.
+        xX = -(this.m00 * bX + this.m01 * bY);
+        xY = -(this.m01 * bX + this.m11 * bY);
+        let solved = xX >= 0.0 && xY >= 0.0;
 
-            //
-            // Case 2: vn1 = 0 and x2 = 0
-            // The first constraint is violated and the second constraint is satisfied
-            //
-            //   0 = a11 * x1 + a12 * 0 + b1'
-            // vn2 = a21 * x1 + a22 * 0 + b2'
-            //
-            xX = this.nc1.effectiveMass * -bX;
+        if (!solved) {
+            xX = this.j1effectiveMass * -bX;
             xY = 0.0;
             vn1 = 0.0;
-            vn2 = this.k.m01 * xX + bY;
-            if (xX >= 0.0 && vn2 >= 0.0) break;
+            vn2 = this.k01 * xX + bY;
+            solved = xX >= 0.0 && vn2 >= 0.0;
+        }
 
-            //
-            // Case 3: vn2 = 0 and x1 = 0
-            // The first constraint is satisfied and the second constraint is violated
-            //
-            // vn1 = a11 * 0 + a12 * x2 + b1'
-            //   0 = a21 * 0 + a22 * x2 + b2'
-            //
+        if (!solved) {
             xX = 0.0;
-            xY = this.nc2.effectiveMass * -bY;
-            vn1 = this.k.m10 * xY + bX;
+            xY = this.j2effectiveMass * -bY;
+            vn1 = this.k01 * xY + bX;
             vn2 = 0.0;
-            if (xY >= 0.0 && vn1 >= 0.0) break;
+            solved = xY >= 0.0 && vn1 >= 0.0;
+        }
 
-            //
-            // Case 4: x1 = 0 and x2 = 0
-            // Both constraints are satisfied
-            //
-            // vn1 = b1
-            // vn2 = b2;
-            //
+        if (!solved) {
             xX = 0.0;
             xY = 0.0;
             vn1 = bX;
             vn2 = bY;
-            if (vn1 >= 0.0 && vn2 >= 0.0) break;
+            solved = vn1 >= 0.0 && vn2 >= 0.0;
+        }
 
+        if (!solved) {
             // How did you reach here?! something went wrong!
             Utils.assert(false);
-            break;
         }
 
         // Get the incremental impulse
@@ -208,15 +217,13 @@ export class BlockSolver {
         const bodyAImpulseScale = this.bodyA.invMass * linearImpulse;
         // Both normal constraints share the same contact normal, so their linear impulses
         // add before being applied to the bodies.
-        this.bodyA.velocity.x += this.nc1.jvaX * bodyAImpulseScale;
-        this.bodyA.velocity.y += this.nc1.jvaY * bodyAImpulseScale;
-        this.bodyA.angularVelocity =
-            this.bodyA.angularVelocity + this.bodyA.invI * (this.nc1.jwa * lambdaX + this.nc2.jwa * lambdaY);
+        this.bodyA.velocity.x += this.j1vaX * bodyAImpulseScale;
+        this.bodyA.velocity.y += this.j1vaY * bodyAImpulseScale;
+        this.bodyA.angularVelocity += this.bodyA.invI * (this.j1wa * lambdaX + this.j2wa * lambdaY);
 
         const bodyBImpulseScale = this.bodyB.invMass * linearImpulse;
-        this.bodyB.velocity.x += this.nc1.jvbX * bodyBImpulseScale;
-        this.bodyB.velocity.y += this.nc1.jvbY * bodyBImpulseScale;
-        this.bodyB.angularVelocity =
-            this.bodyB.angularVelocity + this.bodyB.invI * (this.nc1.jwb * lambdaX + this.nc2.jwb * lambdaY);
+        this.bodyB.velocity.x += this.j1vbX * bodyBImpulseScale;
+        this.bodyB.velocity.y += this.j1vbY * bodyBImpulseScale;
+        this.bodyB.angularVelocity += this.bodyB.invI * (this.j1wb * lambdaX + this.j2wb * lambdaY);
     }
 }
