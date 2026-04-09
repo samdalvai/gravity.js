@@ -168,9 +168,8 @@ export default class Demo {
     }
 
     static demo1 = (world: World, app: Application) => {
-        app.setBackground('background');
-
         // Demo 1: Single box demo
+        app.setBackground('background');
         this.generateFloor(world, app);
         this.generateFences(world, app);
 
@@ -193,9 +192,8 @@ export default class Demo {
     };
 
     static demo2 = (world: World, app: Application) => {
-        app.setBackground('background');
-
         // Demo 2: Stack of boxes
+        app.setBackground('background');
         this.generateFloor(world, app);
         this.generateFences(world, app);
 
@@ -218,9 +216,8 @@ export default class Demo {
     };
 
     static demo3 = (world: World, app: Application) => {
-        app.setBackground('background');
-
         // Demo 3: Pyramid of boxes
+        app.setBackground('background');
         this.generateFloor(world, app);
         this.generateFences(world, app);
 
@@ -247,9 +244,8 @@ export default class Demo {
     };
 
     static demo4 = (world: World, app: Application) => {
-        app.setBackground('background');
-
         // Demo 4: A suspension bridge
+        app.setBackground('background');
         this.generateFloor(world, app);
         this.generateFences(world, app);
 
@@ -344,9 +340,8 @@ export default class Demo {
     };
 
     static demo5 = (world: World, app: Application) => {
-        app.setBackground('background');
-
         // Demo 5: A simple whip
+        app.setBackground('background');
         this.generateFloor(world, app);
         this.generateFences(world, app);
 
@@ -385,9 +380,8 @@ export default class Demo {
     };
 
     static demo6 = (world: World, app: Application) => {
-        app.setBackground('darkBackground');
-
         // Demo 6: A skeleton ragdoll
+        app.setBackground('darkBackground');
         this.generateFloor(world, app);
         this.generateFences(world, app);
 
@@ -483,9 +477,8 @@ export default class Demo {
     };
 
     static demo7 = (world: World, app: Application) => {
-        app.setBackground('background');
-
         // Demo 7: A plank
+        app.setBackground('background');
         const floor = this.generateFloor(world, app);
         this.generateFences(world, app);
 
@@ -541,9 +534,8 @@ export default class Demo {
     };
 
     static demo8 = (world: World, app: Application) => {
-        app.setBackground('background');
-
         // Demo 8: Cloth simulation
+        app.setBackground('background');
         this.generateFloor(world, app);
         this.generateFences(world, app);
 
@@ -597,9 +589,8 @@ export default class Demo {
     };
 
     static demo9 = (world: World, app: Application) => {
-        app.setBackground('background');
-
         // Demo 9: stress test
+        app.setBackground('background');
         this.generateFloor(world, app);
         this.generateFences(world, app);
 
@@ -695,9 +686,8 @@ export default class Demo {
     };
 
     static demo10 = (world: World, app: Application) => {
-        app.setBackground('darkBackground');
-
         // Demo 10: 1000 circles inside a square cage
+        app.setBackground('darkBackground');
         const cage = this.generateSquareCage(world, app);
 
         this.populateStressDemo(world, cage, (x, y) => {
@@ -708,9 +698,8 @@ export default class Demo {
     };
 
     static demo11 = (world: World, app: Application) => {
-        app.setBackground('darkBackground');
-
         // Demo 11: 1000 boxes inside a square cage
+        app.setBackground('darkBackground');
         const cage = this.generateSquareCage(world, app);
 
         this.populateStressDemo(world, cage, (x, y) => {
@@ -721,9 +710,8 @@ export default class Demo {
     };
 
     static demo12 = (world: World, app: Application) => {
-        app.setBackground('darkBackground');
-
         // Demo 12: 1000 capsules inside a square cage
+        app.setBackground('darkBackground');
         const cage = this.generateSquareCage(world, app);
 
         this.populateStressDemo(world, cage, (x, y) => {
@@ -734,9 +722,8 @@ export default class Demo {
     };
 
     static demo13 = (world: World, app: Application) => {
-        app.setBackground('darkBackground');
-
         // Demo 13: 1000 random convex shapes inside a square cage
+        app.setBackground('darkBackground');
         const cage = this.generateSquareCage(world, app);
         const palette = ['#f94144', '#f8961e', '#f9c74f', '#43aa8b', '#577590'];
 
@@ -753,11 +740,10 @@ export default class Demo {
     };
 
     static demo14 = (world: World, app: Application) => {
+        // Demo 14: orbiting particles around a central black hole
         app.setBackground('darkBackground');
 
         const BLACK_HOLE_ORBIT_PARTICLE_COUNT = 2_500;
-
-        // Demo 14: orbiting particles around a central black hole
         SETTINGS.applyGravity = false;
 
         const blackHole = Bodies.circle({ radius: 0.0001, x: 0, y: 0, mass: 600_000 });
@@ -805,9 +791,8 @@ export default class Demo {
     };
 
     static demo0 = (world: World, app: Application) => {
-        app.setBackground('background');
-
         // Demo 0: a complex scene
+        app.setBackground('background');
         const floor = this.generateFloor(world, app);
         this.generateFences(world, app);
 
