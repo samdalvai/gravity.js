@@ -142,9 +142,18 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
                 }
             }
         }
+
+        const otherInitialPos = other.position.copy();
+        const otherShapeNextPost = other.position.addNew(other.velocity.scaleNew(dt));
+
+        other.position = otherShapeNextPost.copy();
+        Graphics.drawBody(other, { fillColor: 'rgba(128, 128, 128, 0.5)' });
+
+        other.position = otherInitialPos.copy();
     }
 
     if (closestIntersection) {
+        Graphics.drawFillCircle(closestIntersection.x, closestIntersection.y, 3, 'orange');
         // TODO: use sweep tests for fraction computation
         const fraction = getFraction(currentPos, nextPos, closestIntersection);
         // TODO: if we move bullet to closestIntersection and shoot down the bullet sticks to the floor,
