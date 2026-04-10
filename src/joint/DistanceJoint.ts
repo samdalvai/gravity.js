@@ -44,9 +44,7 @@ export class DistanceJoint extends Joint {
 
         this.localAnchorA = this.bodyA.worldPointToLocal(anchorA);
         this.localAnchorB = this.bodyB.worldPointToLocal(anchorB);
-        const dx = anchorB.x - anchorA.x;
-        const dy = anchorB.y - anchorA.y;
-        this.length = length <= 0 ? Math.sqrt(dx * dx + dy * dy) : length;
+        this.length = length <= 0 ? anchorB.subNew(anchorA).magnitude() : length;
     }
 
     override preSolve(invDt: number): void {
