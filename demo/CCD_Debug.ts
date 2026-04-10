@@ -37,9 +37,6 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
     }
 
     for (const other of candidateBodies) {
-        const relVel = bullet.velocity.subNew(other.velocity);
-        const nextPos = currentPos.addNew(relVel.scaleNew(dt));
-
         switch (other.shapeType) {
             case ShapeType.BOX:
             case ShapeType.POLYGON: {
@@ -70,68 +67,12 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
                 break;
             }
             case ShapeType.CAPSULE: {
-                const capsuleShape = other.shape as CapsuleShape;
-                const topCirclePosition = capsuleShape.getTopCirclePosition();
-                const bottomCirclePosition = capsuleShape.getBottomCirclePosition();
+                const toi = sweepCircleVsCapsuleTOI(bullet, other, dt);
 
-                const axis = bottomCirclePosition.subNew(topCirclePosition);
-                const axisDir = axis.normalizeNew();
-
-                const topCircleIntersections = edgeCircleIntersection(
-                    currentPos,
-                    nextPos,
-                    topCirclePosition,
-                    capsuleShape.radius,
-                );
-
-                for (const int of topCircleIntersections) {
-                    // TODO: can we take advantage of this to improve capsules collision?
-                    const v = int.subNew(topCirclePosition);
-                    if (v.dot(axisDir) > 0) continue; // Skip bottom half
-
-                    const fraction = getFraction(currentPos, nextPos, int);
-
-                    if (fraction < lowestFraction) {
-                        lowestFraction = fraction;
-                    }
+                if (toi != null && toi < lowestFraction) {
+                    lowestFraction = toi;
                 }
 
-                const bottomCircleIntersections = edgeCircleIntersection(
-                    currentPos,
-                    nextPos,
-                    bottomCirclePosition,
-                    capsuleShape.radius,
-                );
-
-                for (const int of bottomCircleIntersections) {
-                    // TODO: can we take advantage of this to improve capsules collision?
-                    const v = int.subNew(bottomCirclePosition);
-                    if (v.dot(axisDir) < 0) continue; // Skip upper half
-
-                    const fraction = getFraction(currentPos, nextPos, int);
-
-                    if (fraction < lowestFraction) {
-                        lowestFraction = fraction;
-                    }
-                }
-
-                const vertices = capsuleShape.worldVertices;
-                for (let i = 0; i < vertices.length; i++) {
-                    // TODO: can we take advantage of this to improve capsules collision?
-                    if (i % 2 === 0) continue; // Skip top and bottom edges
-                    const v0 = vertices[i];
-                    const v1 = vertices[(i + 1) % vertices.length];
-
-                    const intersection = edgeEdgeIntersection(currentPos, nextPos, v0, v1);
-
-                    if (intersection) {
-                        const fraction = getFraction(currentPos, nextPos, intersection);
-
-                        if (fraction < lowestFraction) {
-                            lowestFraction = fraction;
-                        }
-                    }
-                }
                 break;
             }
         }
@@ -401,6 +342,87 @@ function distancePointToSegmentSquared(p: Vec2, a: Vec2, b: Vec2): number {
 
     const closest = a.addNew(ab.scaleNew(t));
     return p.subNew(closest).dot(p.subNew(closest));
+}
+
+function sweepCircleVsCapsuleTOI(bodyA: RigidBody, bodyB: RigidBody, dt: number): number | null {
+    const circle = bodyA.shape as CircleShape;
+    const capsule = bodyB.shape as CapsuleShape;
+
+    const top = capsule.getTopCirclePosition();
+    const bottom = capsule.getBottomCirclePosition();
+
+    // Relative displacement over the whole step
+    const d = bodyA.velocity.subNew(bodyB.velocity).scaleNew(dt);
+    const p = bodyA.position;
+
+    // Expand capsule by circle radius
+    const expandedRadius = circle.radius + capsule.radius;
+
+    return sweepPointVsSegmentRadiusTOI(p, d, top, bottom, expandedRadius);
+}
+
+function sweepPointVsSegmentRadiusTOI(
+    p: Vec2,
+    d: Vec2, // full displacement during the step
+    a: Vec2,
+    b: Vec2,
+    radius: number,
+): number | null {
+    const ab = b.subNew(a);
+    const abLenSq = ab.dot(ab);
+
+    // Degenerate capsule -> circle
+    if (abLenSq <= EPSILON) {
+        return sweepPointVsPointRadiusTOI(p, d, a, radius);
+    }
+
+    let lowestT = Infinity;
+
+    // Already overlapping at t = 0
+    if (distancePointToSegmentSquared(p, a, b) <= radius * radius) {
+        return 0;
+    }
+
+    const abLen = Math.sqrt(abLenSq);
+    const tangent = ab.scaleNew(1 / abLen);
+    const normal = new Vec2(-tangent.y, tangent.x);
+
+    // 1) Infinite-line hits, then clamp to segment interior
+    const signedDist = p.subNew(a).dot(normal);
+    const vn = d.dot(normal);
+
+    if (Math.abs(vn) > EPSILON) {
+        const t0 = (radius - signedDist) / vn;
+        const t1 = (-radius - signedDist) / vn;
+
+        if (t0 >= 0 && t0 <= 1) {
+            const hitCenter = p.addNew(d.scaleNew(t0));
+            const proj = hitCenter.subNew(a).dot(tangent);
+
+            if (proj >= 0 && proj <= abLen) {
+                lowestT = Math.min(lowestT, t0);
+            }
+        }
+
+        if (t1 >= 0 && t1 <= 1) {
+            const hitCenter = p.addNew(d.scaleNew(t1));
+            const proj = hitCenter.subNew(a).dot(tangent);
+
+            if (proj >= 0 && proj <= abLen) {
+                lowestT = Math.min(lowestT, t1);
+            }
+        }
+    }
+
+    // 2) Endpoint A
+    const tA = sweepPointVsPointRadiusTOI(p, d, a, radius);
+    if (tA != null) lowestT = Math.min(lowestT, tA);
+
+    // 3) Endpoint B
+    const tB = sweepPointVsPointRadiusTOI(p, d, b, radius);
+    if (tB != null) lowestT = Math.min(lowestT, tB);
+
+    return lowestT !== Infinity ? lowestT : null;
 }
 
 function sweepCircleVsPolygonTOI(bodyA: RigidBody, bodyB: RigidBody, dt: number): number | null {
