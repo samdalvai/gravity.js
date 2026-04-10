@@ -24,6 +24,8 @@ export const SETTINGS = {
     restitutionSlop: 50,
     angularVelocitySlop: 0.05,
     positionCorrectionBeta: 0.2,
+    // TODO: contact slop is currently only applied to circle/circle collision
+    contactSlop: 0.01, // Needed for roundoff errors in CCD making some collision not apply
 
     // Solver iterations fine tuning
     solverIterations: 10,

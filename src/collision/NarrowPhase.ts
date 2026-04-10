@@ -185,7 +185,7 @@ export function collideCircles(bodyA: RigidBody, bodyB: RigidBody): ContactManif
     const radiusSum = radiusA + radiusB;
     const distSq = ab.magnitudeSquared();
 
-    if (distSq > radiusSum * radiusSum) {
+    if (distSq > radiusSum * radiusSum + SETTINGS.contactSlop) {
         return null;
     }
 
