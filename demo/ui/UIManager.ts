@@ -48,6 +48,7 @@ export interface UIState {
     showAABB: boolean;
     showContacts: boolean;
     showRuntimeStatsHud: boolean;
+    ccd: boolean;
     applyGravity: boolean;
     paused: boolean;
     solverIterations: number;
@@ -61,6 +62,7 @@ export interface UIActions {
     onSetShowAABB(value: boolean): void;
     onSetShowContacts(value: boolean): void;
     onSetShowRuntimeStatsHud(value: boolean): void;
+    onSetCCD(checked: boolean): void;
     onSetApplyGravity(value: boolean): void;
     onSetPaused(value: boolean): void;
     onSetSolverIterations(value: number): void;
@@ -71,14 +73,23 @@ export interface UIActions {
 export default class UIManager {
     private currentState: UIState | null = null;
     private toolbar: HTMLElement | null = null;
+
+    // Select
     private demoSelect: HTMLSelectElement | null = null;
+
+    // Checkboxes
     private debugCheckbox: HTMLInputElement | null = null;
     private showAABBCheckbox: HTMLInputElement | null = null;
+    private ccdCheckbox: HTMLInputElement | null = null;
     private showContactsCheckbox: HTMLInputElement | null = null;
     private gravityCheckbox: HTMLInputElement | null = null;
     private pausedCheckbox: HTMLInputElement | null = null;
+
+    // Inputs
     private solverIterationsInput: HTMLInputElement | null = null;
     private subStepsInput: HTMLInputElement | null = null;
+
+    // Buttons
     private stepButton: HTMLButtonElement | null = null;
     private restartButton: HTMLButtonElement | null = null;
     private runtimeStatsButton: HTMLButtonElement | null = null;
@@ -161,6 +172,7 @@ export default class UIManager {
         this.showContactsCheckbox = createCheckbox(toggleGroup, 'Show Contacts', checked =>
             actions.onSetShowContacts(checked),
         );
+        this.ccdCheckbox = createCheckbox(toggleGroup, 'CCD', checked => actions.onSetCCD(checked));
         this.gravityCheckbox = createCheckbox(toggleGroup, 'Gravity', checked => actions.onSetApplyGravity(checked));
         this.pausedCheckbox = createCheckbox(toggleGroup, 'Paused', checked => actions.onSetPaused(checked));
 
@@ -252,6 +264,7 @@ export default class UIManager {
             !this.debugCheckbox ||
             !this.showAABBCheckbox ||
             !this.showContactsCheckbox ||
+            !this.ccdCheckbox ||
             !this.gravityCheckbox ||
             !this.pausedCheckbox ||
             !this.solverIterationsInput ||
@@ -261,9 +274,12 @@ export default class UIManager {
         }
 
         this.demoSelect.value = `${state.demoIndex}`;
+
         this.debugCheckbox.checked = state.debug;
         this.showAABBCheckbox.checked = state.showAABB;
         this.showContactsCheckbox.checked = state.showContacts;
+
+        this.ccdCheckbox.checked = state.ccd;
         this.gravityCheckbox.checked = state.applyGravity;
         this.pausedCheckbox.checked = state.paused;
         this.solverIterationsInput.value = `${state.solverIterations}`;
