@@ -1,6 +1,8 @@
 import { CapsuleShape, CircleShape, PolygonShape, RigidBody, ShapeType, Utils, Vec2 } from '../src';
 import Graphics from './graphics/Graphics';
 
+const EPSILON = 1e-8;
+
 export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): number | null {
     Utils.assert(bullet.shape instanceof CircleShape);
 
@@ -75,7 +77,7 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
                 const toi = sweepCircleVsCircleTOI(bullet, other, dt);
                 console.log('toi: ', toi);
 
-                if (toi && toi < lowestFraction) {
+                if (toi != null && toi < lowestFraction) {
                     lowestFraction = toi;
                 }
                 break;
@@ -246,14 +248,13 @@ function sweepCircleVsCircleTOI(bodyA: RigidBody, bodyB: RigidBody, dt: number):
         return 0;
     }
 
-    // Should be a <= epsilon?
-    if (Math.abs(a) <= Number.EPSILON) {
+    if (Math.abs(a) <= EPSILON) {
         return null;
     }
 
     const disc = b * b - 4 * a * c;
 
-    if (disc < 0) {
+    if (disc < -EPSILON) {
         return null;
     }
 
