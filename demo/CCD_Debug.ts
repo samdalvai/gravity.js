@@ -8,22 +8,23 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
     const radius = bulletShape.radius;
 
     const currentPos = bullet.position.copy();
-    // TODO: use relative velocity against other bodies for next position computation
-    const nextPos = currentPos.addNew(bullet.velocity.scaleNew(dt));
-    Graphics.drawLine(currentPos.x, currentPos.y, nextPos.x, nextPos.y, 'red', 2);
-
-    // Compute swept AABB for bullet
-    const minX = Math.min(currentPos.x, nextPos.x) - radius;
-    const minY = Math.min(currentPos.y, nextPos.y) - radius;
-    const maxX = Math.max(currentPos.x, nextPos.x) + radius;
-    const maxY = Math.max(currentPos.y, nextPos.y) + radius;
 
     let minDistanceSquared = Infinity;
     let closestIntersection: Vec2 | undefined;
+    let bulletNextPos: Vec2 | undefined;
 
     const candidateBodies: RigidBody[] = [];
 
     for (const other of bodies) {
+        const relVel = bullet.velocity.subNew(other.velocity);
+        const nextPos = currentPos.addNew(relVel.scaleNew(dt));
+
+        // Compute swept AABB for bullet
+        const minX = Math.min(currentPos.x, nextPos.x) - radius;
+        const minY = Math.min(currentPos.y, nextPos.y) - radius;
+        const maxX = Math.max(currentPos.x, nextPos.x) + radius;
+        const maxY = Math.max(currentPos.y, nextPos.y) + radius;
+
         if (bullet.id === other.id || other.isBullet) continue;
 
         // If objects don't overlap on X axis they cannot collide
@@ -36,6 +37,10 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
     }
 
     for (const other of candidateBodies) {
+        const relVel = bullet.velocity.subNew(other.velocity);
+        const nextPos = currentPos.addNew(relVel.scaleNew(dt));
+        Graphics.drawLine(currentPos.x, currentPos.y, nextPos.x, nextPos.y, 'red', 2);
+
         if (
             other.shapeType === ShapeType.BOX ||
             other.shapeType === ShapeType.POLYGON ||
@@ -56,6 +61,7 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
                     if (distanceSquared < minDistanceSquared) {
                         closestIntersection = intersection.copy();
                         minDistanceSquared = distanceSquared;
+                        bulletNextPos = nextPos.copy();
                     }
                 }
             }
@@ -71,6 +77,7 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
                 if (distanceSquared < minDistanceSquared) {
                     closestIntersection = int.copy();
                     minDistanceSquared = distanceSquared;
+                    bulletNextPos = nextPos.copy();
                 }
             }
         }
@@ -100,6 +107,7 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
                 if (distanceSquared < minDistanceSquared) {
                     closestIntersection = int.copy();
                     minDistanceSquared = distanceSquared;
+                    bulletNextPos = nextPos.copy();
                 }
             }
 
@@ -120,6 +128,7 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
                 if (distanceSquared < minDistanceSquared) {
                     closestIntersection = int.copy();
                     minDistanceSquared = distanceSquared;
+                    bulletNextPos = nextPos.copy();
                 }
             }
 
@@ -138,6 +147,7 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
                     if (distanceSquared < minDistanceSquared) {
                         closestIntersection = intersection.copy();
                         minDistanceSquared = distanceSquared;
+                        bulletNextPos = nextPos.copy();
                     }
                 }
             }
@@ -152,10 +162,10 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
         other.position = otherInitialPos.copy();
     }
 
-    if (closestIntersection) {
+    if (closestIntersection && bulletNextPos) {
         Graphics.drawFillCircle(closestIntersection.x, closestIntersection.y, 3, 'orange');
         // TODO: use sweep tests for fraction computation
-        const fraction = getFraction(currentPos, nextPos, closestIntersection);
+        const fraction = getFraction(currentPos, bulletNextPos, closestIntersection);
         // TODO: if we move bullet to closestIntersection and shoot down the bullet sticks to the floor,
         // probably something wron with polygon/circle collision, also if we move to bulletNewPos
         // the bounce angle is wrong
