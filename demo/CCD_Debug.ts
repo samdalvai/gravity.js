@@ -36,7 +36,7 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
     for (const other of candidateBodies) {
         const relVel = bullet.velocity.subNew(other.velocity);
         const nextPos = currentPos.addNew(relVel.scaleNew(dt));
-        Graphics.drawLine(currentPos.x, currentPos.y, nextPos.x, nextPos.y, 'red', 2);
+        Graphics.drawLine(currentPos.x, currentPos.y, nextPos.x, nextPos.y, 'red', 1);
 
         switch (other.shapeType) {
             case ShapeType.BOX:
@@ -62,15 +62,21 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
                 break;
             }
             case ShapeType.CIRCLE: {
-                const circleShape = other.shape as CircleShape;
-                const intersections = edgeCircleIntersection(currentPos, nextPos, other.position, circleShape.radius);
+                // const circleShape = other.shape as CircleShape;
+                // const intersections = edgeCircleIntersection(currentPos, nextPos, other.position, circleShape.radius);
 
-                for (const int of intersections) {
-                    const fraction = getFraction(currentPos, nextPos, int);
+                // for (const int of intersections) {
+                //     const fraction = getFraction(currentPos, nextPos, int);
 
-                    if (fraction < lowestFraction) {
-                        lowestFraction = fraction;
-                    }
+                //     if (fraction < lowestFraction) {
+                //         lowestFraction = fraction;
+                //     }
+                // }
+                const toi = sweepCircleVsCircleTOI(bullet, other, dt);
+                console.log('toi: ', toi);
+
+                if (toi && toi < lowestFraction) {
+                    lowestFraction = toi;
                 }
                 break;
             }
@@ -221,4 +227,41 @@ function getFraction(a: Vec2, b: Vec2, point: Vec2): number {
     if (abLenSq === 0) return 0;
 
     return (ap.x * ab.x + ap.y * ab.y) / abLenSq;
+}
+
+function sweepCircleVsCircleTOI(bodyA: RigidBody, bodyB: RigidBody, dt: number): number | null {
+    const circleA = bodyA.shape as CircleShape;
+    const circleB = bodyB.shape as CircleShape;
+
+    const v = bodyA.velocity.subNew(bodyB.velocity);
+    const d = v.scaleNew(dt);
+    const r = circleA.radius + circleB.radius;
+    const m = bodyA.position.subNew(bodyB.position);
+
+    const a = d.dot(d);
+    const b = 2 * m.dot(d);
+    const c = m.dot(m) - r * r;
+
+    if (c <= 0) {
+        return 0;
+    }
+
+    // Should be a <= epsilon?
+    if (Math.abs(a) <= Number.EPSILON) {
+        return null;
+    }
+
+    const disc = b * b - 4 * a * c;
+
+    if (disc < 0) {
+        return null;
+    }
+
+    const t = (-b - Math.sqrt(disc)) / (2 * a);
+
+    if (t < 0 || t > 1) {
+        return null;
+    }
+
+    return t;
 }
