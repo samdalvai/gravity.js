@@ -1,6 +1,5 @@
 import {
     Bodies,
-    CircleShape,
     DistanceJoint,
     FIXED_DELTA_TIME,
     Force,
@@ -13,6 +12,7 @@ import {
     World,
 } from '../src';
 import { Utils } from '../src';
+import { resolveCCD } from './CCD_Debug';
 import AssetStore, { TEXTURES } from './graphics/AssetStore';
 import Graphics from './graphics/Graphics';
 import InputManager, { MouseButton } from './input/InputManager';
@@ -578,22 +578,23 @@ export default class Application {
                     Graphics.drawRect(centerX, centerY, width, height, 'pink');
 
                     if (body.isBullet) {
-                        const bulletShape = body.shape as CircleShape;
-                        const radius = bulletShape.radius;
-                        const currentPos = body.position.copy();
-                        const nextPos = currentPos.addNew(body.velocity.scaleNew(SETTINGS.dt));
+                        resolveCCD(body, this.world.getBodies(), SETTINGS.dt);
+                        // const bulletShape = body.shape as CircleShape;
+                        // const radius = bulletShape.radius;
+                        // const currentPos = body.position.copy();
+                        // const nextPos = currentPos.addNew(body.velocity.scaleNew(SETTINGS.dt));
 
-                        const minX = Math.min(currentPos.x, nextPos.x) - radius;
-                        const minY = Math.min(currentPos.y, nextPos.y) - radius;
+                        // const minX = Math.min(currentPos.x, nextPos.x) - radius;
+                        // const minY = Math.min(currentPos.y, nextPos.y) - radius;
 
-                        const maxX = Math.max(currentPos.x, nextPos.x) + radius;
-                        const maxY = Math.max(currentPos.y, nextPos.y) + radius;
+                        // const maxX = Math.max(currentPos.x, nextPos.x) + radius;
+                        // const maxY = Math.max(currentPos.y, nextPos.y) + radius;
 
-                        const centerX = minX + (maxX - minX) / 2;
-                        const centerY = minY + (maxY - minY) / 2;
-                        const width = maxX - minX;
-                        const height = maxY - minY;
-                        Graphics.drawRect(centerX, centerY, width, height, 'pink');
+                        // const centerX = minX + (maxX - minX) / 2;
+                        // const centerY = minY + (maxY - minY) / 2;
+                        // const width = maxX - minX;
+                        // const height = maxY - minY;
+                        // Graphics.drawRect(centerX, centerY, width, height, 'pink');
                     }
                 }
             }
