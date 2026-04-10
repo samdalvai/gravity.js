@@ -133,33 +133,37 @@ export class World {
     }
 
     private ccd(dt: number) {
-        this.fractions.length = 0;
+        const fractions = this.fractions;
+        fractions.length = 0;
 
-        for (const body of this.bodies) {
-            if (body.isBullet) {
-                if (body.velocity.magnitudeSquared() > MIN_BULLET_SPEED) {
-                    const fraction = CCD.resolveCCD(body, this.bodies, dt);
-                    if (fraction) this.fractions.push(fraction);
-                } else {
-                    // If a bullet stopped moving fast enugh downgrade to normal dynamic body
-                    body.isBullet = false;
-                }
+        for (let i = 0; i < this.bodies.length; i++) {
+            const body = this.bodies[i];
+
+            if (!body.isBullet) continue;
+
+            if (body.velocity.magnitudeSquared() <= MIN_BULLET_SPEED) {
+                body.isBullet = false;
+                continue;
+            }
+
+            const fraction = CCD.resolveCCD(body, this.bodies, dt);
+
+            if (fraction != null) {
+                fractions[fractions.length] = fraction;
             }
         }
 
-        this.fractions.push(1);
-        this.fractions.sort((a, b) => a - b);
+        fractions[fractions.length] = 1;
+        fractions.sort((a, b) => a - b);
 
-        let previousFraction = 0;
+        let previous = 0;
 
         // Convert fractions to dt slices, the sum of the slices will be equal to dt
-        for (let i = 0; i < this.fractions.length; i++) {
-            const currentFraction = this.fractions[i] * dt - previousFraction;
-            previousFraction += currentFraction;
-            this.fractions[i] = currentFraction;
+        for (let i = 0; i < fractions.length; i++) {
+            const current = fractions[i] * dt;
+            fractions[i] = current - previous;
+            previous = current;
         }
-
-        console.log('sum: ', previousFraction);
     }
 
     private broadPhase() {
@@ -194,7 +198,9 @@ export class World {
 
         // Narrow phase check, potential pairs may still not collide
         for (let [a, b] of this.potentialPairs) {
-            if (a.isStatic() && b.isStatic()) continue;
+            // TODO: verify if it is appropriate that bullets cannot collide with each other
+            // if (a.isStatic() && b.isStatic()) continue;
+            if ((a.isStatic() && b.isStatic()) || (a.isBullet && b.isBullet)) continue;
 
             // Improve coherence
             if (a.id > b.id) {
