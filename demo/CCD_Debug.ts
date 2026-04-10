@@ -139,6 +139,9 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
             }
         }
 
+        // Debug code to be removed
+        if (lowestFraction === 1) continue;
+
         const otherInitialPos = other.position.copy();
         const otherShapeNextPost = other.position.addNew(other.velocity.scaleNew(dt * lowestFraction));
         other.position = otherShapeNextPost.copy();
