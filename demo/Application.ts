@@ -103,6 +103,7 @@ export default class Application {
             onSetShowAABB: value => this.setShowAABB(value),
             onSetShowContacts: value => this.setShowContacts(value),
             onSetShowRuntimeStatsHud: value => this.setShowRuntimeStatsHud(value),
+            onSetCCD: value => this.setCCD(value),
             onSetApplyGravity: value => this.setApplyGravity(value),
             onSetPaused: value => this.setPaused(value),
             onSetSolverIterations: value => this.setSolverIterations(value),
@@ -842,6 +843,11 @@ export default class Application {
         this.syncUI();
     }
 
+    private setCCD(value: boolean): void {
+        SETTINGS.ccd = value;
+        this.syncUI();
+    }
+
     private setApplyGravity(value: boolean): void {
         SETTINGS.applyGravity = value;
         this.syncUI();
@@ -884,6 +890,7 @@ export default class Application {
             showAABB: this.showAABB,
             showContacts: this.showContacts,
             showRuntimeStatsHud: this.showRuntimeStatsHud,
+            ccd: SETTINGS.ccd,
             applyGravity: SETTINGS.applyGravity,
             paused: this.paused,
             solverIterations: SETTINGS.solverIterations,
