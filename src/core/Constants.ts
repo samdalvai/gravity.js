@@ -14,7 +14,8 @@ export const SETTINGS = {
     warmStarting: true,
     applyWarmStartingThreshold: true,
     blockSolve: true,
-    ccd: true,
+    // ccd: true,
+    ccd: false,
 
     // Thresholds and slops
     warmStartingThreshold: 0.5 * 0.5,
