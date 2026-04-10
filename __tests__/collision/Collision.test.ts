@@ -1,9 +1,11 @@
 import { describe, expect, test } from '@jest/globals';
 
 import * as Collision from '../../src/collision/NarrowPhase';
+import { SETTINGS } from '../../src/core/Constants';
 import { RigidBody } from '../../src/core/RigidBody';
 import { Vec2 } from '../../src/math/Vec2';
 import { BoxShape } from '../../src/shapes/BoxShape';
+import { CapsuleShape } from '../../src/shapes/CapsuleShape';
 import { CircleShape } from '../../src/shapes/CircleShape';
 import { PolygonShape } from '../../src/shapes/PolygonShape';
 
@@ -39,6 +41,17 @@ describe('Collision', () => {
         expect(result).not.toBeNull();
         expect(result.contactPoints).toHaveLength(1);
         expect(result.penetrationDepth).toBe(15);
+    });
+
+    test('detectCollision() keeps circle contacts within contact slop', () => {
+        const a = new RigidBody(new CircleShape(30), 0, 0, 1.0);
+        const b = new RigidBody(new CircleShape(30), 60 + SETTINGS.contactSlop * 0.5, 0, 1.0);
+
+        const result = Collision.detectCollision(a, b);
+
+        expect(result).not.toBeNull();
+        expect(result?.contactPoints).toHaveLength(1);
+        expect(result?.penetrationDepth).toBe(0);
     });
 
     test('detectCollision() detects collision between fully overlapped boxes', () => {
@@ -143,6 +156,17 @@ describe('Collision', () => {
         expect(result).toBeNull();
     });
 
+    test('detectCollision() keeps box and circle contacts within contact slop', () => {
+        const a = new RigidBody(new BoxShape(60, 60), 0, 0, 1.0);
+        const b = new RigidBody(new CircleShape(30), 60 + SETTINGS.contactSlop * 0.5, 0, 1.0);
+
+        const result = Collision.detectCollision(a, b);
+
+        expect(result).not.toBeNull();
+        expect(result?.contactPoints).toHaveLength(1);
+        expect(result?.penetrationDepth).toBe(0);
+    });
+
     test('detectCollision() detects collision between fully overlapped triangles', () => {
         const triangleVertices = [new Vec2(30, 30), new Vec2(-30, 30), new Vec2(0, -30)];
         const a = new RigidBody(new PolygonShape(triangleVertices), 0, 0, 1.0);
@@ -237,5 +261,38 @@ describe('Collision', () => {
         expect(result).not.toBeNull();
         expect(result?.contactPoints.length).toBeGreaterThan(0);
         expect(result?.penetrationDepth).toBeGreaterThan(0);
+    });
+
+    test('detectCollision() keeps box and capsule contacts within contact slop', () => {
+        const a = new RigidBody(new BoxShape(60, 60), 0, 0, 1.0);
+        const b = new RigidBody(new CapsuleShape(40, 10), 40 + SETTINGS.contactSlop * 0.5, 0, 1.0);
+
+        const result = Collision.detectCollision(a, b);
+
+        expect(result).not.toBeNull();
+        expect(result?.contactPoints.length).toBeGreaterThan(0);
+        expect(result?.penetrationDepth).toBe(0);
+    });
+
+    test('detectCollision() keeps capsule and circle contacts within contact slop', () => {
+        const a = new RigidBody(new CapsuleShape(40, 10), 0, 0, 1.0);
+        const b = new RigidBody(new CircleShape(10), 20 + SETTINGS.contactSlop * 0.5, 0, 1.0);
+
+        const result = Collision.detectCollision(a, b);
+
+        expect(result).not.toBeNull();
+        expect(result?.contactPoints).toHaveLength(1);
+        expect(result?.penetrationDepth).toBe(0);
+    });
+
+    test('detectCollision() keeps capsule contacts within contact slop', () => {
+        const a = new RigidBody(new CapsuleShape(40, 10), 0, 0, 1.0);
+        const b = new RigidBody(new CapsuleShape(40, 10), 20 + SETTINGS.contactSlop * 0.5, 0, 1.0);
+
+        const result = Collision.detectCollision(a, b);
+
+        expect(result).not.toBeNull();
+        expect(result?.contactPoints.length).toBeGreaterThan(0);
+        expect(result?.penetrationDepth).toBe(0);
     });
 });
