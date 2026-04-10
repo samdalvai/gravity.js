@@ -38,105 +38,106 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
         const nextPos = currentPos.addNew(relVel.scaleNew(dt));
         Graphics.drawLine(currentPos.x, currentPos.y, nextPos.x, nextPos.y, 'red', 2);
 
-        if (
-            other.shapeType === ShapeType.BOX ||
-            other.shapeType === ShapeType.POLYGON ||
-            other.shapeType === ShapeType.SEGMENT
-        ) {
-            const polygonShape = other.shape as PolygonShape;
-            const vertices = polygonShape.worldVertices;
+        switch (other.shapeType) {
+            case ShapeType.BOX:
+            case ShapeType.POLYGON:
+            case ShapeType.SEGMENT: {
+                const polygonShape = other.shape as PolygonShape;
+                const vertices = polygonShape.worldVertices;
 
-            for (let i = 0; i < vertices.length; i++) {
-                const v0 = vertices[i];
-                const v1 = vertices[(i + 1) % vertices.length];
+                for (let i = 0; i < vertices.length; i++) {
+                    const v0 = vertices[i];
+                    const v1 = vertices[(i + 1) % vertices.length];
 
-                const intersection = edgeEdgeIntersection(currentPos, nextPos, v0, v1);
+                    const intersection = edgeEdgeIntersection(currentPos, nextPos, v0, v1);
 
-                if (intersection) {
-                    const fraction = getFraction(currentPos, nextPos, intersection);
+                    if (intersection) {
+                        const fraction = getFraction(currentPos, nextPos, intersection);
+
+                        if (fraction < lowestFraction) {
+                            lowestFraction = fraction;
+                        }
+                    }
+                }
+                break;
+            }
+            case ShapeType.CIRCLE: {
+                const circleShape = other.shape as CircleShape;
+                const intersections = edgeCircleIntersection(currentPos, nextPos, other.position, circleShape.radius);
+
+                for (const int of intersections) {
+                    const fraction = getFraction(currentPos, nextPos, int);
 
                     if (fraction < lowestFraction) {
                         lowestFraction = fraction;
                     }
                 }
+                break;
             }
-        }
+            case ShapeType.CAPSULE: {
+                const capsuleShape = other.shape as CapsuleShape;
+                const topCirclePosition = capsuleShape.getTopCirclePosition();
+                const bottomCirclePosition = capsuleShape.getBottomCirclePosition();
 
-        if (other.shapeType === ShapeType.CIRCLE) {
-            const circleShape = other.shape as CircleShape;
-            const intersections = edgeCircleIntersection(currentPos, nextPos, other.position, circleShape.radius);
+                const axis = bottomCirclePosition.subNew(topCirclePosition);
+                const axisDir = axis.normalizeNew();
 
-            for (const int of intersections) {
-                const fraction = getFraction(currentPos, nextPos, int);
+                const topCircleIntersections = edgeCircleIntersection(
+                    currentPos,
+                    nextPos,
+                    topCirclePosition,
+                    capsuleShape.radius,
+                );
 
-                if (fraction < lowestFraction) {
-                    lowestFraction = fraction;
-                }
-            }
-        }
+                for (const int of topCircleIntersections) {
+                    // TODO: can we take advantage of this to improve capsules collision?
+                    const v = int.subNew(topCirclePosition);
+                    if (v.dot(axisDir) > 0) continue; // Skip bottom half
 
-        if (other.shapeType === ShapeType.CAPSULE) {
-            const capsuleShape = other.shape as CapsuleShape;
-            const topCirclePosition = capsuleShape.getTopCirclePosition();
-            const bottomCirclePosition = capsuleShape.getBottomCirclePosition();
-
-            const axis = bottomCirclePosition.subNew(topCirclePosition);
-            const axisDir = axis.normalizeNew();
-
-            const topCircleIntersections = edgeCircleIntersection(
-                currentPos,
-                nextPos,
-                topCirclePosition,
-                capsuleShape.radius,
-            );
-
-            for (const int of topCircleIntersections) {
-                // TODO: can we take advantage of this to improve capsules collision?
-                const v = int.subNew(topCirclePosition);
-                if (v.dot(axisDir) > 0) continue; // Skip bottom half
-
-                const fraction = getFraction(currentPos, nextPos, int);
-
-                if (fraction < lowestFraction) {
-                    lowestFraction = fraction;
-                }
-            }
-
-            const bottomCircleIntersections = edgeCircleIntersection(
-                currentPos,
-                nextPos,
-                bottomCirclePosition,
-                capsuleShape.radius,
-            );
-
-            for (const int of bottomCircleIntersections) {
-                // TODO: can we take advantage of this to improve capsules collision?
-                const v = int.subNew(bottomCirclePosition);
-                if (v.dot(axisDir) < 0) continue; // Skip upper half
-
-                const fraction = getFraction(currentPos, nextPos, int);
-
-                if (fraction < lowestFraction) {
-                    lowestFraction = fraction;
-                }
-            }
-
-            const vertices = capsuleShape.worldVertices;
-            for (let i = 0; i < vertices.length; i++) {
-                // TODO: can we take advantage of this to improve capsules collision?
-                if (i % 2 === 0) continue; // Skip top and bottom edges
-                const v0 = vertices[i];
-                const v1 = vertices[(i + 1) % vertices.length];
-
-                const intersection = edgeEdgeIntersection(currentPos, nextPos, v0, v1);
-
-                if (intersection) {
-                    const fraction = getFraction(currentPos, nextPos, intersection);
+                    const fraction = getFraction(currentPos, nextPos, int);
 
                     if (fraction < lowestFraction) {
                         lowestFraction = fraction;
                     }
                 }
+
+                const bottomCircleIntersections = edgeCircleIntersection(
+                    currentPos,
+                    nextPos,
+                    bottomCirclePosition,
+                    capsuleShape.radius,
+                );
+
+                for (const int of bottomCircleIntersections) {
+                    // TODO: can we take advantage of this to improve capsules collision?
+                    const v = int.subNew(bottomCirclePosition);
+                    if (v.dot(axisDir) < 0) continue; // Skip upper half
+
+                    const fraction = getFraction(currentPos, nextPos, int);
+
+                    if (fraction < lowestFraction) {
+                        lowestFraction = fraction;
+                    }
+                }
+
+                const vertices = capsuleShape.worldVertices;
+                for (let i = 0; i < vertices.length; i++) {
+                    // TODO: can we take advantage of this to improve capsules collision?
+                    if (i % 2 === 0) continue; // Skip top and bottom edges
+                    const v0 = vertices[i];
+                    const v1 = vertices[(i + 1) % vertices.length];
+
+                    const intersection = edgeEdgeIntersection(currentPos, nextPos, v0, v1);
+
+                    if (intersection) {
+                        const fraction = getFraction(currentPos, nextPos, intersection);
+
+                        if (fraction < lowestFraction) {
+                            lowestFraction = fraction;
+                        }
+                    }
+                }
+                break;
             }
         }
 
