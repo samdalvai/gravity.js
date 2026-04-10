@@ -80,9 +80,11 @@ export class World {
     }
 
     update(dt: number): void {
+        const bodies = this.bodies;
+
         // Loop all bodies of the world applying forces
-        for (let i = 0; i < this.bodies.length; i++) {
-            const body = this.bodies[i];
+        for (let i = 0; i < bodies.length; i++) {
+            const body = bodies[i];
             if (SETTINGS.applyGravity) {
                 // Apply the weight force to all bodies
                 const weightForce = Force.generateWeightForce(body, this.G);
@@ -112,8 +114,9 @@ export class World {
         }
 
         // Integrate all the forces
-        for (let i = 0; i < this.bodies.length; i++) {
-            this.bodies[i].integrateForces(dt);
+        for (let i = 0; i < bodies.length; i++) {
+            const body = bodies[i];
+            body.integrateForces(dt);
         }
 
         this.ccd(dt);
@@ -129,8 +132,9 @@ export class World {
             this.solveConstraints(invDt);
 
             // Integrate all the velocities
-            for (let i = 0; i < this.bodies.length; i++) {
-                this.bodies[i].integrateVelocities(fraction);
+            for (let i = 0; i < bodies.length; i++) {
+                const body = bodies[i];
+                body.integrateVelocities(fraction);
             }
         }
     }
@@ -139,8 +143,10 @@ export class World {
         const fractions = this.dtFractions;
         fractions.length = 0;
 
-        for (let i = 0; i < this.bodies.length; i++) {
-            const body = this.bodies[i];
+        const bodies = this.bodies;
+
+        for (let i = 0; i < bodies.length; i++) {
+            const body = bodies[i];
 
             if (!body.isBullet) continue;
 
@@ -149,7 +155,7 @@ export class World {
                 continue;
             }
 
-            const fraction = CCD.resolveCCD(body, this.bodies, dt);
+            const fraction = CCD.resolveCCD(body, bodies, dt);
 
             if (fraction != null) {
                 fractions[fractions.length] = fraction;
@@ -173,13 +179,15 @@ export class World {
         this.bodies.sort((a, b) => a.minX - b.minX);
         this.potentialPairs.length = 0;
 
+        const bodies = this.bodies;
+
         // Broad phase check with prune & sweep algorithm
         // TODO: some collisions are not correclty found, try to set gravity to 0
-        for (let i = 0; i < this.bodies.length; i++) {
-            const a = this.bodies[i];
+        for (let i = 0; i < bodies.length; i++) {
+            const a = bodies[i];
 
-            for (let j = i + 1; j < this.bodies.length; j++) {
-                const b = this.bodies[j];
+            for (let j = i + 1; j < bodies.length; j++) {
+                const b = bodies[j];
 
                 // If objects don't overlap on X axis they cannot collide
                 if (b.minX > a.maxX) break;
