@@ -9,11 +9,8 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
 
     const currentPos = bullet.position.copy();
 
-    let minDistanceSquared = Infinity;
-    let closestIntersection: Vec2 | undefined;
-    let bulletNextPos: Vec2 | undefined;
-
     const candidateBodies: RigidBody[] = [];
+    let lowestFraction = 1;
 
     for (const other of bodies) {
         const relVel = bullet.velocity.subNew(other.velocity);
@@ -56,12 +53,10 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
                 const intersection = edgeEdgeIntersection(currentPos, nextPos, v0, v1);
 
                 if (intersection) {
-                    const distanceSquared = intersection.subNew(currentPos).magnitudeSquared();
+                    const fraction = getFraction(currentPos, nextPos, intersection);
 
-                    if (distanceSquared < minDistanceSquared) {
-                        closestIntersection = intersection.copy();
-                        minDistanceSquared = distanceSquared;
-                        bulletNextPos = nextPos.copy();
+                    if (fraction < lowestFraction) {
+                        lowestFraction = fraction;
                     }
                 }
             }
@@ -72,12 +67,10 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
             const intersections = edgeCircleIntersection(currentPos, nextPos, other.position, circleShape.radius);
 
             for (const int of intersections) {
-                const distanceSquared = int.subNew(currentPos).magnitudeSquared();
+                const fraction = getFraction(currentPos, nextPos, int);
 
-                if (distanceSquared < minDistanceSquared) {
-                    closestIntersection = int.copy();
-                    minDistanceSquared = distanceSquared;
-                    bulletNextPos = nextPos.copy();
+                if (fraction < lowestFraction) {
+                    lowestFraction = fraction;
                 }
             }
         }
@@ -102,12 +95,10 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
                 const v = int.subNew(topCirclePosition);
                 if (v.dot(axisDir) > 0) continue; // Skip bottom half
 
-                const distanceSquared = int.subNew(currentPos).magnitudeSquared();
+                const fraction = getFraction(currentPos, nextPos, int);
 
-                if (distanceSquared < minDistanceSquared) {
-                    closestIntersection = int.copy();
-                    minDistanceSquared = distanceSquared;
-                    bulletNextPos = nextPos.copy();
+                if (fraction < lowestFraction) {
+                    lowestFraction = fraction;
                 }
             }
 
@@ -123,12 +114,10 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
                 const v = int.subNew(bottomCirclePosition);
                 if (v.dot(axisDir) < 0) continue; // Skip upper half
 
-                const distanceSquared = int.subNew(currentPos).magnitudeSquared();
+                const fraction = getFraction(currentPos, nextPos, int);
 
-                if (distanceSquared < minDistanceSquared) {
-                    closestIntersection = int.copy();
-                    minDistanceSquared = distanceSquared;
-                    bulletNextPos = nextPos.copy();
+                if (fraction < lowestFraction) {
+                    lowestFraction = fraction;
                 }
             }
 
@@ -142,12 +131,10 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
                 const intersection = edgeEdgeIntersection(currentPos, nextPos, v0, v1);
 
                 if (intersection) {
-                    const distanceSquared = intersection.subNew(currentPos).magnitudeSquared();
+                    const fraction = getFraction(currentPos, nextPos, intersection);
 
-                    if (distanceSquared < minDistanceSquared) {
-                        closestIntersection = intersection.copy();
-                        minDistanceSquared = distanceSquared;
-                        bulletNextPos = nextPos.copy();
+                    if (fraction < lowestFraction) {
+                        lowestFraction = fraction;
                     }
                 }
             }
@@ -162,22 +149,11 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
         other.position = otherInitialPos.copy();
     }
 
-    if (closestIntersection && bulletNextPos) {
-        Graphics.drawFillCircle(closestIntersection.x, closestIntersection.y, 3, 'orange');
-        // TODO: use sweep tests for fraction computation
-        const fraction = getFraction(currentPos, bulletNextPos, closestIntersection);
-        // TODO: if we move bullet to closestIntersection and shoot down the bullet sticks to the floor,
-        // probably something wron with polygon/circle collision, also if we move to bulletNewPos
-        // the bounce angle is wrong
-        // const toBullet = currentPos.subNew(closestIntersection).unitVector();
-        // const bulletNewPos = closestIntersection.addNew(toBullet.scaleNew(bulletShape.radius));
-        // bullet.position = bulletNewPos.copy();
-        // bullet.shape.updateAABB(bullet);
-        // bullet.hasCCD = true;
-        return fraction;
-    }
+    if (lowestFraction === 1) return null;
 
-    return null;
+    const nextPos = currentPos.addNew(bullet.velocity.scaleNew(dt * lowestFraction));
+    Graphics.drawFillCircle(nextPos.x, nextPos.y, 3, 'orange');
+    return lowestFraction;
 }
 
 function edgeEdgeIntersection(A: Vec2, B: Vec2, C: Vec2, D: Vec2): Vec2 | null {
