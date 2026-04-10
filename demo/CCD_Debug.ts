@@ -1,5 +1,4 @@
 import { CapsuleShape, CircleShape, PolygonShape, RigidBody, SegmentShape, ShapeType, Utils, Vec2 } from '../src';
-import { collideCircles, detectCollision } from '../src/collision/NarrowPhase';
 import Graphics from './graphics/Graphics';
 
 const EPSILON = 1e-8;
@@ -119,72 +118,6 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
     if (lowestFraction === 1) return null;
 
     return lowestFraction;
-}
-
-function edgeEdgeIntersection(A: Vec2, B: Vec2, C: Vec2, D: Vec2): Vec2 | null {
-    const r = B.subNew(A); // vector along first segment
-    const s = D.subNew(C); // vector along second segment
-    const rxs = r.x * s.y - r.y * s.x;
-    if (rxs === 0) return null; // parallel or collinear
-
-    const t = (C.subNew(A).x * s.y - C.subNew(A).y * s.x) / rxs;
-    const u = (C.subNew(A).x * r.y - C.subNew(A).y * r.x) / rxs;
-
-    if (t >= 0 && t <= 1 && u >= 0 && u <= 1) {
-        return A.addNew(r.scaleNew(t));
-    }
-
-    return null; // no intersection on the segments
-}
-
-function edgeCircleIntersection(A: Vec2, B: Vec2, C: Vec2, r: number): Vec2[] {
-    const d = B.subNew(A);
-    const f = A.subNew(C);
-
-    const a = d.dot(d);
-    const b = 2 * f.dot(d);
-    const c = f.dot(f) - r * r;
-
-    let discriminant = b * b - 4 * a * c;
-
-    if (discriminant < 0) {
-        return []; // no intersection
-    }
-
-    discriminant = Math.sqrt(discriminant);
-
-    const t1 = (-b - discriminant) / (2 * a);
-    const t2 = (-b + discriminant) / (2 * a);
-
-    const intersections: Vec2[] = [];
-
-    if (0 <= t1 && t1 <= 1) {
-        intersections.push(A.addNew(d.scaleNew(t1)));
-    }
-
-    if (0 <= t2 && t2 <= 1 && t2 != t1) {
-        intersections.push(A.addNew(d.scaleNew(t2)));
-    }
-
-    return intersections;
-}
-
-/**
- * Gets the fraction [0, 1] along an axis where the point lies
- * @param position
- * @param nextPosition
- * @param point
- * @returns
- */
-function getFraction(a: Vec2, b: Vec2, point: Vec2): number {
-    const ab = b.subNew(a);
-    const ap = point.subNew(a);
-
-    const abLenSq = ab.x * ab.x + ab.y * ab.y;
-
-    if (abLenSq === 0) return 0;
-
-    return (ap.x * ab.x + ap.y * ab.y) / abLenSq;
 }
 
 function sweepCircleVsCircleTOI(bodyA: RigidBody, bodyB: RigidBody, dt: number): number | null {
