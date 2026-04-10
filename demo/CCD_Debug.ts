@@ -1,4 +1,5 @@
 import { CapsuleShape, CircleShape, PolygonShape, RigidBody, ShapeType, Utils, Vec2 } from '../src';
+import { collideCircles, detectCollision } from '../src/collision/NarrowPhase';
 import Graphics from './graphics/Graphics';
 
 const EPSILON = 1e-8;
@@ -38,7 +39,6 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
     for (const other of candidateBodies) {
         const relVel = bullet.velocity.subNew(other.velocity);
         const nextPos = currentPos.addNew(relVel.scaleNew(dt));
-        Graphics.drawLine(currentPos.x, currentPos.y, nextPos.x, nextPos.y, 'red', 1);
 
         switch (other.shapeType) {
             case ShapeType.BOX:
@@ -64,22 +64,12 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
                 break;
             }
             case ShapeType.CIRCLE: {
-                // const circleShape = other.shape as CircleShape;
-                // const intersections = edgeCircleIntersection(currentPos, nextPos, other.position, circleShape.radius);
-
-                // for (const int of intersections) {
-                //     const fraction = getFraction(currentPos, nextPos, int);
-
-                //     if (fraction < lowestFraction) {
-                //         lowestFraction = fraction;
-                //     }
-                // }
                 const toi = sweepCircleVsCircleTOI(bullet, other, dt);
-                console.log('toi: ', toi);
 
                 if (toi != null && toi < lowestFraction) {
                     lowestFraction = toi;
                 }
+
                 break;
             }
             case ShapeType.CAPSULE: {
@@ -150,18 +140,30 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
         }
 
         const otherInitialPos = other.position.copy();
-        const otherShapeNextPost = other.position.addNew(other.velocity.scaleNew(dt));
-
+        const otherShapeNextPost = other.position.addNew(other.velocity.scaleNew(dt * lowestFraction));
         other.position = otherShapeNextPost.copy();
         Graphics.drawBody(other, { fillColor: 'rgba(128, 128, 128, 0.5)' });
 
+        const previousPos = bullet.position.copy();
+        const bulletNextPos = previousPos.addNew(bullet.velocity);
+        const bulletNextPosFraction = previousPos.addNew(bullet.velocity.scaleNew(dt * lowestFraction));
+        bullet.position = bulletNextPosFraction.copy();
+        Graphics.drawBody(bullet, { fillColor: 'rgba(128, 128, 128, 0.75)' });
+
+        Graphics.drawLine(previousPos.x, previousPos.y, bulletNextPos.x, bulletNextPos.y, 'red', 1);
+
+        const collide = detectCollision(bullet, other);
+
+        if (collide) {
+            console.log('Colliding');
+        }
+
         other.position = otherInitialPos.copy();
+        bullet.position = previousPos.copy();
     }
 
     if (lowestFraction === 1) return null;
 
-    const nextPos = currentPos.addNew(bullet.velocity.scaleNew(dt * lowestFraction));
-    Graphics.drawFillCircle(nextPos.x, nextPos.y, 3, 'orange');
     return lowestFraction;
 }
 
@@ -245,7 +247,7 @@ function sweepCircleVsCircleTOI(bodyA: RigidBody, bodyB: RigidBody, dt: number):
     const c = m.dot(m) - r * r;
 
     if (c <= 0) {
-        return 0;
+        return null;
     }
 
     if (Math.abs(a) <= EPSILON) {
@@ -258,7 +260,7 @@ function sweepCircleVsCircleTOI(bodyA: RigidBody, bodyB: RigidBody, dt: number):
         return null;
     }
 
-    const t = (-b - Math.sqrt(disc)) / (2 * a);
+    const t = (-b - Math.sqrt(Math.max(disc, 0))) / (2 * a);
 
     if (t < 0 || t > 1) {
         return null;
