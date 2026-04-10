@@ -32,7 +32,7 @@ export class World {
     private forces: Vec2[] = [];
     private torques: number[] = [];
 
-    private fractions: number[] = [];
+    private dtFractions: number[] = [];
 
     constructor(gravity: number) {
         this.G = -gravity;
@@ -81,7 +81,8 @@ export class World {
 
     update(dt: number): void {
         // Loop all bodies of the world applying forces
-        for (const body of this.bodies) {
+        for (let i = 0; i < this.bodies.length; i++) {
+            const body = this.bodies[i];
             if (SETTINGS.applyGravity) {
                 // Apply the weight force to all bodies
                 const weightForce = Force.generateWeightForce(body, this.G);
@@ -111,14 +112,16 @@ export class World {
         }
 
         // Integrate all the forces
-        for (const body of this.bodies) {
-            body.integrateForces(dt);
+        for (let i = 0; i < this.bodies.length; i++) {
+            this.bodies[i].integrateForces(dt);
         }
 
         this.ccd(dt);
 
-        for (const fraction of this.fractions) {
+        for (let i = 0; i < this.dtFractions.length; i++) {
+            const fraction = this.dtFractions[i];
             const invDt = 1 / fraction;
+
             this.broadPhase();
 
             this.narrowPhase();
@@ -126,14 +129,14 @@ export class World {
             this.solveConstraints(invDt);
 
             // Integrate all the velocities
-            for (const body of this.bodies) {
-                body.integrateVelocities(fraction);
+            for (let i = 0; i < this.bodies.length; i++) {
+                this.bodies[i].integrateVelocities(fraction);
             }
         }
     }
 
     private ccd(dt: number) {
-        const fractions = this.fractions;
+        const fractions = this.dtFractions;
         fractions.length = 0;
 
         for (let i = 0; i < this.bodies.length; i++) {
