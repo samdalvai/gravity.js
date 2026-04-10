@@ -124,7 +124,8 @@ export class World {
 
             for (let i = 0; i < this.dtFractions.length; i++) {
                 const dtFraction = this.dtFractions[i];
-                // TODO: dt fraction can be 0 if TOI is 0, we need to solve this
+                // TODO: dt fraction can be 0 if TOI is 0, we need to solve this,
+                // if TOI is 0 it means the bullet is already colliding with another body
                 this.step(dtFraction);
             }
         } else {
