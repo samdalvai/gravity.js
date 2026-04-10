@@ -6,6 +6,8 @@ import { PolygonShape } from '../shapes/PolygonShape';
 import { ShapeType } from '../shapes/Shape';
 import * as Utils from '../utils/Utils';
 
+const EPSILON = 1e-8;
+
 export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): number | null {
     Utils.assert(bullet.shape instanceof CircleShape);
 
@@ -14,11 +16,8 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
 
     const currentPos = bullet.position.copy();
 
-    let minDistanceSquared = Infinity;
-    let closestIntersection: Vec2 | undefined;
-    let bulletNextPos: Vec2 | undefined;
-
     const candidateBodies: RigidBody[] = [];
+    let lowestFraction = 1;
 
     for (const other of bodies) {
         const relVel = bullet.velocity.subNew(other.velocity);
@@ -45,141 +44,119 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
         const relVel = bullet.velocity.subNew(other.velocity);
         const nextPos = currentPos.addNew(relVel.scaleNew(dt));
 
-        if (
-            other.shapeType === ShapeType.BOX ||
-            other.shapeType === ShapeType.POLYGON ||
-            other.shapeType === ShapeType.SEGMENT
-        ) {
-            const polygonShape = other.shape as PolygonShape;
-            const vertices = polygonShape.worldVertices;
+        switch (other.shapeType) {
+            case ShapeType.BOX:
+            case ShapeType.POLYGON:
+            case ShapeType.SEGMENT: {
+                const polygonShape = other.shape as PolygonShape;
+                const vertices = polygonShape.worldVertices;
 
-            for (let i = 0; i < vertices.length; i++) {
-                const v0 = vertices[i];
-                const v1 = vertices[(i + 1) % vertices.length];
+                for (let i = 0; i < vertices.length; i++) {
+                    const v0 = vertices[i];
+                    const v1 = vertices[(i + 1) % vertices.length];
 
-                const intersection = edgeEdgeIntersection(currentPos, nextPos, v0, v1);
+                    const intersection = edgeEdgeIntersection(currentPos, nextPos, v0, v1);
 
-                if (intersection) {
-                    const distanceSquared = intersection.subNew(currentPos).magnitudeSquared();
+                    if (intersection) {
+                        const fraction = getFraction(currentPos, nextPos, intersection);
 
-                    if (distanceSquared < minDistanceSquared) {
-                        closestIntersection = intersection.copy();
-                        minDistanceSquared = distanceSquared;
-                        bulletNextPos = nextPos.copy();
+                        if (fraction < lowestFraction) {
+                            lowestFraction = fraction;
+                        }
                     }
                 }
+                break;
             }
-        }
+            case ShapeType.CIRCLE: {
+                // const circleShape = other.shape as CircleShape;
+                // const intersections = edgeCircleIntersection(currentPos, nextPos, other.position, circleShape.radius);
 
-        if (other.shapeType === ShapeType.CIRCLE) {
-            const circleShape = other.shape as CircleShape;
-            const intersections = edgeCircleIntersection(currentPos, nextPos, other.position, circleShape.radius);
+                // for (const int of intersections) {
+                //     const fraction = getFraction(currentPos, nextPos, int);
 
-            for (const int of intersections) {
-                const distanceSquared = int.subNew(currentPos).magnitudeSquared();
+                //     if (fraction < lowestFraction) {
+                //         lowestFraction = fraction;
+                //     }
+                // }
+                const toi = sweepCircleVsCircleTOI(bullet, other, dt);
+                console.log('toi: ', toi);
 
-                if (distanceSquared < minDistanceSquared) {
-                    closestIntersection = int.copy();
-                    minDistanceSquared = distanceSquared;
-                    bulletNextPos = nextPos.copy();
+                if (toi != null && toi < lowestFraction) {
+                    lowestFraction = toi;
                 }
+                break;
             }
-        }
+            case ShapeType.CAPSULE: {
+                const capsuleShape = other.shape as CapsuleShape;
+                const topCirclePosition = capsuleShape.getTopCirclePosition();
+                const bottomCirclePosition = capsuleShape.getBottomCirclePosition();
 
-        if (other.shapeType === ShapeType.CAPSULE) {
-            const capsuleShape = other.shape as CapsuleShape;
-            const topCirclePosition = capsuleShape.getTopCirclePosition();
-            const bottomCirclePosition = capsuleShape.getBottomCirclePosition();
+                const axis = bottomCirclePosition.subNew(topCirclePosition);
+                const axisDir = axis.normalizeNew();
 
-            const axis = bottomCirclePosition.subNew(topCirclePosition);
-            const axisDir = axis.normalizeNew();
+                const topCircleIntersections = edgeCircleIntersection(
+                    currentPos,
+                    nextPos,
+                    topCirclePosition,
+                    capsuleShape.radius,
+                );
 
-            const topCircleIntersections = edgeCircleIntersection(
-                currentPos,
-                nextPos,
-                topCirclePosition,
-                capsuleShape.radius,
-            );
+                for (const int of topCircleIntersections) {
+                    // TODO: can we take advantage of this to improve capsules collision?
+                    const v = int.subNew(topCirclePosition);
+                    if (v.dot(axisDir) > 0) continue; // Skip bottom half
 
-            for (const int of topCircleIntersections) {
-                // TODO: can we take advantage of this to improve capsules collision?
-                const v = int.subNew(topCirclePosition);
-                if (v.dot(axisDir) > 0) continue; // Skip bottom half
+                    const fraction = getFraction(currentPos, nextPos, int);
 
-                const distanceSquared = int.subNew(currentPos).magnitudeSquared();
-
-                if (distanceSquared < minDistanceSquared) {
-                    closestIntersection = int.copy();
-                    minDistanceSquared = distanceSquared;
-                    bulletNextPos = nextPos.copy();
-                }
-            }
-
-            const bottomCircleIntersections = edgeCircleIntersection(
-                currentPos,
-                nextPos,
-                bottomCirclePosition,
-                capsuleShape.radius,
-            );
-
-            for (const int of bottomCircleIntersections) {
-                // TODO: can we take advantage of this to improve capsules collision?
-                const v = int.subNew(bottomCirclePosition);
-                if (v.dot(axisDir) < 0) continue; // Skip upper half
-
-                const distanceSquared = int.subNew(currentPos).magnitudeSquared();
-
-                if (distanceSquared < minDistanceSquared) {
-                    closestIntersection = int.copy();
-                    minDistanceSquared = distanceSquared;
-                    bulletNextPos = nextPos.copy();
-                }
-            }
-
-            const vertices = capsuleShape.worldVertices;
-            for (let i = 0; i < vertices.length; i++) {
-                // TODO: can we take advantage of this to improve capsules collision?
-                if (i % 2 === 0) continue; // Skip top and bottom edges
-                const v0 = vertices[i];
-                const v1 = vertices[(i + 1) % vertices.length];
-
-                const intersection = edgeEdgeIntersection(currentPos, nextPos, v0, v1);
-
-                if (intersection) {
-                    const distanceSquared = intersection.subNew(currentPos).magnitudeSquared();
-
-                    if (distanceSquared < minDistanceSquared) {
-                        closestIntersection = intersection.copy();
-                        minDistanceSquared = distanceSquared;
-                        bulletNextPos = nextPos.copy();
+                    if (fraction < lowestFraction) {
+                        lowestFraction = fraction;
                     }
                 }
+
+                const bottomCircleIntersections = edgeCircleIntersection(
+                    currentPos,
+                    nextPos,
+                    bottomCirclePosition,
+                    capsuleShape.radius,
+                );
+
+                for (const int of bottomCircleIntersections) {
+                    // TODO: can we take advantage of this to improve capsules collision?
+                    const v = int.subNew(bottomCirclePosition);
+                    if (v.dot(axisDir) < 0) continue; // Skip upper half
+
+                    const fraction = getFraction(currentPos, nextPos, int);
+
+                    if (fraction < lowestFraction) {
+                        lowestFraction = fraction;
+                    }
+                }
+
+                const vertices = capsuleShape.worldVertices;
+                for (let i = 0; i < vertices.length; i++) {
+                    // TODO: can we take advantage of this to improve capsules collision?
+                    if (i % 2 === 0) continue; // Skip top and bottom edges
+                    const v0 = vertices[i];
+                    const v1 = vertices[(i + 1) % vertices.length];
+
+                    const intersection = edgeEdgeIntersection(currentPos, nextPos, v0, v1);
+
+                    if (intersection) {
+                        const fraction = getFraction(currentPos, nextPos, intersection);
+
+                        if (fraction < lowestFraction) {
+                            lowestFraction = fraction;
+                        }
+                    }
+                }
+                break;
             }
         }
-
-        const otherInitialPos = other.position.copy();
-        const otherShapeNextPost = other.position.addNew(other.velocity.scaleNew(dt));
-
-        other.position = otherShapeNextPost.copy();
-
-        other.position = otherInitialPos.copy();
     }
 
-    if (closestIntersection && bulletNextPos) {
-        // TODO: use sweep tests for fraction computation
-        const fraction = getFraction(currentPos, bulletNextPos, closestIntersection);
-        // TODO: if we move bullet to closestIntersection and shoot down the bullet sticks to the floor,
-        // probably something wron with polygon/circle collision, also if we move to bulletNewPos
-        // the bounce angle is wrong
-        // const toBullet = currentPos.subNew(closestIntersection).unitVector();
-        // const bulletNewPos = closestIntersection.addNew(toBullet.scaleNew(bulletShape.radius));
-        // bullet.position = bulletNewPos.copy();
-        // bullet.shape.updateAABB(bullet);
-        // bullet.hasCCD = true;
-        return fraction;
-    }
+    if (lowestFraction === 1) return null;
 
-    return null;
+    return lowestFraction;
 }
 
 function edgeEdgeIntersection(A: Vec2, B: Vec2, C: Vec2, D: Vec2): Vec2 | null {
@@ -246,4 +223,40 @@ function getFraction(a: Vec2, b: Vec2, point: Vec2): number {
     if (abLenSq === 0) return 0;
 
     return (ap.x * ab.x + ap.y * ab.y) / abLenSq;
+}
+
+function sweepCircleVsCircleTOI(bodyA: RigidBody, bodyB: RigidBody, dt: number): number | null {
+    const circleA = bodyA.shape as CircleShape;
+    const circleB = bodyB.shape as CircleShape;
+
+    const v = bodyA.velocity.subNew(bodyB.velocity);
+    const d = v.scaleNew(dt);
+    const r = circleA.radius + circleB.radius;
+    const m = bodyA.position.subNew(bodyB.position);
+
+    const a = d.dot(d);
+    const b = 2 * m.dot(d);
+    const c = m.dot(m) - r * r;
+
+    if (c <= 0) {
+        return 0;
+    }
+
+    if (Math.abs(a) <= EPSILON) {
+        return null;
+    }
+
+    const disc = b * b - 4 * a * c;
+
+    if (disc < -EPSILON) {
+        return null;
+    }
+
+    const t = (-b - Math.sqrt(disc)) / (2 * a);
+
+    if (t < 0 || t > 1) {
+        return null;
+    }
+
+    return t;
 }
