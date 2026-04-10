@@ -119,16 +119,16 @@ export class World {
             body.integrateForces(dt);
         }
 
-        if (SETTINGS.ccd) {
-            this.ccd(dt);
+        // if (SETTINGS.ccd) {
+        //     this.ccd(dt);
 
-            for (let i = 0; i < this.dtFractions.length; i++) {
-                const dtFraction = this.dtFractions[i];
-                this.step(dtFraction);
-            }
-        } else {
-            this.step(dt);
-        }
+        //     for (let i = 0; i < this.dtFractions.length; i++) {
+        //         const dtFraction = this.dtFractions[i];
+        //         this.step(dtFraction);
+        //     }
+        // } else {
+        this.step(dt);
+        // }
     }
 
     private ccd(dt: number) {
