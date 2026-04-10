@@ -41,12 +41,14 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
         const nextPos = currentPos.addNew(relVel.scaleNew(dt));
 
         switch (other.shapeType) {
-            case ShapeType.BOX: {
-                // TODO: to be implemented
-                break;
-            }
+            case ShapeType.BOX:
             case ShapeType.POLYGON: {
-                // TODO: to be implemented
+                const toi = sweepCircleVsPolygonTOI(bullet, other, dt);
+
+                if (toi != null && toi < lowestFraction) {
+                    lowestFraction = toi;
+                }
+
                 break;
             }
             case ShapeType.SEGMENT: {
@@ -399,4 +401,79 @@ function distancePointToSegmentSquared(p: Vec2, a: Vec2, b: Vec2): number {
 
     const closest = a.addNew(ab.scaleNew(t));
     return p.subNew(closest).dot(p.subNew(closest));
+}
+
+function sweepCircleVsPolygonTOI(bodyA: RigidBody, bodyB: RigidBody, dt: number): number | null {
+    const circle = bodyA.shape as CircleShape;
+    const polygon = bodyB.shape as PolygonShape;
+
+    const p = bodyA.position;
+    const d = bodyA.velocity.subNew(bodyB.velocity).scaleNew(dt); // full relative displacement
+    const radius = circle.radius;
+
+    const vertices = polygon.worldVertices;
+    const normals = polygon.worldNormals;
+
+    let lowestT = Infinity;
+
+    // Already overlapping at t = 0
+    if (pointInInflatedPolygon(p, vertices, normals, radius)) {
+        return 0;
+    }
+
+    // 1) Face hits: solve signed distance to each face offset by radius
+    for (let i = 0; i < vertices.length; i++) {
+        const v0 = vertices[i];
+        const normal = normals[i]; // outward normal
+
+        const dist0 = p.subNew(v0).dot(normal);
+        const vn = d.dot(normal);
+
+        // Need to move toward the face
+        if (vn >= -EPSILON) continue;
+
+        // Hit when center reaches the face expanded outward by radius
+        const t = (radius - dist0) / vn;
+
+        if (t < 0 || t > 1) continue;
+
+        const hitPoint = p.addNew(d.scaleNew(t));
+
+        // Check that the projected contact lies on this edge segment, not outside near vertices
+        const v1 = vertices[(i + 1) % vertices.length];
+        const edge = v1.subNew(v0);
+        const edgeLenSq = edge.dot(edge);
+
+        if (edgeLenSq <= EPSILON) continue;
+
+        const contactOnFace = hitPoint.subNew(normal.scaleNew(radius));
+        const proj = contactOnFace.subNew(v0).dot(edge) / edgeLenSq;
+
+        if (proj >= 0 && proj <= 1) {
+            if (t < lowestT) lowestT = t;
+        }
+    }
+
+    // 2) Vertex hits: sweep point vs circle(radius) for every polygon vertex
+    for (let i = 0; i < vertices.length; i++) {
+        const t = sweepPointVsPointRadiusTOI(p, d, vertices[i], radius);
+        if (t != null && t < lowestT) {
+            lowestT = t;
+        }
+    }
+
+    return lowestT !== Infinity ? lowestT : null;
+}
+
+// Checks whether point p is inside polygon inflated by radius.
+// For a convex polygon with outward normals, point is inside inflated polygon
+// if it is not farther than radius outside any face.
+function pointInInflatedPolygon(p: Vec2, vertices: Vec2[], normals: Vec2[], radius: number): boolean {
+    for (let i = 0; i < vertices.length; i++) {
+        const dist = p.subNew(vertices[i]).dot(normals[i]);
+        if (dist > radius) {
+            return false;
+        }
+    }
+    return true;
 }
