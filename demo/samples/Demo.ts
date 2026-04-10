@@ -175,7 +175,7 @@ export default class Demo {
 
         const body = Bodies.box({ width: 60, height: 60, x: 0, y: 0, mass: 1, angularVelocity: 2, rotation: 0.7 });
         app.setBodyTexture(body, 'crate');
-        world.addBody(body);
+        // world.addBody(body);
 
         // Bodies for collision testing
         // const body = Bodies.circle({ radius: 30, x: 0, y: 0, mass: 0 });

@@ -108,7 +108,6 @@ export class World {
 
             // Reset grounded value at the beginning of each frame
             body.isGrounded = false;
-            body.hasCCD = false;
         }
 
         // Integrate all the forces
@@ -148,15 +147,19 @@ export class World {
             }
         }
 
-        this.fractions.sort((f1, f2) => f1 - f2);
+        this.fractions.push(1);
+        this.fractions.sort((a, b) => a - b);
 
-        // Transform fractions to real dt
+        let previousFraction = 0;
+
+        // Convert fractions to dt slices, the sum of the slices will be equal to dt
         for (let i = 0; i < this.fractions.length; i++) {
-            this.fractions[i] *= dt;
+            const currentFraction = this.fractions[i] * dt - previousFraction;
+            previousFraction += currentFraction;
+            this.fractions[i] = currentFraction;
         }
 
-        // Add final fraction equal to dt
-        this.fractions.push(dt);
+        console.log('sum: ', previousFraction);
     }
 
     private broadPhase() {
