@@ -105,15 +105,7 @@ export default class Graphics {
         this.ctx.stroke();
     }
 
-    static drawArrow(
-        x0: number,
-        y0: number,
-        x1: number,
-        y1: number,
-        color = 'white',
-        width = 1,
-        headSize = 6,
-    ): void {
+    static drawArrow(x0: number, y0: number, x1: number, y1: number, color = 'white', width = 1, headSize = 6): void {
         this.drawLine(x0, y0, x1, y1, color, width);
 
         const angle = Math.atan2(y1 - y0, x1 - x0);
