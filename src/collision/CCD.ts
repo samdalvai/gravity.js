@@ -252,7 +252,7 @@ function sweepCircleVsCircleTOI(bodyA: RigidBody, bodyB: RigidBody, dt: number):
         return null;
     }
 
-    const t = (-b - Math.sqrt(disc)) / (2 * a);
+    const t = (-b - Math.sqrt(Math.max(disc, 0))) / (2 * a);
 
     if (t < 0 || t > 1) {
         return null;

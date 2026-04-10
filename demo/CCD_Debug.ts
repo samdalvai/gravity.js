@@ -156,6 +156,19 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
 
         if (collide) {
             console.log('Colliding');
+        } else {
+            console.log('Fraction: ', lowestFraction);
+            console.log('dt Fraction: ', dt * lowestFraction);
+            console.log('pos bullet: ', bullet.position);
+            console.log('pos other: ', other.position);
+            const bulletShape = bullet.shape;
+            const otherShape = other.shape;
+            const combinedRadius = bulletShape.radius + otherShape.radius;
+            const distSq = bullet.position.distanceSquared(other.position);
+            const dist = Math.sqrt(distSq);
+
+            console.log('combined radius: ', combinedRadius);
+            console.log('distance: ', dist);
         }
 
         other.position = otherInitialPos.copy();
