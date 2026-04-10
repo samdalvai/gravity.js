@@ -286,7 +286,8 @@ export default class Application {
 
                         const segment = Bodies.segment({
                             length: 200,
-                            horizontal: true,
+                            // horizontal: true,
+                            horizontal: false,
                             x,
                             y,
                             mass: 0,
