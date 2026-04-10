@@ -119,23 +119,15 @@ export class World {
             body.integrateForces(dt);
         }
 
-        this.ccd(dt);
+        if (SETTINGS.ccd) {
+            this.ccd(dt);
 
-        for (let i = 0; i < this.dtFractions.length; i++) {
-            const fraction = this.dtFractions[i];
-            const invDt = 1 / fraction;
-
-            this.broadPhase();
-
-            this.narrowPhase();
-
-            this.solveConstraints(invDt);
-
-            // Integrate all the velocities
-            for (let i = 0; i < bodies.length; i++) {
-                const body = bodies[i];
-                body.integrateVelocities(fraction);
+            for (let i = 0; i < this.dtFractions.length; i++) {
+                const dtFraction = this.dtFractions[i];
+                this.step(dtFraction);
             }
+        } else {
+            this.step(dt);
         }
     }
 
@@ -172,6 +164,23 @@ export class World {
             const current = fractions[i] * dt;
             fractions[i] = current - previous;
             previous = current;
+        }
+    }
+
+    private step(dt: number) {
+        const bodies = this.bodies;
+        const invDt = 1 / dt;
+
+        this.broadPhase();
+
+        this.narrowPhase();
+
+        this.solveConstraints(invDt);
+
+        // Integrate all the velocities
+        for (let i = 0; i < bodies.length; i++) {
+            const body = bodies[i];
+            body.integrateVelocities(dt);
         }
     }
 
