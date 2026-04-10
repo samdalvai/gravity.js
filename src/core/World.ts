@@ -124,6 +124,7 @@ export class World {
 
             for (let i = 0; i < this.dtFractions.length; i++) {
                 const dtFraction = this.dtFractions[i];
+                // TODO: dt fraction can be 0 if TOI is 0, we need to solve this
                 this.step(dtFraction);
             }
         } else {
