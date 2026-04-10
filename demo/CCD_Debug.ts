@@ -1,4 +1,4 @@
-import { CapsuleShape, CircleShape, PolygonShape, RigidBody, ShapeType, Utils, Vec2 } from '../src';
+import { CapsuleShape, CircleShape, PolygonShape, RigidBody, SegmentShape, ShapeType, Utils, Vec2 } from '../src';
 import { collideCircles, detectCollision } from '../src/collision/NarrowPhase';
 import Graphics from './graphics/Graphics';
 
@@ -41,26 +41,21 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
         const nextPos = currentPos.addNew(relVel.scaleNew(dt));
 
         switch (other.shapeType) {
-            case ShapeType.BOX:
-            case ShapeType.POLYGON:
+            case ShapeType.BOX: {
+                // TODO: to be implemented
+                break;
+            }
+            case ShapeType.POLYGON: {
+                // TODO: to be implemented
+                break;
+            }
             case ShapeType.SEGMENT: {
-                const polygonShape = other.shape as PolygonShape;
-                const vertices = polygonShape.worldVertices;
+                const toi = sweepCircleVsSegmentTOI(bullet, other, dt);
 
-                for (let i = 0; i < vertices.length; i++) {
-                    const v0 = vertices[i];
-                    const v1 = vertices[(i + 1) % vertices.length];
-
-                    const intersection = edgeEdgeIntersection(currentPos, nextPos, v0, v1);
-
-                    if (intersection) {
-                        const fraction = getFraction(currentPos, nextPos, intersection);
-
-                        if (fraction < lowestFraction) {
-                            lowestFraction = fraction;
-                        }
-                    }
+                if (toi != null && toi < lowestFraction) {
+                    lowestFraction = toi;
                 }
+
                 break;
             }
             case ShapeType.CIRCLE: {
@@ -283,4 +278,125 @@ function sweepCircleVsCircleTOI(bodyA: RigidBody, bodyB: RigidBody, dt: number):
     }
 
     return t;
+}
+
+function sweepCircleVsSegmentTOI(bodyA: RigidBody, bodyB: RigidBody, dt: number): number | null {
+    const circle = bodyA.shape as CircleShape;
+    const segment = bodyB.shape as SegmentShape;
+
+    const a = segment.worldVertices[0];
+    const b = segment.worldVertices[1];
+
+    const radius = circle.radius;
+
+    // Relative motion: treat segment as static
+    const v = bodyA.velocity.subNew(bodyB.velocity).scaleNew(dt);
+    const p = bodyA.position;
+
+    const ab = b.subNew(a);
+    const abLenSq = ab.dot(ab);
+
+    if (abLenSq <= EPSILON) {
+        // Degenerate segment -> point
+        return sweepPointVsPointRadiusTOI(p, v, a, radius);
+    }
+
+    const abLen = Math.sqrt(abLenSq);
+    const tangent = ab.scaleNew(1 / abLen);
+    const normal = new Vec2(-tangent.y, tangent.x);
+
+    let lowestT = Infinity;
+
+    // Optional: if already overlapping at t = 0
+    if (distancePointToSegmentSquared(p, a, b) <= radius * radius) {
+        return 0;
+    }
+
+    // 1) Hit against segment interior (infinite line offset by ±radius)
+    const signedDist = p.subNew(a).dot(normal);
+    const vn = v.dot(normal);
+
+    if (Math.abs(vn) > EPSILON) {
+        const t0 = (radius - signedDist) / vn;
+        const t1 = (-radius - signedDist) / vn;
+
+        if (t0 >= 0 && t0 <= 1) {
+            const hitPoint = p.addNew(v.scaleNew(t0));
+            const proj = hitPoint.subNew(a).dot(tangent);
+
+            if (proj >= 0 && proj <= abLen) {
+                lowestT = Math.min(lowestT, t0);
+            }
+        }
+
+        if (t1 >= 0 && t1 <= 1) {
+            const hitPoint = p.addNew(v.scaleNew(t1));
+            const proj = hitPoint.subNew(a).dot(tangent);
+
+            if (proj >= 0 && proj <= abLen) {
+                lowestT = Math.min(lowestT, t1);
+            }
+        }
+    }
+
+    // 2) Hit endpoint A
+    const tA = sweepPointVsPointRadiusTOI(p, v, a, radius);
+    if (tA != null) lowestT = Math.min(lowestT, tA);
+
+    // 3) Hit endpoint B
+    const tB = sweepPointVsPointRadiusTOI(p, v, b, radius);
+    if (tB != null) lowestT = Math.min(lowestT, tB);
+
+    return lowestT !== Infinity ? lowestT : null;
+}
+
+function sweepPointVsPointRadiusTOI(
+    p: Vec2,
+    d: Vec2, // full step displacement, not velocity
+    center: Vec2,
+    radius: number,
+): number | null {
+    const m = p.subNew(center);
+
+    const a = d.dot(d);
+    const b = 2 * m.dot(d);
+    const c = m.dot(m) - radius * radius;
+
+    if (c <= 0) {
+        return 0;
+    }
+
+    if (a <= EPSILON) {
+        return null;
+    }
+
+    const disc = b * b - 4 * a * c;
+
+    if (disc < -EPSILON) {
+        return null;
+    }
+
+    const t = (-b - Math.sqrt(Math.max(0, disc))) / (2 * a);
+
+    if (t < 0 || t > 1) {
+        return null;
+    }
+
+    return t;
+}
+
+function distancePointToSegmentSquared(p: Vec2, a: Vec2, b: Vec2): number {
+    const ab = b.subNew(a);
+    const ap = p.subNew(a);
+    const abLenSq = ab.dot(ab);
+
+    if (abLenSq <= EPSILON) {
+        return ap.dot(ap);
+    }
+
+    let t = ap.dot(ab) / abLenSq;
+    t = Math.max(0, Math.min(1, t));
+
+    const closest = a.addNew(ab.scaleNew(t));
+    return p.subNew(closest).dot(p.subNew(closest));
 }
