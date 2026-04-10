@@ -183,9 +183,10 @@ export function collideCircles(bodyA: RigidBody, bodyB: RigidBody): ContactManif
 
     const ab = posB.subNew(posA);
     const radiusSum = radiusA + radiusB;
+    const contactDistance = radiusSum + SETTINGS.contactSlop;
     const distSq = ab.magnitudeSquared();
 
-    if (distSq > radiusSum * radiusSum + SETTINGS.contactSlop) {
+    if (distSq > contactDistance * contactDistance) {
         return null;
     }
 
@@ -231,7 +232,7 @@ function collideSegmentRadiusAndCircle(
     const result = bodyB.position.subNew(pointA).lengthAndNormalize(0, fallbackNormal);
     const separation = result.length - radiusA - circleB.radius;
 
-    if (separation > 0) {
+    if (separation > SETTINGS.contactSlop) {
         return null;
     }
 
@@ -253,6 +254,7 @@ export function collidePolygonCircle(bodyA: RigidBody, bodyB: RigidBody): Contac
     const vertices = polygonA.worldVertices;
     const normals = polygonA.worldNormals;
     const radius = polygonA.radius + circleB.radius;
+    const contactDistance = radius + SETTINGS.contactSlop;
 
     let normalIndex = 0;
     let separation = Number.NEGATIVE_INFINITY;
@@ -266,7 +268,7 @@ export function collidePolygonCircle(bodyA: RigidBody, bodyB: RigidBody): Contac
         }
     }
 
-    if (separation > radius + 0) {
+    if (separation > contactDistance) {
         return null;
     }
 
@@ -280,7 +282,7 @@ export function collidePolygonCircle(bodyA: RigidBody, bodyB: RigidBody): Contac
         const result = delta.lengthAndNormalize(0);
         const vertexSeparation = delta.dot(result.normal);
 
-        if (vertexSeparation > radius + 0) {
+        if (vertexSeparation > contactDistance) {
             return null;
         }
 
@@ -301,7 +303,7 @@ export function collidePolygonCircle(bodyA: RigidBody, bodyB: RigidBody): Contac
         const result = delta.lengthAndNormalize(0);
         const vertexSeparation = delta.dot(result.normal);
 
-        if (vertexSeparation > radius + 0) {
+        if (vertexSeparation > contactDistance) {
             return null;
         }
 
@@ -395,7 +397,7 @@ function clipConvexEdges(
     // TODO: is this needed?
     for (let i = 0; i < points.length; i++) {
         const p = points[i];
-        if (p.separation <= 0) {
+        if (p.separation <= SETTINGS.contactSlop) {
             filteredPoints.push(p);
         }
     }
@@ -452,8 +454,9 @@ function collideConvexPolygons(
     const { edgeIndex: initialEdgeA, maxSeparation: separationA } = findMaxSeparation(verticesA, normalsA, verticesB);
     const { edgeIndex: initialEdgeB, maxSeparation: separationB } = findMaxSeparation(verticesB, normalsB, verticesA);
     const radius = radiusA + radiusB;
+    const contactDistance = radius + SETTINGS.contactSlop;
 
-    if (separationA > radius || separationB > radius) {
+    if (separationA > contactDistance || separationB > contactDistance) {
         return null;
     }
 
@@ -502,7 +505,7 @@ function collideConvexPolygons(
         if (result.fraction1 === 0.0 && result.fraction2 === 0.0) {
             const delta = v21.subNew(v11);
             const distance = delta.magnitude();
-            if (distance > radius) {
+            if (distance > contactDistance) {
                 return null;
             }
 
@@ -522,7 +525,7 @@ function collideConvexPolygons(
         if (result.fraction1 === 0.0 && result.fraction2 === 1.0) {
             const delta = v22.subNew(v11);
             const distance = delta.magnitude();
-            if (distance > radius) {
+            if (distance > contactDistance) {
                 return null;
             }
 
@@ -542,7 +545,7 @@ function collideConvexPolygons(
         if (result.fraction1 === 1.0 && result.fraction2 === 0.0) {
             const delta = v21.subNew(v12);
             const distance = delta.magnitude();
-            if (distance > radius) {
+            if (distance > contactDistance) {
                 return null;
             }
 
@@ -562,7 +565,7 @@ function collideConvexPolygons(
         if (result.fraction1 === 1.0 && result.fraction2 === 1.0) {
             const delta = v22.subNew(v12);
             const distance = delta.magnitude();
-            if (distance > radius) {
+            if (distance > contactDistance) {
                 return null;
             }
 
@@ -629,9 +632,9 @@ function collideSegmentRadiusPairs(
     const closest1 = p1.addNew(d1.scaleNew(f1));
     const closest2 = p2.addNew(d2.scaleNew(f2));
     const radius = radiusA + radiusB;
-    const maxDistance = radius + 0;
+    const contactDistance = radius + SETTINGS.contactSlop;
 
-    if (result.distanceSquared > maxDistance * maxDistance) {
+    if (result.distanceSquared > contactDistance * contactDistance) {
         return null;
     }
 
