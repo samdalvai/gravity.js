@@ -33,6 +33,8 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
         if (bullet.id === other.id || other.isBullet) continue;
 
         // If objects don't overlap on X axis they cannot collide
+        // Here compared to prune & sweep broad phase we need to check also (other.maxX < minX)
+        // because cahnged AABB for bullet makes sorting not consistent
         if (other.minX > maxX || other.maxX < minX) continue;
 
         // If objects overlap on X axis but don't overlap on Y axis the cannot collide
