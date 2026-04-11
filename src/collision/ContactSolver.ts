@@ -82,7 +82,8 @@ export class ContactSolver {
             const contactNormal = this.manifold.contactNormal;
             const normalVelocity = contactNormal.x * relativeVelocityX + contactNormal.y * relativeVelocityY;
 
-            if (SETTINGS.positionCorrection) {
+            // We skip positional correction for 0 inverse delta time because CCD can generate 0 dt
+            if (SETTINGS.positionCorrection && invDt > 0) {
                 this.bias =
                     -(this.beta * invDt) * Math.max(this.manifold.penetrationDepth! - SETTINGS.penetrationSlop, 0.0);
             }
