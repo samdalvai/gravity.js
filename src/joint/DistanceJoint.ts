@@ -92,7 +92,8 @@ export class DistanceJoint extends Joint {
 
         const error = length - this.length;
 
-        if (SETTINGS.positionCorrection) {
+        // We skip positional correction for 0 inverse delta time because CCD can generate 0 dt
+        if (SETTINGS.positionCorrection && invDt > 0) {
             this.bias = error * this.beta * invDt;
         } else {
             this.bias = 0.0;
