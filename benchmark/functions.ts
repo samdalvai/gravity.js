@@ -1,41 +1,19 @@
-import { Vec2 } from '../src';
-import { randomNumber } from '../src/utils/Utils';
+import { CircleShape, RigidBody } from '../src';
+import { collideCircles, collideCirclesScalar } from '../src/collision/NarrowPhase';
 
-const NUM_BODIES = 10_000;
+export const ITERATIONS = 10_000;
 
-class TestBody {
-    velocity: Vec2;
-
-    constructor(x: number, y: number) {
-        this.velocity = new Vec2(x, y);
-    }
-}
-
-const bodies: TestBody[] = [];
-
-const velocitiesX = new Float64Array(NUM_BODIES);
-const velocitiesY = new Float64Array(NUM_BODIES);
-
-for (let i = 0; i < NUM_BODIES; i++) {
-    const x = randomNumber(-100, 100);
-    const y = randomNumber(-100, 100);
-
-    bodies.push(new TestBody(x, y));
-    velocitiesX[i] = x;
-    velocitiesY[i] = y;
-}
+const a = new RigidBody(new CircleShape(30), 0, 0, 1.0);
+const b = new RigidBody(new CircleShape(30), 30, 0, 1.0);
 
 export function runOriginal() {
-    for (let i = 0; i < NUM_BODIES; i++) {
-        const velocity = bodies[i].velocity;
-        velocity.x += 1;
-        velocity.y += 1;
+    for (let i = 0; i < ITERATIONS; i++) {
+        collideCircles(a, b);
     }
 }
 
 export function runModified() {
-    for (let i = 0; i < NUM_BODIES; i++) {
-        velocitiesX[i] += 1;
-        velocitiesY[i] += 1;
+    for (let i = 0; i < ITERATIONS; i++) {
+        collideCirclesScalar(a, b);
     }
 }
