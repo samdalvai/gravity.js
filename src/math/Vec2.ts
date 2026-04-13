@@ -137,10 +137,6 @@ export class Vec2 {
         return new Vec2(-this.y, this.x);
     }
 
-    rightPerpNew(): Vec2 {
-        return new Vec2(this.y, -this.x);
-    }
-
     perpNew(): Vec2 {
         return this.leftPerpNew();
     }
