@@ -25,6 +25,17 @@ for (let i = 0; i < NUM_BODIES; i++) {
     velocitiesY[i] = y;
 }
 
-export function runOriginal() {}
+export function runOriginal() {
+    for (let i = 0; i < NUM_BODIES; i++) {
+        const velocity = bodies[i].velocity;
+        velocity.x += 1;
+        velocity.y += 1;
+    }
+}
 
-export function runModified() {}
+export function runModified() {
+    for (let i = 0; i < NUM_BODIES; i++) {
+        velocitiesX[i] += 1;
+        velocitiesY[i] += 1;
+    }
+}
