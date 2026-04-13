@@ -1,4 +1,4 @@
-import { benchmark } from './index';
+import { benchmark } from './registry';
 import { runModified, runOriginal } from './functions';
 
 benchmark('original', runOriginal);
