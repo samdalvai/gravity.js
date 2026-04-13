@@ -167,17 +167,8 @@ export class Vec2 {
         return result;
     }
 
-    /** Vector in the -90° (clockwise) perpendicular direction scaled by n */
-    crossScalar(n: number): Vec2 {
-        return new Vec2(-n * this.y, n * this.x);
-    }
-
     dot(v: Vec2): number {
         return this.x * v.x + this.y * v.y;
-    }
-
-    dotSub(v: Vec2, dotWith: Vec2): number {
-        return (this.x - v.x) * dotWith.x + (this.y - v.y) * dotWith.y;
     }
 
     cross(v: Vec2): number {
@@ -196,15 +187,5 @@ export class Vec2 {
         const dx = this.x - v.x;
         const dy = this.y - v.y;
         return dx * dx + dy * dy;
-    }
-
-    lengthAndNormalize(epsilon = 0.0, fallback = new Vec2(1, 0)): { length: number; normal: Vec2 } {
-        const length = this.magnitude();
-
-        if (length < epsilon) {
-            return { length, normal: fallback.copy() };
-        }
-
-        return { length, normal: this.divNew(length) };
     }
 }
