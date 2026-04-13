@@ -181,23 +181,37 @@ export function collideCircles(bodyA: RigidBody, bodyB: RigidBody): ContactManif
     const posA = bodyA.position;
     const posB = bodyB.position;
 
-    const ab = posB.subNew(posA);
+    const dx = posB.x - posA.x;
+    const dy = posB.y - posA.y;
     const radiusSum = radiusA + radiusB;
     const contactDistance = radiusSum + SETTINGS.contactSlop;
-    const distSq = ab.magnitudeSquared();
+    const distSq = dx * dx + dy * dy;
 
     if (distSq > contactDistance * contactDistance) {
         return null;
     }
 
-    const normal = distSq > 0 ? ab.normalizeNew() : new Vec2(1, 0);
-    const distance = ab.magnitude();
-    const pointA = posA.addNew(normal.scaleNew(radiusA));
-    const pointB = posB.subNew(normal.scaleNew(radiusB));
+    let normalX = 1;
+    let normalY = 0;
+    let distance = 0;
+
+    if (distSq > 0) {
+        distance = Math.sqrt(distSq);
+        const invDistance = 1 / distance;
+
+        normalX = dx * invDistance;
+        normalY = dy * invDistance;
+    }
+
+    const normal = new Vec2(normalX, normalY);
+    const pointAX = posA.x + normalX * radiusA;
+    const pointAY = posA.y + normalY * radiusA;
+    const pointBX = posB.x - normalX * radiusB;
+    const pointBY = posB.y - normalY * radiusB;
 
     return createCollisionManifold(bodyA, bodyB, normal, [
         {
-            point: pointA.lerp(pointB, 0.5),
+            point: new Vec2((pointAX + pointBX) * 0.5, (pointAY + pointBY) * 0.5),
             separation: distance - radiusSum,
             id: 0,
         },
@@ -212,36 +226,77 @@ function collideSegmentRadiusAndCircle(
     radiusA: number,
 ): ContactManifold | null {
     const circleB = bodyB.shape as CircleShape;
-    const edge = endA.subNew(startA);
-    const startProjection = bodyB.position.subNew(startA).dot(edge);
-    const endProjection = endA.subNew(bodyB.position).dot(edge);
+    const startAX = startA.x;
+    const startAY = startA.y;
+    const endAX = endA.x;
+    const endAY = endA.y;
+    const circleBX = bodyB.position.x;
+    const circleBY = bodyB.position.y;
+    const edgeX = endAX - startAX;
+    const edgeY = endAY - startAY;
+    const startProjection = (circleBX - startAX) * edgeX + (circleBY - startAY) * edgeY;
+    const endProjection = (endAX - circleBX) * edgeX + (endAY - circleBY) * edgeY;
 
-    let pointA: Vec2;
+    let pointAX = startAX;
+    let pointAY = startAY;
 
     if (startProjection < 0.0) {
-        pointA = startA;
+        pointAX = startAX;
+        pointAY = startAY;
     } else if (endProjection < 0.0) {
-        pointA = endA;
+        pointAX = endAX;
+        pointAY = endAY;
     } else {
-        const edgeLengthSquared = edge.dot(edge);
+        const edgeLengthSquared = edgeX * edgeX + edgeY * edgeY;
         const t = edgeLengthSquared > 0.0 ? startProjection / edgeLengthSquared : 0.0;
-        pointA = startA.addNew(edge.scaleNew(t));
+
+        pointAX = startAX + edgeX * t;
+        pointAY = startAY + edgeY * t;
     }
 
-    const fallbackNormal = edge.magnitudeSquared() > 0 ? edge.leftPerpNew().normalizeNew() : new Vec2(1, 0);
-    const result = bodyB.position.subNew(pointA).lengthAndNormalize(0, fallbackNormal);
-    const separation = result.length - radiusA - circleB.radius;
+    let fallbackNormalX = 1;
+    let fallbackNormalY = 0;
+    const edgeLengthSquared = edgeX * edgeX + edgeY * edgeY;
+
+    if (edgeLengthSquared > 0.0) {
+        const invEdgeLength = 1 / Math.sqrt(edgeLengthSquared);
+
+        fallbackNormalX = -edgeY * invEdgeLength;
+        fallbackNormalY = edgeX * invEdgeLength;
+    }
+
+    const deltaX = circleBX - pointAX;
+    const deltaY = circleBY - pointAY;
+    const deltaLengthSquared = deltaX * deltaX + deltaY * deltaY;
+
+    let distance = 0;
+    let normalX = fallbackNormalX;
+    let normalY = fallbackNormalY;
+
+    if (deltaLengthSquared > 0.0) {
+        distance = Math.sqrt(deltaLengthSquared);
+
+        const invDistance = 1 / distance;
+
+        normalX = deltaX * invDistance;
+        normalY = deltaY * invDistance;
+    }
+
+    const separation = distance - radiusA - circleB.radius;
 
     if (separation > SETTINGS.contactSlop) {
         return null;
     }
 
-    const contactA = pointA.addNew(result.normal.scaleNew(radiusA));
-    const contactB = bodyB.position.subNew(result.normal.scaleNew(circleB.radius));
+    const contactAX = pointAX + normalX * radiusA;
+    const contactAY = pointAY + normalY * radiusA;
+    const contactBX = circleBX - normalX * circleB.radius;
+    const contactBY = circleBY - normalY * circleB.radius;
+    const normal = new Vec2(normalX, normalY);
 
-    return createCollisionManifold(bodyA, bodyB, result.normal, [
+    return createCollisionManifold(bodyA, bodyB, normal, [
         {
-            point: contactA.lerp(contactB, 0.5),
+            point: new Vec2((contactAX + contactBX) * 0.5, (contactAY + contactBY) * 0.5),
             separation,
             id: 0,
         },
@@ -253,6 +308,8 @@ export function collidePolygonCircle(bodyA: RigidBody, bodyB: RigidBody): Contac
     const circleB = bodyB.shape as CircleShape;
     const vertices = polygonA.worldVertices;
     const normals = polygonA.worldNormals;
+    const circleBX = bodyB.position.x;
+    const circleBY = bodyB.position.y;
     const radius = polygonA.radius + circleB.radius;
     const contactDistance = radius + SETTINGS.contactSlop;
 
@@ -260,7 +317,9 @@ export function collidePolygonCircle(bodyA: RigidBody, bodyB: RigidBody): Contac
     let separation = Number.NEGATIVE_INFINITY;
 
     for (let i = 0; i < vertices.length; ++i) {
-        const candidate = bodyB.position.dotSub(vertices[i], normals[i]);
+        const vertex = vertices[i];
+        const normal = normals[i];
+        const candidate = (circleBX - vertex.x) * normal.x + (circleBY - vertex.y) * normal.y;
 
         if (candidate > separation) {
             separation = candidate;
@@ -274,24 +333,40 @@ export function collidePolygonCircle(bodyA: RigidBody, bodyB: RigidBody): Contac
 
     const vertex1 = vertices[normalIndex];
     const vertex2 = vertices[(normalIndex + 1) % vertices.length];
-    const u1 = bodyB.position.subNew(vertex1).dot(vertex2.subNew(vertex1));
-    const u2 = bodyB.position.subNew(vertex2).dot(vertex1.subNew(vertex2));
+    const u1 = (circleBX - vertex1.x) * (vertex2.x - vertex1.x) + (circleBY - vertex1.y) * (vertex2.y - vertex1.y);
+    const u2 = (circleBX - vertex2.x) * (vertex1.x - vertex2.x) + (circleBY - vertex2.y) * (vertex1.y - vertex2.y);
 
     if (u1 < 0.0 && separation > 0) {
-        const delta = bodyB.position.subNew(vertex1);
-        const result = delta.lengthAndNormalize(0);
-        const vertexSeparation = delta.dot(result.normal);
+        const deltaX = circleBX - vertex1.x;
+        const deltaY = circleBY - vertex1.y;
+        const deltaLengthSquared = deltaX * deltaX + deltaY * deltaY;
+
+        let vertexSeparation = 0;
+        let normalX = 1;
+        let normalY = 0;
+
+        if (deltaLengthSquared > 0.0) {
+            vertexSeparation = Math.sqrt(deltaLengthSquared);
+
+            const invDistance = 1 / vertexSeparation;
+
+            normalX = deltaX * invDistance;
+            normalY = deltaY * invDistance;
+        }
 
         if (vertexSeparation > contactDistance) {
             return null;
         }
 
-        const pointA = vertex1.addNew(result.normal.scaleNew(polygonA.radius));
-        const pointB = bodyB.position.subNew(result.normal.scaleNew(circleB.radius));
+        const pointAX = vertex1.x + normalX * polygonA.radius;
+        const pointAY = vertex1.y + normalY * polygonA.radius;
+        const pointBX = circleBX - normalX * circleB.radius;
+        const pointBY = circleBY - normalY * circleB.radius;
+        const normal = new Vec2(normalX, normalY);
 
-        return createCollisionManifold(bodyA, bodyB, result.normal, [
+        return createCollisionManifold(bodyA, bodyB, normal, [
             {
-                point: pointA.lerp(pointB, 0.5),
+                point: new Vec2((pointAX + pointBX) * 0.5, (pointAY + pointBY) * 0.5),
                 separation: vertexSeparation - radius,
                 id: 0,
             },
@@ -299,33 +374,54 @@ export function collidePolygonCircle(bodyA: RigidBody, bodyB: RigidBody): Contac
     }
 
     if (u2 < 0.0 && separation > 0) {
-        const delta = bodyB.position.subNew(vertex2);
-        const result = delta.lengthAndNormalize(0);
-        const vertexSeparation = delta.dot(result.normal);
+        const deltaX = circleBX - vertex2.x;
+        const deltaY = circleBY - vertex2.y;
+        const deltaLengthSquared = deltaX * deltaX + deltaY * deltaY;
+
+        let vertexSeparation = 0;
+        let normalX = 1;
+        let normalY = 0;
+
+        if (deltaLengthSquared > 0.0) {
+            vertexSeparation = Math.sqrt(deltaLengthSquared);
+
+            const invDistance = 1 / vertexSeparation;
+
+            normalX = deltaX * invDistance;
+            normalY = deltaY * invDistance;
+        }
 
         if (vertexSeparation > contactDistance) {
             return null;
         }
 
-        const pointA = vertex2.addNew(result.normal.scaleNew(polygonA.radius));
-        const pointB = bodyB.position.subNew(result.normal.scaleNew(circleB.radius));
+        const pointAX = vertex2.x + normalX * polygonA.radius;
+        const pointAY = vertex2.y + normalY * polygonA.radius;
+        const pointBX = circleBX - normalX * circleB.radius;
+        const pointBY = circleBY - normalY * circleB.radius;
+        const normal = new Vec2(normalX, normalY);
 
-        return createCollisionManifold(bodyA, bodyB, result.normal, [
+        return createCollisionManifold(bodyA, bodyB, normal, [
             {
-                point: pointA.lerp(pointB, 0.5),
+                point: new Vec2((pointAX + pointBX) * 0.5, (pointAY + pointBY) * 0.5),
                 separation: vertexSeparation - radius,
                 id: 0,
             },
         ]);
     }
 
-    const normal = normals[normalIndex];
-    const pointA = bodyB.position.addNew(normal.scaleNew(polygonA.radius - bodyB.position.dotSub(vertex1, normal)));
-    const pointB = bodyB.position.subNew(normal.scaleNew(circleB.radius));
+    const normalX = normals[normalIndex].x;
+    const normalY = normals[normalIndex].y;
+    const planeOffset = (circleBX - vertex1.x) * normalX + (circleBY - vertex1.y) * normalY;
+    const pointAX = circleBX + normalX * (polygonA.radius - planeOffset);
+    const pointAY = circleBY + normalY * (polygonA.radius - planeOffset);
+    const pointBX = circleBX - normalX * circleB.radius;
+    const pointBY = circleBY - normalY * circleB.radius;
+    const normal = new Vec2(normalX, normalY);
 
     return createCollisionManifold(bodyA, bodyB, normal, [
         {
-            point: pointA.lerp(pointB, 0.5),
+            point: new Vec2((pointAX + pointBX) * 0.5, (pointAY + pointBY) * 0.5),
             separation: separation - radius,
             id: 0,
         },
@@ -355,25 +451,46 @@ function clipConvexEdges(
     const i21 = flip ? edgeA : edgeB;
     const i22 = (i21 + 1) % incidentVertices.length;
 
-    const normal = referenceNormals[i11];
     const v11 = referenceVertices[i11];
     const v12 = referenceVertices[i12];
     const v21 = incidentVertices[i21];
     const v22 = incidentVertices[i22];
+    const normalX = referenceNormals[i11].x;
+    const normalY = referenceNormals[i11].y;
+    const tangentX = -normalY;
+    const tangentY = normalX;
+    const upper1 = (v12.x - v11.x) * tangentX + (v12.y - v11.y) * tangentY;
+    const upper2 = (v21.x - v11.x) * tangentX + (v21.y - v11.y) * tangentY;
+    const lower2 = (v22.x - v11.x) * tangentX + (v22.y - v11.y) * tangentY;
+    const clipDenominator = upper2 - lower2;
 
-    const tangent = normal.leftPerpNew();
-    const upper1 = v12.dotSub(v11, tangent);
-    const upper2 = v21.dotSub(v11, tangent);
-    const lower2 = v22.dotSub(v11, tangent);
+    let vLowerX = v22.x;
+    let vLowerY = v22.y;
 
-    const vLower = lower2 < 0.0 && upper2 - lower2 > 0 ? v22.lerp(v21, (0.0 - lower2) / (upper2 - lower2)) : v22;
-    const vUpper = upper2 > upper1 && upper2 - lower2 > 0 ? v22.lerp(v21, (upper1 - lower2) / (upper2 - lower2)) : v21;
+    if (lower2 < 0.0 && clipDenominator > 0.0) {
+        const t = (0.0 - lower2) / clipDenominator;
 
-    const separationLower = vLower.dotSub(v11, normal);
-    const separationUpper = vUpper.dotSub(v11, normal);
+        vLowerX = v22.x + (v21.x - v22.x) * t;
+        vLowerY = v22.y + (v21.y - v22.y) * t;
+    }
+
+    let vUpperX = v21.x;
+    let vUpperY = v21.y;
+
+    if (upper2 > upper1 && clipDenominator > 0.0) {
+        const t = (upper1 - lower2) / clipDenominator;
+
+        vUpperX = v22.x + (v21.x - v22.x) * t;
+        vUpperY = v22.y + (v21.y - v22.y) * t;
+    }
+
+    const separationLower = (vLowerX - v11.x) * normalX + (vLowerY - v11.y) * normalY;
+    const separationUpper = (vUpperX - v11.x) * normalX + (vUpperY - v11.y) * normalY;
     const radius = radiusA + radiusB;
-    const pointLower = vLower.addNew(normal.scaleNew(0.5 * (referenceRadius - incidentRadius - separationLower)));
-    const pointUpper = vUpper.addNew(normal.scaleNew(0.5 * (referenceRadius - incidentRadius - separationUpper)));
+    const pointLowerOffset = 0.5 * (referenceRadius - incidentRadius - separationLower);
+    const pointUpperOffset = 0.5 * (referenceRadius - incidentRadius - separationUpper);
+    const pointLower = new Vec2(vLowerX + normalX * pointLowerOffset, vLowerY + normalY * pointLowerOffset);
+    const pointUpper = new Vec2(vUpperX + normalX * pointUpperOffset, vUpperY + normalY * pointUpperOffset);
 
     const points: ContactPoint[] = [
         {
@@ -404,12 +521,14 @@ function clipConvexEdges(
 
     if (
         filteredPoints.length === 2 &&
-        filteredPoints[0].point.distanceSquared(filteredPoints[1].point) <= SETTINGS.contactMergeThreshold
+        (filteredPoints[0].point.x - filteredPoints[1].point.x) * (filteredPoints[0].point.x - filteredPoints[1].point.x) +
+            (filteredPoints[0].point.y - filteredPoints[1].point.y) * (filteredPoints[0].point.y - filteredPoints[1].point.y) <=
+            SETTINGS.contactMergeThreshold
     ) {
         filteredPoints.length = 1;
     }
 
-    return createCollisionManifold(bodyA, bodyB, flip ? normal.negateNew() : normal, filteredPoints);
+    return createCollisionManifold(bodyA, bodyB, new Vec2(flip ? -normalX : normalX, flip ? -normalY : normalY), filteredPoints);
 }
 
 function findMaxSeparation(
@@ -426,7 +545,7 @@ function findMaxSeparation(
         let separation = Number.POSITIVE_INFINITY;
 
         for (let j = 0; j < verticesB.length; ++j) {
-            const candidate = verticesB[j].dotSub(vertex, normal);
+            const candidate = (verticesB[j].x - vertex.x) * normal.x + (verticesB[j].y - vertex.y) * normal.y;
             if (candidate < separation) {
                 separation = candidate;
             }
@@ -465,11 +584,12 @@ function collideConvexPolygons(
     let flip = false;
 
     if (separationA >= separationB) {
-        const searchDirection = normalsA[edgeA];
+        const searchDirectionX = normalsA[edgeA].x;
+        const searchDirectionY = normalsA[edgeA].y;
         let minDot = Number.MAX_VALUE;
 
         for (let i = 0; i < normalsB.length; ++i) {
-            const dot = searchDirection.dot(normalsB[i]);
+            const dot = searchDirectionX * normalsB[i].x + searchDirectionY * normalsB[i].y;
             if (dot < minDot) {
                 minDot = dot;
                 edgeB = i;
@@ -478,18 +598,64 @@ function collideConvexPolygons(
     } else {
         flip = true;
 
-        const searchDirection = normalsB[edgeB];
+        const searchDirectionX = normalsB[edgeB].x;
+        const searchDirectionY = normalsB[edgeB].y;
         let minDot = Number.MAX_VALUE;
         edgeA = 0;
 
         for (let i = 0; i < normalsA.length; ++i) {
-            const dot = searchDirection.dot(normalsA[i]);
+            const dot = searchDirectionX * normalsA[i].x + searchDirectionY * normalsA[i].y;
             if (dot < minDot) {
                 minDot = dot;
                 edgeA = i;
             }
         }
     }
+
+    const createVertexContact = (
+        vertexAX: number,
+        vertexAY: number,
+        vertexBX: number,
+        vertexBY: number,
+        fallbackNormalX: number,
+        fallbackNormalY: number,
+        id: number,
+    ): ContactManifold | null => {
+        const deltaX = vertexBX - vertexAX;
+        const deltaY = vertexBY - vertexAY;
+        const deltaLengthSquared = deltaX * deltaX + deltaY * deltaY;
+
+        let distance = 0;
+        let normalX = fallbackNormalX;
+        let normalY = fallbackNormalY;
+
+        if (deltaLengthSquared > 0.0) {
+            distance = Math.sqrt(deltaLengthSquared);
+
+            const invDistance = 1 / distance;
+
+            normalX = deltaX * invDistance;
+            normalY = deltaY * invDistance;
+        }
+
+        if (distance > contactDistance) {
+            return null;
+        }
+
+        const pointAX = vertexAX + normalX * radiusA;
+        const pointAY = vertexAY + normalY * radiusA;
+        const pointBX = vertexBX - normalX * radiusB;
+        const pointBY = vertexBY - normalY * radiusB;
+        const normal = new Vec2(normalX, normalY);
+
+        return createCollisionManifold(bodyA, bodyB, normal, [
+            {
+                point: new Vec2((pointAX + pointBX) * 0.5, (pointAY + pointBY) * 0.5),
+                separation: distance - radius,
+                id,
+            },
+        ]);
+    };
 
     if (separationA > 0 || separationB > 0) {
         const i11 = edgeA;
@@ -503,83 +669,19 @@ function collideConvexPolygons(
         const result = segmentDistance(v11.x, v11.y, v12.x, v12.y, v21.x, v21.y, v22.x, v22.y);
 
         if (result.fraction1 === 0.0 && result.fraction2 === 0.0) {
-            const delta = v21.subNew(v11);
-            const distance = delta.magnitude();
-            if (distance > contactDistance) {
-                return null;
-            }
-
-            const normal = distance > 0 ? delta.divNew(distance) : normalsA[edgeA].copy();
-            const pointA = v11.addNew(normal.scaleNew(radiusA));
-            const pointB = v21.subNew(normal.scaleNew(radiusB));
-
-            return createCollisionManifold(bodyA, bodyB, normal, [
-                {
-                    point: pointA.lerp(pointB, 0.5),
-                    separation: distance - radius,
-                    id: Utils.makeId(i11, i21),
-                },
-            ]);
+            return createVertexContact(v11.x, v11.y, v21.x, v21.y, normalsA[edgeA].x, normalsA[edgeA].y, Utils.makeId(i11, i21));
         }
 
         if (result.fraction1 === 0.0 && result.fraction2 === 1.0) {
-            const delta = v22.subNew(v11);
-            const distance = delta.magnitude();
-            if (distance > contactDistance) {
-                return null;
-            }
-
-            const normal = distance > 0 ? delta.divNew(distance) : normalsA[edgeA].copy();
-            const pointA = v11.addNew(normal.scaleNew(radiusA));
-            const pointB = v22.subNew(normal.scaleNew(radiusB));
-
-            return createCollisionManifold(bodyA, bodyB, normal, [
-                {
-                    point: pointA.lerp(pointB, 0.5),
-                    separation: distance - radius,
-                    id: Utils.makeId(i11, i22),
-                },
-            ]);
+            return createVertexContact(v11.x, v11.y, v22.x, v22.y, normalsA[edgeA].x, normalsA[edgeA].y, Utils.makeId(i11, i22));
         }
 
         if (result.fraction1 === 1.0 && result.fraction2 === 0.0) {
-            const delta = v21.subNew(v12);
-            const distance = delta.magnitude();
-            if (distance > contactDistance) {
-                return null;
-            }
-
-            const normal = distance > 0 ? delta.divNew(distance) : normalsA[edgeA].copy();
-            const pointA = v12.addNew(normal.scaleNew(radiusA));
-            const pointB = v21.subNew(normal.scaleNew(radiusB));
-
-            return createCollisionManifold(bodyA, bodyB, normal, [
-                {
-                    point: pointA.lerp(pointB, 0.5),
-                    separation: distance - radius,
-                    id: Utils.makeId(i12, i21),
-                },
-            ]);
+            return createVertexContact(v12.x, v12.y, v21.x, v21.y, normalsA[edgeA].x, normalsA[edgeA].y, Utils.makeId(i12, i21));
         }
 
         if (result.fraction1 === 1.0 && result.fraction2 === 1.0) {
-            const delta = v22.subNew(v12);
-            const distance = delta.magnitude();
-            if (distance > contactDistance) {
-                return null;
-            }
-
-            const normal = distance > 0 ? delta.divNew(distance) : normalsA[edgeA].copy();
-            const pointA = v12.addNew(normal.scaleNew(radiusA));
-            const pointB = v22.subNew(normal.scaleNew(radiusB));
-
-            return createCollisionManifold(bodyA, bodyB, normal, [
-                {
-                    point: pointA.lerp(pointB, 0.5),
-                    separation: distance - radius,
-                    id: Utils.makeId(i12, i22),
-                },
-            ]);
+            return createVertexContact(v12.x, v12.y, v22.x, v22.y, normalsA[edgeA].x, normalsA[edgeA].y, Utils.makeId(i12, i22));
         }
     }
 
@@ -624,13 +726,25 @@ function collideSegmentRadiusPairs(
     q2: Vec2,
     radiusB: number,
 ): ContactManifold | null {
-    const d1 = q1.subNew(p1);
-    const d2 = q2.subNew(p2);
+    const p1X = p1.x;
+    const p1Y = p1.y;
+    const q1X = q1.x;
+    const q1Y = q1.y;
+    const p2X = p2.x;
+    const p2Y = p2.y;
+    const q2X = q2.x;
+    const q2Y = q2.y;
+    const d1X = q1X - p1X;
+    const d1Y = q1Y - p1Y;
+    const d2X = q2X - p2X;
+    const d2Y = q2Y - p2Y;
     const result = segmentDistance(p1.x, p1.y, q1.x, q1.y, p2.x, p2.y, q2.x, q2.y);
     const f1 = result.fraction1;
     const f2 = result.fraction2;
-    const closest1 = p1.addNew(d1.scaleNew(f1));
-    const closest2 = p2.addNew(d2.scaleNew(f2));
+    const closest1X = p1X + d1X * f1;
+    const closest1Y = p1Y + d1Y * f1;
+    const closest2X = p2X + d2X * f2;
+    const closest2Y = p2Y + d2Y * f2;
     const radius = radiusA + radiusB;
     const contactDistance = radius + SETTINGS.contactSlop;
 
@@ -638,101 +752,151 @@ function collideSegmentRadiusPairs(
         return null;
     }
 
-    const length1 = d1.magnitude();
-    const u1 = length1 > 0 ? d1.divNew(length1) : new Vec2(0, 1);
-    const length2 = d2.magnitude();
-    const u2 = length2 > 0 ? d2.divNew(length2) : new Vec2(0, 1);
-    const fp2 = p2.subNew(p1).dot(u1);
-    const fq2 = q2.subNew(p1).dot(u1);
+    const length1Squared = d1X * d1X + d1Y * d1Y;
+    const length1 = Math.sqrt(length1Squared);
+    const u1X = length1 > 0 ? d1X / length1 : 0;
+    const u1Y = length1 > 0 ? d1Y / length1 : 1;
+    const length2Squared = d2X * d2X + d2Y * d2Y;
+    const length2 = Math.sqrt(length2Squared);
+    const u2X = length2 > 0 ? d2X / length2 : 0;
+    const u2Y = length2 > 0 ? d2Y / length2 : 1;
+    const fp2 = (p2X - p1X) * u1X + (p2Y - p1Y) * u1Y;
+    const fq2 = (q2X - p1X) * u1X + (q2Y - p1Y) * u1Y;
     const outsideA = (fp2 <= 0.0 && fq2 <= 0.0) || (fp2 >= length1 && fq2 >= length1);
-    const fp1 = p1.subNew(p2).dot(u2);
-    const fq1 = q1.subNew(p2).dot(u2);
+    const fp1 = (p1X - p2X) * u2X + (p1Y - p2Y) * u2Y;
+    const fq1 = (q1X - p2X) * u2X + (q1Y - p2Y) * u2Y;
     const outsideB = (fp1 <= 0.0 && fq1 <= 0.0) || (fp1 >= length2 && fq1 >= length2);
     const closestDistance = Math.sqrt(result.distanceSquared);
 
     if (!outsideA && !outsideB) {
-        let normalA = u1.leftPerpNew();
-        const ssA1 = p2.subNew(p1).dot(normalA);
-        const ssA2 = q2.subNew(p1).dot(normalA);
+        let normalAX = -u1Y;
+        let normalAY = u1X;
+        const ssA1 = (p2X - p1X) * normalAX + (p2Y - p1Y) * normalAY;
+        const ssA2 = (q2X - p1X) * normalAX + (q2Y - p1Y) * normalAY;
         const sAPositive = Math.min(ssA1, ssA2);
         const sANegative = Math.max(-ssA1, -ssA2);
         const separationA = sAPositive > sANegative ? sAPositive : sANegative;
         if (sAPositive <= sANegative) {
-            normalA = normalA.negateNew();
+            normalAX = -normalAX;
+            normalAY = -normalAY;
         }
 
-        let normalB = u2.leftPerpNew();
-        const ssB1 = p1.subNew(p2).dot(normalB);
-        const ssB2 = q1.subNew(p2).dot(normalB);
+        let normalBX = -u2Y;
+        let normalBY = u2X;
+        const ssB1 = (p1X - p2X) * normalBX + (p1Y - p2Y) * normalBY;
+        const ssB2 = (q1X - p2X) * normalBX + (q1Y - p2Y) * normalBY;
         const sBPositive = Math.min(ssB1, ssB2);
         const sBNegative = Math.max(-ssB1, -ssB2);
         const separationB = sBPositive > sBNegative ? sBPositive : sBNegative;
         if (sBPositive <= sBNegative) {
-            normalB = normalB.negateNew();
+            normalBX = -normalBX;
+            normalBY = -normalBY;
         }
 
         if (separationA >= separationB) {
-            let cp = p2.copy();
-            let cq = q2.copy();
+            let cpX = p2X;
+            let cpY = p2Y;
+            let cqX = q2X;
+            let cqY = q2Y;
 
             if (fp2 < 0.0 && fq2 > 0.0) {
-                cp = p2.lerp(q2, (0.0 - fp2) / (fq2 - fp2));
+                const t = (0.0 - fp2) / (fq2 - fp2);
+
+                cpX = p2X + (q2X - p2X) * t;
+                cpY = p2Y + (q2Y - p2Y) * t;
             } else if (fq2 < 0.0 && fp2 > 0.0) {
-                cq = q2.lerp(p2, (0.0 - fq2) / (fp2 - fq2));
+                const t = (0.0 - fq2) / (fp2 - fq2);
+
+                cqX = q2X + (p2X - q2X) * t;
+                cqY = q2Y + (p2Y - q2Y) * t;
             }
 
             if (fp2 > length1 && fq2 < length1) {
-                cp = p2.lerp(q2, (fp2 - length1) / (fp2 - fq2));
+                const t = (fp2 - length1) / (fp2 - fq2);
+
+                cpX = p2X + (q2X - p2X) * t;
+                cpY = p2Y + (q2Y - p2Y) * t;
             } else if (fq2 > length1 && fp2 < length1) {
-                cq = q2.lerp(p2, (fq2 - length1) / (fq2 - fp2));
+                const t = (fq2 - length1) / (fq2 - fp2);
+
+                cqX = q2X + (p2X - q2X) * t;
+                cqY = q2Y + (p2Y - q2Y) * t;
             }
 
-            const sp = cp.subNew(p1).dot(normalA);
-            const sq = cq.subNew(p1).dot(normalA);
+            const sp = (cpX - p1X) * normalAX + (cpY - p1Y) * normalAY;
+            const sq = (cqX - p1X) * normalAX + (cqY - p1Y) * normalAY;
 
             if (sp <= closestDistance || sq <= closestDistance) {
+                const normalA = new Vec2(normalAX, normalAY);
+
                 return createCollisionManifold(bodyA, bodyB, normalA, [
                     {
-                        point: cp.addNew(normalA.scaleNew(0.5 * (radiusA - radiusB - sp))),
+                        point: new Vec2(
+                            cpX + normalAX * (0.5 * (radiusA - radiusB - sp)),
+                            cpY + normalAY * (0.5 * (radiusA - radiusB - sp)),
+                        ),
                         separation: sp - radius,
                         id: Utils.makeId(0, 0),
                     },
                     {
-                        point: cq.addNew(normalA.scaleNew(0.5 * (radiusA - radiusB - sq))),
+                        point: new Vec2(
+                            cqX + normalAX * (0.5 * (radiusA - radiusB - sq)),
+                            cqY + normalAY * (0.5 * (radiusA - radiusB - sq)),
+                        ),
                         separation: sq - radius,
                         id: Utils.makeId(0, 1),
                     },
                 ]);
             }
         } else {
-            const manifoldNormal = normalB.negateNew();
-            let cp = p1.copy();
-            let cq = q1.copy();
+            const manifoldNormal = new Vec2(-normalBX, -normalBY);
+            let cpX = p1X;
+            let cpY = p1Y;
+            let cqX = q1X;
+            let cqY = q1Y;
 
             if (fp1 < 0.0 && fq1 > 0.0) {
-                cp = p1.lerp(q1, (0.0 - fp1) / (fq1 - fp1));
+                const t = (0.0 - fp1) / (fq1 - fp1);
+
+                cpX = p1X + (q1X - p1X) * t;
+                cpY = p1Y + (q1Y - p1Y) * t;
             } else if (fq1 < 0.0 && fp1 > 0.0) {
-                cq = q1.lerp(p1, (0.0 - fq1) / (fp1 - fq1));
+                const t = (0.0 - fq1) / (fp1 - fq1);
+
+                cqX = q1X + (p1X - q1X) * t;
+                cqY = q1Y + (p1Y - q1Y) * t;
             }
 
             if (fp1 > length2 && fq1 < length2) {
-                cp = p1.lerp(q1, (fp1 - length2) / (fp1 - fq1));
+                const t = (fp1 - length2) / (fp1 - fq1);
+
+                cpX = p1X + (q1X - p1X) * t;
+                cpY = p1Y + (q1Y - p1Y) * t;
             } else if (fq1 > length2 && fp1 < length2) {
-                cq = q1.lerp(p1, (fq1 - length2) / (fq1 - fp1));
+                const t = (fq1 - length2) / (fq1 - fp1);
+
+                cqX = q1X + (p1X - q1X) * t;
+                cqY = q1Y + (p1Y - q1Y) * t;
             }
 
-            const sp = cp.subNew(p2).dot(normalB);
-            const sq = cq.subNew(p2).dot(normalB);
+            const sp = (cpX - p2X) * normalBX + (cpY - p2Y) * normalBY;
+            const sq = (cqX - p2X) * normalBX + (cqY - p2Y) * normalBY;
 
             if (sp <= closestDistance || sq <= closestDistance) {
                 return createCollisionManifold(bodyA, bodyB, manifoldNormal, [
                     {
-                        point: cp.addNew(normalB.scaleNew(0.5 * (radiusB - radiusA - sp))),
+                        point: new Vec2(
+                            cpX + normalBX * (0.5 * (radiusB - radiusA - sp)),
+                            cpY + normalBY * (0.5 * (radiusB - radiusA - sp)),
+                        ),
                         separation: sp - radius,
                         id: Utils.makeId(0, 0),
                     },
                     {
-                        point: cq.addNew(normalB.scaleNew(0.5 * (radiusB - radiusA - sq))),
+                        point: new Vec2(
+                            cqX + normalBX * (0.5 * (radiusB - radiusA - sq)),
+                            cqY + normalBY * (0.5 * (radiusB - radiusA - sq)),
+                        ),
                         separation: sq - radius,
                         id: Utils.makeId(1, 0),
                     },
@@ -741,18 +905,37 @@ function collideSegmentRadiusPairs(
         }
     }
 
-    const fallbackNormal = u1.leftPerpNew().normalizeNew();
-    const delta = closest2.subNew(closest1);
-    const closestResult = delta.lengthAndNormalize(0, fallbackNormal);
-    const pointA = closest1.addNew(closestResult.normal.scaleNew(radiusA));
-    const pointB = closest2.subNew(closestResult.normal.scaleNew(radiusB));
+    const fallbackNormalX = -u1Y;
+    const fallbackNormalY = u1X;
+    const deltaX = closest2X - closest1X;
+    const deltaY = closest2Y - closest1Y;
+    const deltaLengthSquared = deltaX * deltaX + deltaY * deltaY;
+
+    let separation = 0;
+    let normalX = fallbackNormalX;
+    let normalY = fallbackNormalY;
+
+    if (deltaLengthSquared > 0.0) {
+        separation = Math.sqrt(deltaLengthSquared);
+
+        const invDistance = 1 / separation;
+
+        normalX = deltaX * invDistance;
+        normalY = deltaY * invDistance;
+    }
+
+    const pointAX = closest1X + normalX * radiusA;
+    const pointAY = closest1Y + normalY * radiusA;
+    const pointBX = closest2X - normalX * radiusB;
+    const pointBY = closest2Y - normalY * radiusB;
     const idA = f1 === 0.0 ? 0 : 1;
     const idB = f2 === 0.0 ? 0 : 1;
+    const normal = new Vec2(normalX, normalY);
 
-    return createCollisionManifold(bodyA, bodyB, closestResult.normal, [
+    return createCollisionManifold(bodyA, bodyB, normal, [
         {
-            point: pointA.lerp(pointB, 0.5),
-            separation: closestResult.length - radius,
+            point: new Vec2((pointAX + pointBX) * 0.5, (pointAY + pointBY) * 0.5),
+            separation: separation - radius,
             id: Utils.makeId(idA, idB),
         },
     ]);
@@ -790,9 +973,21 @@ function collidePolygonLikeAndCapsule(bodyA: RigidBody, bodyB: RigidBody): Conta
     const shapeA = bodyA.shape as PolygonShape;
     const capsuleB = bodyB.shape as CapsuleShape;
     const capsuleVertices = [capsuleB.worldCenter1, capsuleB.worldCenter2];
-    const axis = capsuleB.worldCenter1.subNew(capsuleB.worldCenter2);
-    const normal = axis.magnitudeSquared() > 0 ? axis.rightPerpNew().normalizeNew() : new Vec2(1, 0);
-    const capsuleNormals = [normal, normal.negateNew()];
+    const axisX = capsuleB.worldCenter1.x - capsuleB.worldCenter2.x;
+    const axisY = capsuleB.worldCenter1.y - capsuleB.worldCenter2.y;
+    const axisLengthSquared = axisX * axisX + axisY * axisY;
+
+    let normalX = 1;
+    let normalY = 0;
+
+    if (axisLengthSquared > 0.0) {
+        const invAxisLength = 1 / Math.sqrt(axisLengthSquared);
+
+        normalX = axisY * invAxisLength;
+        normalY = -axisX * invAxisLength;
+    }
+
+    const capsuleNormals = [new Vec2(normalX, normalY), new Vec2(-normalX, -normalY)];
 
     return collideConvexPolygons(
         bodyA,
