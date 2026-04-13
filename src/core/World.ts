@@ -121,6 +121,7 @@ export class World {
 
         if (SETTINGS.ccd) {
             this.ccd(dt);
+            console.log(this.dtFractions);
 
             for (let i = 0; i < this.dtFractions.length; i++) {
                 const dtFraction = this.dtFractions[i];
@@ -171,7 +172,7 @@ export class World {
 
     private step(dt: number) {
         const bodies = this.bodies;
-        const invDt = 1 / dt;
+        const invDt = dt > 0 ? 1 / dt : 0.00001;
 
         this.broadPhase();
 
@@ -180,9 +181,11 @@ export class World {
         this.solveConstraints(invDt);
 
         // Integrate all the velocities
-        for (let i = 0; i < bodies.length; i++) {
-            const body = bodies[i];
-            body.integrateVelocities(dt);
+        if (dt > 0) {
+            for (let i = 0; i < bodies.length; i++) {
+                const body = bodies[i];
+                body.integrateVelocities(dt);
+            }
         }
     }
 
