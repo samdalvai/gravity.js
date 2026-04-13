@@ -27,8 +27,7 @@ export const SETTINGS = {
     contactSlop: 0.01, // Needed for roundoff errors in CCD making some collision not apply
 
     // Solver iterations fine tuning
-    // solverIterations: 10,
-    solverIterations: 1,
+    solverIterations: 10,
     subSteps: 1,
 
     get dt() {
