@@ -181,23 +181,37 @@ export function collideCircles(bodyA: RigidBody, bodyB: RigidBody): ContactManif
     const posA = bodyA.position;
     const posB = bodyB.position;
 
-    const ab = posB.subNew(posA);
+    const dx = posB.x - posA.x;
+    const dy = posB.y - posA.y;
     const radiusSum = radiusA + radiusB;
     const contactDistance = radiusSum + SETTINGS.contactSlop;
-    const distSq = ab.magnitudeSquared();
+    const distSq = dx * dx + dy * dy;
 
     if (distSq > contactDistance * contactDistance) {
         return null;
     }
 
-    const normal = distSq > 0 ? ab.normalizeNew() : new Vec2(1, 0);
-    const distance = ab.magnitude();
-    const pointA = posA.addNew(normal.scaleNew(radiusA));
-    const pointB = posB.subNew(normal.scaleNew(radiusB));
+    let normalX = 1;
+    let normalY = 0;
+    let distance = 0;
+
+    if (distSq > 0) {
+        distance = Math.sqrt(distSq);
+        const invDistance = 1 / distance;
+
+        normalX = dx * invDistance;
+        normalY = dy * invDistance;
+    }
+
+    const normal = new Vec2(normalX, normalY);
+    const pointAX = posA.x + normalX * radiusA;
+    const pointAY = posA.y + normalY * radiusA;
+    const pointBX = posB.x - normalX * radiusB;
+    const pointBY = posB.y - normalY * radiusB;
 
     return createCollisionManifold(bodyA, bodyB, normal, [
         {
-            point: pointA.lerp(pointB, 0.5),
+            point: new Vec2((pointAX + pointBX) * 0.5, (pointAY + pointBY) * 0.5),
             separation: distance - radiusSum,
             id: 0,
         },
