@@ -220,9 +220,7 @@ export class World {
 
         // Narrow phase check, potential pairs may still not collide
         for (let [a, b] of this.potentialPairs) {
-            // TODO: verify if it is appropriate that bullets cannot collide with each other
-            // if (a.isStatic() && b.isStatic()) continue;
-            if ((a.isStatic() && b.isStatic()) || (a.isBullet && b.isBullet)) continue;
+            if (a.isStatic() && b.isStatic()) continue;
 
             // Improve coherence
             if (a.id > b.id) {
