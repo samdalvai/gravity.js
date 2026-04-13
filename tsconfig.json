@@ -12,7 +12,7 @@
     "__tests__/**/*",
     "demo/**/*",
     "benchmark/**/*"
-  ],
+, "benchmark copy/functions.ts"  ],
   "exclude": [
     "node_modules"
   ]
