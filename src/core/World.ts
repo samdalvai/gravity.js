@@ -9,7 +9,7 @@
  */
 import * as CCD from '../collision/CCD';
 import { ContactManifold } from '../collision/ContactManifold';
-import * as NarrowPhase from '../collision/NarrowPhase.scalar';
+import * as NarrowPhase from '../collision/NarrowPhase';
 import { Force } from '../force/Force';
 import { Joint } from '../joint/Joint';
 import { Vec2 } from '../math/Vec2';
