@@ -14,7 +14,7 @@ import { Force } from '../force/Force';
 import { Joint } from '../joint/Joint';
 import { Vec2 } from '../math/Vec2';
 import * as Utils from '../utils/Utils';
-import { MIN_BULLET_SPEED, SETTINGS } from './Constants';
+import { MIN_BULLET_SPEED_SQUARED, SETTINGS } from './Constants';
 import { RigidBody } from './RigidBody';
 
 export class World {
@@ -145,7 +145,7 @@ export class World {
 
             if (!body.isBullet) continue;
 
-            if (body.velocity.magnitudeSquared() <= MIN_BULLET_SPEED) {
+            if (body.velocity.magnitudeSquared() <= MIN_BULLET_SPEED_SQUARED) {
                 body.isBullet = false;
                 continue;
             }

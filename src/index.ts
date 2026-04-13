@@ -4,7 +4,7 @@ export {
     FIXED_DELTA_TIME,
     GRAVITY,
     MAX_BODIES,
-    MIN_BULLET_SPEED,
+    MIN_BULLET_SPEED_SQUARED,
     PIXELS_PER_METER,
     SETTINGS,
 } from './core/Constants';
