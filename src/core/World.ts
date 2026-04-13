@@ -171,10 +171,8 @@ export class World {
         const bodies = this.bodies;
         const invDt = dt === 0 ? 0 : 1 / dt;
 
-        console.time('broad');
         this.broadPhase();
-        console.timeEnd('broad');
-
+        
         this.narrowPhase();
 
         this.solveConstraints(invDt);
