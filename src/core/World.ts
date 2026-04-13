@@ -172,7 +172,7 @@ export class World {
 
     private step(dt: number) {
         const bodies = this.bodies;
-        const invDt = dt > 0 ? 1 / dt : 0.00001;
+        const invDt = dt > 0 ? 1 / dt : 0;
 
         this.broadPhase();
 
