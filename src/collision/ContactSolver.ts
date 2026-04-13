@@ -128,12 +128,16 @@ export class ContactSolver {
             this.jwb * this.bodyB.angularVelocity;
 
         let lambda = this.effectiveMass * -(jv + this.bias);
+        console.log('contact type: ', this.contactType === ContactType.Normal ? 'Normal' : 'Tangent');
+        console.log('bias: ', this.bias);
+        console.log('lambda: ', lambda);
 
         const oldImpulseSum = this.impulseSum;
         switch (this.contactType) {
             case ContactType.Normal: {
                 if (SETTINGS.impulseAccumulation) this.impulseSum = Math.max(0.0, this.impulseSum + lambda);
                 else this.impulseSum = Math.max(0.0, lambda);
+                console.log('impulseSum: ', this.impulseSum);
                 break;
             }
             case ContactType.Tangent: {
@@ -141,6 +145,7 @@ export class ContactSolver {
                 if (SETTINGS.impulseAccumulation)
                     this.impulseSum = Utils.clamp(this.impulseSum + lambda, -maxFriction, maxFriction);
                 else this.impulseSum = Utils.clamp(lambda, -maxFriction, maxFriction);
+                console.log('impulseSum: ', this.impulseSum);
                 break;
             }
         }
