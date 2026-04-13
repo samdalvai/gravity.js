@@ -5,6 +5,7 @@
   "scripts": {
     "start": "rm -rf .parcel-cache && parcel index.html",
     "clean": "rm -rf .parcel-cache & find dist -maxdepth 1 -type f -exec rm {} +",
+    "benchmark": "tsc --outDir .benchmark-dist --module commonjs --target es2020 benchmark/index.ts && node .benchmark-dist/index.js",
     "test": "jest",
     "test:perf": "jest -- --runTestsByPath __tests__/Performance.test.ts --runInBand",
     "lint": "eslint . --ext .js,.ts",
