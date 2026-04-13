@@ -1,15 +1,5 @@
-type Benchmark = {
-    name: string;
-    run: () => unknown;
-};
-
-const benchmarks: Benchmark[] = [];
-
-export function benchmark(name: string, run: () => unknown) {
-    benchmarks.push({ name, run });
-}
-
 import './benchmarks';
+import { benchmarks } from './registry';
 
 const WARMUP_MS = 250;
 const SAMPLE_MS = 500;
@@ -26,13 +16,17 @@ const results: {
     totalMs: number;
 }[] = [];
 
-for (const { name, run } of benchmarks) {
-    let value: unknown;
+console.log('Nr. of benchmarks: ', benchmarks?.length);
 
+for (const { run } of benchmarks) {
     const warmupStart = performance.now();
     while (performance.now() - warmupStart < WARMUP_MS) {
-        value = run();
+        run();
     }
+}
+
+for (const { name, run } of benchmarks) {
+    let value: unknown;
 
     let totalMs = 0;
     let totalIterations = 0;
@@ -73,7 +67,7 @@ if (results.length > 0) {
         const speed = result === fastest ? 'fastest' : `${(result.averageMs / fastest.averageMs).toFixed(2)}x slower`;
 
         console.log(
-            `${result.name}: ${(result.averageMs * 1000).toFixed(3)} us/run (${result.iterations.toLocaleString()} runs, ${result.totalMs.toFixed(2)} ms) ${speed}`
+            `${result.name}: ${(result.averageMs * 1000).toFixed(3)} us/run (${result.iterations.toLocaleString()} runs, ${result.totalMs.toFixed(2)} ms) ${speed}`,
         );
     }
 }
