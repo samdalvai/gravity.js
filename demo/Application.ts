@@ -12,7 +12,6 @@ import {
     World,
 } from '../src';
 import { Utils } from '../src';
-import { resolveCCD } from './CCD_Debug';
 import AssetStore, { TEXTURES } from './graphics/AssetStore';
 import Graphics from './graphics/Graphics';
 import InputManager, { MouseButton } from './input/InputManager';
@@ -608,12 +607,6 @@ export default class Application {
 
             Graphics.drawLine(-50, 0, 50, 0, 'gray');
             Graphics.drawLine(0, -50, 0, 50, 'gray');
-        }
-
-        for (const body of this.world.getBodies()) {
-            if (body.isBullet) {
-                resolveCCD(body, this.world.getBodies(), SETTINGS.dt);
-            }
         }
 
         Graphics.endWorld();
