@@ -85,7 +85,7 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
         Graphics.drawBody(other, { fillColor: 'rgba(128, 128, 128, 0.5)' });
 
         const previousPos = bullet.position.copy();
-        const bulletNextPos = previousPos.addNew(bullet.velocity);
+        const bulletNextPos = previousPos.addNew(bullet.velocity.scaleNew(dt));
         const bulletNextPosFraction = previousPos.addNew(bullet.velocity.scaleNew(dt * lowestFraction));
         bullet.position = bulletNextPosFraction.copy();
         Graphics.drawBody(bullet, { fillColor: 'rgba(128, 128, 128, 0.75)' });
