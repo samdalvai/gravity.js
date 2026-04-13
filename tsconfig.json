@@ -10,7 +10,8 @@
   "include": [
     "src/**/*",
     "__tests__/**/*",
-    "demo/**/*"
+    "demo/**/*",
+    "benchmark/**/*"
   ],
   "exclude": [
     "node_modules"
