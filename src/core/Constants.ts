@@ -33,4 +33,8 @@ export const SETTINGS = {
     get dt() {
         return FIXED_DELTA_TIME / this.subSteps;
     },
+
+    get invDt() {
+        return 1 / this.dt;
+    },
 };
