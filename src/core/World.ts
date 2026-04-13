@@ -169,7 +169,7 @@ export class World {
 
     private step(dt: number) {
         const bodies = this.bodies;
-        const invDt = dt > 0 ? 1 / dt : 0;
+        const invDt = dt === 0 ? 0 : 1 / dt;
 
         this.broadPhase();
 
@@ -178,7 +178,7 @@ export class World {
         this.solveConstraints(invDt);
 
         // Integrate all the velocities
-        if (dt > 0) {
+        if (dt !== 0) {
             for (let i = 0; i < bodies.length; i++) {
                 const body = bodies[i];
                 body.integrateVelocities(dt);
