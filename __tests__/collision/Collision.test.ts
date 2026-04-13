@@ -1,6 +1,6 @@
 import { describe, expect, test } from '@jest/globals';
 
-import * as Collision from '../../src/collision/NarrowPhase.scalar';
+import * as Collision from '../../src/collision/NarrowPhase';
 import { SETTINGS } from '../../src/core/Constants';
 import { RigidBody } from '../../src/core/RigidBody';
 import { Vec2 } from '../../src/math/Vec2';
