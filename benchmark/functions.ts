@@ -1,25 +1,30 @@
-const values = new Array<number>(100_000);
+import { Vec2 } from '../src';
+import { randomNumber } from '../src/utils/Utils';
 
-for (let i = 0; i < values.length; i++) {
-    values[i] = i;
-}
+const NUM_BODIES = 10_000;
 
-export function runOriginal() {
-    let total = 0;
+class TestBody {
+    velocity: Vec2;
 
-    for (const value of values) {
-        total += value * 2;
+    constructor(x: number, y: number) {
+        this.velocity = new Vec2(x, y);
     }
-
-    return total;
 }
 
-export function runModified() {
-    let total = 0;
+const bodies: TestBody[] = [];
 
-    for (let i = 0; i < values.length; i++) {
-        total += values[i] * 2;
-    }
+const velocitiesX = new Float64Array(NUM_BODIES);
+const velocitiesY = new Float64Array(NUM_BODIES);
 
-    return total;
+for (let i = 0; i < NUM_BODIES; i++) {
+    const x = randomNumber(-100, 100);
+    const y = randomNumber(-100, 100);
+
+    bodies.push(new TestBody(x, y));
+    velocitiesX[i] = x;
+    velocitiesY[i] = y;
 }
+
+export function runOriginal() {}
+
+export function runModified() {}
