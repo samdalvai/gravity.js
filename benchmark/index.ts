@@ -1,7 +1,7 @@
 import './benchmarks';
 import { benchmarks } from './registry';
 
-const WARMUP_MS = 250;
+const WARMUP_MS = 500;
 const SAMPLE_MS = 500;
 const SAMPLES = 5;
 
@@ -16,41 +16,54 @@ const results: {
     totalMs: number;
 }[] = [];
 
-console.log('Nr. of benchmarks: ', benchmarks?.length);
+console.log('Nr. of benchmarks: ', benchmarks.length);
 
-for (const { run } of benchmarks) {
+console.log('Warming up benchmarks...');
+{
     const warmupStart = performance.now();
+
     while (performance.now() - warmupStart < WARMUP_MS) {
-        run();
+        for (const { run } of benchmarks) {
+            run();
+        }
     }
 }
 
-for (const { name, run } of benchmarks) {
-    let value: unknown;
+console.log('Running measurements...');
 
-    let totalMs = 0;
-    let totalIterations = 0;
+const totals = benchmarks.map(({ name }) => ({
+    name,
+    totalMs: 0,
+    totalIterations: 0,
+}));
 
-    for (let sample = 0; sample < SAMPLES; sample++) {
-        let iterations = 0;
-        const start = performance.now();
+const lastValues: unknown[] = new Array(benchmarks.length);
 
-        while (performance.now() - start < SAMPLE_MS) {
-            value = run();
-            iterations++;
+for (let sample = 0; sample < SAMPLES; sample++) {
+    const sampleStart = performance.now();
+
+    while (performance.now() - sampleStart < SAMPLE_MS) {
+        for (let i = 0; i < benchmarks.length; i++) {
+            const { run } = benchmarks[i];
+
+            const start = performance.now();
+            lastValues[i] = run();
+            const end = performance.now();
+
+            totals[i].totalMs += end - start;
+            totals[i].totalIterations++;
         }
-
-        totalMs += performance.now() - start;
-        totalIterations += iterations;
     }
+}
 
-    void value;
+void lastValues;
 
+for (const total of totals) {
     results.push({
-        name,
-        averageMs: totalMs / totalIterations,
-        iterations: totalIterations,
-        totalMs,
+        name: total.name,
+        averageMs: total.totalMs / total.totalIterations,
+        iterations: total.totalIterations,
+        totalMs: total.totalMs,
     });
 }
 
