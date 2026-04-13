@@ -48,11 +48,12 @@ export default class Demo {
         'Demo 7: A plank',
         'Demo 8: Cloth simulation',
         'Demo 9: Stress test',
-        'Demo 10: 1000 Circles',
-        'Demo 11: 1000 Boxes',
-        'Demo 12: 1000 Capsules',
-        'Demo 13: 1000 Random convex shapes',
-        'Demo 14: Black hole orbit',
+        'Demo 10: CCD',
+        'Demo 11: 1000 Circles',
+        'Demo 12: 1000 Boxes',
+        'Demo 13: 1000 Capsules',
+        'Demo 14: 1000 Random convex shapes',
+        'Demo 15: Black hole orbit',
     ];
 
     static generateFloor(world: World, app: Application): RigidBody {
@@ -131,29 +132,6 @@ export default class Demo {
         }
 
         return { innerBottom, innerTop };
-    }
-
-    static populateStressDemo(
-        world: World,
-        bounds: CageBounds,
-        createBody: (x: number, y: number, index: number) => RigidBody,
-    ): void {
-        const stepX = 34;
-        const stepY = 23;
-        const totalWidth = (STRESS_DEMO_COLUMNS - 1) * stepX;
-        const totalHeight = (STRESS_DEMO_ROWS - 1) * stepY;
-        const startX = -totalWidth / 2;
-        const startY = bounds.innerBottom + (bounds.innerTop - bounds.innerBottom - totalHeight) / 2;
-
-        for (let row = 0; row < STRESS_DEMO_ROWS; row++) {
-            for (let col = 0; col < STRESS_DEMO_COLUMNS; col++) {
-                const index = row * STRESS_DEMO_COLUMNS + col;
-                const body = createBody(startX + col * stepX, startY + row * stepY, index);
-                body.restitution = 0.05;
-                body.friction = 0.6;
-                world.addBody(body);
-            }
-        }
     }
 
     static createDistanceJoint(
@@ -673,7 +651,61 @@ export default class Demo {
     };
 
     static demo10 = (world: World, app: Application) => {
-        // Demo 10: 1000 circles inside a square cage
+        // Demo 10: CCD
+        app.setBackground('background');
+        this.generateFloor(world, app);
+        this.generateFences(world, app);
+
+        const fallingBox = Bodies.box({
+            width: 50,
+            height: 50,
+            x: 500,
+            y: 200,
+            mass: 1,
+            velocity: new Vec2(0, -2_350),
+        });
+
+        world.addBody(fallingBox);
+
+        const bullet = Bodies.circle({
+            radius: 5,
+            x: -1000,
+            y: 0,
+            mass: 1,
+            isBullet: true,
+            velocity: new Vec2(20_000, 0),
+        });
+
+        world.addBody(bullet);
+
+        Graphics.zoom = 0.35;
+    };
+
+    static populateStressDemo(
+        world: World,
+        bounds: CageBounds,
+        createBody: (x: number, y: number, index: number) => RigidBody,
+    ): void {
+        const stepX = 34;
+        const stepY = 23;
+        const totalWidth = (STRESS_DEMO_COLUMNS - 1) * stepX;
+        const totalHeight = (STRESS_DEMO_ROWS - 1) * stepY;
+        const startX = -totalWidth / 2;
+        const startY = bounds.innerBottom + (bounds.innerTop - bounds.innerBottom - totalHeight) / 2;
+
+        for (let row = 0; row < STRESS_DEMO_ROWS; row++) {
+            for (let col = 0; col < STRESS_DEMO_COLUMNS; col++) {
+                const index = row * STRESS_DEMO_COLUMNS + col;
+                const body = createBody(startX + col * stepX, startY + row * stepY, index);
+                body.restitution = 0.05;
+                body.friction = 0.6;
+                world.addBody(body);
+            }
+        }
+    }
+
+    static demo11 = (world: World, app: Application) => {
+        // Demo 11: 1000 circles inside a square cage
         app.setBackground('darkBackground');
         const cage = this.generateSquareCage(world, app);
 
@@ -684,8 +716,8 @@ export default class Demo {
         });
     };
 
-    static demo11 = (world: World, app: Application) => {
-        // Demo 11: 1000 boxes inside a square cage
+    static demo12 = (world: World, app: Application) => {
+        // Demo 12: 1000 boxes inside a square cage
         app.setBackground('darkBackground');
         const cage = this.generateSquareCage(world, app);
 
@@ -696,8 +728,8 @@ export default class Demo {
         });
     };
 
-    static demo12 = (world: World, app: Application) => {
-        // Demo 12: 1000 capsules inside a square cage
+    static demo13 = (world: World, app: Application) => {
+        // Demo 13: 1000 capsules inside a square cage
         app.setBackground('darkBackground');
         const cage = this.generateSquareCage(world, app);
 
@@ -708,8 +740,8 @@ export default class Demo {
         });
     };
 
-    static demo13 = (world: World, app: Application) => {
-        // Demo 13: 1000 random convex shapes inside a square cage
+    static demo14 = (world: World, app: Application) => {
+        // Demo 14: 1000 random convex shapes inside a square cage
         app.setBackground('darkBackground');
         const cage = this.generateSquareCage(world, app);
         const palette = ['#f94144', '#f8961e', '#f9c74f', '#43aa8b', '#577590'];
@@ -726,8 +758,8 @@ export default class Demo {
         });
     };
 
-    static demo14 = (world: World, app: Application) => {
-        // Demo 14: orbiting particles around a central black hole
+    static demo15 = (world: World, app: Application) => {
+        // Demo 15: orbiting particles around a central black hole
         app.setBackground('darkBackground');
 
         const BLACK_HOLE_ORBIT_PARTICLE_COUNT = 2_500;
@@ -954,5 +986,6 @@ export default class Demo {
         this.demo12,
         this.demo13,
         this.demo14,
+        this.demo15,
     ];
 }
