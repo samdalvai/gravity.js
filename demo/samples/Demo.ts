@@ -48,7 +48,7 @@ export default class Demo {
         'Demo 7: A plank',
         'Demo 8: Cloth simulation',
         'Demo 9: Stress test',
-        'Demo 10: CCD',
+        'Demo 10: Continuous collision detection',
         'Demo 11: 1000 Circles',
         'Demo 12: 1000 Boxes',
         'Demo 13: 1000 Capsules',
@@ -651,7 +651,7 @@ export default class Demo {
     };
 
     static demo10 = (world: World, app: Application) => {
-        // Demo 10: CCD
+        // Demo 10: Continuous collision detection
         app.setBackground('background');
         this.generateFloor(world, app);
         this.generateFences(world, app);
