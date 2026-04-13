@@ -102,7 +102,7 @@ function sweepCircleVsCircleTOI(bodyA: RigidBody, bodyB: RigidBody, dt: number):
     const c = m.dot(m) - r * r;
 
     if (c <= 0) {
-        return null;
+        return 0;
     }
 
     if (Math.abs(a) <= EPSILON) {
