@@ -4,7 +4,7 @@ export const PIXELS_PER_METER = 100;
 export const MAX_BODIES = 5_000;
 export const GRAVITY = 9.8;
 
-export const MIN_BULLET_SPEED = 1_000_000;
+export const MIN_BULLET_SPEED_SQUARED = 1_000_000;
 
 export const SETTINGS = {
     // Simulation settings
