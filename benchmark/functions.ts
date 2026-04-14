@@ -1,47 +1,63 @@
-import { Vec2 } from '../src';
+import { Bodies, Vec2 } from '../src';
+import { detectCollision } from '../src/collision/NarrowPhase';
+import { detectCollision as detectCollisionV2 } from '../src/collision/NarrowPhaseV2';
 import { randomNumber } from '../src/utils/Utils';
 
-const NUM_BODIES = 10_000;
+// const a = Bodies.circle({
+//     radius: 60,
+//     x: 0,
+//     y: 0,
+//     mass: 1,
+// });
 
-class TestBody {
-    velocity: Vec2;
+// const b = Bodies.circle({
+//     radius: 60,
+//     x: 30,
+//     y: 0,
+//     mass: 1,
+// });
 
-    constructor(x: number, y: number) {
-        this.velocity = new Vec2(x, y);
-    }
-}
+const a = Bodies.box({
+    width: 60,
+    height: 60,
+    x: 0,
+    y: 0,
+    mass: 1,
+});
 
-const bodies: TestBody[] = [];
+const b = Bodies.box({
+    width: 60,
+    height: 60,
+    x: 30,
+    y: 30,
+    mass: 1,
+});
 
-// const velocitiesX = new Float64Array(NUM_BODIES);
-// const velocitiesY = new Float64Array(NUM_BODIES);
-const velocitiesXY = new Float64Array(NUM_BODIES * 2);
-
-for (let i = 0; i < NUM_BODIES; i++) {
-    const x = randomNumber(-100, 100);
-    const y = randomNumber(-100, 100);
-
-    bodies.push(new TestBody(x, y));
-    // velocitiesX[i] = x;
-    // velocitiesY[i] = y;
-    velocitiesXY[i] = x;
-    velocitiesXY[i * 2] = y;
-}
+const ITERATIONS = 1000;
+const SOLVER_ITERATIONS = 20;
+const DT = 1 / 60;
+const INV_DT = 1 / DT;
 
 export function runOriginal() {
-    for (let i = 0; i < NUM_BODIES; i++) {
-        const velocity = bodies[i].velocity;
-        velocity.x += 1;
-        velocity.y += 1;
+    for (let i = 0; i < ITERATIONS; i++) {
+        const manifold = detectCollision(a, b)!;
+
+        manifold.preSolve(INV_DT);
+
+        for (let j = 0; j < SOLVER_ITERATIONS; j++) {
+            manifold.solve();
+        }
     }
 }
 
 export function runModified() {
-    for (let i = 0; i < NUM_BODIES; i++) {
-        // velocitiesX[i] += 1;
-        // velocitiesY[i] += 1;
-        // Version above is faster
-        velocitiesXY[i] += 1;
-        velocitiesXY[i * 2] += 1;
+    for (let i = 0; i < ITERATIONS; i++) {
+        const manifold = detectCollisionV2(a, b)!;
+
+        manifold.preSolve(INV_DT);
+
+        for (let j = 0; j < SOLVER_ITERATIONS; j++) {
+            manifold.solve();
+        }
     }
 }
