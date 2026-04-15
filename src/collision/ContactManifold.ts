@@ -11,8 +11,6 @@ export interface ContactPoint {
 }
 
 export class ContactManifold extends Constraint {
-    static allocations = 0;
-
     // Contact informations
     public penetrationDepth!: number;
 
