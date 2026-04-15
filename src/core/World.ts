@@ -208,7 +208,6 @@ export class World {
         this.potentialPairs.length = 0;
 
         // Broad phase check with prune & sweep algorithm
-        // TODO: some collisions are not correclty found, try to set gravity to 0
         for (let i = 0; i < bodies.length; i++) {
             const a = bodies[i];
 
