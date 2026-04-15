@@ -23,11 +23,11 @@ export class World {
 
     private bodies: RigidBody[] = [];
 
-    public manifolds: ContactManifold[] = [];
-    public joints: Joint[] = [];
+    private manifolds: ContactManifold[] = [];
+    private joints: Joint[] = [];
 
-    public potentialPairs: [RigidBody, RigidBody][] = [];
-    public manifoldMap: Map<number, ContactManifold> = new Map();
+    private potentialPairs: [RigidBody, RigidBody][] = [];
+    private manifoldMap: Map<number, ContactManifold> = new Map();
 
     private readonly manifoldPool = NarrowPhase.manifoldPool;
 
