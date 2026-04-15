@@ -5,6 +5,12 @@ import { Vec2 } from '../math/Vec2';
 export class ContactManifoldPool {
     private readonly manifolds: ContactManifold[] = [];
 
+    constructor(initialCapacity = 0) {
+        for (let i = 0; i < initialCapacity; i++) {
+            this.manifolds.push(new ContactManifold());
+        }
+    }
+
     acquire(
         bodyA: RigidBody,
         bodyB: RigidBody,

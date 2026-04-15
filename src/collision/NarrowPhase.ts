@@ -5,7 +5,7 @@
  * Copyright (c) 2024 Phaser Studio Inc
  * Licensed under the MIT License
  */
-import { SETTINGS } from '../core/Constants';
+import { MAX_BODIES, SETTINGS } from '../core/Constants';
 import { RigidBody } from '../core/RigidBody';
 import { Vec2 } from '../math/Vec2';
 import { ContactManifoldPool } from '../pools/ContactManifoldPool';
@@ -16,7 +16,7 @@ import { ShapeType } from '../shapes/Shape';
 import * as Utils from '../utils/Utils';
 import { ContactManifold, ContactPoint } from './ContactManifold';
 
-export const manifoldPool = new ContactManifoldPool();
+export const manifoldPool = new ContactManifoldPool(MAX_BODIES);
 
 export function detectCollision(bodyA: RigidBody, bodyB: RigidBody): ContactManifold | null {
     const aType = bodyA.shapeType;
