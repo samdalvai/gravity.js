@@ -4,7 +4,6 @@ import { Shape, ShapeType } from '../shapes/Shape';
 import * as Utils from '../utils/Utils';
 import { SETTINGS } from './Constants';
 
-// TODO: make this an abstract class and make shapes extend this
 export class RigidBody {
     private static nextId = 0;
 
