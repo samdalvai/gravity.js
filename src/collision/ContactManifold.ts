@@ -14,6 +14,7 @@ export interface ContactInfo {
     // Relevant contact infos
     bodyA: RigidBody;
     bodyB: RigidBody;
+    impulseSum: number;
 }
 
 export class ContactManifold extends Constraint {
@@ -662,6 +663,7 @@ export class ContactManifold extends Constraint {
         return {
             bodyA: this.bodyA,
             bodyB: this.bodyB,
+            impulseSum: this.normalImpulseSum0 + this.normalImpulseSum1,
         };
     }
 }
