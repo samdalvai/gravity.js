@@ -11,28 +11,30 @@ export interface ContactPoint {
 }
 
 export class ContactManifold extends Constraint {
+    static allocations = 0;
+
     // Contact informations
-    public readonly penetrationDepth: number;
+    public penetrationDepth!: number;
 
-    public readonly contactNormalX: number;
-    public readonly contactNormalY: number;
-    public readonly contactTangentX: number;
-    public readonly contactTangentY: number;
+    public contactNormalX!: number;
+    public contactNormalY!: number;
+    public contactTangentX!: number;
+    public contactTangentY!: number;
 
-    public readonly contactPoint0X: number;
-    public readonly contactPoint0Y: number;
-    public readonly contactPoint0Id: number;
+    public contactPoint0X!: number;
+    public contactPoint0Y!: number;
+    public contactPoint0Id!: number;
 
-    public readonly contactPoint1X: number;
-    public readonly contactPoint1Y: number;
-    public readonly contactPoint1Id: number;
+    public contactPoint1X!: number;
+    public contactPoint1Y!: number;
+    public contactPoint1Id!: number;
 
-    private readonly contactCount: number;
+    private contactCount!: number;
 
-    private readonly beta: number;
-    private readonly restitution: number;
-    private readonly friction: number;
-    private readonly featureFlipped: boolean;
+    private beta!: number;
+    private restitution!: number;
+    private friction!: number;
+    private featureFlipped!: boolean;
     public persistent = false;
 
     public normalJvaX = 0.0;
@@ -83,6 +85,19 @@ export class ContactManifold extends Constraint {
         featureFlipped: boolean,
     ) {
         super(bodyA, bodyB);
+        this.init(bodyA, bodyB, contactPoints, penetrationDepth, contactNormal, featureFlipped);
+    }
+
+    init(
+        bodyA: RigidBody,
+        bodyB: RigidBody,
+        contactPoints: ContactPoint[],
+        penetrationDepth: number,
+        contactNormal: Vec2,
+        featureFlipped: boolean,
+    ): void {
+        this.bodyA = bodyA;
+        this.bodyB = bodyB;
         this.penetrationDepth = penetrationDepth;
         this.contactNormalX = contactNormal.x;
         this.contactNormalY = contactNormal.y;
@@ -120,6 +135,37 @@ export class ContactManifold extends Constraint {
         this.tangentJvaY = -this.contactTangentY;
         this.tangentJvbX = this.contactTangentX;
         this.tangentJvbY = this.contactTangentY;
+
+        this.persistent = false;
+
+        this.normalJwa0 = 0.0;
+        this.normalJwb0 = 0.0;
+        this.tangentJwa0 = 0.0;
+        this.tangentJwb0 = 0.0;
+        this.normalBias0 = 0.0;
+        this.tangentBias0 = 0.0;
+        this.normalEffectiveMass0 = 0.0;
+        this.tangentEffectiveMass0 = 0.0;
+        this.normalImpulseSum0 = 0.0;
+        this.tangentImpulseSum0 = 0.0;
+
+        this.normalJwa1 = 0.0;
+        this.normalJwb1 = 0.0;
+        this.tangentJwa1 = 0.0;
+        this.tangentJwb1 = 0.0;
+        this.normalBias1 = 0.0;
+        this.tangentBias1 = 0.0;
+        this.normalEffectiveMass1 = 0.0;
+        this.tangentEffectiveMass1 = 0.0;
+        this.normalImpulseSum1 = 0.0;
+        this.tangentImpulseSum1 = 0.0;
+
+        this.blockK00 = 0.0;
+        this.blockK01 = 0.0;
+        this.blockK11 = 0.0;
+        this.blockM00 = 0.0;
+        this.blockM01 = 0.0;
+        this.blockM11 = 0.0;
     }
 
     override preSolve(invDt: number): void {

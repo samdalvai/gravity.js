@@ -229,6 +229,7 @@ export class World {
     }
 
     private narrowPhase() {
+        const oldManifolds = this.manifolds;
         const newManifolds: ContactManifold[] = [];
         const newManifoldMap: Map<number, ContactManifold> = new Map();
 
@@ -258,6 +259,10 @@ export class World {
 
         this.manifoldMap = newManifoldMap;
         this.manifolds = newManifolds;
+
+        for (let i = 0; i < oldManifolds.length; i++) {
+            NarrowPhase.releaseManifold(oldManifolds[i]);
+        }
     }
 
     private solveConstraints(invDt: number) {
@@ -287,6 +292,10 @@ export class World {
     }
 
     clear() {
+        for (let i = 0; i < this.manifolds.length; i++) {
+            NarrowPhase.releaseManifold(this.manifolds[i]);
+        }
+
         this.bodies.length = 0;
         this.manifolds.length = 0;
         this.joints.length = 0;
