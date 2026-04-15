@@ -10,6 +10,10 @@ export interface ContactPoint {
     id: number;
 }
 
+export interface ContactInfo {
+    // Relevant contact infos
+}
+
 export class ContactManifold extends Constraint {
     // Contact informations
     public penetrationDepth!: number;
@@ -649,5 +653,10 @@ export class ContactManifold extends Constraint {
 
     get numContacts() {
         return this.contactCount;
+    }
+
+    get contactInfo(): ContactInfo {
+        // Return relevant info
+        return {};
     }
 }
