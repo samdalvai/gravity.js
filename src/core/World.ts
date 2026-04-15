@@ -13,6 +13,7 @@ import * as NarrowPhase from '../collision/NarrowPhase';
 import { Force } from '../force/Force';
 import { Joint } from '../joint/Joint';
 import { Vec2 } from '../math/Vec2';
+import { ContactManifoldPool } from '../pools/ContactManifoldPool';
 import * as Utils from '../utils/Utils';
 import { MIN_BULLET_SPEED_SQUARED, SETTINGS } from './Constants';
 import { RigidBody } from './RigidBody';
@@ -28,6 +29,8 @@ export class World {
 
     public potentialPairs: [RigidBody, RigidBody][] = [];
     public manifoldMap: Map<number, ContactManifold> = new Map();
+
+    private readonly contactManifoldPool = new ContactManifoldPool();
 
     private forces: Vec2[] = [];
     private torques: number[] = [];
@@ -242,7 +245,7 @@ export class World {
                 [a, b] = [b, a];
             }
 
-            const newManifold = NarrowPhase.detectCollision(a, b);
+            const newManifold = NarrowPhase.detectCollision(a, b, this.contactManifoldPool);
             if (newManifold == null) continue;
 
             const key = Utils.pairKey(a, b);
@@ -261,7 +264,7 @@ export class World {
         this.manifolds = newManifolds;
 
         for (let i = 0; i < oldManifolds.length; i++) {
-            NarrowPhase.releaseManifold(oldManifolds[i]);
+            this.contactManifoldPool.release(oldManifolds[i]);
         }
     }
 
@@ -293,7 +296,7 @@ export class World {
 
     clear() {
         for (let i = 0; i < this.manifolds.length; i++) {
-            NarrowPhase.releaseManifold(this.manifolds[i]);
+            this.contactManifoldPool.release(this.manifolds[i]);
         }
 
         this.bodies.length = 0;
