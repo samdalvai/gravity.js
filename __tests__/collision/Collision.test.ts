@@ -166,11 +166,11 @@ function expectCollidingPair(createA: BodyFactory, createB: BodyFactory, positio
     const reverse = Collision.detectCollision(createB(positionB.x, positionB.y), createA(0, 0));
 
     expect(forward).not.toBeNull();
-    expect(forward?.contactPoints.length ?? 0).toBeGreaterThan(0);
+    expect(forward?.points.length ?? 0).toBeGreaterThan(0);
     expect(forward?.penetrationDepth ?? -1).toBeGreaterThanOrEqual(0);
 
     expect(reverse).not.toBeNull();
-    expect(reverse?.contactPoints.length ?? 0).toBeGreaterThan(0);
+    expect(reverse?.points.length ?? 0).toBeGreaterThan(0);
     expect(reverse?.penetrationDepth ?? -1).toBeGreaterThanOrEqual(0);
 
     if (forward && reverse) {
@@ -204,7 +204,7 @@ describe('Collision', () => {
         const result = Collision.detectCollision(a, b);
 
         expect(result).not.toBeNull();
-        expect(result?.contactPoints).toHaveLength(1);
+        expect(result?.points).toHaveLength(1);
         expect(result?.penetrationDepth).toBe(0);
     });
 
@@ -215,7 +215,7 @@ describe('Collision', () => {
         const result = Collision.detectCollision(a, b);
 
         expect(result).not.toBeNull();
-        expect(result?.contactPoints).toHaveLength(1);
+        expect(result?.points).toHaveLength(1);
         expect(result?.penetrationDepth).toBe(0);
     });
 
@@ -233,7 +233,7 @@ describe('Collision', () => {
         const result = Collision.detectCollision(a, b);
 
         expect(result).not.toBeNull();
-        expect(result?.contactPoints.length).toBeGreaterThan(0);
+        expect(result?.points.length).toBeGreaterThan(0);
         expect(result?.penetrationDepth).toBeGreaterThan(0);
     });
 
@@ -251,7 +251,7 @@ describe('Collision', () => {
         const result = Collision.detectCollision(a, b);
 
         expect(result).not.toBeNull();
-        expect(result?.contactPoints.length).toBeGreaterThan(0);
+        expect(result?.points.length).toBeGreaterThan(0);
         expect(result?.penetrationDepth).toBeGreaterThan(0);
     });
 
@@ -262,7 +262,7 @@ describe('Collision', () => {
         const result = Collision.detectCollision(a, b);
 
         expect(result).not.toBeNull();
-        expect(result?.contactPoints.length).toBeGreaterThan(0);
+        expect(result?.points.length).toBeGreaterThan(0);
         expect(result?.penetrationDepth).toBe(0);
     });
 
@@ -273,7 +273,7 @@ describe('Collision', () => {
         const result = Collision.detectCollision(a, b);
 
         expect(result).not.toBeNull();
-        expect(result?.contactPoints).toHaveLength(1);
+        expect(result?.points).toHaveLength(1);
         expect(result?.penetrationDepth).toBe(0);
     });
 
@@ -284,7 +284,7 @@ describe('Collision', () => {
         const result = Collision.detectCollision(a, b);
 
         expect(result).not.toBeNull();
-        expect(result?.contactPoints.length).toBeGreaterThan(0);
+        expect(result?.points.length).toBeGreaterThan(0);
         expect(result?.penetrationDepth).toBe(0);
     });
 });
