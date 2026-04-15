@@ -10,8 +10,8 @@
 import { RigidBody } from '../core/RigidBody';
 
 export abstract class Constraint {
-    public readonly bodyA: RigidBody;
-    public readonly bodyB: RigidBody;
+    public bodyA: RigidBody;
+    public bodyB: RigidBody;
 
     constructor(bodyA: RigidBody, bodyB: RigidBody) {
         this.bodyA = bodyA;

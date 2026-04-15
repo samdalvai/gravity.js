@@ -15,6 +15,8 @@ import { ShapeType } from '../shapes/Shape';
 import * as Utils from '../utils/Utils';
 import { ContactManifold, ContactPoint } from './ContactManifold';
 
+const contactManifoldPool: ContactManifold[] = [];
+
 export function detectCollision(bodyA: RigidBody, bodyB: RigidBody): ContactManifold | null {
     const aType = bodyA.shapeType;
     const bType = bodyB.shapeType;
@@ -80,6 +82,10 @@ function isPolygonLikeShape(shapeType: ShapeType): boolean {
     return isPolygonShape(shapeType) || shapeType === ShapeType.SEGMENT;
 }
 
+export function releaseManifold(manifold: ContactManifold): void {
+    contactManifoldPool.push(manifold);
+}
+
 // TODO: can we avoid calling this method for each collision?
 function createCollisionManifold(
     bodyA: RigidBody,
@@ -95,6 +101,13 @@ function createCollisionManifold(
 
     for (const point of points) {
         depth = Math.max(depth, -point.separation);
+    }
+
+    const manifold = contactManifoldPool.pop();
+
+    if (manifold != null) {
+        manifold.init(bodyA, bodyB, points, depth, normal, false);
+        return manifold;
     }
 
     return new ContactManifold(bodyA, bodyB, points, depth, normal, false);
