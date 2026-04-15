@@ -521,14 +521,21 @@ function clipConvexEdges(
 
     if (
         filteredPoints.length === 2 &&
-        (filteredPoints[0].point.x - filteredPoints[1].point.x) * (filteredPoints[0].point.x - filteredPoints[1].point.x) +
-            (filteredPoints[0].point.y - filteredPoints[1].point.y) * (filteredPoints[0].point.y - filteredPoints[1].point.y) <=
+        (filteredPoints[0].point.x - filteredPoints[1].point.x) *
+            (filteredPoints[0].point.x - filteredPoints[1].point.x) +
+            (filteredPoints[0].point.y - filteredPoints[1].point.y) *
+                (filteredPoints[0].point.y - filteredPoints[1].point.y) <=
             SETTINGS.contactMergeThreshold
     ) {
         filteredPoints.length = 1;
     }
 
-    return createCollisionManifold(bodyA, bodyB, new Vec2(flip ? -normalX : normalX, flip ? -normalY : normalY), filteredPoints);
+    return createCollisionManifold(
+        bodyA,
+        bodyB,
+        new Vec2(flip ? -normalX : normalX, flip ? -normalY : normalY),
+        filteredPoints,
+    );
 }
 
 function findMaxSeparation(
@@ -669,19 +676,51 @@ function collideConvexPolygons(
         const result = segmentDistance(v11.x, v11.y, v12.x, v12.y, v21.x, v21.y, v22.x, v22.y);
 
         if (result.fraction1 === 0.0 && result.fraction2 === 0.0) {
-            return createVertexContact(v11.x, v11.y, v21.x, v21.y, normalsA[edgeA].x, normalsA[edgeA].y, Utils.makeId(i11, i21));
+            return createVertexContact(
+                v11.x,
+                v11.y,
+                v21.x,
+                v21.y,
+                normalsA[edgeA].x,
+                normalsA[edgeA].y,
+                Utils.makeId(i11, i21),
+            );
         }
 
         if (result.fraction1 === 0.0 && result.fraction2 === 1.0) {
-            return createVertexContact(v11.x, v11.y, v22.x, v22.y, normalsA[edgeA].x, normalsA[edgeA].y, Utils.makeId(i11, i22));
+            return createVertexContact(
+                v11.x,
+                v11.y,
+                v22.x,
+                v22.y,
+                normalsA[edgeA].x,
+                normalsA[edgeA].y,
+                Utils.makeId(i11, i22),
+            );
         }
 
         if (result.fraction1 === 1.0 && result.fraction2 === 0.0) {
-            return createVertexContact(v12.x, v12.y, v21.x, v21.y, normalsA[edgeA].x, normalsA[edgeA].y, Utils.makeId(i12, i21));
+            return createVertexContact(
+                v12.x,
+                v12.y,
+                v21.x,
+                v21.y,
+                normalsA[edgeA].x,
+                normalsA[edgeA].y,
+                Utils.makeId(i12, i21),
+            );
         }
 
         if (result.fraction1 === 1.0 && result.fraction2 === 1.0) {
-            return createVertexContact(v12.x, v12.y, v22.x, v22.y, normalsA[edgeA].x, normalsA[edgeA].y, Utils.makeId(i12, i22));
+            return createVertexContact(
+                v12.x,
+                v12.y,
+                v22.x,
+                v22.y,
+                normalsA[edgeA].x,
+                normalsA[edgeA].y,
+                Utils.makeId(i12, i22),
+            );
         }
     }
 

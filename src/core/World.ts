@@ -283,7 +283,7 @@ export class World {
     private setGrounded(manifold: ContactManifold) {
         const bodyA = manifold.bodyA;
         const bodyB = manifold.bodyB;
-        const contactNormal = manifold.contactNormal;
+        const contactNormal = manifold.normal;
 
         const dotA = contactNormal.negateNew().dot(this.up);
         const dotB = contactNormal.dot(this.up);
