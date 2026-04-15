@@ -14,23 +14,29 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
 
     const bulletShape = bullet.shape as CircleShape;
     const radius = bulletShape.radius;
-
-    const currentPos = bullet.position.copy();
-
-    const candidateBodies: RigidBody[] = [];
+    const bulletPosition = bullet.position;
+    const bulletVelocity = bullet.velocity;
+    const px = bulletPosition.x;
+    const py = bulletPosition.y;
+    const staticDx = bulletVelocity.x * dt;
+    const staticDy = bulletVelocity.y * dt;
     let lowestFraction = 1;
 
-    for (const other of bodies) {
-        const relVel = bullet.velocity.subNew(other.velocity);
-        const nextPos = currentPos.addNew(relVel.scaleNew(dt));
-
-        // Compute swept AABB for bullet
-        const minX = Math.min(currentPos.x, nextPos.x) - radius;
-        const minY = Math.min(currentPos.y, nextPos.y) - radius;
-        const maxX = Math.max(currentPos.x, nextPos.x) + radius;
-        const maxY = Math.max(currentPos.y, nextPos.y) + radius;
+    for (let i = 0; i < bodies.length; i++) {
+        const other = bodies[i];
 
         if (bullet.id === other.id || other.isBullet) continue;
+
+        const dx = other.invMass === 0 ? staticDx : (bulletVelocity.x - other.velocity.x) * dt;
+        const dy = other.invMass === 0 ? staticDy : (bulletVelocity.y - other.velocity.y) * dt;
+        const nextX = px + dx;
+        const nextY = py + dy;
+
+        // Compute swept AABB for bullet
+        const minX = Math.min(px, nextX) - radius;
+        const minY = Math.min(py, nextY) - radius;
+        const maxX = Math.max(px, nextX) + radius;
+        const maxY = Math.max(py, nextY) + radius;
 
         // If objects don't overlap on X axis they cannot collide
         // Here compared to prune & sweep broad phase we need to check also (other.maxX < minX)
@@ -40,72 +46,60 @@ export function resolveCCD(bullet: RigidBody, bodies: RigidBody[], dt: number): 
         // If objects overlap on X axis but don't overlap on Y axis the cannot collide
         if (other.maxY < minY || other.minY > maxY) continue;
 
-        candidateBodies.push(other);
-    }
+        let toi: number | null = null;
 
-    for (const other of candidateBodies) {
         switch (other.shapeType) {
             case ShapeType.BOX:
             case ShapeType.POLYGON: {
-                const toi = sweepCircleVsPolygonTOI(bullet, other, dt);
-
-                if (toi != null && toi < lowestFraction) {
-                    lowestFraction = toi;
-                }
-
+                toi = sweepCircleVsPolygonTOI(px, py, dx, dy, radius, other);
                 break;
             }
             case ShapeType.SEGMENT: {
-                const toi = sweepCircleVsSegmentTOI(bullet, other, dt);
-
-                if (toi != null && toi < lowestFraction) {
-                    lowestFraction = toi;
-                }
-
+                toi = sweepCircleVsSegmentTOI(px, py, dx, dy, radius, other);
                 break;
             }
             case ShapeType.CIRCLE: {
-                const toi = sweepCircleVsCircleTOI(bullet, other, dt);
-
-                if (toi != null && toi < lowestFraction) {
-                    lowestFraction = toi;
-                }
-
+                toi = sweepCircleVsCircleTOI(px, py, dx, dy, radius, other);
                 break;
             }
             case ShapeType.CAPSULE: {
-                const toi = sweepCircleVsCapsuleTOI(bullet, other, dt);
-
-                if (toi != null && toi < lowestFraction) {
-                    lowestFraction = toi;
-                }
-
+                toi = sweepCircleVsCapsuleTOI(px, py, dx, dy, radius, other);
                 break;
             }
+        }
+
+        if (toi != null && toi < lowestFraction) {
+            lowestFraction = toi;
         }
     }
 
     return lowestFraction < 1 ? lowestFraction : null;
 }
 
-function sweepCircleVsCircleTOI(bodyA: RigidBody, bodyB: RigidBody, dt: number): number | null {
-    const circleA = bodyA.shape as CircleShape;
+function sweepCircleVsCircleTOI(
+    px: number,
+    py: number,
+    dx: number,
+    dy: number,
+    radius: number,
+    bodyB: RigidBody,
+): number | null {
     const circleB = bodyB.shape as CircleShape;
+    const bodyBPosition = bodyB.position;
 
-    const v = bodyA.velocity.subNew(bodyB.velocity);
-    const d = v.scaleNew(dt);
-    const r = circleA.radius + circleB.radius;
-    const m = bodyA.position.subNew(bodyB.position);
+    const r = radius + circleB.radius;
+    const mx = px - bodyBPosition.x;
+    const my = py - bodyBPosition.y;
 
-    const a = d.dot(d);
-    const b = 2 * m.dot(d);
-    const c = m.dot(m) - r * r;
+    const a = dx * dx + dy * dy;
+    const b = 2 * (mx * dx + my * dy);
+    const c = mx * mx + my * my - r * r;
 
     if (c <= 0) {
         return 0;
     }
 
-    if (Math.abs(a) <= EPSILON) {
+    if (a <= EPSILON) {
         return null;
     }
 
@@ -124,87 +118,36 @@ function sweepCircleVsCircleTOI(bodyA: RigidBody, bodyB: RigidBody, dt: number):
     return t;
 }
 
-function sweepCircleVsSegmentTOI(bodyA: RigidBody, bodyB: RigidBody, dt: number): number | null {
-    const circle = bodyA.shape as CircleShape;
+function sweepCircleVsSegmentTOI(
+    px: number,
+    py: number,
+    dx: number,
+    dy: number,
+    radius: number,
+    bodyB: RigidBody,
+): number | null {
     const segment = bodyB.shape as SegmentShape;
-
     const a = segment.worldVertices[0];
     const b = segment.worldVertices[1];
 
-    const radius = circle.radius;
-
-    // Relative motion: treat segment as static
-    const v = bodyA.velocity.subNew(bodyB.velocity).scaleNew(dt);
-    const p = bodyA.position;
-
-    const ab = b.subNew(a);
-    const abLenSq = ab.dot(ab);
-
-    if (abLenSq <= EPSILON) {
-        // Degenerate segment -> point
-        return sweepPointVsPointRadiusTOI(p, v, a, radius);
-    }
-
-    const abLen = Math.sqrt(abLenSq);
-    const tangent = ab.scaleNew(1 / abLen);
-    const normal = new Vec2(-tangent.y, tangent.x);
-
-    let lowestT = Infinity;
-
-    // Optional: if already overlapping at t = 0
-    if (distancePointToSegmentSquared(p, a, b) <= radius * radius) {
-        return 0;
-    }
-
-    // 1) Hit against segment interior (infinite line offset by ±radius)
-    const signedDist = p.subNew(a).dot(normal);
-    const vn = v.dot(normal);
-
-    if (Math.abs(vn) > EPSILON) {
-        const t0 = (radius - signedDist) / vn;
-        const t1 = (-radius - signedDist) / vn;
-
-        if (t0 >= 0 && t0 <= 1) {
-            const hitPoint = p.addNew(v.scaleNew(t0));
-            const proj = hitPoint.subNew(a).dot(tangent);
-
-            if (proj >= 0 && proj <= abLen) {
-                lowestT = Math.min(lowestT, t0);
-            }
-        }
-
-        if (t1 >= 0 && t1 <= 1) {
-            const hitPoint = p.addNew(v.scaleNew(t1));
-            const proj = hitPoint.subNew(a).dot(tangent);
-
-            if (proj >= 0 && proj <= abLen) {
-                lowestT = Math.min(lowestT, t1);
-            }
-        }
-    }
-
-    // 2) Hit endpoint A
-    const tA = sweepPointVsPointRadiusTOI(p, v, a, radius);
-    if (tA != null) lowestT = Math.min(lowestT, tA);
-
-    // 3) Hit endpoint B
-    const tB = sweepPointVsPointRadiusTOI(p, v, b, radius);
-    if (tB != null) lowestT = Math.min(lowestT, tB);
-
-    return lowestT !== Infinity ? lowestT : null;
+    return sweepPointVsSegmentRadiusTOI(px, py, dx, dy, a.x, a.y, b.x, b.y, radius);
 }
 
 function sweepPointVsPointRadiusTOI(
-    p: Vec2,
-    d: Vec2, // full step displacement, not velocity
-    center: Vec2,
+    px: number,
+    py: number,
+    dx: number,
+    dy: number,
+    centerX: number,
+    centerY: number,
     radius: number,
 ): number | null {
-    const m = p.subNew(center);
+    const mx = px - centerX;
+    const my = py - centerY;
 
-    const a = d.dot(d);
-    const b = 2 * m.dot(d);
-    const c = m.dot(m) - radius * radius;
+    const a = dx * dx + dy * dy;
+    const b = 2 * (mx * dx + my * dy);
+    const c = mx * mx + my * my - radius * radius;
 
     if (c <= 0) {
         return 0;
@@ -229,76 +172,98 @@ function sweepPointVsPointRadiusTOI(
     return t;
 }
 
-function distancePointToSegmentSquared(p: Vec2, a: Vec2, b: Vec2): number {
-    const ab = b.subNew(a);
-    const ap = p.subNew(a);
-    const abLenSq = ab.dot(ab);
+function distancePointToSegmentSquared(
+    px: number,
+    py: number,
+    ax: number,
+    ay: number,
+    bx: number,
+    by: number,
+): number {
+    const abX = bx - ax;
+    const abY = by - ay;
+    const apX = px - ax;
+    const apY = py - ay;
+    const abLenSq = abX * abX + abY * abY;
 
     if (abLenSq <= EPSILON) {
-        return ap.dot(ap);
+        return apX * apX + apY * apY;
     }
 
-    let t = ap.dot(ab) / abLenSq;
+    let t = (apX * abX + apY * abY) / abLenSq;
     t = Math.max(0, Math.min(1, t));
 
-    const closest = a.addNew(ab.scaleNew(t));
-    return p.subNew(closest).dot(p.subNew(closest));
+    const closestX = ax + abX * t;
+    const closestY = ay + abY * t;
+    const dx = px - closestX;
+    const dy = py - closestY;
+    return dx * dx + dy * dy;
 }
 
-function sweepCircleVsCapsuleTOI(bodyA: RigidBody, bodyB: RigidBody, dt: number): number | null {
-    const circle = bodyA.shape as CircleShape;
+function sweepCircleVsCapsuleTOI(
+    px: number,
+    py: number,
+    dx: number,
+    dy: number,
+    radius: number,
+    bodyB: RigidBody,
+): number | null {
     const capsule = bodyB.shape as CapsuleShape;
 
     const top = capsule.getTopCirclePosition();
     const bottom = capsule.getBottomCirclePosition();
 
-    // Relative displacement over the whole step
-    const d = bodyA.velocity.subNew(bodyB.velocity).scaleNew(dt);
-    const p = bodyA.position;
-
     // Expand capsule by circle radius
-    const expandedRadius = circle.radius + capsule.radius;
+    const expandedRadius = radius + capsule.radius;
 
-    return sweepPointVsSegmentRadiusTOI(p, d, top, bottom, expandedRadius);
+    return sweepPointVsSegmentRadiusTOI(px, py, dx, dy, top.x, top.y, bottom.x, bottom.y, expandedRadius);
 }
 
 function sweepPointVsSegmentRadiusTOI(
-    p: Vec2,
-    d: Vec2, // full displacement during the step
-    a: Vec2,
-    b: Vec2,
+    px: number,
+    py: number,
+    dx: number,
+    dy: number,
+    ax: number,
+    ay: number,
+    bx: number,
+    by: number,
     radius: number,
 ): number | null {
-    const ab = b.subNew(a);
-    const abLenSq = ab.dot(ab);
+    const abX = bx - ax;
+    const abY = by - ay;
+    const abLenSq = abX * abX + abY * abY;
 
     // Degenerate capsule -> circle
     if (abLenSq <= EPSILON) {
-        return sweepPointVsPointRadiusTOI(p, d, a, radius);
+        return sweepPointVsPointRadiusTOI(px, py, dx, dy, ax, ay, radius);
     }
 
     let lowestT = Infinity;
 
     // Already overlapping at t = 0
-    if (distancePointToSegmentSquared(p, a, b) <= radius * radius) {
+    if (distancePointToSegmentSquared(px, py, ax, ay, bx, by) <= radius * radius) {
         return 0;
     }
 
     const abLen = Math.sqrt(abLenSq);
-    const tangent = ab.scaleNew(1 / abLen);
-    const normal = new Vec2(-tangent.y, tangent.x);
+    const tangentX = abX / abLen;
+    const tangentY = abY / abLen;
+    const normalX = -tangentY;
+    const normalY = tangentX;
 
     // 1) Infinite-line hits, then clamp to segment interior
-    const signedDist = p.subNew(a).dot(normal);
-    const vn = d.dot(normal);
+    const signedDist = (px - ax) * normalX + (py - ay) * normalY;
+    const vn = dx * normalX + dy * normalY;
 
     if (Math.abs(vn) > EPSILON) {
         const t0 = (radius - signedDist) / vn;
         const t1 = (-radius - signedDist) / vn;
 
         if (t0 >= 0 && t0 <= 1) {
-            const hitCenter = p.addNew(d.scaleNew(t0));
-            const proj = hitCenter.subNew(a).dot(tangent);
+            const hitX = px + dx * t0;
+            const hitY = py + dy * t0;
+            const proj = (hitX - ax) * tangentX + (hitY - ay) * tangentY;
 
             if (proj >= 0 && proj <= abLen) {
                 lowestT = Math.min(lowestT, t0);
@@ -306,8 +271,9 @@ function sweepPointVsSegmentRadiusTOI(
         }
 
         if (t1 >= 0 && t1 <= 1) {
-            const hitCenter = p.addNew(d.scaleNew(t1));
-            const proj = hitCenter.subNew(a).dot(tangent);
+            const hitX = px + dx * t1;
+            const hitY = py + dy * t1;
+            const proj = (hitX - ax) * tangentX + (hitY - ay) * tangentY;
 
             if (proj >= 0 && proj <= abLen) {
                 lowestT = Math.min(lowestT, t1);
@@ -316,23 +282,25 @@ function sweepPointVsSegmentRadiusTOI(
     }
 
     // 2) Endpoint A
-    const tA = sweepPointVsPointRadiusTOI(p, d, a, radius);
+    const tA = sweepPointVsPointRadiusTOI(px, py, dx, dy, ax, ay, radius);
     if (tA != null) lowestT = Math.min(lowestT, tA);
 
     // 3) Endpoint B
-    const tB = sweepPointVsPointRadiusTOI(p, d, b, radius);
+    const tB = sweepPointVsPointRadiusTOI(px, py, dx, dy, bx, by, radius);
     if (tB != null) lowestT = Math.min(lowestT, tB);
 
     return lowestT !== Infinity ? lowestT : null;
 }
 
-function sweepCircleVsPolygonTOI(bodyA: RigidBody, bodyB: RigidBody, dt: number): number | null {
-    const circle = bodyA.shape as CircleShape;
+function sweepCircleVsPolygonTOI(
+    px: number,
+    py: number,
+    dx: number,
+    dy: number,
+    radius: number,
+    bodyB: RigidBody,
+): number | null {
     const polygon = bodyB.shape as PolygonShape;
-
-    const p = bodyA.position;
-    const d = bodyA.velocity.subNew(bodyB.velocity).scaleNew(dt); // full relative displacement
-    const radius = circle.radius;
 
     const vertices = polygon.worldVertices;
     const normals = polygon.worldNormals;
@@ -340,7 +308,7 @@ function sweepCircleVsPolygonTOI(bodyA: RigidBody, bodyB: RigidBody, dt: number)
     let lowestT = Infinity;
 
     // Already overlapping at t = 0
-    if (pointInInflatedPolygon(p, vertices, normals, radius)) {
+    if (pointInInflatedPolygon(px, py, vertices, normals, radius)) {
         return 0;
     }
 
@@ -348,9 +316,11 @@ function sweepCircleVsPolygonTOI(bodyA: RigidBody, bodyB: RigidBody, dt: number)
     for (let i = 0; i < vertices.length; i++) {
         const v0 = vertices[i];
         const normal = normals[i]; // outward normal
+        const normalX = normal.x;
+        const normalY = normal.y;
 
-        const dist0 = p.subNew(v0).dot(normal);
-        const vn = d.dot(normal);
+        const dist0 = (px - v0.x) * normalX + (py - v0.y) * normalY;
+        const vn = dx * normalX + dy * normalY;
 
         // Need to move toward the face
         if (vn >= -EPSILON) continue;
@@ -360,17 +330,20 @@ function sweepCircleVsPolygonTOI(bodyA: RigidBody, bodyB: RigidBody, dt: number)
 
         if (t < 0 || t > 1) continue;
 
-        const hitPoint = p.addNew(d.scaleNew(t));
+        const hitX = px + dx * t;
+        const hitY = py + dy * t;
 
         // Check that the projected contact lies on this edge segment, not outside near vertices
         const v1 = vertices[(i + 1) % vertices.length];
-        const edge = v1.subNew(v0);
-        const edgeLenSq = edge.dot(edge);
+        const edgeX = v1.x - v0.x;
+        const edgeY = v1.y - v0.y;
+        const edgeLenSq = edgeX * edgeX + edgeY * edgeY;
 
         if (edgeLenSq <= EPSILON) continue;
 
-        const contactOnFace = hitPoint.subNew(normal.scaleNew(radius));
-        const proj = contactOnFace.subNew(v0).dot(edge) / edgeLenSq;
+        const contactX = hitX - normalX * radius;
+        const contactY = hitY - normalY * radius;
+        const proj = ((contactX - v0.x) * edgeX + (contactY - v0.y) * edgeY) / edgeLenSq;
 
         if (proj >= 0 && proj <= 1) {
             if (t < lowestT) lowestT = t;
@@ -379,7 +352,8 @@ function sweepCircleVsPolygonTOI(bodyA: RigidBody, bodyB: RigidBody, dt: number)
 
     // 2) Vertex hits: sweep point vs circle(radius) for every polygon vertex
     for (let i = 0; i < vertices.length; i++) {
-        const t = sweepPointVsPointRadiusTOI(p, d, vertices[i], radius);
+        const vertex = vertices[i];
+        const t = sweepPointVsPointRadiusTOI(px, py, dx, dy, vertex.x, vertex.y, radius);
         if (t != null && t < lowestT) {
             lowestT = t;
         }
@@ -391,9 +365,11 @@ function sweepCircleVsPolygonTOI(bodyA: RigidBody, bodyB: RigidBody, dt: number)
 // Checks whether point p is inside polygon inflated by radius.
 // For a convex polygon with outward normals, point is inside inflated polygon
 // if it is not farther than radius outside any face.
-function pointInInflatedPolygon(p: Vec2, vertices: Vec2[], normals: Vec2[], radius: number): boolean {
+function pointInInflatedPolygon(px: number, py: number, vertices: Vec2[], normals: Vec2[], radius: number): boolean {
     for (let i = 0; i < vertices.length; i++) {
-        const dist = p.subNew(vertices[i]).dot(normals[i]);
+        const vertex = vertices[i];
+        const normal = normals[i];
+        const dist = (px - vertex.x) * normal.x + (py - vertex.y) * normal.y;
         if (dist > radius) {
             return false;
         }
