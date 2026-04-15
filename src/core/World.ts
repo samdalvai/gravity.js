@@ -257,7 +257,6 @@ export class World {
             newManifolds.push(newManifold);
 
             this.setGrounded(newManifold);
-            this.runCallbacks(newManifold);
         }
 
         this.manifoldMap = newManifoldMap;
@@ -280,6 +279,21 @@ export class World {
 
             for (let j = 0; j < this.joints.length; j++) this.joints[j].solve();
         }
+
+        // Run contact callbacks
+        for (let i = 0; i < this.manifolds.length; i++) {
+            const manifold = this.manifolds[i];
+            const bodyA = manifold.bodyA;
+            const bodyB = manifold.bodyB;
+
+            if (bodyA.onContact) {
+                bodyA.onContact(manifold.contactInfo);
+            }
+
+            if (bodyB.onContact) {
+                bodyB.onContact(manifold.contactInfo);
+            }
+        }
     }
 
     private setGrounded(manifold: ContactManifold) {
@@ -289,19 +303,6 @@ export class World {
 
         if (!bodyA.isStatic() && normalY < -0.5) bodyA.isGrounded = true;
         if (!bodyB.isStatic() && normalY > 0.5) bodyB.isGrounded = true;
-    }
-
-    private runCallbacks(manifold: ContactManifold) {
-        const bodyA = manifold.bodyA;
-        const bodyB = manifold.bodyB;
-
-        if (bodyA.onContact) {
-            bodyA.onContact(manifold.contactInfo);
-        }
-
-        if (bodyB.onContact) {
-            bodyB.onContact(manifold.contactInfo);
-        }
     }
 
     clear() {
