@@ -656,6 +656,7 @@ export class ContactManifold extends Constraint {
     }
 
     get contactInfo(): ContactInfo {
+        console.log(this);
         // Return relevant info
         return {};
     }
