@@ -156,7 +156,6 @@ export default class Demo {
             console.log('info: ', info);
             body.onContact = undefined;
         };
-        body.velocity.y = -2000
         app.setBodyTexture(body, 'crate');
         world.addBody(body);
     };

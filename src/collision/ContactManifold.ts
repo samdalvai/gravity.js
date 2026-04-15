@@ -12,6 +12,8 @@ export interface ContactPoint {
 
 export interface ContactInfo {
     // Relevant contact infos
+    bodyA: RigidBody;
+    bodyB: RigidBody;
 }
 
 export class ContactManifold extends Constraint {
@@ -655,9 +657,11 @@ export class ContactManifold extends Constraint {
         return this.contactCount;
     }
 
-    get contactInfo(): ContactInfo {
-        console.log(this);
+    get contactInfo() {
         // Return relevant info
-        return {};
+        return {
+            bodyA: this.bodyA,
+            bodyB: this.bodyB,
+        };
     }
 }
