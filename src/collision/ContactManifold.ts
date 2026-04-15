@@ -76,6 +76,7 @@ export class ContactManifold extends Constraint {
     private blockM01 = 0.0;
     private blockM11 = 0.0;
 
+    constructor();
     constructor(
         bodyA: RigidBody,
         bodyB: RigidBody,
@@ -83,9 +84,27 @@ export class ContactManifold extends Constraint {
         penetrationDepth: number,
         contactNormal: Vec2,
         featureFlipped: boolean,
+    );
+    constructor(
+        bodyA?: RigidBody,
+        bodyB?: RigidBody,
+        contactPoints?: ContactPoint[],
+        penetrationDepth?: number,
+        contactNormal?: Vec2,
+        featureFlipped?: boolean,
     ) {
-        super(bodyA, bodyB);
-        this.init(bodyA, bodyB, contactPoints, penetrationDepth, contactNormal, featureFlipped);
+        super(bodyA as RigidBody, bodyB as RigidBody);
+
+        if (
+            bodyA != null &&
+            bodyB != null &&
+            contactPoints != null &&
+            penetrationDepth != null &&
+            contactNormal != null &&
+            featureFlipped != null
+        ) {
+            this.init(bodyA, bodyB, contactPoints, penetrationDepth, contactNormal, featureFlipped);
+        }
     }
 
     init(
