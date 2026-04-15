@@ -152,6 +152,10 @@ export default class Demo {
         this.generateFences(world, app);
 
         const body = Bodies.box({ width: 60, height: 60, x: 0, y: 0, mass: 1, angularVelocity: 2, rotation: 0.7 });
+        body.onContact = info => {
+            console.log('info: ', info);
+            body.onContact = undefined;
+        };
         app.setBodyTexture(body, 'crate');
         world.addBody(body);
     };

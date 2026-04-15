@@ -1,3 +1,4 @@
+import { ContactInfo } from '../collision/ContactManifold';
 import { Vec2 } from '../math/Vec2';
 import { CircleShape } from '../shapes/CircleShape';
 import { Shape, ShapeType } from '../shapes/Shape';
@@ -52,6 +53,8 @@ export class RigidBody {
     maxX = 0;
     minY = 0;
     maxY = 0;
+
+    public onContact?: (contactInfo: ContactInfo) => void;
 
     constructor(shape: Shape, x: number, y: number, mass: number) {
         this.id = RigidBody.nextId++;
@@ -122,7 +125,7 @@ export class RigidBody {
         this._isBullet = value;
     }
 
-    private updateMassProperties(): void {
+    updateMassProperties(): void {
         Utils.assert(this.mass >= 0, 'Mass must be non-negative');
         Utils.assert(this.shapeType !== ShapeType.SEGMENT || this.mass === 0, 'Segments can only be static');
 
