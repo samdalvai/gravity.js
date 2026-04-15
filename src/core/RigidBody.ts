@@ -235,9 +235,6 @@ export class RigidBody {
 
     integrateVelocities(dt: number): void {
         if (this.isStatic()) {
-            // TODO: this is needed because otherwise AABB is not correctly set for static objects with rotation
-            this.shape.updateVertices(this.rotation, this.position);
-            this.shape.updateAABB(this);
             return;
         }
 
