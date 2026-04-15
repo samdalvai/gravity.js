@@ -761,6 +761,7 @@ export default class Demo {
     static demo15 = (world: World, app: Application) => {
         // Demo 15: orbiting particles around a central black hole
         app.setBackground('darkBackground');
+        Graphics.zoom = 0.4;
 
         const BLACK_HOLE_ORBIT_PARTICLE_COUNT = 2_500;
         SETTINGS.applyGravity = false;

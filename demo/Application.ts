@@ -592,11 +592,9 @@ export default class Application {
                     }
                 }
                 for (const manifold of this.world.getManifolds()) {
-                    for (const contact of manifold.contactPoints) {
+                    for (const contact of manifold.points) {
                         const startPoint = contact.point;
-                        const normalEndPoint = contact.point.addNew(
-                            manifold.contactNormal.scaleNew(PIXELS_PER_METER * 0.15),
-                        );
+                        const normalEndPoint = contact.point.addNew(manifold.normal.scaleNew(PIXELS_PER_METER * 0.15));
 
                         Graphics.drawFillCircle(startPoint.x, startPoint.y, 3, 'red');
                         Graphics.drawArrow(startPoint.x, startPoint.y, normalEndPoint.x, normalEndPoint.y, 'red', 1);
@@ -794,6 +792,7 @@ export default class Application {
         this.middleMousePressed = false;
         this.controlPressed = false;
         Graphics.resetView();
+        this.setApplyGravity(true);
         demo(this.world, this);
         this.syncUI();
     }
