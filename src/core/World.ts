@@ -172,7 +172,7 @@ export class World {
         const invDt = dt === 0 ? 0 : 1 / dt;
 
         this.broadPhase();
-        
+
         this.narrowPhase();
 
         this.solveConstraints(invDt);
@@ -187,10 +187,25 @@ export class World {
     }
 
     private broadPhase() {
-        this.sortBodiesByMinX();
-        this.potentialPairs.length = 0;
-
+        // Use insertion sort instead of Array.sort to exploit temporal coherence:
+        // between frames, bodies move only slightly, so the array is already nearly sorted by minX.
+        // In this case insertion sort runs in ~O(n) (only small local swaps),
+        // while a full sort would still cost O(n log n).
         const bodies = this.bodies;
+
+        for (let i = 1; i < bodies.length; i++) {
+            const current = bodies[i];
+            let j = i - 1;
+
+            while (j >= 0 && bodies[j].minX > current.minX) {
+                bodies[j + 1] = bodies[j];
+                j--;
+            }
+
+            bodies[j + 1] = current;
+        }
+
+        this.potentialPairs.length = 0;
 
         // Broad phase check with prune & sweep algorithm
         // TODO: some collisions are not correclty found, try to set gravity to 0
@@ -244,26 +259,6 @@ export class World {
 
         this.manifoldMap = newManifoldMap;
         this.manifolds = newManifolds;
-    }
-
-    private sortBodiesByMinX(): void {
-        // Use insertion sort instead of Array.sort to exploit temporal coherence:
-        // between frames, bodies move only slightly, so the array is already nearly sorted by minX.
-        // In this case insertion sort runs in ~O(n) (only small local swaps),
-        // while a full sort would still cost O(n log n).
-        const bodies = this.bodies;
-
-        for (let i = 1; i < bodies.length; i++) {
-            const current = bodies[i];
-            let j = i - 1;
-
-            while (j >= 0 && bodies[j].minX > current.minX) {
-                bodies[j + 1] = bodies[j];
-                j--;
-            }
-
-            bodies[j + 1] = current;
-        }
     }
 
     private solveConstraints(invDt: number) {
