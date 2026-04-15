@@ -284,13 +284,10 @@ export class World {
     private setGrounded(manifold: ContactManifold) {
         const bodyA = manifold.bodyA;
         const bodyB = manifold.bodyB;
-        const contactNormal = manifold.normal;
+        const normalY = manifold.contactNormalY;
 
-        const dotA = contactNormal.negateNew().dot(this.up);
-        const dotB = contactNormal.dot(this.up);
-
-        if (!bodyA.isStatic() && dotA > 0.5) bodyA.isGrounded = true;
-        if (!bodyB.isStatic() && dotB > 0.5) bodyB.isGrounded = true;
+        if (!bodyA.isStatic() && normalY < -0.5) bodyA.isGrounded = true;
+        if (!bodyB.isStatic() && normalY > 0.5) bodyB.isGrounded = true;
     }
 
     clear() {
