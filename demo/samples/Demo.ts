@@ -984,7 +984,7 @@ export default class Demo {
         floor.shape.updateVertices(floor.rotation, floor.position);
 
         const boxWidth = 20;
-        const boxRows = 5;
+        const boxRows = 10;
         const xOffset = 250;
         const yOffset = 250;
         const spacing = 1;
@@ -1012,7 +1012,7 @@ export default class Demo {
                 const box = Bodies.box({
                     width: boxWidth,
                     height: boxWidth,
-                    x: boxWidth * i + spacing * i - xOffset,
+                    x: boxWidth * i + spacing * i - xOffset - boxWidth * boxRows,
                     y: boxWidth * j + spacing * j + yOffset,
                     mass: 1,
                     restitution: 0,
@@ -1024,6 +1024,9 @@ export default class Demo {
         }
 
         // Create weld joints between adjacent boxes
+        const jointFrequency = 30;
+        const jointDamping = 0.5;
+
         for (let i = 0; i < boxRows; i++) {
             for (let j = 0; j < boxRows; j++) {
                 const current = boxes[i][j];
@@ -1031,7 +1034,7 @@ export default class Demo {
                 // weld to the box on the right
                 if (i + 1 < boxRows) {
                     const right = boxes[i + 1][j];
-                    const weld = new WeldJoint(current, right);
+                    const weld = new WeldJoint(current, right, undefined, jointFrequency, jointDamping);
                     weld.drawAnchor = true;
                     weld.drawConnectionLine = true;
                     world.addJoint(weld);
@@ -1040,7 +1043,7 @@ export default class Demo {
                 // weld to the box below
                 if (j + 1 < boxRows) {
                     const below = boxes[i][j + 1];
-                    const weld = new WeldJoint(current, below);
+                    const weld = new WeldJoint(current, below, undefined, jointFrequency, jointDamping);
                     weld.drawAnchor = true;
                     weld.drawConnectionLine = true;
                     world.addJoint(weld);
