@@ -984,16 +984,43 @@ export default class Demo {
         this.generateFloor(world, app);
         this.generateFences(world, app);
 
+        const breakImpulseThreshold = 10_000;
         const circleRadius = 15;
         const ringCenter = new Vec2(0, 60);
         const circlePalette = ['#7bdff2', '#b8f2e6', '#ffd166', '#f4a261'];
         const ringConfigs = [
             { count: 20, radius: 90 },
-            { count: 13, radius: 60 },
-            { count: 6, radius: 30 },
-            { count: 1, radius: 0 },
+            // { count: 13, radius: 60 },
+            // { count: 6, radius: 30 },
+            // { count: 1, radius: 0 },
         ];
         const weldedPairs = new Set<string>();
+        const weldedJointIds = new Set<number>();
+        const weldedBodyIds = new Set<number>();
+        const bodyJoints = new Map<number, Set<WeldJoint>>();
+
+        const removeWeld = (joint: WeldJoint): void => {
+            if (!weldedJointIds.has(joint.id)) return;
+
+            weldedJointIds.delete(joint.id);
+            world.removeJoint(joint);
+            bodyJoints.get(joint.bodyA.id)?.delete(joint);
+            bodyJoints.get(joint.bodyB.id)?.delete(joint);
+        };
+
+        const breakCircle = (body: RigidBody): void => {
+            const joints = bodyJoints.get(body.id);
+            if (!joints || joints.size === 0) {
+                body.onContact = undefined;
+                return;
+            }
+
+            for (const joint of [...joints]) {
+                removeWeld(joint);
+            }
+
+            body.onContact = undefined;
+        };
 
         const createCircle = (x: number, y: number, index: number): RigidBody => {
             const circle = Bodies.circle({
@@ -1003,6 +1030,16 @@ export default class Demo {
                 mass: 1,
             });
 
+            weldedBodyIds.add(circle.id);
+            bodyJoints.set(circle.id, new Set());
+            circle.onContact = info => {
+                const otherBody = info.bodyA.id === circle.id ? info.bodyB : info.bodyA;
+                if (weldedBodyIds.has(otherBody.id)) return;
+                if (info.impulseSum <= breakImpulseThreshold) return;
+                console.log(info.impulseSum);
+
+                breakCircle(circle);
+            };
             app.setBodyFillColor(circle, circlePalette[index % circlePalette.length]);
             world.addBody(circle);
             return circle;
@@ -1013,7 +1050,11 @@ export default class Demo {
             if (weldedPairs.has(pairKey)) return;
 
             weldedPairs.add(pairKey);
-            world.addJoint(new WeldJoint(bodyA, bodyB));
+            const joint = new WeldJoint(bodyA, bodyB);
+            weldedJointIds.add(joint.id);
+            bodyJoints.get(bodyA.id)?.add(joint);
+            bodyJoints.get(bodyB.id)?.add(joint);
+            world.addJoint(joint);
         };
 
         const connectRing = (bodies: RigidBody[]): void => {
