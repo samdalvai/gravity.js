@@ -13,6 +13,9 @@ import { RigidBody } from '../core/RigidBody';
 import * as Utils from '../utils/Utils';
 
 export abstract class Joint extends Constraint {
+    private static nextId = 0;
+    readonly id: number;
+
     protected beta = 0.0; // Coefficient of position correction (Positional error feedback factor)
     protected gamma = 0.0; // Coefficient of Softness (Force feedback factor)
 
@@ -28,6 +31,7 @@ export abstract class Joint extends Constraint {
     // 0 < Joint mass
     constructor(bodyA: RigidBody, bodyB: RigidBody, frequency = 15, dampingRatio = 1.0, jointMass = -1) {
         super(bodyA, bodyB);
+        this.id = Joint.nextId++;
 
         this.setFDM(frequency, dampingRatio, jointMass);
     }

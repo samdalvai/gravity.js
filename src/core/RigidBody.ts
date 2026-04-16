@@ -7,7 +7,6 @@ import { SETTINGS } from './Constants';
 
 export class RigidBody {
     private static nextId = 0;
-
     readonly id: number;
 
     // Linear motion
