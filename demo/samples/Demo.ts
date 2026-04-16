@@ -147,6 +147,167 @@ export default class Demo {
         return new DistanceJoint(bodyA, bodyB, anchorA, anchorB, length, tuning.frequency, tuning.dampingRatio);
     }
 
+    static demo0 = (world: World, app: Application) => {
+        // Demo 0: a complex scene
+        app.setBackground('background');
+        const floor = this.generateFloor(world, app);
+        this.generateFences(world, app);
+
+        // Add bird
+        const bird = Bodies.circle({ radius: 45, x: -550, y: -200, mass: 3.0 });
+        app.setBodyTexture(bird, 'birdRed');
+        world.addBody(bird);
+
+        // Add a stack of boxes
+        for (let i = 1; i <= 4; i++) {
+            const mass = 10.0 / i;
+            const box = Bodies.box({
+                width: 50,
+                height: 50,
+                x: -300,
+                y: floor.position.y + FLOOR_HEIGHT / 2 + i * 55,
+                mass,
+                friction: 0.9,
+                restitution: 0.1,
+            });
+            app.setBodyTexture(box, 'woodBox');
+            world.addBody(box);
+        }
+
+        // Add structure with blocks
+        const plank1 = Bodies.box({
+            width: 50,
+            height: 150,
+            x: -30,
+            y: floor.position.y + FLOOR_HEIGHT / 2 + 100,
+            mass: 5.0,
+        });
+        const plank2 = Bodies.box({
+            width: 50,
+            height: 150,
+            x: 130,
+            y: floor.position.y + FLOOR_HEIGHT / 2 + 100,
+            mass: 5.0,
+        });
+        const plank3 = Bodies.box({
+            width: 250,
+            height: 25,
+            x: 50,
+            y: floor.position.y + FLOOR_HEIGHT / 2 + 200,
+            mass: 2.0,
+        });
+        app.setBodyTexture(plank1, 'woodPlankSolid');
+        app.setBodyTexture(plank2, 'woodPlankSolid');
+        app.setBodyTexture(plank3, 'woodPlankCracked');
+        world.addBody(plank1);
+        world.addBody(plank2);
+        world.addBody(plank3);
+
+        // Add a triangle polygon
+        const triangleVertices = [new Vec2(-30, -30), new Vec2(30, -30), new Vec2(0, 30)];
+        const triangle = Bodies.polygon({
+            vertices: triangleVertices,
+            x: plank3.position.x,
+            y: plank3.position.y + 50,
+            mass: 0.5,
+        });
+        app.setBodyTexture(triangle, 'woodTriangle');
+        world.addBody(triangle);
+
+        // Add a pyramid of boxes
+        const numRows = 5;
+        for (let col = 0; col < numRows; col++) {
+            for (let row = 0; row < col; row++) {
+                const x = plank3.position.x + 200 + col * 50 - row * 25;
+                const y = floor.position.y + FLOOR_HEIGHT / 2 + 50 + row * 52;
+                const mass = 5 / (row + 1);
+                const box = Bodies.box({ width: 50, height: 50, x, y, mass, friction: 0.9, restitution: 0.0 });
+                app.setBodyTexture(box, 'woodBox');
+                world.addBody(box);
+            }
+        }
+
+        const bridgeTuning = JOINT_TUNING.stressBridge;
+
+        // Add a bridge of connected steps and joints
+        const numSteps = 10;
+        const spacing = 33;
+
+        // Start anchor (static)
+        const stepHeight = 20;
+        const startStep = Bodies.box({ width: 80, height: stepHeight, x: -500, y: 200, mass: 0.0 });
+        app.setBodyTexture(startStep, 'rockBridgeAnchor');
+        world.addBody(startStep);
+
+        // The first connection should be from the anchor, not the floor
+        let last = startStep;
+
+        for (let i = 1; i <= numSteps; i++) {
+            const x = startStep.position.x + 30 + i * spacing;
+            const y = startStep.position.y - Math.sin((i / numSteps) * Math.PI) * 10;
+            const mass = 3;
+
+            const step = Bodies.circle({ radius: 15, x, y, mass });
+            app.setBodyTexture(step, 'woodBridgeStep');
+            world.addBody(step);
+
+            // Connect previous link to this link
+            const joint = this.createDistanceJoint(last, step, bridgeTuning);
+            world.addJoint(joint);
+
+            last = step;
+        }
+
+        // Final anchor
+        const endStep = Bodies.box({
+            width: 80,
+            height: stepHeight,
+            x: last.position.x + 60,
+            y: startStep.position.y,
+            mass: 0.0,
+        });
+        app.setBodyTexture(endStep, 'rockBridgeAnchor');
+        world.addBody(endStep);
+
+        const lastJoint = this.createDistanceJoint(last, endStep, bridgeTuning);
+        world.addJoint(lastJoint);
+
+        // Add pigs
+        const pigRadius = 30;
+        const pig1 = Bodies.circle({
+            radius: pigRadius,
+            x: plank1.position.x + 80,
+            y: floor.position.y + FLOOR_HEIGHT / 2 + pigRadius,
+            mass: 3.0,
+        });
+        const pig2 = Bodies.circle({
+            radius: pigRadius,
+            x: plank2.position.x + 400,
+            y: floor.position.y + FLOOR_HEIGHT / 2 + pigRadius,
+            mass: 3.0,
+        });
+        const pig3 = Bodies.circle({
+            radius: pigRadius,
+            x: plank2.position.x + 460,
+            y: floor.position.y + FLOOR_HEIGHT / 2 + pigRadius,
+            mass: 3.0,
+        });
+        const pig4 = Bodies.circle({
+            radius: pigRadius,
+            x: startStep.position.x,
+            y: startStep.position.y + stepHeight / 2 + pigRadius,
+            mass: 1.0,
+        });
+        app.setBodyTexture(pig1, 'pig1');
+        app.setBodyTexture(pig2, 'pig2');
+        app.setBodyTexture(pig3, 'pig1');
+        app.setBodyTexture(pig4, 'pig2');
+        world.addBody(pig1);
+        world.addBody(pig2);
+        world.addBody(pig3);
+        world.addBody(pig4);
+    };
+
     static demo1 = (world: World, app: Application) => {
         // Demo 1: Single box demo
         app.setBackground('background');
@@ -810,168 +971,6 @@ export default class Demo {
             app.setBodyFillColor(particle, particlePalette[Math.floor(Utils.randomNumber(0, particlePalette.length))]);
             world.addBody(particle);
         }
-    };
-
-    // TODO: move at first position
-    static demo0 = (world: World, app: Application) => {
-        // Demo 0: a complex scene
-        app.setBackground('background');
-        const floor = this.generateFloor(world, app);
-        this.generateFences(world, app);
-
-        // Add bird
-        const bird = Bodies.circle({ radius: 45, x: -550, y: -200, mass: 3.0 });
-        app.setBodyTexture(bird, 'birdRed');
-        world.addBody(bird);
-
-        // Add a stack of boxes
-        for (let i = 1; i <= 4; i++) {
-            const mass = 10.0 / i;
-            const box = Bodies.box({
-                width: 50,
-                height: 50,
-                x: -300,
-                y: floor.position.y + FLOOR_HEIGHT / 2 + i * 55,
-                mass,
-                friction: 0.9,
-                restitution: 0.1,
-            });
-            app.setBodyTexture(box, 'woodBox');
-            world.addBody(box);
-        }
-
-        // Add structure with blocks
-        const plank1 = Bodies.box({
-            width: 50,
-            height: 150,
-            x: -30,
-            y: floor.position.y + FLOOR_HEIGHT / 2 + 100,
-            mass: 5.0,
-        });
-        const plank2 = Bodies.box({
-            width: 50,
-            height: 150,
-            x: 130,
-            y: floor.position.y + FLOOR_HEIGHT / 2 + 100,
-            mass: 5.0,
-        });
-        const plank3 = Bodies.box({
-            width: 250,
-            height: 25,
-            x: 50,
-            y: floor.position.y + FLOOR_HEIGHT / 2 + 200,
-            mass: 2.0,
-        });
-        app.setBodyTexture(plank1, 'woodPlankSolid');
-        app.setBodyTexture(plank2, 'woodPlankSolid');
-        app.setBodyTexture(plank3, 'woodPlankCracked');
-        world.addBody(plank1);
-        world.addBody(plank2);
-        world.addBody(plank3);
-
-        // Add a triangle polygon
-        const triangleVertices = [new Vec2(-30, -30), new Vec2(30, -30), new Vec2(0, 30)];
-        const triangle = Bodies.polygon({
-            vertices: triangleVertices,
-            x: plank3.position.x,
-            y: plank3.position.y + 50,
-            mass: 0.5,
-        });
-        app.setBodyTexture(triangle, 'woodTriangle');
-        world.addBody(triangle);
-
-        // Add a pyramid of boxes
-        const numRows = 5;
-        for (let col = 0; col < numRows; col++) {
-            for (let row = 0; row < col; row++) {
-                const x = plank3.position.x + 200 + col * 50 - row * 25;
-                const y = floor.position.y + FLOOR_HEIGHT / 2 + 50 + row * 52;
-                const mass = 5 / (row + 1);
-                const box = Bodies.box({ width: 50, height: 50, x, y, mass, friction: 0.9, restitution: 0.0 });
-                app.setBodyTexture(box, 'woodBox');
-                world.addBody(box);
-            }
-        }
-
-        const bridgeTuning = JOINT_TUNING.stressBridge;
-
-        // Add a bridge of connected steps and joints
-        const numSteps = 10;
-        const spacing = 33;
-
-        // Start anchor (static)
-        const stepHeight = 20;
-        const startStep = Bodies.box({ width: 80, height: stepHeight, x: -500, y: 200, mass: 0.0 });
-        app.setBodyTexture(startStep, 'rockBridgeAnchor');
-        world.addBody(startStep);
-
-        // The first connection should be from the anchor, not the floor
-        let last = startStep;
-
-        for (let i = 1; i <= numSteps; i++) {
-            const x = startStep.position.x + 30 + i * spacing;
-            const y = startStep.position.y - Math.sin((i / numSteps) * Math.PI) * 10;
-            const mass = 3;
-
-            const step = Bodies.circle({ radius: 15, x, y, mass });
-            app.setBodyTexture(step, 'woodBridgeStep');
-            world.addBody(step);
-
-            // Connect previous link to this link
-            const joint = this.createDistanceJoint(last, step, bridgeTuning);
-            world.addJoint(joint);
-
-            last = step;
-        }
-
-        // Final anchor
-        const endStep = Bodies.box({
-            width: 80,
-            height: stepHeight,
-            x: last.position.x + 60,
-            y: startStep.position.y,
-            mass: 0.0,
-        });
-        app.setBodyTexture(endStep, 'rockBridgeAnchor');
-        world.addBody(endStep);
-
-        const lastJoint = this.createDistanceJoint(last, endStep, bridgeTuning);
-        world.addJoint(lastJoint);
-
-        // Add pigs
-        const pigRadius = 30;
-        const pig1 = Bodies.circle({
-            radius: pigRadius,
-            x: plank1.position.x + 80,
-            y: floor.position.y + FLOOR_HEIGHT / 2 + pigRadius,
-            mass: 3.0,
-        });
-        const pig2 = Bodies.circle({
-            radius: pigRadius,
-            x: plank2.position.x + 400,
-            y: floor.position.y + FLOOR_HEIGHT / 2 + pigRadius,
-            mass: 3.0,
-        });
-        const pig3 = Bodies.circle({
-            radius: pigRadius,
-            x: plank2.position.x + 460,
-            y: floor.position.y + FLOOR_HEIGHT / 2 + pigRadius,
-            mass: 3.0,
-        });
-        const pig4 = Bodies.circle({
-            radius: pigRadius,
-            x: startStep.position.x,
-            y: startStep.position.y + stepHeight / 2 + pigRadius,
-            mass: 1.0,
-        });
-        app.setBodyTexture(pig1, 'pig1');
-        app.setBodyTexture(pig2, 'pig2');
-        app.setBodyTexture(pig3, 'pig1');
-        app.setBodyTexture(pig4, 'pig2');
-        world.addBody(pig1);
-        world.addBody(pig2);
-        world.addBody(pig3);
-        world.addBody(pig4);
     };
 
     static demo16 = (world: World, app: Application) => {
