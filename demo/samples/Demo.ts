@@ -5,6 +5,7 @@
  * https://github.com/erincatto/box2d-lite
  */
 import { Bodies, DistanceJoint, GRAVITY, RigidBody, SETTINGS, Utils, Vec2, World } from '../../src';
+import { Joint } from '../../src/joint/Joint';
 import { WeldJoint } from '../../src/joint/WeldJoint';
 import Application from '../Application';
 import Graphics from '../graphics/Graphics';
@@ -1060,7 +1061,7 @@ export default class Demo {
         const boxWidth = 20;
         const boxRows = 10;
         const xOffset = 250;
-        const yOffset = -250;
+        const yOffset = 0;
         const spacing = 1;
 
         const boxes: RigidBody[][] = [];
@@ -1090,6 +1091,7 @@ export default class Demo {
         for (let i = 0; i < boxRows; i++) {
             for (let j = 0; j < boxRows; j++) {
                 const current = boxes[i][j];
+                const joints: Joint[] = [];
 
                 // weld to the box on the right
                 if (i + 1 < boxRows) {
@@ -1098,6 +1100,7 @@ export default class Demo {
                     weld.drawAnchor = true;
                     weld.drawConnectionLine = true;
                     world.addJoint(weld);
+                    joints.push(weld);
                 }
 
                 // weld to the box below
@@ -1107,7 +1110,16 @@ export default class Demo {
                     weld.drawAnchor = true;
                     weld.drawConnectionLine = true;
                     world.addJoint(weld);
+                    joints.push(weld);
                 }
+
+                current.onContact = info => {
+                    if (info.impulseSum > 1_000) {
+                        for (const j of joints) {
+                            world.removeJoint(j);
+                        }
+                    }
+                };
             }
         }
     };
