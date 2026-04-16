@@ -986,13 +986,14 @@ export default class Demo {
 
         const breakImpulseThreshold = 10_000;
         const circleRadius = 15;
+        const circleSpacing = 2;
         const ringCenter = new Vec2(0, 60);
         const circlePalette = ['#7bdff2', '#b8f2e6', '#ffd166', '#f4a261'];
         const ringConfigs = [
-            { count: 20, radius: 90 },
-            // { count: 13, radius: 60 },
-            // { count: 6, radius: 30 },
-            // { count: 1, radius: 0 },
+            { count: 20 },
+            { count: 13 },
+            { count: 6 },
+            { count: 1 },
         ];
         const weldedPairs = new Set<string>();
         const weldedJointIds = new Set<number>();
@@ -1092,11 +1093,15 @@ export default class Demo {
 
         for (const ringConfig of ringConfigs) {
             const ringBodies: RigidBody[] = [];
+            const ringRadius =
+                ringConfig.count === 1
+                    ? 0
+                    : (circleRadius * 2 + circleSpacing) / (2 * Math.sin(Math.PI / ringConfig.count));
 
             for (let i = 0; i < ringConfig.count; i++) {
                 const angle = ringConfig.count === 1 ? 0 : (i / ringConfig.count) * Math.PI * 2;
-                const x = ringCenter.x + Math.cos(angle) * ringConfig.radius;
-                const y = ringCenter.y + Math.sin(angle) * ringConfig.radius;
+                const x = ringCenter.x + Math.cos(angle) * ringRadius;
+                const y = ringCenter.y + Math.sin(angle) * ringRadius;
                 ringBodies.push(createCircle(x, y, circleIndex));
                 circleIndex++;
             }
