@@ -65,8 +65,20 @@ export class World {
         return this.manifolds;
     }
 
-    addJoint(constraint: Joint): void {
-        this.joints.push(constraint);
+    addJoint(joint: Joint): void {
+        this.joints.push(joint);
+    }
+
+    removeJoint(joint: Joint): void {
+        for (let i = 0; i < this.joints.length; i++) {
+            const current = this.joints[i];
+
+            if (joint.id === current.id) {
+                this.joints[i] = this.joints[this.joints.length - 1];
+                this.joints.pop();
+                return;
+            }
+        }
     }
 
     getJoints(): Joint[] {
