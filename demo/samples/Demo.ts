@@ -55,7 +55,7 @@ export default class Demo {
         'Demo 13: 1000 Capsules',
         'Demo 14: 1000 Random convex shapes',
         'Demo 15: Black hole orbit',
-        'Demo 16: Weld joint and breakable bodies',
+        'Demo 16: Welded circle ring',
     ];
 
     static generateFloor(world: World, app: Application): RigidBody {
@@ -979,31 +979,94 @@ export default class Demo {
     };
 
     static demo16 = (world: World, app: Application) => {
-        // Demo 10: Continuous collision detection
+        // Demo 16: Welded circle ring
         app.setBackground('background');
         this.generateFloor(world, app);
         this.generateFences(world, app);
 
-        const box1 = Bodies.box({
-            width: 60,
-            height: 60,
-            x: 30,
-            y: 0,
-            mass: 1,
-        });
+        const circleRadius = 15;
+        const ringCenter = new Vec2(0, 60);
+        const circlePalette = ['#7bdff2', '#b8f2e6', '#ffd166', '#f4a261'];
+        const ringConfigs = [
+            { count: 20, radius: 90 },
+            { count: 13, radius: 60 },
+            { count: 6, radius: 30 },
+            { count: 1, radius: 0 },
+        ];
+        const weldedPairs = new Set<string>();
 
-        const box2 = Bodies.box({
-            width: 60,
-            height: 60,
-            x: -30,
-            y: 0,
-            mass: 1,
-        });
+        const createCircle = (x: number, y: number, index: number): RigidBody => {
+            const circle = Bodies.circle({
+                radius: circleRadius,
+                x,
+                y,
+                mass: 1,
+            });
 
-        world.addBody(box1);
-        world.addBody(box2);
-        const weld = new WeldJoint(box1, box2);
-        world.addJoint(weld);
+            app.setBodyFillColor(circle, circlePalette[index % circlePalette.length]);
+            world.addBody(circle);
+            return circle;
+        };
+
+        const addWeld = (bodyA: RigidBody, bodyB: RigidBody): void => {
+            const pairKey = bodyA.id < bodyB.id ? `${bodyA.id}:${bodyB.id}` : `${bodyB.id}:${bodyA.id}`;
+            if (weldedPairs.has(pairKey)) return;
+
+            weldedPairs.add(pairKey);
+            world.addJoint(new WeldJoint(bodyA, bodyB));
+        };
+
+        const connectRing = (bodies: RigidBody[]): void => {
+            if (bodies.length < 2) return;
+
+            for (let i = 0; i < bodies.length; i++) {
+                addWeld(bodies[i], bodies[(i + 1) % bodies.length]);
+            }
+        };
+
+        const connectRings = (outerRing: RigidBody[], innerRing: RigidBody[]): void => {
+            const radialConnections = innerRing.length === 1 ? 1 : 2;
+            const maxBridgeDistance = circleRadius * 2.5;
+            const maxBridgeDistanceSq = maxBridgeDistance * maxBridgeDistance;
+
+            for (const outerBody of outerRing) {
+                const nearestInnerBodies = [...innerRing]
+                    .map(innerBody => ({
+                        body: innerBody,
+                        distanceSq: outerBody.position.subNew(innerBody.position).magnitudeSquared(),
+                    }))
+                    .sort((bodyA, bodyB) => bodyA.distanceSq - bodyB.distanceSq)
+                    .slice(0, radialConnections);
+
+                for (const nearestInnerBody of nearestInnerBodies) {
+                    if (nearestInnerBody.distanceSq <= maxBridgeDistanceSq) {
+                        addWeld(outerBody, nearestInnerBody.body);
+                    }
+                }
+            }
+        };
+
+        const rings: RigidBody[][] = [];
+        let circleIndex = 0;
+
+        for (const ringConfig of ringConfigs) {
+            const ringBodies: RigidBody[] = [];
+
+            for (let i = 0; i < ringConfig.count; i++) {
+                const angle = ringConfig.count === 1 ? 0 : (i / ringConfig.count) * Math.PI * 2;
+                const x = ringCenter.x + Math.cos(angle) * ringConfig.radius;
+                const y = ringCenter.y + Math.sin(angle) * ringConfig.radius;
+                ringBodies.push(createCircle(x, y, circleIndex));
+                circleIndex++;
+            }
+
+            rings.push(ringBodies);
+            connectRing(ringBodies);
+        }
+
+        for (let i = 0; i < rings.length - 1; i++) {
+            connectRings(rings[i], rings[i + 1]);
+        }
     };
 
     static demoFunctions = [
