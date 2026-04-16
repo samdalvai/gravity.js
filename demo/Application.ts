@@ -546,25 +546,25 @@ export default class Application {
         }
 
         // Draw all joints
-        for (const joint of this.world.getJoints()) {
-            if (joint instanceof DistanceJoint) {
-                const anchorA = joint.localAnchorA;
-                const anchorB = joint.localAnchorB;
-                const worldA = joint.bodyA.localPointToWorld(anchorA);
-                const worldB = joint.bodyB.localPointToWorld(anchorB);
+        // for (const joint of this.world.getJoints()) {
+        //     //if (joint instanceof DistanceJoint) {
+        //     const anchorA = joint.localAnchorA;
+        //     const anchorB = joint.localAnchorB;
+        //     const worldA = joint.bodyA.localPointToWorld(anchorA);
+        //     const worldB = joint.bodyB.localPointToWorld(anchorB);
 
-                const color = this.debug ? 'white' : 'black';
+        //     const color = this.debug ? 'white' : 'black';
 
-                if (joint.drawAnchor) {
-                    Graphics.drawFillCircle(worldA.x, worldA.y, 5, color);
-                    Graphics.drawFillCircle(worldB.x, worldB.y, 5, color);
-                }
+        //     if (joint.drawAnchor) {
+        //         Graphics.drawFillCircle(worldA.x, worldA.y, 5, color);
+        //         Graphics.drawFillCircle(worldB.x, worldB.y, 5, color);
+        //     }
 
-                if (joint.drawConnectionLine) {
-                    Graphics.drawLine(worldA.x, worldA.y, worldB.x, worldB.y, color);
-                }
-            }
-        }
+        //     if (joint.drawConnectionLine) {
+        //         Graphics.drawLine(worldA.x, worldA.y, worldB.x, worldB.y, color);
+        //     }
+        //     //}
+        // }
 
         // Draw all joints anchor points and debug properties
         if (this.debug) {
@@ -580,16 +580,14 @@ export default class Application {
 
             if (this.showContacts) {
                 for (const joint of this.world.getJoints()) {
-                    if (joint instanceof DistanceJoint) {
-                        const anchorA = joint.localAnchorA;
-                        const anchorB = joint.localAnchorB;
-                        const worldA = joint.bodyA.localPointToWorld(anchorA);
-                        const worldB = joint.bodyB.localPointToWorld(anchorB);
-                        Graphics.drawFillCircle(worldA.x, worldA.y, 5, 'blue');
-                        Graphics.drawFillCircle(worldB.x, worldB.y, 5, 'blue');
+                    const anchorA = joint.localAnchorA;
+                    const anchorB = joint.localAnchorB;
+                    const worldA = joint.bodyA.localPointToWorld(anchorA);
+                    const worldB = joint.bodyB.localPointToWorld(anchorB);
+                    Graphics.drawFillCircle(worldA.x, worldA.y, 3, 'blue');
+                    Graphics.drawFillCircle(worldB.x, worldB.y, 3, 'blue');
 
-                        Graphics.drawLine(worldA.x, worldA.y, worldB.x, worldB.y, 'blue');
-                    }
+                    Graphics.drawLine(worldA.x, worldA.y, worldB.x, worldB.y, 'blue');
                 }
                 for (const manifold of this.world.getManifolds()) {
                     for (const contact of manifold.points) {

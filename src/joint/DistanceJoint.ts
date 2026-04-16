@@ -13,9 +13,6 @@ import { Vec2 } from '../math/Vec2';
 import { Joint } from './Joint';
 
 export class DistanceJoint extends Joint {
-    public localAnchorA: Vec2;
-    public localAnchorB: Vec2;
-
     private readonly length: number;
 
     private raX = 0.0;

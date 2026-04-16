@@ -7,9 +7,6 @@ import { Joint } from './Joint';
 
 // Revolute joint + Angle joint
 export class WeldJoint extends Joint {
-    public localAnchorA: Vec2;
-    public localAnchorB: Vec2;
-
     public initialAngleOffset: number;
 
     private ra!: Vec2;
