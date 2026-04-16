@@ -1,6 +1,5 @@
 import {
     Bodies,
-    DistanceJoint,
     FIXED_DELTA_TIME,
     Force,
     GRAVITY,
@@ -545,27 +544,6 @@ export default class Application {
             Graphics.drawBody(body, this.bodyRenderRegistry.getStyle(body), this.debug);
         }
 
-        // Draw all joints
-        // for (const joint of this.world.getJoints()) {
-        //     //if (joint instanceof DistanceJoint) {
-        //     const anchorA = joint.localAnchorA;
-        //     const anchorB = joint.localAnchorB;
-        //     const worldA = joint.bodyA.localPointToWorld(anchorA);
-        //     const worldB = joint.bodyB.localPointToWorld(anchorB);
-
-        //     const color = this.debug ? 'white' : 'black';
-
-        //     if (joint.drawAnchor) {
-        //         Graphics.drawFillCircle(worldA.x, worldA.y, 5, color);
-        //         Graphics.drawFillCircle(worldB.x, worldB.y, 5, color);
-        //     }
-
-        //     if (joint.drawConnectionLine) {
-        //         Graphics.drawLine(worldA.x, worldA.y, worldB.x, worldB.y, color);
-        //     }
-        //     //}
-        // }
-
         // Draw all joints anchor points and debug properties
         if (this.debug) {
             if (this.showAABB) {
@@ -589,6 +567,7 @@ export default class Application {
 
                     Graphics.drawLine(worldA.x, worldA.y, worldB.x, worldB.y, 'blue');
                 }
+
                 for (const manifold of this.world.getManifolds()) {
                     for (const contact of manifold.points) {
                         const startPoint = contact.point;
