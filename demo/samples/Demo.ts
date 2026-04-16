@@ -55,7 +55,7 @@ export default class Demo {
         'Demo 13: 1000 Capsules',
         'Demo 14: 1000 Random convex shapes',
         'Demo 15: Black hole orbit',
-        'Demo 16: Welded circle ring',
+        'Demo 16: Welded boxes',
     ];
 
     static generateFloor(world: World, app: Application): RigidBody {
@@ -975,87 +975,78 @@ export default class Demo {
     };
 
     static demo16 = (world: World, app: Application) => {
-        // Demo 16: Welded circle ring
+        // Demo 16: Welded boxes
         app.setBackground('background');
-        this.generateFloor(world, app);
-        this.generateFences(world, app);
+        const floor = this.generateFloor(world, app);
+        floor.rotation = -0.1;
+        floor.position.y += 100;
+        floor.shape.updateAABB(floor);
+        floor.shape.updateVertices(floor.rotation, floor.position);
 
-        const box1 = Bodies.box({
-            width: 60,
-            height: 60,
-            x: -30,
-            y: -30,
-            mass: 1,
-        });
+        const boxWidth = 20;
+        const boxRows = 5;
+        const xOffset = 250;
+        const yOffset = 250;
+        const spacing = 1;
 
-        const box2 = Bodies.box({
-            width: 60,
-            height: 60,
-            x: 30,
-            y: -30,
-            mass: 1,
-        });
-
-        const box3 = Bodies.box({
-            width: 60,
-            height: 60,
-            x: -30,
-            y: 30,
-            mass: 1,
-        });
-
-        const box4 = Bodies.box({
-            width: 60,
-            height: 60,
-            x: 30,
-            y: 30,
-            mass: 1,
-        });
-
-        world.addBody(box1);
-        world.addBody(box2);
-        world.addBody(box3);
-        world.addBody(box4);
-
-        const weld12 = new WeldJoint(box1, box2);
-        const weld23 = new WeldJoint(box2, box3);
-        const weld34 = new WeldJoint(box3, box4);
-        const weld41 = new WeldJoint(box4, box1);
-
-        world.addJoint(weld12);
-        world.addJoint(weld23);
-        world.addJoint(weld34);
-        world.addJoint(weld41);
-
-        const impulseThreshold = 4_000;
-
-        box1.onContact = info => {
-            if (info.impulseSum > impulseThreshold) {
-                world.removeJoint(weld12);
-                world.removeJoint(weld41);
+        for (let i = 0; i < boxRows; i++) {
+            for (let j = 0; j < boxRows; j++) {
+                const box = Bodies.box({
+                    width: boxWidth,
+                    height: boxWidth,
+                    x: boxWidth * i + spacing * i + xOffset,
+                    y: boxWidth * j + spacing * j + yOffset,
+                    mass: 1,
+                    restitution: 0,
+                });
+                world.addBody(box);
             }
-        };
+        }
 
-        box2.onContact = info => {
-            if (info.impulseSum > impulseThreshold) {
-                world.removeJoint(weld12);
-                world.removeJoint(weld23);
-            }
-        };
+        const boxes: RigidBody[][] = [];
 
-        box3.onContact = info => {
-            if (info.impulseSum > impulseThreshold) {
-                world.removeJoint(weld23);
-                world.removeJoint(weld34);
-            }
-        };
+        for (let i = 0; i < boxRows; i++) {
+            boxes[i] = [];
 
-        box4.onContact = info => {
-            if (info.impulseSum > impulseThreshold) {
-                world.removeJoint(weld34);
-                world.removeJoint(weld41);
+            for (let j = 0; j < boxRows; j++) {
+                const box = Bodies.box({
+                    width: boxWidth,
+                    height: boxWidth,
+                    x: boxWidth * i + spacing * i - xOffset,
+                    y: boxWidth * j + spacing * j + yOffset,
+                    mass: 1,
+                    restitution: 0,
+                });
+
+                world.addBody(box);
+                boxes[i][j] = box;
             }
-        };
+        }
+
+        // Create weld joints between adjacent boxes
+        for (let i = 0; i < boxRows; i++) {
+            for (let j = 0; j < boxRows; j++) {
+                const current = boxes[i][j];
+
+                // weld to the box on the right
+                if (i + 1 < boxRows) {
+                    const right = boxes[i + 1][j];
+                    const weld = new WeldJoint(current, right);
+                    weld.drawAnchor = true;
+                    weld.drawConnectionLine = true;
+                    world.addJoint(weld);
+                }
+
+                // weld to the box below
+                if (j + 1 < boxRows) {
+                    const below = boxes[i][j + 1];
+                    const weld = new WeldJoint(current, below);
+                    weld.drawAnchor = true;
+                    weld.drawConnectionLine = true;
+                    world.addJoint(weld);
+                }
+            }
+        }
     };
 
     static demoFunctions = [
