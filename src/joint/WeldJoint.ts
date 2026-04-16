@@ -1,19 +1,32 @@
 import { SETTINGS } from '../core/Constants';
 import { RigidBody } from '../core/RigidBody';
-import { Mat3 } from '../math/Mat3';
 import { Vec2 } from '../math/Vec2';
-import { Vec3 } from '../math/Vec3';
 import { Joint } from './Joint';
 
-// Revolute joint + Angle joint
 export class WeldJoint extends Joint {
     public initialAngleOffset: number;
 
-    private ra!: Vec2;
-    private rb!: Vec2;
-    private m!: Mat3;
-    private bias!: Vec3;
-    private impulseSum: Vec3 = new Vec3();
+    private raX = 0.0;
+    private raY = 0.0;
+    private rbX = 0.0;
+    private rbY = 0.0;
+
+    private effectiveMass00 = 0.0;
+    private effectiveMass01 = 0.0;
+    private effectiveMass02 = 0.0;
+    private effectiveMass10 = 0.0;
+    private effectiveMass11 = 0.0;
+    private effectiveMass12 = 0.0;
+    private effectiveMass20 = 0.0;
+    private effectiveMass21 = 0.0;
+    private effectiveMass22 = 0.0;
+
+    private biasX = 0.0;
+    private biasY = 0.0;
+    private biasZ = 0.0;
+    private impulseSumX = 0.0;
+    private impulseSumY = 0.0;
+    private impulseSumZ = 0.0;
 
     constructor(
         bodyA: RigidBody,
@@ -33,92 +46,124 @@ export class WeldJoint extends Joint {
         this.drawConnectionLine = false;
     }
 
-    override preSolve(invDt: number) {
-        // Calculate Jacobian J and effective mass M
-        // J = [-I, -skew(ra), I, skew(rb)] // Revolute
-        //     [ 0,        -1, 0,        1] // Angle
-        // M = (J · M^-1 · J^t)^-1
-        this.ra = this.localAnchorA.rotate(this.bodyA.rotation);
-        this.rb = this.localAnchorB.rotate(this.bodyB.rotation);
+    override preSolve(invDt: number): void {
+        const bodyA = this.bodyA;
+        const bodyB = this.bodyB;
 
-        const k = new Mat3();
+        const localAnchorA = this.localAnchorA;
+        const cosA = Math.cos(bodyA.rotation);
+        const sinA = Math.sin(bodyA.rotation);
+        this.raX = localAnchorA.x * cosA - localAnchorA.y * sinA;
+        this.raY = localAnchorA.x * sinA + localAnchorA.y * cosA;
 
-        k.m00 =
-            this.bodyA.invMass +
-            this.bodyB.invMass +
-            this.bodyA.invI * this.ra.y * this.ra.y +
-            this.bodyB.invI * this.rb.y * this.rb.y;
+        const localAnchorB = this.localAnchorB;
+        const cosB = Math.cos(bodyB.rotation);
+        const sinB = Math.sin(bodyB.rotation);
+        this.rbX = localAnchorB.x * cosB - localAnchorB.y * sinB;
+        this.rbY = localAnchorB.x * sinB + localAnchorB.y * cosB;
 
-        k.m01 = -this.bodyA.invI * this.ra.y * this.ra.x - this.bodyB.invI * this.rb.y * this.rb.x;
+        const invMassA = bodyA.invMass;
+        const invMassB = bodyB.invMass;
+        const invIA = bodyA.invI;
+        const invIB = bodyB.invI;
 
-        k.m10 = -this.bodyA.invI * this.ra.x * this.ra.y - this.bodyB.invI * this.rb.x * this.rb.y;
+        const k00 = invMassA + invMassB + invIA * this.raY * this.raY + invIB * this.rbY * this.rbY + this.gamma;
+        const k01 = -invIA * this.raY * this.raX - invIB * this.rbY * this.rbX;
+        const k02 = -invIA * this.raY - invIB * this.rbY;
+        const k11 = invMassA + invMassB + invIA * this.raX * this.raX + invIB * this.rbX * this.rbX + this.gamma;
+        const k12 = invIA * this.raX + invIB * this.rbX;
+        const k22 = invIA + invIB + this.gamma;
 
-        k.m11 =
-            this.bodyA.invMass +
-            this.bodyB.invMass +
-            this.bodyA.invI * this.ra.x * this.ra.x +
-            this.bodyB.invI * this.rb.x * this.rb.x;
+        const det =
+            k00 * (k11 * k22 - k12 * k12) -
+            k01 * (k01 * k22 - k12 * k02) +
+            k02 * (k01 * k12 - k11 * k02);
 
-        k.m02 = -this.bodyA.invI * this.ra.y - this.bodyB.invI * this.rb.y;
-        k.m12 = this.bodyA.invI * this.ra.x + this.bodyB.invI * this.rb.x;
+        if (det === 0.0) {
+            throw new Error('Determinant 0');
+        }
 
-        k.m20 = -this.bodyA.invI * this.ra.y - this.bodyB.invI * this.rb.y;
-        k.m21 = this.bodyA.invI * this.ra.x + this.bodyB.invI * this.rb.x;
+        const invDet = 1.0 / det;
+        this.effectiveMass00 = (k11 * k22 - k12 * k12) * invDet;
+        this.effectiveMass01 = (k02 * k12 - k01 * k22) * invDet;
+        this.effectiveMass02 = (k01 * k12 - k02 * k11) * invDet;
+        this.effectiveMass10 = (k12 * k02 - k01 * k22) * invDet;
+        this.effectiveMass11 = (k00 * k22 - k02 * k02) * invDet;
+        this.effectiveMass12 = (k01 * k02 - k00 * k12) * invDet;
+        this.effectiveMass20 = (k01 * k12 - k02 * k11) * invDet;
+        this.effectiveMass21 = (k02 * k01 - k00 * k12) * invDet;
+        this.effectiveMass22 = (k00 * k11 - k01 * k01) * invDet;
 
-        k.m22 = this.bodyA.invI + this.bodyB.invI;
+        const errorX = bodyB.position.x + this.rbX - (bodyA.position.x + this.raX);
+        const errorY = bodyB.position.y + this.rbY - (bodyA.position.y + this.raY);
+        const errorZ = bodyB.rotation - bodyA.rotation - this.initialAngleOffset;
 
-        k.m00 += this.gamma;
-        k.m11 += this.gamma;
-        k.m22 += this.gamma;
+        if (SETTINGS.positionCorrection) {
+            const biasScale = this.beta * invDt;
+            this.biasX = errorX * biasScale;
+            this.biasY = errorY * biasScale;
+            this.biasZ = errorZ * biasScale;
+        } else {
+            this.biasX = 0.0;
+            this.biasY = 0.0;
+            this.biasZ = 0.0;
+        }
 
-        this.m = k.inverted();
-
-        const pa = this.bodyA.position.addNew(this.ra);
-        const pb = this.bodyB.position.addNew(this.rb);
-
-        const error01 = pb.subNew(pa);
-        const error2 = this.bodyB.rotation - this.bodyA.rotation - this.initialAngleOffset;
-
-        if (SETTINGS.positionCorrection) this.bias = new Vec3(error01.x, error01.y, error2).mul(this.beta * invDt);
-        else this.bias = new Vec3(0.0, 0.0, 0.0);
-
-        if (SETTINGS.warmStarting) this.applyImpulse(this.impulseSum);
+        if (
+            SETTINGS.warmStarting &&
+            (this.impulseSumX !== 0.0 || this.impulseSumY !== 0.0 || this.impulseSumZ !== 0.0)
+        ) {
+            this.applyImpulse(this.impulseSumX, this.impulseSumY, this.impulseSumZ);
+        }
     }
 
-    override solve() {
-        // Calculate corrective impulse: Pc
-        // Pc = J^t * λ (λ: lagrangian multiplier)
-        // λ = (J · M^-1 · J^t)^-1 ⋅ -(J·v+b)
+    override solve(): void {
+        const bodyA = this.bodyA;
+        const bodyB = this.bodyB;
 
-        const jv01 = this.bodyB.velocity
-            .addNew(this.rb.crossScalar(this.bodyB.angularVelocity))
-            .subNew(this.bodyA.velocity.addNew(this.ra.crossScalar(this.bodyA.angularVelocity)));
-        const jv2 = this.bodyB.angularVelocity - this.bodyA.angularVelocity;
+        const relativeVelocityX =
+            bodyB.velocity.x -
+            bodyB.angularVelocity * this.rbY -
+            (bodyA.velocity.x - bodyA.angularVelocity * this.raY);
+        const relativeVelocityY =
+            bodyB.velocity.y +
+            bodyB.angularVelocity * this.rbX -
+            (bodyA.velocity.y + bodyA.angularVelocity * this.raX);
+        const relativeAngularVelocity = bodyB.angularVelocity - bodyA.angularVelocity;
 
-        const jv = new Vec3(jv01.x, jv01.y, jv2);
+        const rhsX = -(relativeVelocityX + this.biasX + this.impulseSumX * this.gamma);
+        const rhsY = -(relativeVelocityY + this.biasY + this.impulseSumY * this.gamma);
+        const rhsZ = -(relativeAngularVelocity + this.biasZ + this.impulseSumZ * this.gamma);
 
-        const lambda = this.m.mulVector3(jv.add(this.bias).add(this.impulseSum.mul(this.gamma)).inverted());
+        const lambdaX = this.effectiveMass00 * rhsX + this.effectiveMass01 * rhsY + this.effectiveMass02 * rhsZ;
+        const lambdaY = this.effectiveMass10 * rhsX + this.effectiveMass11 * rhsY + this.effectiveMass12 * rhsZ;
+        const lambdaZ = this.effectiveMass20 * rhsX + this.effectiveMass21 * rhsY + this.effectiveMass22 * rhsZ;
 
-        this.applyImpulse(lambda);
+        this.applyImpulse(lambdaX, lambdaY, lambdaZ);
 
-        if (SETTINGS.warmStarting) this.impulseSum = this.impulseSum.add(lambda);
+        if (SETTINGS.warmStarting) {
+            this.impulseSumX += lambdaX;
+            this.impulseSumY += lambdaY;
+            this.impulseSumZ += lambdaZ;
+        }
     }
 
-    private applyImpulse(lambda: Vec3) {
-        // V2 = V2' + M^-1 ⋅ Pc
-        // Pc = J^t ⋅ λ
+    private applyImpulse(lambdaX: number, lambdaY: number, lambdaZ: number): void {
+        if (lambdaX === 0.0 && lambdaY === 0.0 && lambdaZ === 0.0) {
+            return;
+        }
 
-        const lambda01 = new Vec2(lambda.x, lambda.y);
-        const lambda2 = lambda.z;
+        const bodyA = this.bodyA;
+        const bodyB = this.bodyB;
 
-        // Solve for point-to-point constraint
-        this.bodyA.velocity = this.bodyA.velocity.subNew(lambda01.scaleNew(this.bodyA.invMass));
-        this.bodyA.angularVelocity = this.bodyA.angularVelocity - this.bodyA.invI * this.ra.cross(lambda01);
-        this.bodyB.velocity = this.bodyB.velocity.addNew(lambda01.scaleNew(this.bodyB.invMass));
-        this.bodyB.angularVelocity = this.bodyB.angularVelocity + this.bodyB.invI * this.rb.cross(lambda01);
+        const bodyAImpulseScale = bodyA.invMass;
+        bodyA.velocity.x -= lambdaX * bodyAImpulseScale;
+        bodyA.velocity.y -= lambdaY * bodyAImpulseScale;
+        bodyA.angularVelocity -= (this.raX * lambdaY - this.raY * lambdaX + lambdaZ) * bodyA.invI;
 
-        // Solve for angle constraint
-        this.bodyA.angularVelocity = this.bodyA.angularVelocity - lambda2 * this.bodyA.invI;
-        this.bodyB.angularVelocity = this.bodyB.angularVelocity + lambda2 * this.bodyB.invI;
+        const bodyBImpulseScale = bodyB.invMass;
+        bodyB.velocity.x += lambdaX * bodyBImpulseScale;
+        bodyB.velocity.y += lambdaY * bodyBImpulseScale;
+        bodyB.angularVelocity += (this.rbX * lambdaY - this.rbY * lambdaX + lambdaZ) * bodyB.invI;
     }
 }
