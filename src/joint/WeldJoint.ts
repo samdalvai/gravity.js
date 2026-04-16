@@ -41,9 +41,8 @@ export class WeldJoint extends Joint {
         // J = [-I, -skew(ra), I, skew(rb)] // Revolute
         //     [ 0,        -1, 0,        1] // Angle
         // M = (J · M^-1 · J^t)^-1
-
-        this.ra = this.bodyA.localPointToWorld(this.localAnchorA);
-        this.rb = this.bodyB.localPointToWorld(this.localAnchorB);
+        this.ra = this.localAnchorA.rotate(this.bodyA.rotation);
+        this.rb = this.localAnchorB.rotate(this.bodyB.rotation);
 
         const k = new Mat3();
 
@@ -116,7 +115,7 @@ export class WeldJoint extends Joint {
         const lambda2 = lambda.z;
 
         // Solve for point-to-point constraint
-        this.bodyA.velocity = this.bodyA.velocity.addNew(lambda01.scaleNew(this.bodyA.invMass));
+        this.bodyA.velocity = this.bodyA.velocity.subNew(lambda01.scaleNew(this.bodyA.invMass));
         this.bodyA.angularVelocity = this.bodyA.angularVelocity - this.bodyA.invI * this.ra.cross(lambda01);
         this.bodyB.velocity = this.bodyB.velocity.addNew(lambda01.scaleNew(this.bodyB.invMass));
         this.bodyB.angularVelocity = this.bodyB.angularVelocity + this.bodyB.invI * this.rb.cross(lambda01);
