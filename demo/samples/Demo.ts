@@ -5,7 +5,6 @@
  * https://github.com/erincatto/box2d-lite
  */
 import { Bodies, DistanceJoint, GRAVITY, RigidBody, SETTINGS, Utils, Vec2, World } from '../../src';
-import { Joint } from '../../src/joint/Joint';
 import { WeldJoint } from '../../src/joint/WeldJoint';
 import Application from '../Application';
 import Graphics from '../graphics/Graphics';
@@ -57,7 +56,7 @@ export default class Demo {
         'Demo 14: 1000 Random convex shapes',
         'Demo 15: Black hole orbit',
         'Demo 16: Welded boxes',
-        'Demo 17: Breakable joints',
+        'Demo 17: Breakable ragdoll',
     ];
 
     static generateFloor(world: World, app: Application): RigidBody {
@@ -1054,74 +1053,159 @@ export default class Demo {
     };
 
     static demo17 = (world: World, app: Application) => {
-        // Demo 17: Breakable Joints
-        app.setBackground('background');
+        // Demo 17: Breakable ragdoll
+        app.setBackground('darkBackground');
         this.generateFloor(world, app);
+        this.generateFences(world, app);
 
-        const boxWidth = 20;
-        const boxRows = 10;
-        const xOffset = 250;
-        const yOffset = 0;
-        const spacing = 1;
+        const breakImpulseThreshold = 2_000;
+        const ragdollCenter = new Vec2(0, -150);
+        const bodyTuning = JOINT_TUNING.ragdoll;
+        const ragdollBodyIds = new Set<number>();
+        const bodyJoints = new Map<number, Set<DistanceJoint>>();
 
-        const boxes: RigidBody[][] = [];
+        const removeDistanceJoint = (joint: DistanceJoint): void => {
+            world.removeJoint(joint);
+            bodyJoints.get(joint.bodyA.id)?.delete(joint);
+            bodyJoints.get(joint.bodyB.id)?.delete(joint);
+        };
 
-        for (let i = 0; i < boxRows; i++) {
-            boxes[i] = [];
-
-            for (let j = 0; j < boxRows; j++) {
-                const box = Bodies.box({
-                    width: boxWidth,
-                    height: boxWidth,
-                    x: boxWidth * i + spacing * i + xOffset,
-                    y: boxWidth * j + spacing * j + yOffset,
-                    mass: 1,
-                    restitution: 0,
-                });
-
-                world.addBody(box);
-                boxes[i][j] = box;
+        const breakAttachedJoints = (body: RigidBody): void => {
+            const joints = bodyJoints.get(body.id);
+            if (!joints || joints.size === 0) {
+                body.onContact = undefined;
+                return;
             }
-        }
 
-        // Create weld joints between adjacent boxes
-        const jointFrequency = 30;
-        const jointDamping = 0.5;
-
-        for (let i = 0; i < boxRows; i++) {
-            for (let j = 0; j < boxRows; j++) {
-                const current = boxes[i][j];
-                const joints: Joint[] = [];
-
-                // weld to the box on the right
-                if (i + 1 < boxRows) {
-                    const right = boxes[i + 1][j];
-                    const weld = new WeldJoint(current, right, undefined, jointFrequency, jointDamping);
-                    weld.drawAnchor = true;
-                    weld.drawConnectionLine = true;
-                    world.addJoint(weld);
-                    joints.push(weld);
-                }
-
-                // weld to the box below
-                if (j + 1 < boxRows) {
-                    const below = boxes[i][j + 1];
-                    const weld = new WeldJoint(current, below, undefined, jointFrequency, jointDamping);
-                    weld.drawAnchor = true;
-                    weld.drawConnectionLine = true;
-                    world.addJoint(weld);
-                    joints.push(weld);
-                }
-
-                current.onContact = info => {
-                    if (info.impulseSum > 1_000) {
-                        for (const j of joints) {
-                            world.removeJoint(j);
-                        }
-                    }
-                };
+            for (const joint of [...joints]) {
+                removeDistanceJoint(joint);
             }
-        }
+
+            body.onContact = undefined;
+        };
+
+        const registerRagdollBody = (body: RigidBody): void => {
+            ragdollBodyIds.add(body.id);
+            bodyJoints.set(body.id, new Set());
+            body.onContact = info => {
+                const otherBody = info.bodyA.id === body.id ? info.bodyB : info.bodyA;
+                if (ragdollBodyIds.has(otherBody.id)) return;
+                if (info.impulseSum <= breakImpulseThreshold) return;
+
+                breakAttachedJoints(body);
+            };
+            world.addBody(body);
+        };
+
+        const addBreakableJoint = (
+            bodyA: RigidBody,
+            bodyB: RigidBody,
+            anchorA: Vec2 = bodyA.position,
+            anchorB: Vec2 = bodyB.position,
+            length = -1,
+        ): DistanceJoint => {
+            const joint = this.createDistanceJoint(bodyA, bodyB, bodyTuning, anchorA, anchorB, length);
+            joint.drawAnchor = true;
+            joint.drawConnectionLine = true;
+            bodyJoints.get(bodyA.id)?.add(joint);
+            bodyJoints.get(bodyB.id)?.add(joint);
+            world.addJoint(joint);
+            return joint;
+        };
+
+        const torso = Bodies.box({ width: 50, height: 100, x: ragdollCenter.x, y: ragdollCenter.y, mass: 3.0 });
+        const head = Bodies.circle({
+            radius: 25,
+            x: ragdollCenter.x,
+            y: ragdollCenter.y + 50 + 25,
+            mass: 5.0,
+        });
+        const leftArm = Bodies.box({
+            width: 15,
+            height: 70,
+            x: ragdollCenter.x - 32,
+            y: ragdollCenter.y + 10,
+            mass: 1.0,
+        });
+        const rightArm = Bodies.box({
+            width: 15,
+            height: 70,
+            x: ragdollCenter.x + 32,
+            y: ragdollCenter.y + 10,
+            mass: 1.0,
+        });
+        const leftLeg = Bodies.box({
+            width: 20,
+            height: 90,
+            x: ragdollCenter.x - 20,
+            y: ragdollCenter.y - 97,
+            mass: 1.0,
+        });
+        const rightLeg = Bodies.box({
+            width: 20,
+            height: 90,
+            x: ragdollCenter.x + 20,
+            y: ragdollCenter.y - 97,
+            mass: 1.0,
+        });
+
+        app.setBodyTexture(head, 'head');
+        app.setBodyTexture(torso, 'torso');
+        app.setBodyTexture(leftArm, 'leftArm');
+        app.setBodyTexture(rightArm, 'rightArm');
+        app.setBodyTexture(leftLeg, 'leftLeg');
+        app.setBodyTexture(rightLeg, 'rightLeg');
+
+        registerRagdollBody(head);
+        registerRagdollBody(torso);
+        registerRagdollBody(leftArm);
+        registerRagdollBody(rightArm);
+        registerRagdollBody(leftLeg);
+        registerRagdollBody(rightLeg);
+
+        addBreakableJoint(
+            torso,
+            head,
+            torso.position.addNew(new Vec2(0, 50)),
+            head.position.addNew(new Vec2(0, -25)),
+            0,
+        );
+        addBreakableJoint(
+            torso,
+            leftArm,
+            torso.position.addNew(new Vec2(-28, 45)),
+            leftArm.position.addNew(new Vec2(5, 35)),
+        );
+        addBreakableJoint(
+            torso,
+            rightArm,
+            torso.position.addNew(new Vec2(28, 45)),
+            rightArm.position.addNew(new Vec2(-5, 35)),
+        );
+        addBreakableJoint(
+            torso,
+            leftLeg,
+            torso.position.addNew(new Vec2(-20, -50)),
+            leftLeg.position.addNew(new Vec2(0, 45)),
+        );
+        addBreakableJoint(
+            torso,
+            rightLeg,
+            torso.position.addNew(new Vec2(20, -50)),
+            rightLeg.position.addNew(new Vec2(0, 45)),
+        );
+
+        const heavyBox = Bodies.box({
+            width: 60,
+            height: 60,
+            x: ragdollCenter.x,
+            y: ragdollCenter.y + 1000,
+            mass: 100,
+        });
+
+        app.setBodyTexture(heavyBox, 'metal');
+        
+        world.addBody(heavyBox);
     };
 
     static demoFunctions = [
