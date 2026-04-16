@@ -5,6 +5,7 @@
  * https://github.com/erincatto/box2d-lite
  */
 import { Bodies, DistanceJoint, GRAVITY, RigidBody, SETTINGS, Utils, Vec2, World } from '../../src';
+import { WeldJoint } from '../../src/joint/WeldJoint';
 import Application from '../Application';
 import Graphics from '../graphics/Graphics';
 
@@ -54,6 +55,7 @@ export default class Demo {
         'Demo 13: 1000 Capsules',
         'Demo 14: 1000 Random convex shapes',
         'Demo 15: Black hole orbit',
+        'Demo 16: Weld joint and breakable bodies',
     ];
 
     static generateFloor(world: World, app: Application): RigidBody {
@@ -814,6 +816,7 @@ export default class Demo {
         }
     };
 
+    // TODO: move at first position
     static demo0 = (world: World, app: Application) => {
         // Demo 0: a complex scene
         app.setBackground('background');
@@ -975,6 +978,34 @@ export default class Demo {
         world.addBody(pig4);
     };
 
+    static demo16 = (world: World, app: Application) => {
+        // Demo 10: Continuous collision detection
+        app.setBackground('background');
+        this.generateFloor(world, app);
+        this.generateFences(world, app);
+
+        const box1 = Bodies.box({
+            width: 60,
+            height: 60,
+            x: 30,
+            y: 0,
+            mass: 1,
+        });
+
+        const box2 = Bodies.box({
+            width: 60,
+            height: 60,
+            x: -30,
+            y: 0,
+            mass: 1,
+        });
+
+        world.addBody(box1);
+        world.addBody(box2);
+        const weld = new WeldJoint(box1, box2);
+        world.addJoint(weld);
+    };
+
     static demoFunctions = [
         this.demo0,
         this.demo1,
@@ -992,5 +1023,6 @@ export default class Demo {
         this.demo13,
         this.demo14,
         this.demo15,
+        this.demo16,
     ];
 }
