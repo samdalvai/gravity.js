@@ -163,6 +163,11 @@ export class Vec2 {
         return result;
     }
 
+    /** Vector in the -90° (clockwise) perpendicular direction scaled by n */
+    crossScalar(n: number): Vec2 {
+        return new Vec2(-n * this.y, n * this.x);
+    }
+
     dot(v: Vec2): number {
         return this.x * v.x + this.y * v.y;
     }

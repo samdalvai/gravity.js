@@ -95,17 +95,17 @@ export class WeldJoint extends Joint {
         // λ = (J · M^-1 · J^t)^-1 ⋅ -(J·v+b)
 
         const jv01 = this.bodyB.velocity
-            .add(Util.cross(this.bodyB.angularVelocity, this.rb))
-            .sub(this.bodyA.velocity.add(Util.cross(this.bodyA.angularVelocity, this.ra)));
+            .addNew(this.rb.crossScalar(this.bodyB.angularVelocity))
+            .subNew(this.bodyA.velocity.addNew(this.ra.crossScalar(this.bodyA.angularVelocity)));
         const jv2 = this.bodyB.angularVelocity - this.bodyA.angularVelocity;
 
         const jv = new Vec3(jv01.x, jv01.y, jv2);
 
-        const lambda = this.m.mulVec3(jv.add(this.bias).add(this.impulseSum.mul(this.gamma)).inverted());
+        const lambda = this.m.mulVector3(jv.add(this.bias).add(this.impulseSum.mul(this.gamma)).inverted());
 
         this.applyImpulse(lambda);
 
-        if (Settings.warmStarting) this.impulseSum = this.impulseSum.add(lambda);
+        if (SETTINGS.warmStarting) this.impulseSum = this.impulseSum.add(lambda);
     }
 
     private applyImpulse(lambda: Vec3) {
@@ -116,9 +116,9 @@ export class WeldJoint extends Joint {
         const lambda2 = lambda.z;
 
         // Solve for point-to-point constraint
-        this.bodyA.velocity = this.bodyA.velocity.sub(lambda01.mul(this.bodyA.invMass));
+        this.bodyA.velocity = this.bodyA.velocity.addNew(lambda01.scaleNew(this.bodyA.invMass));
         this.bodyA.angularVelocity = this.bodyA.angularVelocity - this.bodyA.invI * this.ra.cross(lambda01);
-        this.bodyB.velocity = this.bodyB.velocity.add(lambda01.mul(this.bodyB.invMass));
+        this.bodyB.velocity = this.bodyB.velocity.addNew(lambda01.scaleNew(this.bodyB.invMass));
         this.bodyB.angularVelocity = this.bodyB.angularVelocity + this.bodyB.invI * this.rb.cross(lambda01);
 
         // Solve for angle constraint
