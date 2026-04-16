@@ -56,7 +56,7 @@ export default class Demo {
         'Demo 14: 1000 Random convex shapes',
         'Demo 15: Black hole orbit',
         'Demo 16: Welded boxes',
-        'Demo 17: Breakable ragdoll',
+        'Demo 17: Breakable joints',
     ];
 
     static generateFloor(world: World, app: Application): RigidBody {
@@ -1053,15 +1053,18 @@ export default class Demo {
     };
 
     static demo17 = (world: World, app: Application) => {
-        // Demo 17: Breakable ragdoll
+        // Demo 17: Breakable joints
         app.setBackground('darkBackground');
         this.generateFloor(world, app);
         this.generateFences(world, app);
 
-        const breakImpulseThreshold = 2_000;
+        const ragdollBreakImpulseThreshold = 2_000;
+        const bridgeBreakImpulseThreshold = 900;
         const ragdollCenter = new Vec2(0, -150);
-        const bodyTuning = JOINT_TUNING.ragdoll;
+        const ragdollTuning = JOINT_TUNING.ragdoll;
+        const bridgeTuning = JOINT_TUNING.bridge;
         const ragdollBodyIds = new Set<number>();
+        const bridgeBodyIds = new Set<number>();
         const bodyJoints = new Map<number, Set<DistanceJoint>>();
 
         const removeDistanceJoint = (joint: DistanceJoint): void => {
@@ -1084,12 +1087,16 @@ export default class Demo {
             body.onContact = undefined;
         };
 
-        const registerRagdollBody = (body: RigidBody): void => {
-            ragdollBodyIds.add(body.id);
+        const registerBreakableBody = (
+            body: RigidBody,
+            groupBodyIds: Set<number>,
+            breakImpulseThreshold: number,
+        ): void => {
+            groupBodyIds.add(body.id);
             bodyJoints.set(body.id, new Set());
             body.onContact = info => {
                 const otherBody = info.bodyA.id === body.id ? info.bodyB : info.bodyA;
-                if (ragdollBodyIds.has(otherBody.id)) return;
+                if (groupBodyIds.has(otherBody.id)) return;
                 if (info.impulseSum <= breakImpulseThreshold) return;
 
                 breakAttachedJoints(body);
@@ -1103,8 +1110,9 @@ export default class Demo {
             anchorA: Vec2 = bodyA.position,
             anchorB: Vec2 = bodyB.position,
             length = -1,
+            tuning: JointTuning = ragdollTuning,
         ): DistanceJoint => {
-            const joint = this.createDistanceJoint(bodyA, bodyB, bodyTuning, anchorA, anchorB, length);
+            const joint = this.createDistanceJoint(bodyA, bodyB, tuning, anchorA, anchorB, length);
             joint.drawAnchor = true;
             joint.drawConnectionLine = true;
             bodyJoints.get(bodyA.id)?.add(joint);
@@ -1156,12 +1164,12 @@ export default class Demo {
         app.setBodyTexture(leftLeg, 'leftLeg');
         app.setBodyTexture(rightLeg, 'rightLeg');
 
-        registerRagdollBody(head);
-        registerRagdollBody(torso);
-        registerRagdollBody(leftArm);
-        registerRagdollBody(rightArm);
-        registerRagdollBody(leftLeg);
-        registerRagdollBody(rightLeg);
+        registerBreakableBody(head, ragdollBodyIds, ragdollBreakImpulseThreshold);
+        registerBreakableBody(torso, ragdollBodyIds, ragdollBreakImpulseThreshold);
+        registerBreakableBody(leftArm, ragdollBodyIds, ragdollBreakImpulseThreshold);
+        registerBreakableBody(rightArm, ragdollBodyIds, ragdollBreakImpulseThreshold);
+        registerBreakableBody(leftLeg, ragdollBodyIds, ragdollBreakImpulseThreshold);
+        registerBreakableBody(rightLeg, ragdollBodyIds, ragdollBreakImpulseThreshold);
 
         addBreakableJoint(
             torso,
@@ -1204,8 +1212,53 @@ export default class Demo {
         });
 
         app.setBodyTexture(heavyBox, 'metal');
-        
         world.addBody(heavyBox);
+
+        const bridgeAnchorY = ragdollCenter.y + 350;
+        const bridgeAnchorWidth = 80;
+        const bridgeAnchorHeight = 20;
+        const bridgeLinkCount = 10;
+        const bridgeLinkSpacing = 33;
+
+        const startAnchor = Bodies.box({
+            width: bridgeAnchorWidth,
+            height: bridgeAnchorHeight,
+            x: ragdollCenter.x - 210,
+            y: bridgeAnchorY,
+            mass: 0,
+        });
+        app.setBodyTexture(startAnchor, 'rockBridgeAnchor');
+        world.addBody(startAnchor);
+
+        let previousBody: RigidBody = startAnchor;
+
+        for (let i = 1; i <= bridgeLinkCount; i++) {
+            const x = startAnchor.position.x + 30 + i * bridgeLinkSpacing;
+            const y = bridgeAnchorY - Math.sin((i / bridgeLinkCount) * Math.PI) * 12;
+            const link = Bodies.circle({
+                radius: 15,
+                x,
+                y,
+                mass: 3,
+                restitution: 0,
+            });
+
+            app.setBodyTexture(link, 'woodBridgeStep');
+            registerBreakableBody(link, bridgeBodyIds, bridgeBreakImpulseThreshold);
+            addBreakableJoint(previousBody, link, previousBody.position, link.position, -1, bridgeTuning);
+            previousBody = link;
+        }
+
+        const endAnchor = Bodies.box({
+            width: bridgeAnchorWidth,
+            height: bridgeAnchorHeight,
+            x: startAnchor.position.x + 60 + bridgeLinkCount * bridgeLinkSpacing + bridgeAnchorWidth / 2,
+            y: bridgeAnchorY,
+            mass: 0,
+        });
+        app.setBodyTexture(endAnchor, 'rockBridgeAnchor');
+        world.addBody(endAnchor);
+        addBreakableJoint(previousBody, endAnchor, previousBody.position, endAnchor.position, -1, bridgeTuning);
     };
 
     static demoFunctions = [
