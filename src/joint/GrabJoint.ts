@@ -17,14 +17,23 @@ export class GrabJoint extends Joint {
         super(body, body, frequency, dampingRatio, jointMass);
 
         this.localAnchor = this.bodyA.worldPointToLocal(anchor);
-        this.target = target;
+        this.target = target.copy();
     }
 
-    override preSolve(): void {
+    setTarget(target: Vec2): void {
+        this.target.assign(target);
+    }
+
+    override preSolve(invDt: number): void {
         // Calculate Jacobian J and effective mass M
         // J = [I, skew(r)]
         // M = (J · M^-1 · J^t)^-1
-        this.r = this.bodyA.localPointToWorld(this.localAnchor);
+        const cos = Math.cos(this.bodyA.rotation);
+        const sin = Math.sin(this.bodyA.rotation);
+        this.r = new Vec2(
+            this.localAnchor.x * cos - this.localAnchor.y * sin,
+            this.localAnchor.x * sin + this.localAnchor.y * cos,
+        );
         const p = this.bodyA.position.addNew(this.r);
 
         const k = new Matrix2();
@@ -41,10 +50,15 @@ export class GrabJoint extends Joint {
 
         const error = p.subNew(this.target);
 
-        if (SETTINGS.positionCorrection) this.bias = error.scaleNew(this.beta * SETTINGS.invDt);
-        else this.bias = new Vec2(0.0, 0.0);
+        if (SETTINGS.positionCorrection && invDt > 0) {
+            this.bias = error.scaleNew(this.beta * invDt);
+        } else {
+            this.bias = new Vec2(0.0, 0.0);
+        }
 
-        if (SETTINGS.warmStarting) this.applyImpulse(this.impulseSum);
+        if (SETTINGS.warmStarting && (this.impulseSum.x !== 0.0 || this.impulseSum.y !== 0.0)) {
+            this.applyImpulse(this.impulseSum);
+        }
     }
 
     override solve(): void {
@@ -58,7 +72,7 @@ export class GrabJoint extends Joint {
 
         this.applyImpulse(lambda);
 
-        if (SETTINGS.warmStarting) this.impulseSum = this.impulseSum.addNew(lambda);
+        if (SETTINGS.warmStarting) this.impulseSum.addAssign(lambda);
     }
 
     private applyImpulse(lambda: Vec2): void {

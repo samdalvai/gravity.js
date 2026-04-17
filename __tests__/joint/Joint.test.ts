@@ -3,6 +3,7 @@ import { Bodies } from '../../src/bodies/Bodies';
 import { RigidBody } from '../../src/core/RigidBody';
 import { DistanceJoint } from '../../src/joint/DistanceJoint';
 import { DistanceJoint as DistanceJointPerf } from '../../src/joint/DistanceJoint';
+import { GrabJoint } from '../../src/joint/GrabJoint';
 import { WeldJoint } from '../../src/joint/WeldJoint';
 import { Vec2 } from '../../src/math/Vec2';
 import { CircleShape } from '../../src/shapes/CircleShape';
@@ -130,5 +131,49 @@ describe('Joint', () => {
         expect(finalAnchorSeparation).toBeLessThan(initialAnchorSeparation);
         expect(a.velocity.x).toBeLessThan(0);
         expect(b.velocity.x).toBeGreaterThan(0);
+    });
+
+    test('Grab joint should use the grabbed world anchor when pulling toward the target', () => {
+        const body = Bodies.box({ width: 60, height: 60, x: 50, y: 20, mass: 1 });
+        const anchor = new Vec2(80, 20);
+        const target = new Vec2(100, 60);
+        const joint = new GrabJoint(body, anchor, target, 5, 0.7);
+        const deltaTime = 1 / 60;
+        const solverIterations = 10;
+
+        const initialDistance = anchor.subNew(target).magnitude();
+
+        joint.preSolve(1 / deltaTime);
+
+        for (let i = 0; i < solverIterations; i++) {
+            joint.solve();
+        }
+
+        expect(body.velocity.x).toBeGreaterThan(0);
+        expect(body.velocity.y).toBeGreaterThan(0);
+
+        body.integrateVelocities(deltaTime);
+
+        const finalAnchor = body.localPointToWorld(joint.localAnchor);
+        const finalDistance = finalAnchor.subNew(target).magnitude();
+
+        expect(finalDistance).toBeLessThan(initialDistance);
+    });
+
+    test('Grab joint should copy the target instead of sharing the source vector', () => {
+        const body = Bodies.circle({ radius: 20, x: 0, y: 0, mass: 1 });
+        const sourceTarget = new Vec2(10, 20);
+        const joint = new GrabJoint(body, body.position, sourceTarget);
+
+        sourceTarget.x = -999;
+        sourceTarget.y = -999;
+
+        expect(joint.target.x).toBe(10);
+        expect(joint.target.y).toBe(20);
+
+        joint.setTarget(new Vec2(30, 40));
+
+        expect(joint.target.x).toBe(30);
+        expect(joint.target.y).toBe(40);
     });
 });
