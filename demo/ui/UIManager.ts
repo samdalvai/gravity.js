@@ -18,7 +18,7 @@ const SHORTCUT_SECTIONS = [
     {
         title: 'Spawn',
         items: [
-            '[ Left Mouse ] Spawn circle',
+            '[ Left Mouse ] Spawn circle / Grab body',
             '[ Right Mouse ] Spawn box',
             '[ C ] Spawn particles while held',
             '[ X ] Spawn capsule',
