@@ -41,4 +41,33 @@ export class SegmentShape extends PolygonShape {
     updateAABB(body: RigidBody): void {
         super.updateAABB(body);
     }
+
+    isPointInside(body: RigidBody, point: Vec2): boolean {
+        const a = this.worldVertices[0];
+        const b = this.worldVertices[1];
+
+        const abX = b.x - a.x;
+        const abY = b.y - a.y;
+        const apX = point.x - a.x;
+        const apY = point.y - a.y;
+
+        const abLenSq = abX * abX + abY * abY;
+        if (abLenSq === 0) {
+            return false;
+        }
+
+        const t = (apX * abX + apY * abY) / abLenSq;
+        if (t < 0 || t > 1) {
+            return false;
+        }
+
+        const closestX = a.x + t * abX;
+        const closestY = a.y + t * abY;
+
+        const dx = point.x - closestX;
+        const dy = point.y - closestY;
+
+        const epsilon = 1e-8;
+        return dx * dx + dy * dy <= epsilon * epsilon;
+    }
 }

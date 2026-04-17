@@ -43,6 +43,7 @@ export default class Application {
 
     private testBody: RigidBody | null = null;
     private blackHole: RigidBody | null = null;
+    private grabJoint: GrabJoint | null = null;
 
     // Inputs
     private leftButtonPressed: boolean = false;
@@ -385,18 +386,23 @@ export default class Application {
 
                         switch (inputEvent.button) {
                             case MouseButton.LEFT:
-                                {
-                                    const ball = Bodies.circle({
-                                        radius: 30,
-                                        x,
-                                        y,
-                                        mass: 1.0,
-                                        restitution: 0.5,
-                                        friction: 0.7,
-                                    });
-                                    this.setBodyTexture(ball, 'basketball');
-                                    this.world.addBody(ball);
+                                for (const body of this.world.getBodies()) {
+                                    console.log(body.position);
+                                    const isInside = body.isPointInside(InputManager.mousePosition)
+                                    console.log("Is inside? ", isInside);
                                 }
+                                // {
+                                //     const ball = Bodies.circle({
+                                //         radius: 30,
+                                //         x,
+                                //         y,
+                                //         mass: 1.0,
+                                //         restitution: 0.5,
+                                //         friction: 0.7,
+                                //     });
+                                //     this.setBodyTexture(ball, 'basketball');
+                                //     this.world.addBody(ball);
+                                // }
                                 break;
                             case MouseButton.RIGHT:
                                 {
