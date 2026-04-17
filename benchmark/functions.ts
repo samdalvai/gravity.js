@@ -185,16 +185,10 @@ for (let i = 0; i < WARMUP_ITERATIONS; i++) {
     worldNew.update(DT);
 }
 
-const TEST_ITERATIONS = 100;
-
 export function runOriginal() {
-    for (let i = 0; i < TEST_ITERATIONS; i++) {
-        worldCurrent.update(DT);
-    }
+    worldCurrent.update(DT);
 }
 
 export function runModified() {
-    for (let i = 0; i < TEST_ITERATIONS; i++) {
-        worldNew.update(DT);
-    }
+    worldNew.update(DT);
 }
