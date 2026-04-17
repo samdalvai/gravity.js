@@ -364,19 +364,17 @@ export default class Application {
                 document.body.style.cursor = 'default';
             }
 
-            // Convert screen -> world coordinates
-            const screenX = inputEvent.x - Graphics.width() / 2;
-            const screenY = -(inputEvent.y - Graphics.height() / 2);
-
-            // Adjust mouse world position with pan and zoom
-            InputManager.mousePosition.x = screenX / Graphics.zoom + Graphics.pan.x;
-            InputManager.mousePosition.y = screenY / Graphics.zoom + Graphics.pan.y;
+            this.updateMouseWorldPosition(inputEvent);
+            this.syncGrabJointTarget();
         }
 
         // Handle mouse click events
         while (InputManager.mouseInputBuffer.length > 0) {
             const inputEvent = InputManager.mouseInputBuffer.shift();
             if (!inputEvent) return;
+
+            this.updateMouseWorldPosition(inputEvent);
+            this.syncGrabJointTarget();
 
             switch (inputEvent.type) {
                 case 'mousedown':
@@ -393,12 +391,7 @@ export default class Application {
 
                                         if (isInside) {
                                             bodySelected = true;
-                                            if (this.grabJoint) {
-                                                this.world.removeJoint(this.grabJoint);
-                                            }
-
-                                            const grab = new GrabJoint(body, body.position, InputManager.mousePosition);
-                                            this.world.addJoint(grab);
+                                            this.startGrabJoint(body);
                                             break;
                                         }
                                     }
@@ -441,11 +434,7 @@ export default class Application {
                 case 'mouseup':
                     switch (inputEvent.button) {
                         case MouseButton.LEFT:
-                            {
-                                if (this.grabJoint) {
-                                    this.world.removeJoint(this.grabJoint);
-                                }
-                            }
+                            this.releaseGrabJoint();
                             break;
                         case MouseButton.MIDDLE:
                             this.middleMousePressed = false;
@@ -692,6 +681,10 @@ export default class Application {
                 continue;
             }
 
+            if (this.grabJoint?.bodyA.id === body.id) {
+                this.releaseGrabJoint();
+            }
+
             this.bodyRenderRegistry.delete(body);
             this.world.removeBody(body);
 
@@ -722,6 +715,35 @@ export default class Application {
         for (let i = 0; i < SETTINGS.subSteps; i++) {
             this.stepSimulation();
         }
+    }
+
+    private updateMouseWorldPosition(inputEvent: MouseEvent): void {
+        const screenX = inputEvent.x - Graphics.width() / 2;
+        const screenY = -(inputEvent.y - Graphics.height() / 2);
+
+        InputManager.mousePosition.x = screenX / Graphics.zoom + Graphics.pan.x;
+        InputManager.mousePosition.y = screenY / Graphics.zoom + Graphics.pan.y;
+    }
+
+    private startGrabJoint(body: RigidBody): void {
+        this.releaseGrabJoint();
+
+        const grab = new GrabJoint(body, InputManager.mousePosition, InputManager.mousePosition);
+        this.world.addJoint(grab);
+        this.grabJoint = grab;
+    }
+
+    private syncGrabJointTarget(): void {
+        this.grabJoint?.setTarget(InputManager.mousePosition);
+    }
+
+    private releaseGrabJoint(): void {
+        if (!this.grabJoint) {
+            return;
+        }
+
+        this.world.removeJoint(this.grabJoint);
+        this.grabJoint = null;
     }
 
     private handleDemoShortcutDigit(digit: string): void {
@@ -789,6 +811,7 @@ export default class Application {
         this.clearDemoShortcutTimer();
         this.demoIndex = index;
         this.world.clear();
+        this.grabJoint = null;
         this.bgTexture = null;
         this.bodyRenderRegistry.clear();
         this.player = null;
