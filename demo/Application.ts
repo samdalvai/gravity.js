@@ -391,6 +391,8 @@ export default class Application {
 
                                         if (isInside) {
                                             bodySelected = true;
+                                            if (body.isStatic()) break;
+
                                             this.startGrabJoint(body);
                                             break;
                                         }
