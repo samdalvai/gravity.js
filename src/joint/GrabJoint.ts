@@ -24,7 +24,6 @@ export class GrabJoint extends Joint {
         // Calculate Jacobian J and effective mass M
         // J = [I, skew(r)]
         // M = (J · M^-1 · J^t)^-1
-
         this.r = this.bodyA.localPointToWorld(this.localAnchor);
         const p = this.bodyA.position.addNew(this.r);
 

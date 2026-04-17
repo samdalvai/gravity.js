@@ -15,6 +15,7 @@ export { World } from './core/World';
 
 export { DistanceJoint } from './joint/DistanceJoint';
 export { WeldJoint } from './joint/WeldJoint';
+export { GrabJoint } from './joint/GrabJoint';
 
 export { Vec2 } from './math/Vec2';
 
