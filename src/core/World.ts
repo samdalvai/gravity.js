@@ -14,7 +14,7 @@ import { Force } from '../force/Force';
 import { Joint } from '../joint/Joint';
 import { Vec2 } from '../math/Vec2';
 import * as Utils from '../utils/Utils';
-import { MIN_BULLET_SPEED_SQUARED, SETTINGS } from './Constants';
+import { MAX_BODIES, MIN_BULLET_SPEED_SQUARED, SETTINGS } from './Constants';
 import { RigidBody } from './RigidBody';
 
 export class World {
@@ -41,6 +41,8 @@ export class World {
     }
 
     addBody(body: RigidBody): void {
+        if (this.bodies.length >= MAX_BODIES) return;
+
         this.bodies.push(body);
     }
 
