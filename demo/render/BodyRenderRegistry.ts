@@ -3,6 +3,7 @@ import AssetStore, { TEXTURES } from '../graphics/AssetStore';
 
 export interface BodyRenderStyle {
     fillColor?: string;
+    strokeColor?: string;
     texture?: ImageBitmap | null;
 }
 

@@ -323,6 +323,7 @@ export default class Graphics {
         const y = body.position.y;
         const rotation = body.rotation;
         const fillColor = renderStyle?.fillColor ?? 'gray';
+        const strokeColor = renderStyle?.strokeColor ?? 'white';
         const texture = renderStyle?.texture ?? null;
 
         this.ctx.save();
@@ -330,14 +331,13 @@ export default class Graphics {
         this.ctx.rotate(rotation);
 
         // TODO: Draw filled shape if texture is not available
-        const color = 'white';
 
         switch (body.shape.getType()) {
             case ShapeType.CIRCLE:
                 {
                     const circleShape = body.shape as CircleShape;
                     if (debug) {
-                        this.drawCircle(circleShape.radius, body.isBullet ? 'red' : color);
+                        this.drawCircle(circleShape.radius, body.isBullet ? 'red' : strokeColor);
                     } else if (texture) {
                         this.drawTexture(circleShape.radius * 2, circleShape.radius * 2, texture);
                     } else {
@@ -350,7 +350,7 @@ export default class Graphics {
                     const polygonShape = body.shape as PolygonShape;
 
                     if (debug) {
-                        this.drawPolygon(polygonShape.localVertices, color);
+                        this.drawPolygon(polygonShape.localVertices, strokeColor);
                     } else if (texture) {
                         this.drawTexture(polygonShape.width, polygonShape.height, texture);
                     } else {
@@ -363,7 +363,7 @@ export default class Graphics {
                     const boxShape = body.shape as BoxShape;
 
                     if (debug) {
-                        this.drawBox(boxShape.width, boxShape.height, color);
+                        this.drawBox(boxShape.width, boxShape.height, strokeColor);
                     } else if (texture) {
                         this.drawTexture(boxShape.width, boxShape.height, texture);
                     } else {
@@ -376,7 +376,7 @@ export default class Graphics {
                     const capsuleShape = body.shape as CapsuleShape;
 
                     if (debug) {
-                        this.drawCapsule(capsuleShape, color);
+                        this.drawCapsule(capsuleShape, strokeColor);
                     } else if (texture) {
                         // TODO: draw texture without stretching it
                         this.drawTexture(capsuleShape.width, capsuleShape.height + capsuleShape.radius * 2, texture);
@@ -393,13 +393,13 @@ export default class Graphics {
                     const v1 = vertices[1];
 
                     if (debug) {
-                        this.drawLine(v0.x, v0.y, v1.x, v1.y, color);
-                        this.drawFillCircle(0, 0, 2, color);
+                        this.drawLine(v0.x, v0.y, v1.x, v1.y, strokeColor);
+                        this.drawFillCircle(0, 0, 2, strokeColor);
                     } else if (texture) {
                         // TODO: support textured segment rendering if needed
                     } else {
-                        this.drawLine(v0.x, v0.y, v1.x, v1.y, color);
-                        this.drawFillCircle(0, 0, 2, color);
+                        this.drawLine(v0.x, v0.y, v1.x, v1.y, strokeColor);
+                        this.drawFillCircle(0, 0, 2, strokeColor);
                     }
                 }
                 break;
