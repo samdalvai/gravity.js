@@ -44,4 +44,21 @@ export class BoxShape extends PolygonShape {
         body.minY = body.position.y - ey;
         body.maxY = body.position.y + ey;
     }
+
+    isPointInside(body: RigidBody, point: Vec2): boolean {
+        const hw = this.width * 0.5;
+        const hh = this.height * 0.5;
+
+        const dx = point.x - body.position.x;
+        const dy = point.y - body.position.y;
+
+        const cos = Math.cos(body.rotation);
+        const sin = Math.sin(body.rotation);
+
+        // Transform point into box local space using inverse rotation
+        const localX = dx * cos + dy * sin;
+        const localY = -dx * sin + dy * cos;
+
+        return Math.abs(localX) <= hw && Math.abs(localY) <= hh;
+    }
 }

@@ -80,4 +80,33 @@ export class CapsuleShape extends Shape {
     getBottomCirclePosition(): Vec2 {
         return this.worldCenter2;
     }
+
+    isPointInside(body: RigidBody, point: Vec2): boolean {
+        const a = this.worldCenter1;
+        const b = this.worldCenter2;
+
+        const abX = b.x - a.x;
+        const abY = b.y - a.y;
+        const apX = point.x - a.x;
+        const apY = point.y - a.y;
+
+        const abLenSq = abX * abX + abY * abY;
+
+        if (abLenSq === 0) {
+            const dx = point.x - a.x;
+            const dy = point.y - a.y;
+            return dx * dx + dy * dy <= this.radius * this.radius;
+        }
+
+        let t = (apX * abX + apY * abY) / abLenSq;
+        t = Math.max(0, Math.min(1, t));
+
+        const closestX = a.x + t * abX;
+        const closestY = a.y + t * abY;
+
+        const dx = point.x - closestX;
+        const dy = point.y - closestY;
+
+        return dx * dx + dy * dy <= this.radius * this.radius;
+    }
 }

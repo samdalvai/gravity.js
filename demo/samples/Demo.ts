@@ -329,8 +329,8 @@ export default class Demo {
         app.setBodyTexture(body, 'crate');
         world.addBody(body);
 
-        const grab = new GrabJoint(body, body.position, new Vec2(0, 0));
-        world.addJoint(grab);
+        // const grab = new GrabJoint(body, body.position, new Vec2(0, 0));
+        // world.addJoint(grab);
     };
 
     static demo2 = (world: World, app: Application) => {

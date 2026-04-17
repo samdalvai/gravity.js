@@ -134,4 +134,27 @@ export class PolygonShape extends Shape {
 
         return area * 0.5;
     }
+
+    isPointInside(body: RigidBody, point: Vec2): boolean {
+        const vertices = this.worldVertices;
+        const count = vertices.length;
+
+        for (let i = 0; i < count; i++) {
+            const a = vertices[i];
+            const b = vertices[(i + 1) % count];
+
+            const edgeX = b.x - a.x;
+            const edgeY = b.y - a.y;
+            const pointX = point.x - a.x;
+            const pointY = point.y - a.y;
+
+            const cross = edgeX * pointY - edgeY * pointX;
+
+            if (cross < 0) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }

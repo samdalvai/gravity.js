@@ -30,4 +30,13 @@ export class CircleShape extends Shape {
         body.minY = body.position.y - radius;
         body.maxY = body.position.y + radius;
     }
+
+    isPointInside(body: RigidBody, point: Vec2): boolean {
+        const dx = point.x - body.position.x;
+        const dy = point.y - body.position.y;
+
+        const radius = this.radius;
+
+        return dx * dx + dy * dy <= radius * radius;
+    }
 }
