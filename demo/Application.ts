@@ -386,23 +386,36 @@ export default class Application {
 
                         switch (inputEvent.button) {
                             case MouseButton.LEFT:
-                                for (const body of this.world.getBodies()) {
-                                    console.log(body.position);
-                                    const isInside = body.isPointInside(InputManager.mousePosition)
-                                    console.log("Is inside? ", isInside);
+                                {
+                                    let bodySelected = false;
+                                    for (const body of this.world.getBodies()) {
+                                        const isInside = body.isPointInside(InputManager.mousePosition);
+
+                                        if (isInside) {
+                                            bodySelected = true;
+                                            if (this.grabJoint) {
+                                                this.world.removeJoint(this.grabJoint);
+                                            }
+
+                                            const grab = new GrabJoint(body, body.position, InputManager.mousePosition);
+                                            this.world.addJoint(grab);
+                                            break;
+                                        }
+                                    }
+
+                                    if (!bodySelected) {
+                                        const ball = Bodies.circle({
+                                            radius: 30,
+                                            x,
+                                            y,
+                                            mass: 1.0,
+                                            restitution: 0.5,
+                                            friction: 0.7,
+                                        });
+                                        this.setBodyTexture(ball, 'basketball');
+                                        this.world.addBody(ball);
+                                    }
                                 }
-                                // {
-                                //     const ball = Bodies.circle({
-                                //         radius: 30,
-                                //         x,
-                                //         y,
-                                //         mass: 1.0,
-                                //         restitution: 0.5,
-                                //         friction: 0.7,
-                                //     });
-                                //     this.setBodyTexture(ball, 'basketball');
-                                //     this.world.addBody(ball);
-                                // }
                                 break;
                             case MouseButton.RIGHT:
                                 {
@@ -427,6 +440,13 @@ export default class Application {
                     break;
                 case 'mouseup':
                     switch (inputEvent.button) {
+                        case MouseButton.LEFT:
+                            {
+                                if (this.grabJoint) {
+                                    this.world.removeJoint(this.grabJoint);
+                                }
+                            }
+                            break;
                         case MouseButton.MIDDLE:
                             this.middleMousePressed = false;
                             break;
@@ -532,7 +552,15 @@ export default class Application {
 
         // Draw all bodies
         for (const body of this.world.getBodies()) {
-            Graphics.drawBody(body, this.bodyRenderRegistry.getStyle(body), this.debug);
+            if (body.isPointInside(InputManager.mousePosition)) {
+                Graphics.drawBody(
+                    body,
+                    { ...this.bodyRenderRegistry.getStyle(body), strokeColor: 'orange' },
+                    this.debug,
+                );
+            } else {
+                Graphics.drawBody(body, this.bodyRenderRegistry.getStyle(body), this.debug);
+            }
         }
 
         // Draw all joints anchor points and debug properties
