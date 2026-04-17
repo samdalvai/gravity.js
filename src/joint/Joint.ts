@@ -10,15 +10,11 @@
 import { Constraint } from '../constraint/Constraint';
 import { SETTINGS } from '../core/Constants';
 import { RigidBody } from '../core/RigidBody';
-import { Vec2 } from '../math/Vec2';
 import * as Utils from '../utils/Utils';
 
 export abstract class Joint extends Constraint {
     private static nextId = 0;
     readonly id: number;
-
-    public localAnchorA!: Vec2;
-    public localAnchorB!: Vec2;
 
     protected beta = 0.0; // Coefficient of position correction (Positional error feedback factor)
     protected gamma = 0.0; // Coefficient of Softness (Force feedback factor)

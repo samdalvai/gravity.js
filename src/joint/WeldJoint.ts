@@ -4,6 +4,8 @@ import { Vec2 } from '../math/Vec2';
 import { Joint } from './Joint';
 
 export class WeldJoint extends Joint {
+    public localAnchorA!: Vec2;
+    public localAnchorB!: Vec2;
     public initialAngleOffset: number;
 
     private raX = 0.0;
@@ -74,10 +76,7 @@ export class WeldJoint extends Joint {
         const k12 = invIA * this.raX + invIB * this.rbX;
         const k22 = invIA + invIB + this.gamma;
 
-        const det =
-            k00 * (k11 * k22 - k12 * k12) -
-            k01 * (k01 * k22 - k12 * k02) +
-            k02 * (k01 * k12 - k11 * k02);
+        const det = k00 * (k11 * k22 - k12 * k12) - k01 * (k01 * k22 - k12 * k02) + k02 * (k01 * k12 - k11 * k02);
 
         if (det === 0.0) {
             throw new Error('Determinant 0');
@@ -122,13 +121,9 @@ export class WeldJoint extends Joint {
         const bodyB = this.bodyB;
 
         const relativeVelocityX =
-            bodyB.velocity.x -
-            bodyB.angularVelocity * this.rbY -
-            (bodyA.velocity.x - bodyA.angularVelocity * this.raY);
+            bodyB.velocity.x - bodyB.angularVelocity * this.rbY - (bodyA.velocity.x - bodyA.angularVelocity * this.raY);
         const relativeVelocityY =
-            bodyB.velocity.y +
-            bodyB.angularVelocity * this.rbX -
-            (bodyA.velocity.y + bodyA.angularVelocity * this.raX);
+            bodyB.velocity.y + bodyB.angularVelocity * this.rbX - (bodyA.velocity.y + bodyA.angularVelocity * this.raX);
         const relativeAngularVelocity = bodyB.angularVelocity - bodyA.angularVelocity;
 
         const rhsX = -(relativeVelocityX + this.biasX + this.impulseSumX * this.gamma);
