@@ -262,10 +262,6 @@ export default class Application {
                     }
 
                     if (inputEvent.key === 'x') {
-                        if (this.world.getBodies().length >= MAX_BODIES) {
-                            continue;
-                        }
-
                         const x = InputManager.mousePosition.x;
                         const y = InputManager.mousePosition.y;
 
@@ -282,10 +278,6 @@ export default class Application {
                     }
 
                     if (inputEvent.key === 'z') {
-                        if (this.world.getBodies().length >= MAX_BODIES) {
-                            continue;
-                        }
-
                         const x = InputManager.mousePosition.x;
                         const y = InputManager.mousePosition.y;
 
@@ -302,10 +294,6 @@ export default class Application {
                     }
 
                     if (inputEvent.key === 'r' && !inputEvent.ctrlKey && !inputEvent.metaKey) {
-                        if (this.world.getBodies().length >= MAX_BODIES) {
-                            continue;
-                        }
-
                         const x = InputManager.mousePosition.x;
                         const y = InputManager.mousePosition.y;
 
@@ -398,9 +386,6 @@ export default class Application {
                         switch (inputEvent.button) {
                             case MouseButton.LEFT:
                                 {
-                                    if (this.world.getBodies().length >= MAX_BODIES) {
-                                        continue;
-                                    }
                                     const ball = Bodies.circle({
                                         radius: 30,
                                         x,
@@ -415,9 +400,6 @@ export default class Application {
                                 break;
                             case MouseButton.RIGHT:
                                 {
-                                    if (this.world.getBodies().length >= MAX_BODIES) {
-                                        continue;
-                                    }
                                     const box = Bodies.box({
                                         width: 60,
                                         height: 60,
@@ -494,10 +476,6 @@ export default class Application {
             const y = InputManager.mousePosition.y;
             const radius = 10;
             for (let i = 0; i < 10; i++) {
-                if (this.world.getBodies().length >= MAX_BODIES) {
-                    continue;
-                }
-
                 const angle = Math.random() * Math.PI * 2;
                 const positionOffset = new Vec2(Math.cos(angle), Math.sin(angle)).scaleNew(radius);
 
