@@ -1,13 +1,16 @@
 import {
     Bodies,
+    DistanceJoint,
     FIXED_DELTA_TIME,
     Force,
     GRAVITY,
+    GrabJoint,
     MAX_BODIES,
     PIXELS_PER_METER,
     RigidBody,
     SETTINGS,
     Vec2,
+    WeldJoint,
     World,
 } from '../src';
 import { Utils } from '../src';
@@ -562,14 +565,26 @@ export default class Application {
 
             if (this.showContacts) {
                 for (const joint of this.world.getJoints()) {
-                    const anchorA = joint.localAnchorA;
-                    const anchorB = joint.localAnchorB;
-                    const worldA = joint.bodyA.localPointToWorld(anchorA);
-                    const worldB = joint.bodyB.localPointToWorld(anchorB);
-                    Graphics.drawFillCircle(worldA.x, worldA.y, 3, 'blue');
-                    Graphics.drawFillCircle(worldB.x, worldB.y, 3, 'blue');
+                    if (joint instanceof DistanceJoint || joint instanceof WeldJoint) {
+                        const anchorA = joint.localAnchorA;
+                        const anchorB = joint.localAnchorB;
+                        const worldA = joint.bodyA.localPointToWorld(anchorA);
+                        const worldB = joint.bodyB.localPointToWorld(anchorB);
+                        Graphics.drawFillCircle(worldA.x, worldA.y, 3, 'blue');
+                        Graphics.drawFillCircle(worldB.x, worldB.y, 3, 'blue');
 
-                    Graphics.drawLine(worldA.x, worldA.y, worldB.x, worldB.y, 'blue');
+                        Graphics.drawLine(worldA.x, worldA.y, worldB.x, worldB.y, 'blue');
+                    }
+
+                    if (joint instanceof GrabJoint) {
+                        const anchor = joint.localAnchor;
+                        const world = joint.bodyA.localPointToWorld(anchor);
+                        const target = joint.target;
+                        Graphics.drawFillCircle(world.x, world.y, 3, 'blue');
+                        Graphics.drawFillCircle(target.x, target.y, 3, 'blue');
+
+                        Graphics.drawLine(world.x, world.y, target.x, target.y, 'blue');
+                    }
                 }
 
                 for (const manifold of this.world.getManifolds()) {
