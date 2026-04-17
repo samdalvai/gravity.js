@@ -161,6 +161,10 @@ export default class Application {
                         this.setBlackHole(Bodies.circle({ radius: 0.0001, x, y, mass: 1_000_000 }));
                     }
 
+                    if (key === 'r' && inputEvent.shiftKey) {
+                        this.loadDemo(this.demoIndex);
+                    }
+
                     if (inputEvent.key === 'c') {
                         this.generateParticle = true;
                     }
@@ -769,7 +773,6 @@ export default class Application {
         this.middleMousePressed = false;
         this.controlPressed = false;
         Graphics.resetView();
-        this.setApplyGravity(true);
         demo(this.world, this);
         this.syncUI();
     }
