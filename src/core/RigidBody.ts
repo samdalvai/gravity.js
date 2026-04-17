@@ -268,4 +268,8 @@ export class RigidBody {
             this.angularVelocity *= 1 - rollingResistance * dt;
         }
     }
+
+    isPointInside(point: Vec2): boolean {
+        return this.shape.isPointInside(this, point);
+    }
 }
