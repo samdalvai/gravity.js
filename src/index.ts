@@ -14,6 +14,7 @@ export { RigidBody } from './core/RigidBody';
 export { World } from './core/World';
 
 export { DistanceJoint } from './joint/DistanceJoint';
+export { WeldJoint } from './joint/WeldJoint';
 
 export { Vec2 } from './math/Vec2';
 

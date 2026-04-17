@@ -4,8 +4,7 @@
  *
  * https://github.com/erincatto/box2d-lite
  */
-import { Bodies, DistanceJoint, GRAVITY, RigidBody, SETTINGS, Utils, Vec2, World } from '../../src';
-import { WeldJoint } from '../../src/joint/WeldJoint';
+import { Bodies, DistanceJoint, GRAVITY, RigidBody, SETTINGS, Utils, Vec2, WeldJoint, World } from '../../src';
 import Application from '../Application';
 import Graphics from '../graphics/Graphics';
 
