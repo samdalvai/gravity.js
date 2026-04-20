@@ -1,5 +1,5 @@
 import { describe, expect, test } from '@jest/globals';
-import { BodiesFactory } from '../../src/factory/Bodies';
+import { BodiesFactory } from '../../src/factory/BodiesFactory';
 import { RigidBody } from '../../src/core/RigidBody';
 import { DistanceJoint } from '../../src/joint/DistanceJoint';
 import { DistanceJoint as DistanceJointPerf } from '../../src/joint/DistanceJoint';
