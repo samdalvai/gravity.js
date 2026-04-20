@@ -58,6 +58,7 @@ export default class Application {
     private showContacts = true;
     private showAABB = false;
     private showRuntimeStatsHud = true;
+    private grab = true;
     private readonly uiManager = new UIManager();
 
     constructor() {
@@ -107,6 +108,7 @@ export default class Application {
             onSetShowRuntimeStatsHud: value => this.setShowRuntimeStatsHud(value),
             onSetCCD: value => this.setCCD(value),
             onSetApplyGravity: value => this.setApplyGravity(value),
+            onSetGrab: value => this.setGrab(value),
             onSetPaused: value => this.setPaused(value),
             onSetSolverIterations: value => this.setSolverIterations(value),
             onSetSubSteps: value => this.setSubSteps(value),
@@ -386,15 +388,18 @@ export default class Application {
                             case MouseButton.LEFT:
                                 {
                                     let bodySelected = false;
-                                    for (const body of this.world.getBodies()) {
-                                        const isInside = body.isPointInside(InputManager.mousePosition);
 
-                                        if (isInside) {
-                                            bodySelected = true;
-                                            if (body.isStatic()) break;
+                                    if (this.grab) {
+                                        for (const body of this.world.getBodies()) {
+                                            const isInside = body.isPointInside(InputManager.mousePosition);
 
-                                            this.startGrabJoint(body);
-                                            break;
+                                            if (isInside) {
+                                                bodySelected = true;
+                                                if (body.isStatic()) break;
+
+                                                this.startGrabJoint(body);
+                                                break;
+                                            }
                                         }
                                     }
 
@@ -856,6 +861,11 @@ export default class Application {
         this.syncUI();
     }
 
+    private setGrab(value: boolean) {
+        this.grab = value;
+        this.syncUI();
+    }
+
     private setSolverIterations(value: number): void {
         const clampedValue = Utils.clamp(value, 1, 30);
 
@@ -895,6 +905,7 @@ export default class Application {
             showRuntimeStatsHud: this.showRuntimeStatsHud,
             ccd: SETTINGS.ccd,
             applyGravity: SETTINGS.applyGravity,
+            grab: this.grab,
             paused: this.paused,
             solverIterations: SETTINGS.solverIterations,
             subSteps: SETTINGS.subSteps,
