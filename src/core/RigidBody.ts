@@ -33,7 +33,7 @@ export class RigidBody {
     // Material properties
     private _restitution: number;
     private _friction: number;
-    // private _density: number;
+    private _density: number;
     private _rollingResistance: number;
     surfaceSpeed: number;
 
@@ -56,6 +56,7 @@ export class RigidBody {
 
     public onContact?: (contactInfo: ContactInfo) => void;
 
+    // TODO: substitute mass with density
     constructor(shape: Shape, x: number, y: number, mass: number) {
         this.id = RigidBody.nextId++;
 
