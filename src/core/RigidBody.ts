@@ -57,13 +57,13 @@ export class RigidBody {
     public onContact?: (contactInfo: ContactInfo) => void;
 
     // TODO: substitute mass with density
-    constructor(shape: Shape, x: number, y: number, mass: number) {
+    constructor(shape: Shape, x: number, y: number, density: number) {
         this.id = RigidBody.nextId++;
 
         this.shape = shape;
         this.shapeType = shape.getType();
 
-        Utils.assert(this.shapeType !== ShapeType.SEGMENT || mass === 0, 'Segments can only be static');
+        Utils.assert(this.shapeType !== ShapeType.SEGMENT || density === 0, 'Segments can only be static');
 
         this.position = new Vec2(x, y);
         this.velocity = new Vec2(0, 0);
@@ -79,7 +79,7 @@ export class RigidBody {
 
         const area = this.shape.getArea();
         // TODO: to be substituted with density
-        this._density = mass;
+        this._density = density;
         this.mass = this._density * area;
         this.invMass = 0.0;
         this.I = 0.0;
