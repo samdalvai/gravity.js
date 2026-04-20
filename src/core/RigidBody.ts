@@ -172,8 +172,8 @@ export class RigidBody {
     }
 
     private updateMassProperties(): void {
-        Utils.assert(this.mass >= 0, 'Mass must be non-negative');
-        Utils.assert(this.shapeType !== ShapeType.SEGMENT || this.mass === 0, 'Segments can only be static');
+        Utils.assert(this._mass >= 0, 'Mass must be non-negative');
+        Utils.assert(this.shapeType !== ShapeType.SEGMENT || this._mass === 0, 'Segments can only be static');
 
         const area = this.shape.getArea();
         this._mass = area * this._density;
@@ -181,8 +181,8 @@ export class RigidBody {
     }
 
     private updateDensityProperties(): void {
-        Utils.assert(this.density >= 0, 'Density must be non-negative');
-        Utils.assert(this.shapeType !== ShapeType.SEGMENT || this.density === 0, 'Segments can only be static');
+        Utils.assert(this._density >= 0, 'Density must be non-negative');
+        Utils.assert(this.shapeType !== ShapeType.SEGMENT || this._density === 0, 'Segments can only be static');
 
         const area = this.shape.getArea();
         this._density = this._mass / area;
