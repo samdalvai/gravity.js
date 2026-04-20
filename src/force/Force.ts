@@ -9,21 +9,26 @@ export class Force {
         return weightForce;
     }
 
-    static generateDragForce(body: RigidBody, k: number): Vec2 {
-        let dragForce = new Vec2(0, 0);
+    static generateDragForce(body: RigidBody, k: number, dt: number): Vec2 {
+        const v = body.velocity;
 
-        if (body.velocity.magnitudeSquared() > 0) {
-            // Calculate the drag direction (inverse of velocity unit vector)
-            const dragDirection = body.velocity.unitVector().scaleNew(-1);
-
-            // Calculate the drag magnitude, k * |v|^2
-            const dragMagnitude = k * body.velocity.magnitudeSquared();
-
-            // Generate the final drag force with direction and magnitude
-            dragForce = dragDirection.scaleNew(dragMagnitude);
+        if (v.magnitudeSquared() === 0) {
+            return new Vec2(0, 0);
         }
 
-        return dragForce;
+        const speed = v.magnitude();
+        const dragDir = v.scaleNew(-1 / speed); // normalized opposite direction
+
+        // Drag force magnitude: k * v^2
+        let dragMagnitude = k * speed * speed;
+
+        // Compute max force that would bring velocity to zero this step
+        const maxForce = (body.mass * speed) / dt;
+
+        // Clamp drag so it never reverses velocity
+        dragMagnitude = Math.min(dragMagnitude, maxForce);
+
+        return dragDir.scaleNew(dragMagnitude);
     }
 
     static generateFrictionForce(body: RigidBody, k: number): Vec2 {
