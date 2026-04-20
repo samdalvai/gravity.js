@@ -26,9 +26,9 @@ export class RigidBody {
 
     // Mass and Moment of Inertia
     private _mass: number;
-    invMass: number;
-    I: number;
-    invI: number;
+    private _invMass: number;
+    private _I: number;
+    private _invI: number;
 
     // Material properties
     private _restitution: number;
@@ -83,9 +83,9 @@ export class RigidBody {
 
         this._density = 0;
         this._mass = 0;
-        this.invMass = 0.0;
-        this.I = 0.0;
-        this.invI = 0.0;
+        this._invMass = 0.0;
+        this._I = 0.0;
+        this._invI = 0.0;
 
         if (mass !== undefined) {
             this._mass = mass;
@@ -133,6 +133,18 @@ export class RigidBody {
         this._mass = value;
 
         this.updateDensityProperties();
+    }
+
+    get invMass(): number {
+        return this._invMass;
+    }
+
+    get I(): number {
+        return this._I;
+    }
+
+    get invI(): number {
+        return this._invI;
     }
 
     get density(): number {
@@ -190,9 +202,9 @@ export class RigidBody {
     }
 
     private syncMassProperties(): void {
-        this.invMass = this.mass !== 0.0 ? 1.0 / this.mass : 0.0;
-        this.I = this.shape.getMomentOfInertia() * this.mass;
-        this.invI = this.I !== 0.0 ? 1.0 / this.I : 0.0;
+        this._invMass = this.mass !== 0.0 ? 1.0 / this.mass : 0.0;
+        this._I = this.shape.getMomentOfInertia() * this.mass;
+        this._invI = this.I !== 0.0 ? 1.0 / this.I : 0.0;
     }
 
     isStatic(): boolean {
