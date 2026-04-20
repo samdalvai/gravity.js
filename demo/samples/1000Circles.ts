@@ -1,4 +1,4 @@
-import { BodiesFactory as Bodies } from '../../src';
+import { BodiesFactory } from '../../src';
 import type { World } from '../../src';
 import type Application from '../Application';
 import { defineDemo, generateSquareCage, populateStressDemo } from './shared';
@@ -8,7 +8,7 @@ function setup1000Circles(world: World, app: Application): void {
     const cage = generateSquareCage(world, app);
 
     populateStressDemo(world, cage, (x, y) => {
-        const body = Bodies.circle({ radius: 10, x, y, mass: 1 });
+        const body = BodiesFactory.circle({ radius: 10, x, y, mass: 1 });
         app.setBodyFillColor(body, '#7bdff2');
         return body;
     });

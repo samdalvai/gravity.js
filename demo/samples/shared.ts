@@ -1,5 +1,5 @@
 import {
-    BodiesFactory as Bodies,
+    BodiesFactory,
     DistanceJoint,
     RigidBody,
     Vec2,
@@ -44,7 +44,7 @@ export function defineDemo(label: string, setup: DemoSetup): DemoRunner {
 }
 
 export function generateFloor(world: World, app: Application): RigidBody {
-    const floor = Bodies.box({ width: FLOOR_WIDTH, height: FLOOR_HEIGHT, x: 0, y: FLOOR_POSITION_Y, mass: 0.0 });
+    const floor = BodiesFactory.box({ width: FLOOR_WIDTH, height: FLOOR_HEIGHT, x: 0, y: FLOOR_POSITION_Y, mass: 0.0 });
     app.setBodyTexture(floor, 'transparent');
     world.addBody(floor);
     return floor;
@@ -53,7 +53,7 @@ export function generateFloor(world: World, app: Application): RigidBody {
 export function generateFences(world: World, app: Application): void {
     const fenceWidth = 50;
     const fenceHeight = 900 + FLOOR_HEIGHT;
-    const leftFence = Bodies.box({
+    const leftFence = BodiesFactory.box({
         width: fenceWidth,
         height: fenceHeight,
         x: -(FLOOR_WIDTH / 2 + fenceWidth / 2),
@@ -61,7 +61,7 @@ export function generateFences(world: World, app: Application): void {
         mass: 0.0,
     });
 
-    const rightFence = Bodies.box({
+    const rightFence = BodiesFactory.box({
         width: fenceWidth,
         height: fenceHeight,
         x: FLOOR_WIDTH / 2 + fenceWidth / 2,
@@ -83,28 +83,28 @@ export function generateSquareCage(world: World, app: Application): CageBounds {
     const wallSpanVertical = SQUARE_CAGE_INNER_SIZE + wallThickness * 2;
     const wallColor = '#4d5a72';
     const walls = [
-        Bodies.box({
+        BodiesFactory.box({
             width: wallSpanHorizontal,
             height: wallThickness,
             x: 0,
             y: innerBottom - wallThickness / 2,
             mass: 0,
         }),
-        Bodies.box({
+        BodiesFactory.box({
             width: wallSpanHorizontal,
             height: wallThickness,
             x: 0,
             y: innerTop + wallThickness / 2,
             mass: 0,
         }),
-        Bodies.box({
+        BodiesFactory.box({
             width: wallThickness,
             height: wallSpanVertical,
             x: -(SQUARE_CAGE_INNER_SIZE / 2 + wallThickness / 2),
             y: (innerBottom + innerTop) / 2,
             mass: 0,
         }),
-        Bodies.box({
+        BodiesFactory.box({
             width: wallThickness,
             height: wallSpanVertical,
             x: SQUARE_CAGE_INNER_SIZE / 2 + wallThickness / 2,

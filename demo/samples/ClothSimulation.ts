@@ -1,4 +1,4 @@
-import { BodiesFactory as Bodies } from '../../src';
+import { BodiesFactory } from '../../src';
 import type { RigidBody, World } from '../../src';
 import type Application from '../Application';
 import { JOINT_TUNING, createDistanceJoint, defineDemo, generateFences, generateFloor } from './shared';
@@ -22,7 +22,7 @@ function setupClothSimulation(world: World, app: Application): void {
             const x = startX + col * spacing;
             const y = topY - row * spacing;
             const mass = row === 0 ? 0 : 1;
-            const particle = Bodies.circle({ radius: particleRadius, x, y, mass });
+            const particle = BodiesFactory.circle({ radius: particleRadius, x, y, mass });
             world.addBody(particle);
             rowParticles.push(particle);
         }

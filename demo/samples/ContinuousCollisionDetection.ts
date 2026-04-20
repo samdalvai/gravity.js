@@ -1,4 +1,4 @@
-import { BodiesFactory as Bodies, Vec2 } from '../../src';
+import { BodiesFactory, Vec2 } from '../../src';
 import type { World } from '../../src';
 import Graphics from '../graphics/Graphics';
 import type Application from '../Application';
@@ -9,7 +9,7 @@ function setupContinuousCollisionDetection(world: World, app: Application): void
     generateFloor(world, app);
     generateFences(world, app);
 
-    const fallingBox = Bodies.box({
+    const fallingBox = BodiesFactory.box({
         width: 50,
         height: 50,
         x: 500,
@@ -19,7 +19,7 @@ function setupContinuousCollisionDetection(world: World, app: Application): void
     });
     world.addBody(fallingBox);
 
-    const bullet = Bodies.circle({
+    const bullet = BodiesFactory.circle({
         radius: 5,
         x: -1000,
         y: 0,

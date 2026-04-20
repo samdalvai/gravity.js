@@ -1,4 +1,4 @@
-import { BodiesFactory as Bodies } from '../../src';
+import { BodiesFactory } from '../../src';
 import type { World } from '../../src';
 import type Application from '../Application';
 import {
@@ -21,7 +21,7 @@ function setupStressTest(world: World, app: Application): void {
     const startX = -(numSteps * spacing) / 2 - stepWidth / 2;
     const startY = 0;
 
-    const startAnchor = Bodies.box({
+    const startAnchor = BodiesFactory.box({
         width: stepWidth * 2,
         height: stepWidth * 0.5,
         x: startX - stepWidth / 2,
@@ -36,14 +36,14 @@ function setupStressTest(world: World, app: Application): void {
     for (let i = 1; i <= numSteps; i++) {
         const x = startX + i * spacing;
         const y = startY - Math.sin((i / numSteps) * Math.PI) * 10;
-        const step = Bodies.circle({ radius: stepWidth * 0.5, x, y, mass: 3 });
+        const step = BodiesFactory.circle({ radius: stepWidth * 0.5, x, y, mass: 3 });
         app.setBodyTexture(step, 'woodBridgeStep');
         world.addBody(step);
         world.addJoint(createDistanceJoint(lastStep, step, tuning));
         lastStep = step;
     }
 
-    const endAnchor = Bodies.box({
+    const endAnchor = BodiesFactory.box({
         width: stepWidth * 2,
         height: stepWidth * 0.5,
         x: lastStep.position.x + spacing + stepWidth / 2,
@@ -59,7 +59,7 @@ function setupStressTest(world: World, app: Application): void {
 
     for (let i = 0; i < numBoxLargeHorizontal; i++) {
         for (let j = 0; j < 10; j++) {
-            const box = Bodies.box({
+            const box = BodiesFactory.box({
                 width: boxSizeLarge,
                 height: boxSizeLarge,
                 x: -(numBoxLargeHorizontal * boxSizeLarge) / 2 + boxSizeLarge / 2 + i * boxSizeLarge,
@@ -76,7 +76,7 @@ function setupStressTest(world: World, app: Application): void {
 
     for (let i = 0; i < numBoxSmallHorizontal; i++) {
         for (let j = 0; j < 10; j++) {
-            const box = Bodies.box({
+            const box = BodiesFactory.box({
                 width: boxSizeSmall,
                 height: boxSizeSmall,
                 x: -(numBoxSmallHorizontal * boxSizeSmall) / 2 + boxSizeSmall / 2 + i * boxSizeSmall,

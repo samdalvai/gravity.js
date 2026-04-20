@@ -1,4 +1,4 @@
-import { BodiesFactory as Bodies, WeldJoint } from '../../src';
+import { BodiesFactory, WeldJoint } from '../../src';
 import type { RigidBody, World } from '../../src';
 import type Application from '../Application';
 import { defineDemo, generateFloor } from './shared';
@@ -19,7 +19,7 @@ function setupWeldedBoxes(world: World, app: Application): void {
 
     for (let i = 0; i < boxRows; i++) {
         for (let j = 0; j < boxRows; j++) {
-            const box = Bodies.box({
+            const box = BodiesFactory.box({
                 width: boxWidth,
                 height: boxWidth,
                 x: boxWidth * i + spacing * i + xOffset,
@@ -37,7 +37,7 @@ function setupWeldedBoxes(world: World, app: Application): void {
         boxes[i] = [];
 
         for (let j = 0; j < boxRows; j++) {
-            const box = Bodies.box({
+            const box = BodiesFactory.box({
                 width: boxWidth,
                 height: boxWidth,
                 x: boxWidth * i + spacing * i - xOffset - boxWidth * boxRows,
