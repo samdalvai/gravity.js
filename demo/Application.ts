@@ -478,12 +478,12 @@ export default class Application {
             const acceleration = PLAYER_ACCELERATION;
 
             if (this.leftButtonPressed) {
-                const impulse = -acceleration * this.player.density * FIXED_DELTA_TIME * PIXELS_PER_METER;
+                const impulse = -acceleration * this.player.mass * FIXED_DELTA_TIME * PIXELS_PER_METER;
                 this.player.applyImpulseLinear(new Vec2(impulse, 0));
             }
 
             if (this.rightButtonPressed) {
-                const impulse = acceleration * this.player.density * FIXED_DELTA_TIME * PIXELS_PER_METER;
+                const impulse = acceleration * this.player.mass * FIXED_DELTA_TIME * PIXELS_PER_METER;
                 this.player.applyImpulseLinear(new Vec2(impulse, 0));
             }
 
