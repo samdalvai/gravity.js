@@ -77,7 +77,8 @@ export class RigidBody {
         this._sumForces = new Vec2(0, 0);
         this._sumTorque = 0.0;
 
-        this.mass = mass;
+        const area = this.shape.getArea();
+        this.mass = mass * area;
         this.invMass = 0.0;
         this.I = 0.0;
         this.invI = 0.0;
@@ -146,7 +147,7 @@ export class RigidBody {
     }
 
     isStatic(): boolean {
-        const epsilon = 0.005;
+        const epsilon = 0.000005;
         return Math.abs(this.invMass - 0.0) < epsilon;
     }
 
