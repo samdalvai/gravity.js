@@ -33,6 +33,8 @@ export class RigidBody {
     // Material properties
     private _restitution: number;
     private _friction: number;
+    // private _density: number;
+    private _rollingResistance: number;
     surfaceSpeed: number;
 
     // Grounded variables
@@ -81,6 +83,7 @@ export class RigidBody {
 
         this._restitution = 0.2;
         this._friction = 0.7;
+        this._rollingResistance = 0.5;
         this.surfaceSpeed = 0;
 
         this.updateMassProperties();
@@ -105,6 +108,15 @@ export class RigidBody {
     set friction(value: number) {
         Utils.assert(value >= 0 && value <= 1);
         this._friction = value;
+    }
+
+    get rollingResistance(): number {
+        return this._rollingResistance;
+    }
+
+    set rollingResistance(value: number) {
+        Utils.assert(value >= 0 && value <= 1);
+        this._rollingResistance = value;
     }
 
     get isBullet(): boolean {
@@ -261,10 +273,9 @@ export class RigidBody {
         // Update AABB values based on new position
         this.shape.updateAABB(this);
 
-        // Bleed off angular velocity for grounded bodies
+        // Apply rolling resistance for grounded bodies
         if (this.isGrounded) {
-            const rollingResistance = 0.5;
-            this.angularVelocity *= 1 - rollingResistance * dt;
+            this.angularVelocity *= 1 - this._rollingResistance * dt;
         }
     }
 
