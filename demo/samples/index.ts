@@ -7,6 +7,7 @@ import breakableJointsDemo from './BreakableJoints';
 import clothSimulationDemo from './ClothSimulation';
 import complexSceneDemo from './ComplexScene';
 import continuousCollisionDetectionDemo from './ContinuousCollisionDetection';
+import dragDemo from './Drag';
 import plankDemo from './Plank';
 import pyramidOfBoxesDemo from './PyramidOfBoxes';
 import simpleWhipDemo from './SimpleWhip';
@@ -37,6 +38,7 @@ export const DEMOS: DemoRunner[] = [
     blackHoleOrbitDemo,
     weldedBoxesDemo,
     breakableJointsDemo,
+    dragDemo,
 ];
 
 export const DEMO_LABELS = DEMOS.map((demo, index) => `Demo ${index}: ${demo.label}`);

@@ -44,6 +44,7 @@ export default class Application {
     private testBody: RigidBody | null = null;
     private blackHole: RigidBody | null = null;
     private grabJoint: GrabJoint | null = null;
+    private dragForce: number | null = null;
 
     // Inputs
     private leftButtonPressed: boolean = false;
@@ -91,6 +92,10 @@ export default class Application {
 
     setBlackHole(body: RigidBody | null): void {
         this.blackHole = body;
+    }
+
+    setDragForce(drag: number | null): void {
+        this.dragForce = drag;
     }
 
     async setup(): Promise<void> {
@@ -711,6 +716,19 @@ export default class Application {
         }
     }
 
+    private applyDragForce(): void {
+        if (!this.dragForce) {
+            return;
+        }
+
+        const drag = this.dragForce;
+
+        for (const body of this.world.getBodies()) {
+            const dragForce = Force.generateDragForce(body, drag, SETTINGS.dt);
+            body.addForce(dragForce);
+        }
+    }
+
     private advanceSimulation(): void {
         for (let i = 0; i < SETTINGS.subSteps; i++) {
             this.stepSimulation();
@@ -748,7 +766,9 @@ export default class Application {
 
     private handleDemoShortcutDigit(digit: string): void {
         const nextBuffer = `${this.demoShortcutBuffer}${digit}`;
-        const matchingDemoIndexes = DEMOS.map((_demo, index) => `${index}`).filter(index => index.startsWith(nextBuffer));
+        const matchingDemoIndexes = DEMOS.map((_demo, index) => `${index}`).filter(index =>
+            index.startsWith(nextBuffer),
+        );
 
         if (matchingDemoIndexes.length === 0) {
             this.flushDemoShortcut();
@@ -815,6 +835,7 @@ export default class Application {
         this.player = null;
         this.testBody = null;
         this.blackHole = null;
+        this.dragForce = null;
         this.generateParticle = false;
         this.leftButtonPressed = false;
         this.rightButtonPressed = false;
@@ -891,6 +912,7 @@ export default class Application {
 
     private stepSimulation(): void {
         this.applyBlackHoleForce();
+        this.applyDragForce();
         this.world.update(SETTINGS.dt);
     }
 
