@@ -56,9 +56,9 @@ export class RigidBody {
 
     public onContact?: (contactInfo: ContactInfo) => void;
 
-    constructor(shape: Shape, x: number, y: number, mass: number, density: undefined);
-    constructor(shape: Shape, x: number, y: number, mass: undefined, density: number);
     constructor(shape: Shape, x: number, y: number, mass?: number, density?: number) {
+        Utils.assert(mass !== undefined || density !== undefined, 'One between mass or density should be defined');
+
         this.id = RigidBody.nextId++;
 
         this.shape = shape;

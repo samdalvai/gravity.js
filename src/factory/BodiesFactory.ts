@@ -10,7 +10,6 @@ import { Shape } from '../shapes/Shape';
 export type BodyOptions = {
     x: number;
     y: number;
-    mass: number;
     rotation?: number;
     velocity?: Vec2;
     angularVelocity?: number;
