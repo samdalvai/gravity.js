@@ -7,47 +7,60 @@ import { PolygonShape } from '../shapes/PolygonShape';
 import { SegmentShape } from '../shapes/SegmentShape';
 import { Shape } from '../shapes/Shape';
 
-export interface BodyOptions {
+export type BodyOptions = {
     x: number;
     y: number;
     mass: number;
     rotation?: number;
     velocity?: Vec2;
     angularVelocity?: number;
+    canRotate?: boolean;
+    isBullet?: boolean;
+} & BodyMaterialOptions;
+
+type MassOnly = {
+    mass: number;
+    density?: undefined;
+};
+
+type DensityOnly = {
+    density: number;
+    mass?: undefined;
+};
+
+export type BodyMaterialOptions = (MassOnly | DensityOnly) & {
     restitution?: number;
     friction?: number;
     rollingResistance?: number;
     surfaceSpeed?: number;
-    canRotate?: boolean;
-    isBullet?: boolean;
-}
+};
 
-export interface BoxBodyOptions extends BodyOptions {
+export type BoxBodyOptions = {
     width: number;
     height: number;
-}
+} & BodyOptions;
 
-export interface CircleBodyOptions extends BodyOptions {
+export type CircleBodyOptions = {
     radius: number;
-}
+} & BodyOptions;
 
-export interface CapsuleBodyOptions extends BodyOptions {
+export type CapsuleBodyOptions = {
     halfHeight: number;
     radius: number;
-}
+} & BodyOptions;
 
-export interface PolygonBodyOptions extends BodyOptions {
+export type PolygonBodyOptions = {
     vertices: readonly Vec2[];
-}
+} & BodyOptions;
 
-export interface SegmentBodyOptions extends BodyOptions {
+export type SegmentBodyOptions = {
     length: number;
     horizontal: boolean;
-}
+} & BodyOptions;
 
 export class BodiesFactory {
     static fromShape(shape: Shape, options: BodyOptions): RigidBody {
-        const body = new RigidBody(shape, options.x, options.y, options.mass);
+        const body = new RigidBody(shape, options.x, options.y, options.mass, options.density);
         return applyBodyOptions(body, options);
     }
 

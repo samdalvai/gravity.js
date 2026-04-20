@@ -25,7 +25,7 @@ export class RigidBody {
     private _sumTorque: number;
 
     // Mass and Moment of Inertia
-    mass: number;
+    private _mass: number;
     invMass: number;
     I: number;
     invI: number;
@@ -56,14 +56,18 @@ export class RigidBody {
 
     public onContact?: (contactInfo: ContactInfo) => void;
 
-    // TODO: substitute mass with density
-    constructor(shape: Shape, x: number, y: number, density: number) {
+    constructor(shape: Shape, x: number, y: number, mass: number, density: undefined);
+    constructor(shape: Shape, x: number, y: number, mass: undefined, density: number);
+    constructor(shape: Shape, x: number, y: number, mass?: number, density?: number) {
         this.id = RigidBody.nextId++;
 
         this.shape = shape;
         this.shapeType = shape.getType();
 
-        Utils.assert(this.shapeType !== ShapeType.SEGMENT || density === 0, 'Segments can only be static');
+        Utils.assert(
+            this.shapeType !== ShapeType.SEGMENT || mass === 0 || density === 0,
+            'Segments can only be static',
+        );
 
         this.position = new Vec2(x, y);
         this.velocity = new Vec2(0, 0);
@@ -77,18 +81,26 @@ export class RigidBody {
         this._sumForces = new Vec2(0, 0);
         this._sumTorque = 0.0;
 
-        this._density = density;
-        this.mass = 0;
+        this._density = 0;
+        this._mass = 0;
         this.invMass = 0.0;
         this.I = 0.0;
         this.invI = 0.0;
+
+        if (mass !== undefined) {
+            this._mass = mass;
+            this.updateDensityProperties();
+        }
+
+        if (density !== undefined) {
+            this._density = density;
+            this.updateMassProperties();
+        }
 
         this._restitution = 0.2;
         this._friction = 0.7;
         this._rollingResistance = 0.5;
         this.surfaceSpeed = 0;
-
-        this.updateMassProperties();
 
         this.shape.updateVertices(this.rotation, this.position);
         this.shape.updateAABB(this);
@@ -110,6 +122,17 @@ export class RigidBody {
     set friction(value: number) {
         Utils.assert(value >= 0 && value <= 1);
         this._friction = value;
+    }
+
+    get mass(): number {
+        return this._mass;
+    }
+
+    set mass(value: number) {
+        Utils.assert(value >= 0);
+        this._mass = value;
+
+        this.updateDensityProperties();
     }
 
     get density(): number {
@@ -148,12 +171,25 @@ export class RigidBody {
         this._isBullet = value;
     }
 
-    updateMassProperties(): void {
-        Utils.assert(this.density >= 0, 'Density must be non-negative');
+    private updateMassProperties(): void {
+        Utils.assert(this.mass >= 0, 'Mass must be non-negative');
         Utils.assert(this.shapeType !== ShapeType.SEGMENT || this.mass === 0, 'Segments can only be static');
 
         const area = this.shape.getArea();
-        this.mass = area * this._density;
+        this._mass = area * this._density;
+        this.syncMassProperties();
+    }
+
+    private updateDensityProperties(): void {
+        Utils.assert(this.density >= 0, 'Density must be non-negative');
+        Utils.assert(this.shapeType !== ShapeType.SEGMENT || this.density === 0, 'Segments can only be static');
+
+        const area = this.shape.getArea();
+        this._density = this._mass / area;
+        this.syncMassProperties();
+    }
+
+    private syncMassProperties(): void {
         this.invMass = this.mass !== 0.0 ? 1.0 / this.mass : 0.0;
         this.I = this.shape.getMomentOfInertia() * this.mass;
         this.invI = this.I !== 0.0 ? 1.0 / this.I : 0.0;
