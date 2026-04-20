@@ -1,4 +1,4 @@
-import { BodiesFactory } from '../factory/Bodies';
+import { BodiesFactory } from '../factory/BodiesFactory';
 import { RigidBody } from '../core/RigidBody';
 import { Vec2 } from '../math/Vec2';
 

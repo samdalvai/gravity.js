@@ -9,7 +9,7 @@ export {
     SETTINGS,
 } from './core/Constants';
 
-export { BodiesFactory } from './factory/Bodies';
+export { BodiesFactory } from './factory/BodiesFactory';
 export { RigidBody } from './core/RigidBody';
 export { World } from './core/World';
 
