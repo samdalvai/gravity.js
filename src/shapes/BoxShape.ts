@@ -29,6 +29,10 @@ export class BoxShape extends PolygonShape {
         return 0.083333 * (this.width * this.width + this.height * this.height);
     }
 
+    getArea(): number {
+        return this.width * this.height;
+    }
+
     updateAABB(body: RigidBody): void {
         const hw = this.width * 0.5;
         const hh = this.height * 0.5;

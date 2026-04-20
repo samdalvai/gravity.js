@@ -75,6 +75,18 @@ export class PolygonShape extends Shape {
         return acc0 / 6 / acc1;
     }
 
+    getArea(): number {
+        let area = 0;
+        const vertices = this.localVertices;
+        for (let i = 0; i < vertices.length; i++) {
+            const current = vertices[i];
+            const next = vertices[(i + 1) % vertices.length];
+            area += current.cross(next);
+        }
+
+        return Math.abs(area * 0.5);
+    }
+
     updateVertices(angle: number, position: Vec2): void {
         const cos = Math.cos(angle);
         const sin = Math.sin(angle);
