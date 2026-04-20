@@ -106,79 +106,6 @@ function createCollisionManifold(
     return new ContactManifold(bodyA, bodyB, points, depth, normal, false);
 }
 
-function segmentDistance(
-    p1X: number,
-    p1Y: number,
-    q1X: number,
-    q1Y: number,
-    p2X: number,
-    p2Y: number,
-    q2X: number,
-    q2Y: number,
-): {
-    fraction1: number;
-    fraction2: number;
-    distanceSquared: number;
-} {
-    let fraction1 = 0;
-    let fraction2 = 0;
-
-    const d1X = q1X - p1X;
-    const d1Y = q1Y - p1Y;
-    const d2X = q2X - p2X;
-    const d2Y = q2Y - p2Y;
-    const rX = p1X - p2X;
-    const rY = p1Y - p2Y;
-    const dd1 = d1X * d1X + d1Y * d1Y;
-    const dd2 = d2X * d2X + d2Y * d2Y;
-    const rd2 = rX * d2X + rY * d2Y;
-    const rd1 = rX * d1X + rY * d1Y;
-
-    if (dd1 < 0 || dd2 < 0) {
-        if (dd1 >= 0) {
-            fraction1 = Utils.clamp(-rd1 / dd1, 0.0, 1.0);
-            fraction2 = 0.0;
-        } else if (dd2 >= 0) {
-            fraction1 = 0.0;
-            fraction2 = Utils.clamp(rd2 / dd2, 0.0, 1.0);
-        }
-    } else {
-        const d12 = d1X * d2X + d1Y * d2Y;
-        const denominator = dd1 * dd2 - d12 * d12;
-
-        let f1 = 0.0;
-        if (denominator !== 0.0) {
-            f1 = Utils.clamp((d12 * rd2 - rd1 * dd2) / denominator, 0.0, 1.0);
-        }
-
-        let f2 = (d12 * f1 + rd2) / dd2;
-
-        if (f2 < 0.0) {
-            f2 = 0.0;
-            f1 = Utils.clamp(-rd1 / dd1, 0.0, 1.0);
-        } else if (f2 > 1.0) {
-            f2 = 1.0;
-            f1 = Utils.clamp((d12 - rd1) / dd1, 0.0, 1.0);
-        }
-
-        fraction1 = f1;
-        fraction2 = f2;
-    }
-
-    const closest1X = p1X + fraction1 * d1X;
-    const closest1Y = p1Y + fraction1 * d1Y;
-    const closest2X = p2X + fraction2 * d2X;
-    const closest2Y = p2Y + fraction2 * d2Y;
-    const dx = closest1X - closest2X;
-    const dy = closest1Y - closest2Y;
-
-    return {
-        fraction1,
-        fraction2,
-        distanceSquared: dx * dx + dy * dy,
-    };
-}
-
 export function collideCircles(bodyA: RigidBody, bodyB: RigidBody): ContactManifold | null {
     const circleA = bodyA.shape as CircleShape;
     const circleB = bodyB.shape as CircleShape;
@@ -219,91 +146,6 @@ export function collideCircles(bodyA: RigidBody, bodyB: RigidBody): ContactManif
         {
             point: new Vec2((pointAX + pointBX) * 0.5, (pointAY + pointBY) * 0.5),
             separation: distance - radiusSum,
-            id: 0,
-        },
-    ]);
-}
-
-function collideSegmentRadiusAndCircle(
-    bodyA: RigidBody,
-    bodyB: RigidBody,
-    startA: Vec2,
-    endA: Vec2,
-    radiusA: number,
-): ContactManifold | null {
-    const circleB = bodyB.shape as CircleShape;
-    const startAX = startA.x;
-    const startAY = startA.y;
-    const endAX = endA.x;
-    const endAY = endA.y;
-    const circleBX = bodyB.position.x;
-    const circleBY = bodyB.position.y;
-    const edgeX = endAX - startAX;
-    const edgeY = endAY - startAY;
-    const startProjection = (circleBX - startAX) * edgeX + (circleBY - startAY) * edgeY;
-    const endProjection = (endAX - circleBX) * edgeX + (endAY - circleBY) * edgeY;
-
-    let pointAX = startAX;
-    let pointAY = startAY;
-
-    if (startProjection < 0.0) {
-        pointAX = startAX;
-        pointAY = startAY;
-    } else if (endProjection < 0.0) {
-        pointAX = endAX;
-        pointAY = endAY;
-    } else {
-        const edgeLengthSquared = edgeX * edgeX + edgeY * edgeY;
-        const t = edgeLengthSquared > 0.0 ? startProjection / edgeLengthSquared : 0.0;
-
-        pointAX = startAX + edgeX * t;
-        pointAY = startAY + edgeY * t;
-    }
-
-    let fallbackNormalX = 1;
-    let fallbackNormalY = 0;
-    const edgeLengthSquared = edgeX * edgeX + edgeY * edgeY;
-
-    if (edgeLengthSquared > 0.0) {
-        const invEdgeLength = 1 / Math.sqrt(edgeLengthSquared);
-
-        fallbackNormalX = -edgeY * invEdgeLength;
-        fallbackNormalY = edgeX * invEdgeLength;
-    }
-
-    const deltaX = circleBX - pointAX;
-    const deltaY = circleBY - pointAY;
-    const deltaLengthSquared = deltaX * deltaX + deltaY * deltaY;
-
-    let distance = 0;
-    let normalX = fallbackNormalX;
-    let normalY = fallbackNormalY;
-
-    if (deltaLengthSquared > 0.0) {
-        distance = Math.sqrt(deltaLengthSquared);
-
-        const invDistance = 1 / distance;
-
-        normalX = deltaX * invDistance;
-        normalY = deltaY * invDistance;
-    }
-
-    const separation = distance - radiusA - circleB.radius;
-
-    if (separation > SETTINGS.contactSlop) {
-        return null;
-    }
-
-    const contactAX = pointAX + normalX * radiusA;
-    const contactAY = pointAY + normalY * radiusA;
-    const contactBX = circleBX - normalX * circleB.radius;
-    const contactBY = circleBY - normalY * circleB.radius;
-    const normal = new Vec2(normalX, normalY);
-
-    return createCollisionManifold(bodyA, bodyB, normal, [
-        {
-            point: new Vec2((contactAX + contactBX) * 0.5, (contactAY + contactBY) * 0.5),
-            separation,
             id: 0,
         },
     ]);
@@ -571,6 +413,79 @@ function findMaxSeparation(
     }
 
     return { edgeIndex: bestIndex, maxSeparation };
+}
+
+function segmentDistance(
+    p1X: number,
+    p1Y: number,
+    q1X: number,
+    q1Y: number,
+    p2X: number,
+    p2Y: number,
+    q2X: number,
+    q2Y: number,
+): {
+    fraction1: number;
+    fraction2: number;
+    distanceSquared: number;
+} {
+    let fraction1 = 0;
+    let fraction2 = 0;
+
+    const d1X = q1X - p1X;
+    const d1Y = q1Y - p1Y;
+    const d2X = q2X - p2X;
+    const d2Y = q2Y - p2Y;
+    const rX = p1X - p2X;
+    const rY = p1Y - p2Y;
+    const dd1 = d1X * d1X + d1Y * d1Y;
+    const dd2 = d2X * d2X + d2Y * d2Y;
+    const rd2 = rX * d2X + rY * d2Y;
+    const rd1 = rX * d1X + rY * d1Y;
+
+    if (dd1 < 0 || dd2 < 0) {
+        if (dd1 >= 0) {
+            fraction1 = Utils.clamp(-rd1 / dd1, 0.0, 1.0);
+            fraction2 = 0.0;
+        } else if (dd2 >= 0) {
+            fraction1 = 0.0;
+            fraction2 = Utils.clamp(rd2 / dd2, 0.0, 1.0);
+        }
+    } else {
+        const d12 = d1X * d2X + d1Y * d2Y;
+        const denominator = dd1 * dd2 - d12 * d12;
+
+        let f1 = 0.0;
+        if (denominator !== 0.0) {
+            f1 = Utils.clamp((d12 * rd2 - rd1 * dd2) / denominator, 0.0, 1.0);
+        }
+
+        let f2 = (d12 * f1 + rd2) / dd2;
+
+        if (f2 < 0.0) {
+            f2 = 0.0;
+            f1 = Utils.clamp(-rd1 / dd1, 0.0, 1.0);
+        } else if (f2 > 1.0) {
+            f2 = 1.0;
+            f1 = Utils.clamp((d12 - rd1) / dd1, 0.0, 1.0);
+        }
+
+        fraction1 = f1;
+        fraction2 = f2;
+    }
+
+    const closest1X = p1X + fraction1 * d1X;
+    const closest1Y = p1Y + fraction1 * d1Y;
+    const closest2X = p2X + fraction2 * d2X;
+    const closest2Y = p2Y + fraction2 * d2Y;
+    const dx = closest1X - closest2X;
+    const dy = closest1Y - closest2Y;
+
+    return {
+        fraction1,
+        fraction2,
+        distanceSquared: dx * dx + dy * dy,
+    };
 }
 
 function collideConvexPolygons(
@@ -982,6 +897,91 @@ function collideSegmentRadiusPairs(
             point: new Vec2((pointAX + pointBX) * 0.5, (pointAY + pointBY) * 0.5),
             separation: separation - radius,
             id: Utils.makeId(idA, idB),
+        },
+    ]);
+}
+
+function collideSegmentRadiusAndCircle(
+    bodyA: RigidBody,
+    bodyB: RigidBody,
+    startA: Vec2,
+    endA: Vec2,
+    radiusA: number,
+): ContactManifold | null {
+    const circleB = bodyB.shape as CircleShape;
+    const startAX = startA.x;
+    const startAY = startA.y;
+    const endAX = endA.x;
+    const endAY = endA.y;
+    const circleBX = bodyB.position.x;
+    const circleBY = bodyB.position.y;
+    const edgeX = endAX - startAX;
+    const edgeY = endAY - startAY;
+    const startProjection = (circleBX - startAX) * edgeX + (circleBY - startAY) * edgeY;
+    const endProjection = (endAX - circleBX) * edgeX + (endAY - circleBY) * edgeY;
+
+    let pointAX = startAX;
+    let pointAY = startAY;
+
+    if (startProjection < 0.0) {
+        pointAX = startAX;
+        pointAY = startAY;
+    } else if (endProjection < 0.0) {
+        pointAX = endAX;
+        pointAY = endAY;
+    } else {
+        const edgeLengthSquared = edgeX * edgeX + edgeY * edgeY;
+        const t = edgeLengthSquared > 0.0 ? startProjection / edgeLengthSquared : 0.0;
+
+        pointAX = startAX + edgeX * t;
+        pointAY = startAY + edgeY * t;
+    }
+
+    let fallbackNormalX = 1;
+    let fallbackNormalY = 0;
+    const edgeLengthSquared = edgeX * edgeX + edgeY * edgeY;
+
+    if (edgeLengthSquared > 0.0) {
+        const invEdgeLength = 1 / Math.sqrt(edgeLengthSquared);
+
+        fallbackNormalX = -edgeY * invEdgeLength;
+        fallbackNormalY = edgeX * invEdgeLength;
+    }
+
+    const deltaX = circleBX - pointAX;
+    const deltaY = circleBY - pointAY;
+    const deltaLengthSquared = deltaX * deltaX + deltaY * deltaY;
+
+    let distance = 0;
+    let normalX = fallbackNormalX;
+    let normalY = fallbackNormalY;
+
+    if (deltaLengthSquared > 0.0) {
+        distance = Math.sqrt(deltaLengthSquared);
+
+        const invDistance = 1 / distance;
+
+        normalX = deltaX * invDistance;
+        normalY = deltaY * invDistance;
+    }
+
+    const separation = distance - radiusA - circleB.radius;
+
+    if (separation > SETTINGS.contactSlop) {
+        return null;
+    }
+
+    const contactAX = pointAX + normalX * radiusA;
+    const contactAY = pointAY + normalY * radiusA;
+    const contactBX = circleBX - normalX * circleB.radius;
+    const contactBY = circleBY - normalY * circleB.radius;
+    const normal = new Vec2(normalX, normalY);
+
+    return createCollisionManifold(bodyA, bodyB, normal, [
+        {
+            point: new Vec2((contactAX + contactBX) * 0.5, (contactAY + contactBY) * 0.5),
+            separation,
+            id: 0,
         },
     ]);
 }
