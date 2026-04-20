@@ -106,24 +106,6 @@ export class RigidBody {
         this.shape.updateAABB(this);
     }
 
-    get restitution(): number {
-        return this._restitution;
-    }
-
-    set restitution(value: number) {
-        Utils.assert(value >= 0 && value <= 1);
-        this._restitution = value;
-    }
-
-    get friction(): number {
-        return this._friction;
-    }
-
-    set friction(value: number) {
-        Utils.assert(value >= 0 && value <= 1);
-        this._friction = value;
-    }
-
     get mass(): number {
         return this._mass;
     }
@@ -145,6 +127,24 @@ export class RigidBody {
 
     get invI(): number {
         return this._invI;
+    }
+
+    get restitution(): number {
+        return this._restitution;
+    }
+
+    set restitution(value: number) {
+        Utils.assert(value >= 0 && value <= 1);
+        this._restitution = value;
+    }
+
+    get friction(): number {
+        return this._friction;
+    }
+
+    set friction(value: number) {
+        Utils.assert(value >= 0 && value <= 1);
+        this._friction = value;
     }
 
     get density(): number {
