@@ -41,7 +41,6 @@ export class RigidBody {
 
     // Continuous collision detection
     private _isBullet = false;
-    hasCCD = false;
 
     // Pointer to the shape/geometry of this rigid body
     readonly shape: Shape;
