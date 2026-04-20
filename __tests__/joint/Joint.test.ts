@@ -35,8 +35,8 @@ describe('Joint', () => {
     }
 
     function createWeldedBoxes() {
-        const a = BodiesFactory.box({ width: 60, height: 60, x: 30, y: 0, mass: 1 });
-        const b = BodiesFactory.box({ width: 60, height: 60, x: -30, y: 0, mass: 1 });
+        const a = BodiesFactory.box({ width: 60, height: 60, x: 30, y: 0, density: 1 });
+        const b = BodiesFactory.box({ width: 60, height: 60, x: -30, y: 0, density: 1 });
         const joint = new WeldJoint(a, b);
 
         return { a, b, joint };
@@ -135,7 +135,7 @@ describe('Joint', () => {
     });
 
     test('Grab joint should use the grabbed world anchor when pulling toward the target', () => {
-        const body = BodiesFactory.box({ width: 60, height: 60, x: 50, y: 20, mass: 1 });
+        const body = BodiesFactory.box({ width: 60, height: 60, x: 50, y: 20, density: 1 });
         const anchor = new Vec2(80, 20);
         const target = new Vec2(100, 60);
         const joint = new GrabJoint(body, anchor, target, 5, 0.7);
@@ -162,7 +162,7 @@ describe('Joint', () => {
     });
 
     test('Grab joint should copy the target instead of sharing the source vector', () => {
-        const body = BodiesFactory.circle({ radius: 20, x: 0, y: 0, mass: 1 });
+        const body = BodiesFactory.circle({ radius: 20, x: 0, y: 0, density: 1 });
         const sourceTarget = new Vec2(10, 20);
         const joint = new GrabJoint(body, body.position, sourceTarget);
 

@@ -10,7 +10,7 @@ import { Shape } from '../shapes/Shape';
 export interface BodyOptions {
     x: number;
     y: number;
-    mass: number;
+    density: number;
     rotation?: number;
     velocity?: Vec2;
     angularVelocity?: number;
@@ -47,7 +47,7 @@ export interface SegmentBodyOptions extends BodyOptions {
 
 export class BodiesFactory {
     static fromShape(shape: Shape, options: BodyOptions): RigidBody {
-        const body = new RigidBody(shape, options.x, options.y, options.mass);
+        const body = new RigidBody(shape, options.x, options.y, options.density);
         return applyBodyOptions(body, options);
     }
 

@@ -164,7 +164,7 @@ export default class Application {
                     } else if (key === 'f') {
                         const x = InputManager.mousePosition.x;
                         const y = InputManager.mousePosition.y;
-                        this.setBlackHole(BodiesFactory.circle({ radius: 0.0001, x, y, mass: 1_000_000 }));
+                        this.setBlackHole(BodiesFactory.circle({ radius: 0.0001, x, y, density: 1_000_000 }));
                     }
 
                     if (key === 'r' && inputEvent.shiftKey) {
@@ -201,7 +201,7 @@ export default class Application {
                             radius: 5,
                             x: 0,
                             y: 0,
-                            mass: 0.1,
+                            density: 0.1,
                             velocity: direction.scaleNew(bulletForce),
                             isBullet: true,
                         });
@@ -255,7 +255,7 @@ export default class Application {
                             radius: 25,
                             x,
                             y,
-                            mass: 1,
+                            density: 1,
                             canRotate: false,
                             restitution: 0.0,
                             friction: 0.8,
@@ -273,7 +273,7 @@ export default class Application {
                             radius: 20,
                             x,
                             y,
-                            mass: 1,
+                            density: 1,
                             restitution: 0.2,
                             friction: 0.7,
                         });
@@ -289,7 +289,7 @@ export default class Application {
                             horizontal: true,
                             x,
                             y,
-                            mass: 0,
+                            density: 0,
                             restitution: 0.2,
                             friction: 0.7,
                         });
@@ -408,7 +408,7 @@ export default class Application {
                                             radius: 30,
                                             x,
                                             y,
-                                            mass: 1.0,
+                                            density: 1.0,
                                             restitution: 0.5,
                                             friction: 0.7,
                                         });
@@ -424,7 +424,7 @@ export default class Application {
                                         height: 60,
                                         x,
                                         y,
-                                        mass: 1.0,
+                                        density: 1.0,
                                         restitution: 0.3,
                                         friction: 0.7,
                                     });
@@ -478,12 +478,12 @@ export default class Application {
             const acceleration = PLAYER_ACCELERATION;
 
             if (this.leftButtonPressed) {
-                const impulse = -acceleration * this.player.mass * FIXED_DELTA_TIME * PIXELS_PER_METER;
+                const impulse = -acceleration * this.player.density * FIXED_DELTA_TIME * PIXELS_PER_METER;
                 this.player.applyImpulseLinear(new Vec2(impulse, 0));
             }
 
             if (this.rightButtonPressed) {
-                const impulse = acceleration * this.player.mass * FIXED_DELTA_TIME * PIXELS_PER_METER;
+                const impulse = acceleration * this.player.density * FIXED_DELTA_TIME * PIXELS_PER_METER;
                 this.player.applyImpulseLinear(new Vec2(impulse, 0));
             }
 
@@ -505,7 +505,7 @@ export default class Application {
                     radius: 5,
                     x: x + positionOffset.x,
                     y: y + positionOffset.y,
-                    mass: 0.01,
+                    density: 0.01,
                     restitution: 0.0,
                     friction: 0.5,
                 });
