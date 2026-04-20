@@ -164,7 +164,8 @@ export default class Application {
                     } else if (key === 'f') {
                         const x = InputManager.mousePosition.x;
                         const y = InputManager.mousePosition.y;
-                        this.setBlackHole(BodiesFactory.circle({ radius: 0.0001, x, y, mass: 1_000_000 }));
+                        const blackHole = BodiesFactory.circle({ radius: 0.0001, x, y, density: 50_000_000_000_000 });
+                        this.setBlackHole(blackHole);
                     }
 
                     if (key === 'r' && inputEvent.shiftKey) {
