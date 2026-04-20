@@ -14,8 +14,9 @@ export interface BodyOptions {
     rotation?: number;
     velocity?: Vec2;
     angularVelocity?: number;
-    friction?: number;
     restitution?: number;
+    friction?: number;
+    rollingResistance?: number;
     surfaceSpeed?: number;
     canRotate?: boolean;
     isBullet?: boolean;
@@ -93,12 +94,16 @@ function applyBodyOptions(body: RigidBody, options: BodyOptions): RigidBody {
         body.canRotate = options.canRotate;
     }
 
+    if (options.restitution !== undefined) {
+        body.restitution = options.restitution;
+    }
+
     if (options.friction !== undefined) {
         body.friction = options.friction;
     }
 
-    if (options.restitution !== undefined) {
-        body.restitution = options.restitution;
+    if (options.rollingResistance !== undefined) {
+        body.rollingResistance = options.rollingResistance;
     }
 
     if (options.surfaceSpeed !== undefined) {
