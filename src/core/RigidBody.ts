@@ -82,7 +82,7 @@ export class RigidBody {
         const area = this.shape.getArea();
         // TODO: to be substituted with density
         this._density = mass;
-        this.mass = mass * area;
+        this.mass = this._density * area;
         this.invMass = 0.0;
         this.I = 0.0;
         this.invI = 0.0;
@@ -114,6 +114,16 @@ export class RigidBody {
     set friction(value: number) {
         Utils.assert(value >= 0 && value <= 1);
         this._friction = value;
+    }
+
+    get density(): number {
+        return this._density;
+    }
+
+    set density(value: number) {
+        // TODO: update mass properties on density change
+        Utils.assert(value >= 0);
+        this._density = value;
     }
 
     get rollingResistance(): number {
