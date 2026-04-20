@@ -1,4 +1,6 @@
 import { describe, expect, test } from '@jest/globals';
+
+import { BoxShape } from '../../src';
 import { RigidBody } from '../../src/core/RigidBody';
 import { Vec2 } from '../../src/math/Vec2';
 import { CircleShape } from '../../src/shapes/CircleShape';
@@ -26,5 +28,17 @@ describe('RigidBody', () => {
         const local = a.worldPointToLocal(new Vec2(110, 110));
         expect(local.x).toBe(10);
         expect(local.y).toBe(10);
+    });
+
+    test('Rigid body declared by mass or density should have the same mass properties', () => {
+        const a = new RigidBody(new BoxShape(10, 10), 100, 100, 10);
+        const b = new RigidBody(new BoxShape(10, 10), 100, 100, undefined, 0.1);
+
+        expect(a.mass).toBe(b.mass);
+        expect(a.density).toBe(b.density);
+    });
+
+    test('Rigid body declared with no mass or density properties should throw error', () => {
+        expect(() => new RigidBody(new BoxShape(10, 10), 100, 100, undefined, undefined)).toThrow();
     });
 });
