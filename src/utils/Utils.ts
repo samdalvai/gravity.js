@@ -1,4 +1,4 @@
-import { Bodies } from '../bodies/Bodies';
+import { BodiesFactory } from '../factory/Bodies';
 import { RigidBody } from '../core/RigidBody';
 import { Vec2 } from '../math/Vec2';
 
@@ -49,7 +49,7 @@ export function randomConvexBody(x: number, y: number, radius: number, numVertic
         vertices.push(new Vec2(Math.cos(angle), Math.sin(angle)).scaleNew(radius));
     }
 
-    return Bodies.polygon({ vertices, x, y, mass: 1 });
+    return BodiesFactory.polygon({ vertices, x, y, mass: 1 });
 }
 
 // a.id << 16 → shifts a.id into the upper 16 bits of a 32-bit integer

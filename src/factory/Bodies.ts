@@ -44,7 +44,7 @@ export interface SegmentBodyOptions extends BodyOptions {
     horizontal: boolean;
 }
 
-export class Bodies {
+export class BodiesFactory {
     static fromShape(shape: Shape, options: BodyOptions): RigidBody {
         const body = new RigidBody(shape, options.x, options.y, options.mass);
         return applyBodyOptions(body, options);
@@ -52,27 +52,27 @@ export class Bodies {
 
     static box(options: BoxBodyOptions): RigidBody {
         const { width, height, ...bodyOptions } = options;
-        return Bodies.fromShape(new BoxShape(width, height), bodyOptions);
+        return BodiesFactory.fromShape(new BoxShape(width, height), bodyOptions);
     }
 
     static circle(options: CircleBodyOptions): RigidBody {
         const { radius, ...bodyOptions } = options;
-        return Bodies.fromShape(new CircleShape(radius), bodyOptions);
+        return BodiesFactory.fromShape(new CircleShape(radius), bodyOptions);
     }
 
     static capsule(options: CapsuleBodyOptions): RigidBody {
         const { halfHeight, radius, ...bodyOptions } = options;
-        return Bodies.fromShape(new CapsuleShape(halfHeight, radius), bodyOptions);
+        return BodiesFactory.fromShape(new CapsuleShape(halfHeight, radius), bodyOptions);
     }
 
     static polygon(options: PolygonBodyOptions): RigidBody {
         const { vertices, ...bodyOptions } = options;
-        return Bodies.fromShape(new PolygonShape([...vertices]), bodyOptions);
+        return BodiesFactory.fromShape(new PolygonShape([...vertices]), bodyOptions);
     }
 
     static segment(options: SegmentBodyOptions): RigidBody {
         const { length, horizontal, ...bodyOptions } = options;
-        return Bodies.fromShape(new SegmentShape(length, horizontal), bodyOptions);
+        return BodiesFactory.fromShape(new SegmentShape(length, horizontal), bodyOptions);
     }
 }
 

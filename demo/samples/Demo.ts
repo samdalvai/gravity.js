@@ -5,7 +5,7 @@
  * https://github.com/erincatto/box2d-lite
  */
 import {
-    Bodies,
+    BodiesFactory as Bodies,
     DistanceJoint,
     GRAVITY,
     RigidBody,
