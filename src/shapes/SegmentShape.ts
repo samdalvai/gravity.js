@@ -34,6 +34,11 @@ export class SegmentShape extends PolygonShape {
         return lengthSq * 0.083333;
     }
 
+    getArea(): number {
+        // Segments with 0 thickness have area equal to 0
+        return 0;
+    }
+
     updateVertices(angle: number, position: Vec2): void {
         super.updateVertices(angle, position);
     }
