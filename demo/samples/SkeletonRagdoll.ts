@@ -1,4 +1,4 @@
-import { BodiesFactory as Bodies, Vec2 } from '../../src';
+import { BodiesFactory, Vec2 } from '../../src';
 import type { World } from '../../src';
 import type Application from '../Application';
 import {
@@ -14,30 +14,30 @@ function setupSkeletonRagdoll(world: World, app: Application): void {
     generateFloor(world, app);
     generateFences(world, app);
 
-    const torso = Bodies.box({ width: 50, height: 100, x: 0, y: -100, mass: 3.0 });
-    const head = Bodies.circle({ radius: 25, x: torso.position.x, y: torso.position.y + 50 + 25, mass: 5.0 });
-    const leftArm = Bodies.box({
+    const torso = BodiesFactory.box({ width: 50, height: 100, x: 0, y: -100, mass: 3.0 });
+    const head = BodiesFactory.circle({ radius: 25, x: torso.position.x, y: torso.position.y + 50 + 25, mass: 5.0 });
+    const leftArm = BodiesFactory.box({
         width: 15,
         height: 70,
         x: torso.position.x - 32,
         y: torso.position.y + 10,
         mass: 1.0,
     });
-    const rightArm = Bodies.box({
+    const rightArm = BodiesFactory.box({
         width: 15,
         height: 70,
         x: torso.position.x + 32,
         y: torso.position.y + 10,
         mass: 1.0,
     });
-    const leftLeg = Bodies.box({
+    const leftLeg = BodiesFactory.box({
         width: 20,
         height: 90,
         x: torso.position.x - 20,
         y: torso.position.y - 97,
         mass: 1.0,
     });
-    const rightLeg = Bodies.box({
+    const rightLeg = BodiesFactory.box({
         width: 20,
         height: 90,
         x: torso.position.x + 20,
