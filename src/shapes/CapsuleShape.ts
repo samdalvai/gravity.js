@@ -55,6 +55,12 @@ export class CapsuleShape extends Shape {
         return iRect + iCircle;
     }
 
+    getArea(): number {
+        const areaCircle = Math.PI * this.radius * this.radius;
+        const areaBody = this.radius * 2 * this.halfHeight * 2;
+        return areaCircle + areaBody;
+    }
+
     updateVertices(angle: number, position: Vec2): void {
         const cos = Math.cos(angle);
         const sin = Math.sin(angle);
