@@ -18,7 +18,7 @@ import AssetStore, { TEXTURES } from './graphics/AssetStore';
 import Graphics from './graphics/Graphics';
 import InputManager, { MouseButton } from './input/InputManager';
 import BodyRenderRegistry from './render/BodyRenderRegistry';
-import Demo from './samples/Demo';
+import { DEMOS, DEMO_LABELS } from './samples';
 import UIManager, { UIState } from './ui/UIManager';
 
 const BODY_REMOVAL_THRESHOLD = 25_000;
@@ -619,7 +619,7 @@ export default class Application {
         const y = InputManager.mousePosition.y;
 
         const stats: Array<[string, string]> = [
-            ['Demo', Demo.demoStrings[this.demoIndex].replace(/^Demo \d+:\s*/, '')],
+            ['Demo', DEMO_LABELS[this.demoIndex] ?? ''],
             ['Gravity', SETTINGS.applyGravity ? 'ON' : 'OFF'],
             ['Paused', this.paused ? 'ON' : 'OFF'],
             ['AABB', this.showAABB ? 'ON' : 'OFF'],
@@ -748,9 +748,7 @@ export default class Application {
 
     private handleDemoShortcutDigit(digit: string): void {
         const nextBuffer = `${this.demoShortcutBuffer}${digit}`;
-        const matchingDemoIndexes = Demo.demoFunctions
-            .map((_demo, index) => `${index}`)
-            .filter(index => index.startsWith(nextBuffer));
+        const matchingDemoIndexes = DEMOS.map((_demo, index) => `${index}`).filter(index => index.startsWith(nextBuffer));
 
         if (matchingDemoIndexes.length === 0) {
             this.flushDemoShortcut();
@@ -790,7 +788,7 @@ export default class Application {
         this.demoShortcutBuffer = '';
         this.clearDemoShortcutTimer();
 
-        if (!Demo.demoFunctions[index]) {
+        if (!DEMOS[index]) {
             return;
         }
 
@@ -798,7 +796,7 @@ export default class Application {
     }
 
     private loadDemo(index: number): void {
-        const demo = Demo.demoFunctions[index];
+        const demo = DEMOS[index];
 
         if (!demo) {
             this.demoShortcutBuffer = '';
@@ -899,7 +897,7 @@ export default class Application {
     private getUIState(): UIState {
         return {
             demoIndex: this.demoIndex,
-            demoLabels: Demo.demoStrings,
+            demoLabels: DEMO_LABELS,
             debug: this.debug,
             showAABB: this.showAABB,
             showContacts: this.showContacts,
