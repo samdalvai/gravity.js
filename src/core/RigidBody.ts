@@ -5,8 +5,6 @@ import { Shape, ShapeType } from '../shapes/Shape';
 import * as Utils from '../utils/Utils';
 import { SETTINGS } from './Constants';
 
-const STATIC_EPSILON = 1e-8;
-
 export class RigidBody {
     private static nextId = 0;
     readonly id: number;
@@ -161,7 +159,7 @@ export class RigidBody {
     }
 
     isStatic(): boolean {
-        return Math.abs(this.invMass - 0.0) < STATIC_EPSILON;
+        return this.invMass === 0;
     }
 
     addForce(force: Vec2): void {
