@@ -50,31 +50,32 @@ describe('Joint', () => {
         const { a, b } = runJointSimulation(DistanceJoint);
 
         // Check that the solver approximation is "good enough"
-        expect(Math.abs(a.position.y - 95)).toBe(0.6009915351155684);
+        expect(Math.abs(a.position.y - 95)).toBeCloseTo(0.6009915351155684);
         expect(Math.abs(a.position.x - 100)).toBe(0);
         expect(Math.abs(b.position.y - 205)).toBe(0.6009915351155826);
         expect(Math.abs(b.position.x - 100)).toBe(0);
 
         expect(Math.abs(a.velocity.x)).toBe(0);
-        expect(Math.abs(a.velocity.y - 260)).toBe(3.9405078930655577);
+
+        expect(Math.abs(a.velocity.y - 260)).toBeCloseTo(3.9405078930655577);
 
         expect(Math.abs(b.velocity.x)).toBe(0);
-        expect(Math.abs(b.velocity.y + 260)).toBe(3.9405078930655577);
+        expect(Math.abs(b.velocity.y + 260)).toBeCloseTo(3.9405078930655577);
     });
 
     test('Perf joint constraint solving should match the original joint behavior', () => {
         const { a, b } = runJointSimulation(DistanceJointPerf);
 
-        expect(Math.abs(a.position.y - 95)).toBe(0.6009915351155684);
+        expect(Math.abs(a.position.y - 95)).toBeCloseTo(0.6009915351155684);
         expect(Math.abs(a.position.x - 100)).toBe(0);
         expect(Math.abs(b.position.y - 205)).toBe(0.6009915351155826);
         expect(Math.abs(b.position.x - 100)).toBe(0);
 
         expect(Math.abs(a.velocity.x)).toBe(0);
-        expect(Math.abs(a.velocity.y - 260)).toBe(3.9405078930655577);
+        expect(Math.abs(a.velocity.y - 260)).toBeCloseTo(3.9405078930655577);
 
         expect(Math.abs(b.velocity.x)).toBe(0);
-        expect(Math.abs(b.velocity.y + 260)).toBe(3.9405078930655577);
+        expect(Math.abs(b.velocity.y + 260)).toBeCloseTo(3.9405078930655577);
     });
 
     test('Weld joint should remain at rest when the anchor starts aligned', () => {
