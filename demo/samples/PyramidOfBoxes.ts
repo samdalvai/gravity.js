@@ -1,4 +1,4 @@
-import { BodiesFactory as Bodies } from '../../src';
+import { BodiesFactory } from '../../src';
 import type { World } from '../../src';
 import type Application from '../Application';
 import { defineDemo, generateFences, generateFloor } from './shared';
@@ -21,7 +21,7 @@ function setupPyramidOfBoxes(world: World, app: Application): void {
         for (let col = 0; col < boxesInRow; col++) {
             const x = centerX - rowWidth / 2 + boxSize / 2 + col * boxSize;
             const y = baseY - row * (boxSize + boxSpacing);
-            const box = Bodies.box({ width: boxSize, height: boxSize, x, y: -y, mass: 1, restitution: 0.001 });
+            const box = BodiesFactory.box({ width: boxSize, height: boxSize, x, y: -y, mass: 1, restitution: 0.001 });
             app.setBodyTexture(box, 'crate');
             world.addBody(box);
         }

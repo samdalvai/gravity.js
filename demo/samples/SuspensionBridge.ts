@@ -1,4 +1,4 @@
-import { BodiesFactory as Bodies, Vec2 } from '../../src';
+import { BodiesFactory, Vec2 } from '../../src';
 import type { RigidBody, World } from '../../src';
 import type Application from '../Application';
 import {
@@ -26,14 +26,14 @@ function setupSuspensionBridge(world: World, app: Application): void {
     const pillarHeight = 400;
     const pillarPositionY = FLOOR_POSITION_Y + pillarHeight / 2 + FLOOR_HEIGHT / 2;
 
-    const pillarLeft = Bodies.box({
+    const pillarLeft = BodiesFactory.box({
         width: pillarWidth,
         height: pillarHeight,
         x: -pillarOffsetX,
         y: pillarPositionY,
         mass: 0,
     });
-    const pillarRight = Bodies.box({
+    const pillarRight = BodiesFactory.box({
         width: pillarWidth,
         height: pillarHeight,
         x: pillarOffsetX,
@@ -51,7 +51,7 @@ function setupSuspensionBridge(world: World, app: Application): void {
 
     for (let i = 0; i < stepCount; i++) {
         const x = (i - (stepCount - 1) / 2) * stepSpacing;
-        const step = Bodies.box({ width: stepWidth, height: stepHeight, x, y: stepPositionY, mass: 5 });
+        const step = BodiesFactory.box({ width: stepWidth, height: stepHeight, x, y: stepPositionY, mass: 5 });
         app.setBodyTexture(step, 'woodBox');
         world.addBody(step);
         steps.push(step);
