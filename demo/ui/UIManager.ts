@@ -51,6 +51,7 @@ export interface UIState {
     showRuntimeStatsHud: boolean;
     ccd: boolean;
     applyGravity: boolean;
+    grab: boolean;
     paused: boolean;
     solverIterations: number;
     subSteps: number;
@@ -65,6 +66,7 @@ export interface UIActions {
     onSetShowRuntimeStatsHud(value: boolean): void;
     onSetCCD(checked: boolean): void;
     onSetApplyGravity(value: boolean): void;
+    onSetGrab(checked: boolean): void;
     onSetPaused(value: boolean): void;
     onSetSolverIterations(value: number): void;
     onSetSubSteps(value: number): void;
@@ -96,6 +98,7 @@ export default class UIManager {
     private runtimeStatsButton: HTMLButtonElement | null = null;
     private shortcutsButton: HTMLButtonElement | null = null;
     private shortcutsDialog: HTMLDialogElement | null = null;
+    private grabCheckbox: HTMLInputElement | null = null;
 
     initialize(state: UIState, actions: UIActions): void {
         this.currentState = state;
@@ -175,6 +178,7 @@ export default class UIManager {
         );
         this.ccdCheckbox = createCheckbox(toggleGroup, 'CCD', checked => actions.onSetCCD(checked));
         this.gravityCheckbox = createCheckbox(toggleGroup, 'Gravity', checked => actions.onSetApplyGravity(checked));
+        this.grabCheckbox = createCheckbox(toggleGroup, 'Grab', checked => actions.onSetGrab(checked));
         this.pausedCheckbox = createCheckbox(toggleGroup, 'Paused', checked => actions.onSetPaused(checked));
 
         const numericGroup = createGroup();
@@ -267,6 +271,7 @@ export default class UIManager {
             !this.showContactsCheckbox ||
             !this.ccdCheckbox ||
             !this.gravityCheckbox ||
+            !this.grabCheckbox ||
             !this.pausedCheckbox ||
             !this.solverIterationsInput ||
             !this.subStepsInput
@@ -282,6 +287,7 @@ export default class UIManager {
 
         this.ccdCheckbox.checked = state.ccd;
         this.gravityCheckbox.checked = state.applyGravity;
+        this.grabCheckbox.checked = state.grab;
         this.pausedCheckbox.checked = state.paused;
         this.solverIterationsInput.value = `${state.solverIterations}`;
         this.subStepsInput.value = `${state.subSteps}`;
