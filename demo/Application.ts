@@ -1,5 +1,5 @@
 import {
-    Bodies,
+    BodiesFactory,
     DistanceJoint,
     FIXED_DELTA_TIME,
     Force,
@@ -164,7 +164,7 @@ export default class Application {
                     } else if (key === 'f') {
                         const x = InputManager.mousePosition.x;
                         const y = InputManager.mousePosition.y;
-                        this.setBlackHole(Bodies.circle({ radius: 0.0001, x, y, mass: 1_000_000 }));
+                        this.setBlackHole(BodiesFactory.circle({ radius: 0.0001, x, y, mass: 1_000_000 }));
                     }
 
                     if (key === 'r' && inputEvent.shiftKey) {
@@ -197,7 +197,7 @@ export default class Application {
                         const direction = target.subNew(center).normalizeNew();
                         const bulletForce = 50_000;
 
-                        const bullet = Bodies.circle({
+                        const bullet = BodiesFactory.circle({
                             radius: 5,
                             x: 0,
                             y: 0,
@@ -250,7 +250,7 @@ export default class Application {
                             this.player = null;
                         }
 
-                        this.player = Bodies.capsule({
+                        this.player = BodiesFactory.capsule({
                             halfHeight: 30,
                             radius: 25,
                             x,
@@ -268,7 +268,7 @@ export default class Application {
                         const x = InputManager.mousePosition.x;
                         const y = InputManager.mousePosition.y;
 
-                        const capsule = Bodies.capsule({
+                        const capsule = BodiesFactory.capsule({
                             halfHeight: 40,
                             radius: 20,
                             x,
@@ -284,7 +284,7 @@ export default class Application {
                         const x = InputManager.mousePosition.x;
                         const y = InputManager.mousePosition.y;
 
-                        const segment = Bodies.segment({
+                        const segment = BodiesFactory.segment({
                             length: 200,
                             horizontal: true,
                             x,
@@ -404,7 +404,7 @@ export default class Application {
                                     }
 
                                     if (!bodySelected) {
-                                        const ball = Bodies.circle({
+                                        const ball = BodiesFactory.circle({
                                             radius: 30,
                                             x,
                                             y,
@@ -419,7 +419,7 @@ export default class Application {
                                 break;
                             case MouseButton.RIGHT:
                                 {
-                                    const box = Bodies.box({
+                                    const box = BodiesFactory.box({
                                         width: 60,
                                         height: 60,
                                         x,
@@ -501,7 +501,7 @@ export default class Application {
                 const angle = Math.random() * Math.PI * 2;
                 const positionOffset = new Vec2(Math.cos(angle), Math.sin(angle)).scaleNew(radius);
 
-                const particle = Bodies.circle({
+                const particle = BodiesFactory.circle({
                     radius: 5,
                     x: x + positionOffset.x,
                     y: y + positionOffset.y,
@@ -623,7 +623,7 @@ export default class Application {
             ['Paused', this.paused ? 'ON' : 'OFF'],
             ['AABB', this.showAABB ? 'ON' : 'OFF'],
             ['Contacts', this.showContacts ? 'ON' : 'OFF'],
-            ['Bodies', `${this.world.getBodies().length}/${MAX_BODIES}`],
+            ['BodiesFactory', `${this.world.getBodies().length}/${MAX_BODIES}`],
             ['Collisions', `${numContacts}`],
             ['FPS', this.FPS.toFixed(2)],
             ['Zoom', Graphics.zoom.toFixed(2)],
