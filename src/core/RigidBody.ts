@@ -77,10 +77,8 @@ export class RigidBody {
         this._sumForces = new Vec2(0, 0);
         this._sumTorque = 0.0;
 
-        const area = this.shape.getArea();
-        // TODO: to be substituted with density
         this._density = density;
-        this.mass = this._density * area;
+        this.mass = 0;
         this.invMass = 0.0;
         this.I = 0.0;
         this.invI = 0.0;
@@ -119,9 +117,10 @@ export class RigidBody {
     }
 
     set density(value: number) {
-        // TODO: update mass properties on density change
         Utils.assert(value >= 0);
         this._density = value;
+
+        this.updateMassProperties();
     }
 
     get rollingResistance(): number {
@@ -150,9 +149,11 @@ export class RigidBody {
     }
 
     updateMassProperties(): void {
-        Utils.assert(this.mass >= 0, 'Mass must be non-negative');
+        Utils.assert(this.density >= 0, 'Density must be non-negative');
         Utils.assert(this.shapeType !== ShapeType.SEGMENT || this.mass === 0, 'Segments can only be static');
 
+        const area = this.shape.getArea();
+        this.mass = area * this._density;
         this.invMass = this.mass !== 0.0 ? 1.0 / this.mass : 0.0;
         this.I = this.shape.getMomentOfInertia() * this.mass;
         this.invI = this.I !== 0.0 ? 1.0 / this.I : 0.0;
