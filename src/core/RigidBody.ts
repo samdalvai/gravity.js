@@ -115,7 +115,7 @@ export class RigidBody {
     }
 
     set rollingResistance(value: number) {
-        Utils.assert(value >= 0 && value <= 1);
+        Utils.assert(value >= 0);
         this._rollingResistance = value;
     }
 
