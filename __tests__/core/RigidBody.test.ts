@@ -30,9 +30,24 @@ describe('RigidBody', () => {
         expect(local.y).toBe(10);
     });
 
-    test('Rigid body declared by mass or density should have the same mass properties', () => {
-        const a = new RigidBody(new BoxShape(10, 10), 100, 100, 10);
-        const b = new RigidBody(new BoxShape(10, 10), 100, 100, undefined, 0.1);
+    test('Box rigid body declared by mass or density should have the same mass properties', () => {
+        const boxWidth = 10;
+        const boxArea = boxWidth * boxWidth;
+        const boxMass = 10;
+
+        const a = new RigidBody(new BoxShape(boxWidth, boxWidth), 100, 100, boxMass);
+        const b = new RigidBody(new BoxShape(boxWidth, boxWidth), 100, 100, undefined, boxMass / boxArea);
+
+        expect(a.mass).toBe(b.mass);
+        expect(a.density).toBe(b.density);
+    });
+
+    test('Circle rigid body declared by mass or density should have the same mass properties', () => {
+        const circleArea = Math.PI * 10 * 10;
+        const circleMass = 10;
+
+        const a = new RigidBody(new CircleShape(10), 100, 100, circleMass);
+        const b = new RigidBody(new CircleShape(10), 100, 100, undefined, circleMass / circleArea);
 
         expect(a.mass).toBe(b.mass);
         expect(a.density).toBe(b.density);
