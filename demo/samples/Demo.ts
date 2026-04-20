@@ -69,7 +69,7 @@ export default class Demo {
     ];
 
     static generateFloor(world: World, app: Application): RigidBody {
-        const floor = Bodies.box({ width: FLOOR_WIDTH, height: FLOOR_HEIGHT, x: 0, y: FLOOR_POSITION_Y, mass: 0.0 });
+        const floor = Bodies.box({ width: FLOOR_WIDTH, height: FLOOR_HEIGHT, x: 0, y: FLOOR_POSITION_Y, density: 0.0 });
         app.setBodyTexture(floor, 'transparent');
         world.addBody(floor);
         return floor;
@@ -83,7 +83,7 @@ export default class Demo {
             height: fenceHeight,
             x: -(FLOOR_WIDTH / 2 + fenceWidth / 2),
             y: FLOOR_POSITION_Y + FLOOR_HEIGHT / 2 + fenceHeight / 2 - FLOOR_HEIGHT,
-            mass: 0.0,
+            density: 0.0,
         });
 
         const rightFence = Bodies.box({
@@ -91,7 +91,7 @@ export default class Demo {
             height: fenceHeight,
             x: FLOOR_WIDTH / 2 + fenceWidth / 2,
             y: FLOOR_POSITION_Y + FLOOR_HEIGHT / 2 + fenceHeight / 2 - FLOOR_HEIGHT,
-            mass: 0.0,
+            density: 0.0,
         });
 
         app.setBodyTexture(leftFence, 'transparent');
@@ -113,28 +113,28 @@ export default class Demo {
                 height: wallThickness,
                 x: 0,
                 y: innerBottom - wallThickness / 2,
-                mass: 0,
+                density: 0,
             }),
             Bodies.box({
                 width: wallSpanHorizontal,
                 height: wallThickness,
                 x: 0,
                 y: innerTop + wallThickness / 2,
-                mass: 0,
+                density: 0,
             }),
             Bodies.box({
                 width: wallThickness,
                 height: wallSpanVertical,
                 x: -(SQUARE_CAGE_INNER_SIZE / 2 + wallThickness / 2),
                 y: (innerBottom + innerTop) / 2,
-                mass: 0,
+                density: 0,
             }),
             Bodies.box({
                 width: wallThickness,
                 height: wallSpanVertical,
                 x: SQUARE_CAGE_INNER_SIZE / 2 + wallThickness / 2,
                 y: (innerBottom + innerTop) / 2,
-                mass: 0,
+                density: 0,
             }),
         ];
 
@@ -164,19 +164,19 @@ export default class Demo {
         this.generateFences(world, app);
 
         // Add bird
-        const bird = Bodies.circle({ radius: 45, x: -550, y: -200, mass: 3.0 });
+        const bird = Bodies.circle({ radius: 45, x: -550, y: -200, density: 3.0 });
         app.setBodyTexture(bird, 'birdRed');
         world.addBody(bird);
 
         // Add a stack of boxes
         for (let i = 1; i <= 4; i++) {
-            const mass = 10.0 / i;
+            const density = 10.0 / i;
             const box = Bodies.box({
                 width: 50,
                 height: 50,
                 x: -300,
                 y: floor.position.y + FLOOR_HEIGHT / 2 + i * 55,
-                mass,
+                density,
                 friction: 0.9,
                 restitution: 0.1,
             });
@@ -190,21 +190,21 @@ export default class Demo {
             height: 150,
             x: -30,
             y: floor.position.y + FLOOR_HEIGHT / 2 + 100,
-            mass: 5.0,
+            density: 5.0,
         });
         const plank2 = Bodies.box({
             width: 50,
             height: 150,
             x: 130,
             y: floor.position.y + FLOOR_HEIGHT / 2 + 100,
-            mass: 5.0,
+            density: 5.0,
         });
         const plank3 = Bodies.box({
             width: 250,
             height: 25,
             x: 50,
             y: floor.position.y + FLOOR_HEIGHT / 2 + 200,
-            mass: 2.0,
+            density: 2.0,
         });
         app.setBodyTexture(plank1, 'woodPlankSolid');
         app.setBodyTexture(plank2, 'woodPlankSolid');
@@ -219,7 +219,7 @@ export default class Demo {
             vertices: triangleVertices,
             x: plank3.position.x,
             y: plank3.position.y + 50,
-            mass: 0.5,
+            density: 0.5,
         });
         app.setBodyTexture(triangle, 'woodTriangle');
         world.addBody(triangle);
@@ -230,8 +230,8 @@ export default class Demo {
             for (let row = 0; row < col; row++) {
                 const x = plank3.position.x + 200 + col * 50 - row * 25;
                 const y = floor.position.y + FLOOR_HEIGHT / 2 + 50 + row * 52;
-                const mass = 5 / (row + 1);
-                const box = Bodies.box({ width: 50, height: 50, x, y, mass, friction: 0.9, restitution: 0.0 });
+                const density = 5 / (row + 1);
+                const box = Bodies.box({ width: 50, height: 50, x, y, density, friction: 0.9, restitution: 0.0 });
                 app.setBodyTexture(box, 'woodBox');
                 world.addBody(box);
             }
@@ -245,7 +245,7 @@ export default class Demo {
 
         // Start anchor (static)
         const stepHeight = 20;
-        const startStep = Bodies.box({ width: 80, height: stepHeight, x: -500, y: 200, mass: 0.0 });
+        const startStep = Bodies.box({ width: 80, height: stepHeight, x: -500, y: 200, density: 0.0 });
         app.setBodyTexture(startStep, 'rockBridgeAnchor');
         world.addBody(startStep);
 
@@ -255,9 +255,9 @@ export default class Demo {
         for (let i = 1; i <= numSteps; i++) {
             const x = startStep.position.x + 30 + i * spacing;
             const y = startStep.position.y - Math.sin((i / numSteps) * Math.PI) * 10;
-            const mass = 3;
+            const density = 3;
 
-            const step = Bodies.circle({ radius: 15, x, y, mass });
+            const step = Bodies.circle({ radius: 15, x, y, density });
             app.setBodyTexture(step, 'woodBridgeStep');
             world.addBody(step);
 
@@ -274,7 +274,7 @@ export default class Demo {
             height: stepHeight,
             x: last.position.x + 60,
             y: startStep.position.y,
-            mass: 0.0,
+            density: 0.0,
         });
         app.setBodyTexture(endStep, 'rockBridgeAnchor');
         world.addBody(endStep);
@@ -288,25 +288,25 @@ export default class Demo {
             radius: pigRadius,
             x: plank1.position.x + 80,
             y: floor.position.y + FLOOR_HEIGHT / 2 + pigRadius,
-            mass: 3.0,
+            density: 3.0,
         });
         const pig2 = Bodies.circle({
             radius: pigRadius,
             x: plank2.position.x + 400,
             y: floor.position.y + FLOOR_HEIGHT / 2 + pigRadius,
-            mass: 3.0,
+            density: 3.0,
         });
         const pig3 = Bodies.circle({
             radius: pigRadius,
             x: plank2.position.x + 460,
             y: floor.position.y + FLOOR_HEIGHT / 2 + pigRadius,
-            mass: 3.0,
+            density: 3.0,
         });
         const pig4 = Bodies.circle({
             radius: pigRadius,
             x: startStep.position.x,
             y: startStep.position.y + stepHeight / 2 + pigRadius,
-            mass: 1.0,
+            density: 1.0,
         });
         app.setBodyTexture(pig1, 'pig1');
         app.setBodyTexture(pig2, 'pig2');
@@ -324,7 +324,7 @@ export default class Demo {
         this.generateFloor(world, app);
         this.generateFences(world, app);
 
-        const body = Bodies.box({ width: 60, height: 60, x: 0, y: 0, mass: 1, angularVelocity: 2, rotation: 0.7 });
+        const body = Bodies.box({ width: 60, height: 60, x: 0, y: 0, density: 1, angularVelocity: 2, rotation: 0.7 });
         app.setBodyTexture(body, 'crate');
         world.addBody(body);
     };
@@ -345,7 +345,7 @@ export default class Demo {
                 height: boxSize,
                 x: 0,
                 y: -200 + (boxSize + boxSpacing) * i,
-                mass: 1,
+                density: 1,
                 restitution: 0,
             });
             app.setBodyTexture(box, 'crate');
@@ -374,7 +374,7 @@ export default class Demo {
                 const x = centerX - rowWidth / 2 + boxSize / 2 + col * boxSize;
                 const y = baseY - row * (boxSize + boxSpacing);
 
-                const box = Bodies.box({ width: boxSize, height: boxSize, x, y: -y, mass: 1, restitution: 0.001 });
+                const box = Bodies.box({ width: boxSize, height: boxSize, x, y: -y, density: 1, restitution: 0.001 });
                 app.setBodyTexture(box, 'crate');
                 world.addBody(box);
             }
@@ -404,14 +404,14 @@ export default class Demo {
             height: pillarHeight,
             x: -pillarOffsetX,
             y: pillarPositionY,
-            mass: 0,
+            density: 0,
         });
         const pillarRight = Bodies.box({
             width: pillarWidth,
             height: pillarHeight,
             x: pillarOffsetX,
             y: pillarPositionY,
-            mass: 0,
+            density: 0,
         });
 
         app.setBodyTexture(pillarLeft, 'metal');
@@ -426,7 +426,7 @@ export default class Demo {
         for (let i = 0; i < stepCount; i++) {
             const x = (i - (stepCount - 1) / 2) * stepSpacing;
 
-            const step = Bodies.box({ width: stepWidth, height: stepHeight, x, y: stepPositionY, mass: 5 });
+            const step = Bodies.box({ width: stepWidth, height: stepHeight, x, y: stepPositionY, density: 5 });
 
             app.setBodyTexture(step, 'woodBox');
             world.addBody(step);
@@ -483,7 +483,7 @@ export default class Demo {
         this.generateFloor(world, app);
         this.generateFences(world, app);
 
-        const whipAnchor = Bodies.box({ width: 60, height: 25, x: 0, y: 350, mass: 0 });
+        const whipAnchor = Bodies.box({ width: 60, height: 25, x: 0, y: 350, density: 0 });
         app.setBodyTexture(whipAnchor, 'rockBridgeAnchor');
         world.addBody(whipAnchor);
 
@@ -499,7 +499,7 @@ export default class Demo {
                 i === 0
                     ? whipAnchor.position.y - whipElementHeight
                     : whipAnchor.position.y - (whipElementHeight + 60 * i);
-            const whipElement = Bodies.box({ width: 10, height: 50, x, y, mass: 1 });
+            const whipElement = Bodies.box({ width: 10, height: 50, x, y, density: 1 });
             app.setBodyTexture(whipElement, 'crate');
             world.addBody(whipElement);
 
@@ -524,35 +524,35 @@ export default class Demo {
         this.generateFences(world, app);
 
         // Add ragdoll parts (rigid bodies)
-        const torso = Bodies.box({ width: 50, height: 100, x: 0, y: -100, mass: 3.0 });
-        const head = Bodies.circle({ radius: 25, x: torso.position.x, y: torso.position.y + 50 + 25, mass: 5.0 });
+        const torso = Bodies.box({ width: 50, height: 100, x: 0, y: -100, density: 3.0 });
+        const head = Bodies.circle({ radius: 25, x: torso.position.x, y: torso.position.y + 50 + 25, density: 5.0 });
         const leftArm = Bodies.box({
             width: 15,
             height: 70,
             x: torso.position.x - 32,
             y: torso.position.y + 10,
-            mass: 1.0,
+            density: 1.0,
         });
         const rightArm = Bodies.box({
             width: 15,
             height: 70,
             x: torso.position.x + 32,
             y: torso.position.y + 10,
-            mass: 1.0,
+            density: 1.0,
         });
         const leftLeg = Bodies.box({
             width: 20,
             height: 90,
             x: torso.position.x - 20,
             y: torso.position.y - 97,
-            mass: 1.0,
+            density: 1.0,
         });
         const rightLeg = Bodies.box({
             width: 20,
             height: 90,
             x: torso.position.x + 20,
             y: torso.position.y - 97,
-            mass: 1.0,
+            density: 1.0,
         });
         app.setBodyTexture(head, 'head');
         app.setBodyTexture(torso, 'torso');
@@ -620,7 +620,7 @@ export default class Demo {
         const floor = this.generateFloor(world, app);
         this.generateFences(world, app);
 
-        const plank = Bodies.box({ width: 750, height: 20, x: 0, y: floor.position.y + 100, mass: 10 });
+        const plank = Bodies.box({ width: 750, height: 20, x: 0, y: floor.position.y + 100, density: 10 });
         app.setBodyTexture(plank, 'woodPlankCracked');
         world.addBody(plank);
 
@@ -628,7 +628,7 @@ export default class Demo {
         world.addJoint(joint);
 
         const triangleVertices = [new Vec2(-30, -30), new Vec2(30, -30), new Vec2(0, 33.5)];
-        const triangle = Bodies.polygon({ vertices: triangleVertices, x: 0, y: floor.position.y + 55, mass: 0 });
+        const triangle = Bodies.polygon({ vertices: triangleVertices, x: 0, y: floor.position.y + 55, density: 0 });
         app.setBodyTexture(triangle, 'woodTriangle');
         world.addBody(triangle);
 
@@ -637,21 +637,21 @@ export default class Demo {
             height: 25,
             x: plank.position.x - 350,
             y: plank.position.y + 25,
-            mass: 1,
+            density: 1,
         });
         const box2 = Bodies.box({
             width: 25,
             height: 25,
             x: plank.position.x - 325,
             y: plank.position.y + 25,
-            mass: 1,
+            density: 1,
         });
         const box3 = Bodies.box({
             width: 25,
             height: 25,
             x: plank.position.x - 337.5,
             y: plank.position.y + 50,
-            mass: 1,
+            density: 1,
         });
         app.setBodyTexture(box1, 'crate');
         app.setBodyTexture(box2, 'crate');
@@ -665,7 +665,7 @@ export default class Demo {
             height: 50,
             x: plank.position.x + 350,
             y: Graphics.height() - 750,
-            mass: 10,
+            density: 10,
         });
         app.setBodyTexture(heavyBox, 'metal');
         world.addBody(heavyBox);
@@ -692,8 +692,8 @@ export default class Demo {
             for (let col = 0; col < cols; col++) {
                 const x = startX + col * spacing;
                 const y = topY - row * spacing;
-                const mass = row === 0 ? 0 : 1; // top row can be anchors (mass=0)
-                const particle = Bodies.circle({ radius: particleRadius, x, y, mass });
+                const density = row === 0 ? 0 : 1; // top row can be anchors (density=0)
+                const particle = Bodies.circle({ radius: particleRadius, x, y, density });
                 world.addBody(particle);
                 rowParticles.push(particle);
             }
@@ -747,7 +747,7 @@ export default class Demo {
             height: stepWidth * 0.5,
             x: startX - stepWidth / 2,
             y: startY,
-            mass: 0.0,
+            density: 0.0,
         });
         app.setBodyTexture(startAnchor, 'rockBridgeAnchor');
         world.addBody(startAnchor);
@@ -762,7 +762,7 @@ export default class Demo {
             // Optional sag: small vertical sinusoidal displacement
             const y = startY - Math.sin((i / numSteps) * Math.PI) * 10;
 
-            const step = Bodies.circle({ radius: stepWidth * 0.5, x, y, mass: 3 });
+            const step = Bodies.circle({ radius: stepWidth * 0.5, x, y, density: 3 });
             app.setBodyTexture(step, 'woodBridgeStep');
             world.addBody(step);
 
@@ -779,7 +779,7 @@ export default class Demo {
             height: stepWidth * 0.5,
             x: lastStep.position.x + spacing + stepWidth / 2,
             y: startY,
-            mass: 0.0,
+            density: 0.0,
         });
         app.setBodyTexture(endAnchor, 'rockBridgeAnchor');
         world.addBody(endAnchor);
@@ -798,7 +798,7 @@ export default class Demo {
                     height: boxSizeLarge,
                     x: -(numBoxLargeHorizontal * boxSizeLarge) / 2 + boxSizeLarge / 2 + i * boxSizeLarge,
                     y: 500 + j * boxSizeLarge,
-                    mass: 1,
+                    density: 1,
                 });
                 app.setBodyTexture(box, 'woodBox');
                 world.addBody(box);
@@ -815,7 +815,7 @@ export default class Demo {
                     height: boxSizeSmall,
                     x: -(numBoxSmallHorizontal * boxSizeSmall) / 2 + boxSizeSmall / 2 + i * boxSizeSmall,
                     y: 2000 + j * boxSizeSmall,
-                    mass: 1,
+                    density: 1,
                 });
                 app.setBodyTexture(box, 'metal');
                 world.addBody(box);
@@ -834,7 +834,7 @@ export default class Demo {
             height: 50,
             x: 500,
             y: 200,
-            mass: 1,
+            density: 1,
             velocity: new Vec2(0, -2_350),
         });
 
@@ -844,7 +844,7 @@ export default class Demo {
             radius: 5,
             x: -1000,
             y: 0,
-            mass: 1,
+            density: 1,
             isBullet: true,
             velocity: new Vec2(20_000, 0),
         });
@@ -883,7 +883,7 @@ export default class Demo {
         const cage = this.generateSquareCage(world, app);
 
         this.populateStressDemo(world, cage, (x, y) => {
-            const body = Bodies.circle({ radius: 10, x, y, mass: 1 });
+            const body = Bodies.circle({ radius: 10, x, y, density: 1 });
             app.setBodyFillColor(body, '#7bdff2');
             return body;
         });
@@ -895,7 +895,7 @@ export default class Demo {
         const cage = this.generateSquareCage(world, app);
 
         this.populateStressDemo(world, cage, (x, y) => {
-            const body = Bodies.box({ width: 18, height: 18, x, y, mass: 1 });
+            const body = Bodies.box({ width: 18, height: 18, x, y, density: 1 });
             app.setBodyFillColor(body, '#f4a261');
             return body;
         });
@@ -907,7 +907,7 @@ export default class Demo {
         const cage = this.generateSquareCage(world, app);
 
         this.populateStressDemo(world, cage, (x, y) => {
-            const body = Bodies.capsule({ halfHeight: 6, radius: 6, x, y, mass: 1 });
+            const body = Bodies.capsule({ halfHeight: 6, radius: 6, x, y, density: 1 });
             app.setBodyFillColor(body, '#b8f2e6');
             return body;
         });
@@ -939,11 +939,11 @@ export default class Demo {
         const BLACK_HOLE_ORBIT_PARTICLE_COUNT = 2_500;
         SETTINGS.applyGravity = false;
 
-        const blackHole = Bodies.circle({ radius: 0.0001, x: 0, y: 0, mass: 600_000 });
+        const blackHole = Bodies.circle({ radius: 0.0001, x: 0, y: 0, density: 600_000 });
         app.setBlackHole(blackHole);
 
         const particleRadius = 2.5;
-        const particleMass = 0.02;
+        const particledensity = 0.02;
         const minOrbitRadius = 180;
         const maxOrbitRadius = 1000;
         const minGravityDistanceSquared = 80 * 80;
@@ -963,7 +963,7 @@ export default class Demo {
                 maxGravityDistanceSquared,
             );
             const orbitSpeed =
-                Math.sqrt((GRAVITY * blackHole.mass * orbitRadius) / effectiveDistanceSquared) *
+                Math.sqrt((GRAVITY * blackHole.density * orbitRadius) / effectiveDistanceSquared) *
                 Utils.randomNumber(0.9, 1.12);
             const tangentialVelocity = radialDirection.leftPerpNew().scaleNew(orbitSpeed);
             const radialVelocity = radialDirection.scaleNew(orbitSpeed * Utils.randomNumber(-0.18, 0.12));
@@ -972,7 +972,7 @@ export default class Demo {
                 radius: particleRadius,
                 x: position.x,
                 y: position.y,
-                mass: particleMass,
+                density: particledensity,
                 velocity,
                 restitution: 0,
                 friction: 0,
@@ -1005,7 +1005,7 @@ export default class Demo {
                     height: boxWidth,
                     x: boxWidth * i + spacing * i + xOffset,
                     y: boxWidth * j + spacing * j + yOffset,
-                    mass: 1,
+                    density: 1,
                     restitution: 0,
                 });
                 world.addBody(box);
@@ -1023,7 +1023,7 @@ export default class Demo {
                     height: boxWidth,
                     x: boxWidth * i + spacing * i - xOffset - boxWidth * boxRows,
                     y: boxWidth * j + spacing * j + yOffset,
-                    mass: 1,
+                    density: 1,
                     restitution: 0,
                 });
 
@@ -1130,40 +1130,40 @@ export default class Demo {
             return joint;
         };
 
-        const torso = Bodies.box({ width: 50, height: 100, x: ragdollCenter.x, y: ragdollCenter.y, mass: 3.0 });
+        const torso = Bodies.box({ width: 50, height: 100, x: ragdollCenter.x, y: ragdollCenter.y, density: 3.0 });
         const head = Bodies.circle({
             radius: 25,
             x: ragdollCenter.x,
             y: ragdollCenter.y + 50 + 25,
-            mass: 5.0,
+            density: 5.0,
         });
         const leftArm = Bodies.box({
             width: 15,
             height: 70,
             x: ragdollCenter.x - 32,
             y: ragdollCenter.y + 10,
-            mass: 1.0,
+            density: 1.0,
         });
         const rightArm = Bodies.box({
             width: 15,
             height: 70,
             x: ragdollCenter.x + 32,
             y: ragdollCenter.y + 10,
-            mass: 1.0,
+            density: 1.0,
         });
         const leftLeg = Bodies.box({
             width: 20,
             height: 90,
             x: ragdollCenter.x - 20,
             y: ragdollCenter.y - 97,
-            mass: 1.0,
+            density: 1.0,
         });
         const rightLeg = Bodies.box({
             width: 20,
             height: 90,
             x: ragdollCenter.x + 20,
             y: ragdollCenter.y - 97,
-            mass: 1.0,
+            density: 1.0,
         });
 
         app.setBodyTexture(head, 'head');
@@ -1217,7 +1217,7 @@ export default class Demo {
             height: 60,
             x: ragdollCenter.x,
             y: ragdollCenter.y + 1000,
-            mass: 100,
+            density: 100,
         });
 
         app.setBodyTexture(heavyBox, 'metal');
@@ -1234,7 +1234,7 @@ export default class Demo {
             height: bridgeAnchorHeight,
             x: ragdollCenter.x - 210,
             y: bridgeAnchorY,
-            mass: 0,
+            density: 0,
         });
         app.setBodyTexture(startAnchor, 'rockBridgeAnchor');
         world.addBody(startAnchor);
@@ -1248,7 +1248,7 @@ export default class Demo {
                 radius: 15,
                 x,
                 y,
-                mass: 3,
+                density: 3,
                 restitution: 0,
             });
 
@@ -1263,7 +1263,7 @@ export default class Demo {
             height: bridgeAnchorHeight,
             x: startAnchor.position.x + 60 + bridgeLinkCount * bridgeLinkSpacing + bridgeAnchorWidth / 2,
             y: bridgeAnchorY,
-            mass: 0,
+            density: 0,
         });
         app.setBodyTexture(endAnchor, 'rockBridgeAnchor');
         world.addBody(endAnchor);
