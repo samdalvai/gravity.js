@@ -543,15 +543,7 @@ export default class Application {
 
         // Draw all bodies
         for (const body of this.world.getBodies()) {
-            if (!this.grabJoint && body.isPointInside(InputManager.mousePosition)) {
-                Graphics.drawBody(
-                    body,
-                    { ...this.bodyRenderRegistry.getStyle(body), strokeColor: 'orange' },
-                    this.debug,
-                );
-            } else {
-                Graphics.drawBody(body, this.bodyRenderRegistry.getStyle(body), this.debug);
-            }
+            Graphics.drawBody(body, this.bodyRenderRegistry.getStyle(body), this.debug);
         }
 
         // Draw all joints anchor points and debug properties
