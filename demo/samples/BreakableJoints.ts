@@ -1,4 +1,4 @@
-import { BodiesFactory as Bodies, DistanceJoint, Vec2 } from '../../src';
+import { BodiesFactory, DistanceJoint, Vec2 } from '../../src';
 import type { RigidBody, World } from '../../src';
 import type Application from '../Application';
 import {
@@ -77,35 +77,35 @@ function setupBreakableJoints(world: World, app: Application): void {
         return joint;
     };
 
-    const torso = Bodies.box({ width: 50, height: 100, x: ragdollCenter.x, y: ragdollCenter.y, mass: 3.0 });
-    const head = Bodies.circle({
+    const torso = BodiesFactory.box({ width: 50, height: 100, x: ragdollCenter.x, y: ragdollCenter.y, mass: 3.0 });
+    const head = BodiesFactory.circle({
         radius: 25,
         x: ragdollCenter.x,
         y: ragdollCenter.y + 50 + 25,
         mass: 5.0,
     });
-    const leftArm = Bodies.box({
+    const leftArm = BodiesFactory.box({
         width: 15,
         height: 70,
         x: ragdollCenter.x - 32,
         y: ragdollCenter.y + 10,
         mass: 1.0,
     });
-    const rightArm = Bodies.box({
+    const rightArm = BodiesFactory.box({
         width: 15,
         height: 70,
         x: ragdollCenter.x + 32,
         y: ragdollCenter.y + 10,
         mass: 1.0,
     });
-    const leftLeg = Bodies.box({
+    const leftLeg = BodiesFactory.box({
         width: 20,
         height: 90,
         x: ragdollCenter.x - 20,
         y: ragdollCenter.y - 97,
         mass: 1.0,
     });
-    const rightLeg = Bodies.box({
+    const rightLeg = BodiesFactory.box({
         width: 20,
         height: 90,
         x: ragdollCenter.x + 20,
@@ -159,7 +159,7 @@ function setupBreakableJoints(world: World, app: Application): void {
         rightLeg.position.addNew(new Vec2(0, 45)),
     );
 
-    const heavyBox = Bodies.box({
+    const heavyBox = BodiesFactory.box({
         width: 60,
         height: 60,
         x: ragdollCenter.x,
@@ -175,7 +175,7 @@ function setupBreakableJoints(world: World, app: Application): void {
     const bridgeLinkCount = 10;
     const bridgeLinkSpacing = 33;
 
-    const startAnchor = Bodies.box({
+    const startAnchor = BodiesFactory.box({
         width: bridgeAnchorWidth,
         height: bridgeAnchorHeight,
         x: ragdollCenter.x - 210,
@@ -190,7 +190,7 @@ function setupBreakableJoints(world: World, app: Application): void {
     for (let i = 1; i <= bridgeLinkCount; i++) {
         const x = startAnchor.position.x + 30 + i * bridgeLinkSpacing;
         const y = bridgeAnchorY - Math.sin((i / bridgeLinkCount) * Math.PI) * 12;
-        const link = Bodies.circle({
+        const link = BodiesFactory.circle({
             radius: 15,
             x,
             y,
@@ -204,7 +204,7 @@ function setupBreakableJoints(world: World, app: Application): void {
         previousBody = link;
     }
 
-    const endAnchor = Bodies.box({
+    const endAnchor = BodiesFactory.box({
         width: bridgeAnchorWidth,
         height: bridgeAnchorHeight,
         x: startAnchor.position.x + 60 + bridgeLinkCount * bridgeLinkSpacing + bridgeAnchorWidth / 2,

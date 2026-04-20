@@ -1,4 +1,4 @@
-import { BodiesFactory as Bodies, Vec2 } from '../../src';
+import { BodiesFactory, Vec2 } from '../../src';
 import type { World } from '../../src';
 import type Application from '../Application';
 import {
@@ -14,7 +14,7 @@ function setupSimpleWhip(world: World, app: Application): void {
     generateFloor(world, app);
     generateFences(world, app);
 
-    const whipAnchor = Bodies.box({ width: 60, height: 25, x: 0, y: 350, mass: 0 });
+    const whipAnchor = BodiesFactory.box({ width: 60, height: 25, x: 0, y: 350, mass: 0 });
     app.setBodyTexture(whipAnchor, 'rockBridgeAnchor');
     world.addBody(whipAnchor);
 
@@ -29,7 +29,7 @@ function setupSimpleWhip(world: World, app: Application): void {
             i === 0
                 ? whipAnchor.position.y - whipElementHeight
                 : whipAnchor.position.y - (whipElementHeight + 60 * i);
-        const whipElement = Bodies.box({ width: 10, height: 50, x, y, mass: 1 });
+        const whipElement = BodiesFactory.box({ width: 10, height: 50, x, y, mass: 1 });
         app.setBodyTexture(whipElement, 'crate');
         world.addBody(whipElement);
 

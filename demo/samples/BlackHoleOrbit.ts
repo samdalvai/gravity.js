@@ -1,4 +1,4 @@
-import { BodiesFactory as Bodies, GRAVITY, SETTINGS, Utils, Vec2 } from '../../src';
+import { BodiesFactory, GRAVITY, SETTINGS, Utils, Vec2 } from '../../src';
 import type { World } from '../../src';
 import Graphics from '../graphics/Graphics';
 import type Application from '../Application';
@@ -11,7 +11,7 @@ function setupBlackHoleOrbit(world: World, app: Application): void {
     const particleCount = 2_500;
     SETTINGS.applyGravity = false;
 
-    const blackHole = Bodies.circle({ radius: 0.0001, x: 0, y: 0, mass: 600_000 });
+    const blackHole = BodiesFactory.circle({ radius: 0.0001, x: 0, y: 0, mass: 600_000 });
     app.setBlackHole(blackHole);
 
     const particleRadius = 2.5;
@@ -40,7 +40,7 @@ function setupBlackHoleOrbit(world: World, app: Application): void {
         const tangentialVelocity = radialDirection.leftPerpNew().scaleNew(orbitSpeed);
         const radialVelocity = radialDirection.scaleNew(orbitSpeed * Utils.randomNumber(-0.18, 0.12));
         const velocity = tangentialVelocity.addNew(radialVelocity);
-        const particle = Bodies.circle({
+        const particle = BodiesFactory.circle({
             radius: particleRadius,
             x: position.x,
             y: position.y,

@@ -1,4 +1,4 @@
-import { BodiesFactory as Bodies } from '../../src';
+import { BodiesFactory } from '../../src';
 import type { World } from '../../src';
 import type Application from '../Application';
 import { defineDemo, generateFences, generateFloor } from './shared';
@@ -13,7 +13,7 @@ function setupStackOfBoxes(world: World, app: Application): void {
     const boxSpacing = 10;
 
     for (let i = 0; i < numOfBoxes; i++) {
-        const box = Bodies.box({
+        const box = BodiesFactory.box({
             width: boxSize,
             height: boxSize,
             x: 0,
