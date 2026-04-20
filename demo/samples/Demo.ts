@@ -8,7 +8,6 @@ import {
     Bodies,
     DistanceJoint,
     GRAVITY,
-    GrabJoint,
     RigidBody,
     SETTINGS,
     Utils,
@@ -328,9 +327,6 @@ export default class Demo {
         const body = Bodies.box({ width: 60, height: 60, x: 0, y: 0, mass: 1, angularVelocity: 2, rotation: 0.7 });
         app.setBodyTexture(body, 'crate');
         world.addBody(body);
-
-        // const grab = new GrabJoint(body, body.position, new Vec2(0, 0));
-        // world.addJoint(grab);
     };
 
     static demo2 = (world: World, app: Application) => {
