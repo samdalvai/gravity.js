@@ -5,6 +5,8 @@ import { Shape, ShapeType } from '../shapes/Shape';
 import * as Utils from '../utils/Utils';
 import { SETTINGS } from './Constants';
 
+const STATIC_EPSILON = 1e-8;
+
 export class RigidBody {
     private static nextId = 0;
     readonly id: number;
@@ -78,6 +80,8 @@ export class RigidBody {
         this._sumTorque = 0.0;
 
         const area = this.shape.getArea();
+        // TODO: to be substituted with density
+        this._density = mass;
         this.mass = mass * area;
         this.invMass = 0.0;
         this.I = 0.0;
@@ -147,8 +151,7 @@ export class RigidBody {
     }
 
     isStatic(): boolean {
-        const epsilon = 0.000005;
-        return Math.abs(this.invMass - 0.0) < epsilon;
+        return Math.abs(this.invMass - 0.0) < STATIC_EPSILON;
     }
 
     addForce(force: Vec2): void {
