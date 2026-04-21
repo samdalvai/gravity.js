@@ -5,7 +5,7 @@ import randomConvexShapesDemo from './1000RandomConvexShapes';
 import blackHoleOrbitDemo from './BlackHoleOrbit';
 import breakableJointsDemo from './BreakableJoints';
 import clothSimulationDemo from './ClothSimulation';
-import collisionFilteringDemo from './ColllisionFilter';
+import collisionFilteringDemo from './ColllisionFiltering';
 import complexSceneDemo from './ComplexScene';
 import continuousCollisionDetectionDemo from './ContinuousCollisionDetection';
 import convectionDemo from './ConvectionForce';
