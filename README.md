@@ -11,7 +11,7 @@ Learn more at [pikuma.com](https://pikuma.com/).
 - Collision detection between different shapes: Circles, Boxes, Polygons, Segments and Capsules
 - Broad Phase using prune & sweep algorithm with AABB partitioning
 - Warm starting with contact caching
-- Distance joints
+- Different types of joints
 - Substepping to reduce collision tunneling
 - Basic CCD for bullets with circle shape
 - Texture rendering for shapes
