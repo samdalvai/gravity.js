@@ -6,7 +6,7 @@ import { defineDemo } from './shared';
 
 function setupElectroStaticForce(world: World, app: Application): void {
     SETTINGS.applyGravity = false;
-    Graphics.zoom = 0.75;
+    Graphics.zoom = 0.5;
 
     const numOfParticles = 1_000;
 
