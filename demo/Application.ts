@@ -825,14 +825,20 @@ export default class Application {
             return;
         }
         const bodies = this.world.getBodies();
+        const waterSurfaceY = this.liquid.aabb.maxY;
 
         for (let i = 0; i < bodies.length; i++) {
             const body = bodies[i];
 
             if (body.isStatic()) continue;
 
-            const buoyancy = Force.generateBuoyancyForce(body, this.liquid.aabb.maxY, this.liquid.density, GRAVITY);
+            const buoyancy = Force.generateBuoyancyForce(body, waterSurfaceY, this.liquid.density, GRAVITY);
+            const waterDrag = Force.generateWaterDragForce(body, waterSurfaceY, 0.1);
+            const waterAngularDrag = Force.generateAngularWaterDragTorque(body, waterSurfaceY, 1);
+
             body.addForce(buoyancy);
+            body.addForce(waterDrag);
+            body.addTorque(waterAngularDrag);
         }
     }
 
