@@ -8,6 +8,7 @@
  * https://github.com/Sopiro
  */
 import * as CCD from '../collision/CCD';
+import { canCollide } from '../collision/CollisionFilter';
 import { ContactManifold } from '../collision/ContactManifold';
 import * as NarrowPhase from '../collision/NarrowPhase';
 import { Force } from '../force/Force';
@@ -252,6 +253,8 @@ export class World {
         // Narrow phase check, potential pairs may still not collide
         for (let [a, b] of this.potentialPairs) {
             if (a.isStatic() && b.isStatic()) continue;
+
+            if (!canCollide(a.collisionFilter, b.collisionFilter)) continue;
 
             // Improve coherence
             if (a.id > b.id) {
