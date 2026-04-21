@@ -3,11 +3,13 @@ import type Application from '../Application';
 import Graphics from '../graphics/Graphics';
 import { FENCE_WIDTH, FLOOR_HEIGHT, defineDemo, generateFences, generateFloor } from './shared';
 
+export const AMBIENT_TEMPERATURE = 0;
+export const MIN_TEMPERATURE = 0;
+export const MAX_TEMPERATURE = 5_000;
+
 function setupConvectionForce(world: World, app: Application): void {
     Graphics.zoom = 0.5;
 
-    const MIN_TEMPERATURE = 0;
-    const MAX_TEMPERATURE = 5_000;
     const FLOOR_WIDTH = 1500;
 
     const floor = generateFloor(world, app, FLOOR_WIDTH);
@@ -43,12 +45,6 @@ function setupConvectionForce(world: World, app: Application): void {
         particle.onContact = info => {
             const bodyA = info.bodyA;
             const bodyB = info.bodyB;
-            const colorA = temperatureToColor(bodyA.temperature, MIN_TEMPERATURE, MAX_TEMPERATURE);
-            const colorB = temperatureToColor(bodyB.temperature, MIN_TEMPERATURE, MAX_TEMPERATURE);
-
-            app.setBodyFillColor(bodyA, colorA);
-            app.setBodyFillColor(bodyB, colorB);
-
             exchangeHeat(bodyA, bodyB, SETTINGS.dt);
         };
 
