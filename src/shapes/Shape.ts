@@ -14,7 +14,8 @@ export abstract class Shape {
 
     abstract getType(): ShapeType;
     abstract getMomentOfInertia(): number;
-    abstract getArea(): number
+    abstract getArea(): number;
+    abstract getPerimeter(): number;
     abstract updateVertices(angle: number, position: Vec2): void;
     abstract updateAABB(body: RigidBody): void;
     abstract isPointInside(body: RigidBody, point: Vec2): boolean;

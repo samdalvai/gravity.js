@@ -22,6 +22,10 @@ export class CircleShape extends Shape {
         return Math.PI * this.radius * this.radius;
     }
 
+    getPerimeter(): number {
+        return 2 * Math.PI * this.radius;
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     updateVertices(angle: number, position: Vec2): void {
         return; // Circles don't have vertices... nothing to do here

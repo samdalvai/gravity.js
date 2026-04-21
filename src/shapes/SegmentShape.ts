@@ -39,6 +39,11 @@ export class SegmentShape extends PolygonShape {
         return 0;
     }
 
+    getPerimeter(): number {
+        // Segments do not have a perimiter
+        return 0;
+    }
+
     updateVertices(angle: number, position: Vec2): void {
         super.updateVertices(angle, position);
     }

@@ -772,11 +772,11 @@ export default class Application {
             return;
         }
         const bodies = this.world.getBodies();
+
         for (let i = 0; i < bodies.length; i++) {
             // TODO: update bodies color fill based on temperature
             // TODO: apply convection force
-
-            // TODO: apply cooling if there is no contact
+            // TODO: apply cooling if there is no contact (simplify to always dissipate heat)
         }
     }
 

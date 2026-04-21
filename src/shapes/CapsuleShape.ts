@@ -61,6 +61,12 @@ export class CapsuleShape extends Shape {
         return areaCircle + areaBody;
     }
 
+    getPerimeter(): number {
+        const perimCircle = 2 * Math.PI * this.radius;
+        const perimBody = 2 * this.halfHeight * 2;
+        return perimCircle + perimBody;
+    }
+
     updateVertices(angle: number, position: Vec2): void {
         const cos = Math.cos(angle);
         const sin = Math.sin(angle);
