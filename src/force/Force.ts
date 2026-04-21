@@ -181,4 +181,30 @@ export class Force {
 
         return new Vec2(0, strength * (deltaT - minTemperatureDifference));
     }
+
+    static generateBuoyancyForce(body: RigidBody, waterSurfaceY: number, liquidDensity: number, gravity: number): Vec2 {
+        const maxX = body.maxX;
+        const minX = body.minX;
+        const maxY = body.maxY;
+        const minY = body.minY;
+
+        const width = maxX - minX;
+        const height = maxY - minY;
+
+        if (width <= 0 || height <= 0) {
+            return new Vec2(0, 0);
+        }
+
+        // Amount of the AABB below the water surface
+        const submergedHeight = Math.max(0, Math.min(maxY - waterSurfaceY, height));
+
+        if (submergedHeight === 0) {
+            return new Vec2(0, 0);
+        }
+
+        const submergedArea = width * submergedHeight;
+        const buoyancyMagnitude = liquidDensity * submergedArea * gravity;
+
+        return new Vec2(0, -buoyancyMagnitude);
+    }
 }
