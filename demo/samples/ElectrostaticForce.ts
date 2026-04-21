@@ -1,4 +1,4 @@
-import { BodiesFactory, SETTINGS, Utils } from '../../src';
+import { BodiesFactory, SETTINGS, Utils, Vec2 } from '../../src';
 import type { World } from '../../src';
 import type Application from '../Application';
 import Graphics from '../graphics/Graphics';
@@ -17,7 +17,10 @@ function setupElectroStaticForce(world: World, app: Application): void {
             x: Utils.randomNumber(-1500, 1500),
             y: Utils.randomNumber(-1000, 1000),
             mass: Utils.randomNumber(0.1, 1),
+            charge: Utils.randomNumber(-50, 50),
         });
+        // particle.angularVelocity = Utils.randomNumber(-2.5, 2.5);
+        // particle.velocity = new Vec2(Utils.randomNumber(-50, 50), Utils.randomNumber(-50, 50));
         world.addBody(particle);
     }
 }
