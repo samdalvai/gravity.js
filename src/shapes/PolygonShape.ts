@@ -87,6 +87,23 @@ export class PolygonShape extends Shape {
         return Math.abs(area * 0.5);
     }
 
+    getPerimeter(): number {
+        let perimeter = 0;
+        const vertices = this.localVertices;
+
+        for (let i = 0; i < vertices.length; i++) {
+            const current = vertices[i];
+            const next = vertices[(i + 1) % vertices.length];
+
+            const dx = next.x - current.x;
+            const dy = next.y - current.y;
+
+            perimeter += Math.sqrt(dx * dx + dy * dy);
+        }
+
+        return perimeter;
+    }
+
     updateVertices(angle: number, position: Vec2): void {
         const cos = Math.cos(angle);
         const sin = Math.sin(angle);
