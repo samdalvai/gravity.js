@@ -838,7 +838,7 @@ export default class Application {
             if (liquidAABB.maxY < body.minY || liquidAABB.minY > body.maxY) continue;
 
             const buoyancy = Force.generateBuoyancyForce(body, waterSurfaceY, this.liquid.density, GRAVITY);
-            const waterDrag = Force.generateLinearWaterDragForce(body, waterSurfaceY, 0.2);
+            const waterDrag = Force.generateLinearWaterDragForce(body, waterSurfaceY, 0.2, SETTINGS.dt);
             const waterAngularDrag = Force.generateAngularWaterDragTorque(body, waterSurfaceY, 0.75);
 
             body.addForce(buoyancy);
