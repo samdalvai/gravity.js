@@ -261,8 +261,7 @@ export default class Application {
                     }
 
                     if (inputEvent.key === '.') {
-                        this.applyBlackHoleForce();
-                        this.world.update(SETTINGS.dt);
+                        this.stepSimulation();
                     }
 
                     if (inputEvent.key === ',') {
@@ -832,7 +831,8 @@ export default class Application {
 
             if (body.isStatic()) continue;
 
-            const buoyancy = Force.generateBuoyancyForce(body, this.liquid.aabb.maxY, this.liquid.density, -GRAVITY);
+            const buoyancy = Force.generateBuoyancyForce(body, this.liquid.aabb.maxY, this.liquid.density, GRAVITY);
+            console.log('Buoyancy: ', buoyancy);
             body.addForce(buoyancy);
         }
     }
