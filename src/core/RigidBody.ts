@@ -1,3 +1,4 @@
+import { CollisionFilter, DEFAULT_COLLISION_FILTER } from '../collision/CollisionFilter';
 import { ContactInfo } from '../collision/ContactManifold';
 import { Vec2 } from '../math/Vec2';
 import { CircleShape } from '../shapes/CircleShape';
@@ -51,6 +52,9 @@ export class RigidBody {
     // Pointer to the shape/geometry of this rigid body
     readonly shape: Shape;
     readonly shapeType: ShapeType;
+
+    // Collision filters
+    collisionFilter: CollisionFilter;
 
     // AABB
     minX = 0;
@@ -108,6 +112,8 @@ export class RigidBody {
         this.charge = 0;
         this.surfaceSpeed = 0;
         this.temperature = 0;
+
+        this.collisionFilter = DEFAULT_COLLISION_FILTER;
 
         this.shape.updateVertices(this.rotation, this.position);
         this.shape.updateAABB(this);
