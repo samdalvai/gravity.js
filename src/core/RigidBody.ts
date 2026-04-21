@@ -39,6 +39,7 @@ export class RigidBody {
     // Special material properties
     charge: number;
     surfaceSpeed: number;
+    temperature: number;
 
     // Grounded variables
     isGrounded = false;
@@ -106,6 +107,7 @@ export class RigidBody {
 
         this.charge = 0;
         this.surfaceSpeed = 0;
+        this.temperature = 0;
 
         this.shape.updateVertices(this.rotation, this.position);
         this.shape.updateAABB(this);

@@ -33,6 +33,7 @@ export type BodyMaterialOptions = (MassOnly | DensityOnly) & {
     rollingResistance?: number;
     surfaceSpeed?: number;
     charge?: number;
+    temperature?: number;
 };
 
 export type BoxBodyOptions = {
@@ -125,6 +126,10 @@ function applyBodyOptions(body: RigidBody, options: BodyOptions): RigidBody {
 
     if (options.surfaceSpeed !== undefined) {
         body.surfaceSpeed = options.surfaceSpeed;
+    }
+
+    if (options.temperature !== undefined) {
+        body.temperature = options.temperature;
     }
 
     if (options.isBullet !== undefined) {
