@@ -202,13 +202,19 @@ export class Force {
             return new Vec2(0, 0);
         }
 
-        const submergedArea = width * submergedHeight;
+        const submergedFraction = submergedHeight / height;
+        const submergedArea = body.shape.getArea() * submergedFraction;
         const buoyancyMagnitude = liquidDensity * submergedArea * gravity;
 
         return new Vec2(0, buoyancyMagnitude);
     }
 
-    static generateLinearWaterDragForce(body: RigidBody, waterSurfaceY: number, dragCoefficient: number): Vec2 {
+    static generateLinearWaterDragForce(
+        body: RigidBody,
+        waterSurfaceY: number,
+        dragCoefficient: number,
+        dt: number,
+    ): Vec2 {
         const maxY = body.maxY;
         const minY = body.minY;
 
@@ -237,7 +243,13 @@ export class Force {
         const speed = Math.sqrt(speedSq);
 
         // Quadratic drag
-        const dragMagnitude = dragCoefficient * speedSq * submergedFraction;
+        let dragMagnitude = dragCoefficient * speedSq * submergedFraction;
+
+        if (dt > 0) {
+            // Do not let water drag reverse the velocity in a single step.
+            const maxForce = (body.mass * speed) / dt;
+            dragMagnitude = Math.min(dragMagnitude, maxForce);
+        }
 
         // Opposite to velocity
         return v.scaleNew(-dragMagnitude / speed);
