@@ -18,7 +18,7 @@ function setupBuoyancy(world: World, app: Application): void {
             maxX: floor.position.x + FLOOR_WIDTH / 2,
             maxY: LIQUID_MAX_Y,
         },
-        density: 0.1,
+        density: 0.05,
     });
 
     const ball = BodiesFactory.circle({
