@@ -825,12 +825,17 @@ export default class Application {
             return;
         }
         const bodies = this.world.getBodies();
-        const waterSurfaceY = this.liquid.aabb.maxY;
+        const liquidAABB = this.liquid.aabb;
+        const waterSurfaceY = liquidAABB.maxY;
 
         for (let i = 0; i < bodies.length; i++) {
             const body = bodies[i];
-
             if (body.isStatic()) continue;
+
+            if (liquidAABB.minX > body.maxX || liquidAABB.maxX < body.minX) continue;
+
+            // If objects overlap on X axis but don't overlap on Y axis the cannot collide
+            if (liquidAABB.maxY < body.minY || liquidAABB.minY > body.maxY) continue;
 
             const buoyancy = Force.generateBuoyancyForce(body, waterSurfaceY, this.liquid.density, GRAVITY);
             const waterDrag = Force.generateLinearWaterDragForce(body, waterSurfaceY, 0.2);
