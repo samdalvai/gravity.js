@@ -809,8 +809,8 @@ export default class Application {
             dissipateHeat(body, AMBIENT_TEMPERATURE, SETTINGS.dt, DISSIPATION_FACTOR);
 
             const color = temperatureToColor(body.temperature, MIN_TEMPERATURE, MAX_TEMPERATURE);
-            this.setBodyFillColor(body, color);
 
+            this.setBodyFillColor(body, color);
             const convection = Force.generateConvectionForce(
                 body,
                 AMBIENT_TEMPERATURE,
@@ -830,7 +830,10 @@ export default class Application {
         for (let i = 0; i < bodies.length; i++) {
             const body = bodies[i];
 
-            // TODO: apply buoyancy
+            if (body.isStatic()) continue;
+
+            const buoyancy = Force.generateBuoyancyForce(body, this.liquid.aabb.maxY, this.liquid.density, -GRAVITY);
+            body.addForce(buoyancy);
         }
     }
 
