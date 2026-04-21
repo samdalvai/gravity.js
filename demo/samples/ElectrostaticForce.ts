@@ -13,11 +13,12 @@ function setupElectroStaticForce(world: World, app: Application): void {
     for (let i = 0; i < numOfParticles; i++) {
         const charge = Utils.randomNumber(-100, 100);
         const radius = Math.max(Math.abs(charge) / 5, 5);
+        const mass = radius / 10;
         const particle = BodiesFactory.circle({
             radius: radius,
             x: Utils.randomNumber(-1500, 1500),
             y: Utils.randomNumber(-1000, 1000),
-            mass: Utils.randomNumber(0.1, 1),
+            mass: mass,
             charge: charge,
         });
 
