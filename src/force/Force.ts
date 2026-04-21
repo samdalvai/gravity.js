@@ -182,6 +182,8 @@ export class Force {
         return new Vec2(0, strength * (deltaT - minTemperatureDifference));
     }
 
+    // TODO: To be improved by computing submerged area and applyin the force at that centroid 
+    // instead of the body default centroid
     static generateBuoyancyForce(body: RigidBody, waterSurfaceY: number, liquidDensity: number, gravity: number): Vec2 {
         const maxX = body.maxX;
         const minX = body.minX;

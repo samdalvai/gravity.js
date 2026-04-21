@@ -12,6 +12,8 @@ export const DISSIPATION_FACTOR = 0.00005;
 export const CONVECTION_FORCE = 0.030;
 export const MIN_TEMPERATURE_DIFFERENCE = 1000;
 
+// TODO: what about generating a curve chimney that will feed the particles back
+// to the heated floor?
 function setupConvectionForce(world: World, app: Application): void {
     Graphics.zoom = 0.5;
 
