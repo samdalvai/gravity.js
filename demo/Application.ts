@@ -50,6 +50,7 @@ export default class Application {
     private dragForce: number | null = null;
     private grab = true;
     private coulombForce = false;
+    private convectionForce = false;
 
     // Inputs
     private generateParticle = false;
@@ -105,6 +106,10 @@ export default class Application {
 
     setCoulombForce(active: boolean): void {
         this.coulombForce = active;
+    }
+
+    setConvectionForce(active: boolean): void {
+        this.convectionForce = active;
     }
 
     async setup(): Promise<void> {
@@ -758,6 +763,14 @@ export default class Application {
         }
     }
 
+    private applyConvectionForce(): void {
+        if (!this.convectionForce) {
+            return;
+        }
+
+        // TODO: apply convection force
+    }
+
     private advanceSimulation(): void {
         for (let i = 0; i < SETTINGS.subSteps; i++) {
             this.stepSimulation();
@@ -866,6 +879,7 @@ export default class Application {
         this.blackHole = null;
         this.dragForce = null;
         this.coulombForce = false;
+        this.convectionForce = false;
         this.generateParticle = false;
         this.leftButtonPressed = false;
         this.rightButtonPressed = false;
@@ -944,6 +958,7 @@ export default class Application {
         this.applyBlackHoleForce();
         this.applyDragForce();
         this.applyCoulombForce();
+        this.applyConvectionForce();
         this.world.update(SETTINGS.dt);
     }
 
