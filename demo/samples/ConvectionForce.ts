@@ -6,11 +6,17 @@ import { FENCE_WIDTH, FLOOR_HEIGHT, defineDemo, generateFences, generateFloor } 
 export const AMBIENT_TEMPERATURE = 0;
 export const MIN_TEMPERATURE = 0;
 export const MAX_TEMPERATURE = 5_000;
+export const PARTICLE_MASS = 0.015;
+export const HEATING_FACTOR = 0.65;
+export const DISSIPATION_FACTOR = 0.00005;
+export const CONVECTION_FORCE = 0.030;
+export const MIN_TEMPERATURE_DIFFERENCE = 1000;
 
 function setupConvectionForce(world: World, app: Application): void {
     Graphics.zoom = 0.5;
 
     const FLOOR_WIDTH = 1500;
+    const WALL_COLOR = 'rgb(90, 45, 20)';
 
     const floor = generateFloor(world, app, FLOOR_WIDTH);
     floor.temperature = MAX_TEMPERATURE;
@@ -24,8 +30,21 @@ function setupConvectionForce(world: World, app: Application): void {
 
     app.removeBodyTexture(fences[0]);
     app.removeBodyTexture(fences[1]);
-    app.setBodyFillColor(fences[0], temperatureToColor(floor.temperature, MIN_TEMPERATURE, MAX_TEMPERATURE));
-    app.setBodyFillColor(fences[1], temperatureToColor(floor.temperature, MIN_TEMPERATURE, MAX_TEMPERATURE));
+    app.setBodyFillColor(fences[0], WALL_COLOR);
+    app.setBodyFillColor(fences[1], WALL_COLOR);
+
+    const ceiling = BodiesFactory.box({
+        width: FLOOR_WIDTH + FENCE_WIDTH * 2,
+        height: FLOOR_HEIGHT,
+        x: 0,
+        y: fences[0].maxY + FLOOR_HEIGHT / 2,
+        mass: 0,
+        restitution: 0,
+    });
+
+    app.removeBodyTexture(ceiling);
+    app.setBodyFillColor(ceiling, WALL_COLOR);
+    world.addBody(ceiling);
 
     const numOfParticles = 2_500;
     const particleRadius = 5;
@@ -37,7 +56,7 @@ function setupConvectionForce(world: World, app: Application): void {
             radius: particleRadius,
             x: Utils.randomNumber(-MAX_X, MAX_X),
             y: Utils.randomNumber(BASE_Y, 250),
-            mass: 0.1,
+            mass: PARTICLE_MASS,
             temperature: MIN_TEMPERATURE,
         });
 
@@ -45,7 +64,7 @@ function setupConvectionForce(world: World, app: Application): void {
         particle.onContact = info => {
             const bodyA = info.bodyA;
             const bodyB = info.bodyB;
-            exchangeHeat(bodyA, bodyB, SETTINGS.dt);
+            exchangeHeat(bodyA, bodyB, SETTINGS.dt, HEATING_FACTOR);
         };
 
         world.addBody(particle);
@@ -98,6 +117,9 @@ export function exchangeHeat(a: RigidBody, b: RigidBody, dt: number, k = 0.5) {
     if (!b.isStatic()) {
         b.temperature += heat / b.mass;
     }
+
+    a.temperature = Utils.clamp(a.temperature, MIN_TEMPERATURE, MAX_TEMPERATURE);
+    b.temperature = Utils.clamp(b.temperature, MIN_TEMPERATURE, MAX_TEMPERATURE);
 }
 
 export function dissipateHeat(body: RigidBody, ambientTemperature: number, dt: number, cooling = 0.001) {
@@ -109,5 +131,5 @@ export function dissipateHeat(body: RigidBody, ambientTemperature: number, dt: n
     const perimeter = body.shape.getPerimeter();
     const heatLoss = cooling * perimeter * deltaT * dt;
 
-    body.temperature -= heatLoss / body.mass;
+    body.temperature = Math.max(ambientTemperature, body.temperature - heatLoss / body.mass);
 }

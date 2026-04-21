@@ -21,8 +21,11 @@ import BodyRenderRegistry from './render/BodyRenderRegistry';
 import { DEMOS, DEMO_LABELS } from './samples';
 import {
     AMBIENT_TEMPERATURE,
+    CONVECTION_FORCE,
+    DISSIPATION_FACTOR,
     MAX_TEMPERATURE,
     MIN_TEMPERATURE,
+    MIN_TEMPERATURE_DIFFERENCE,
     dissipateHeat,
     temperatureToColor,
 } from './samples/ConvectionForce';
@@ -783,12 +786,17 @@ export default class Application {
         for (let i = 0; i < bodies.length; i++) {
             const body = bodies[i];
 
-            dissipateHeat(body, AMBIENT_TEMPERATURE, SETTINGS.dt);
+            dissipateHeat(body, AMBIENT_TEMPERATURE, SETTINGS.dt, DISSIPATION_FACTOR);
 
             const color = temperatureToColor(body.temperature, MIN_TEMPERATURE, MAX_TEMPERATURE);
             this.setBodyFillColor(body, color);
 
-            const convection = Force.generateConvectionForce(body, AMBIENT_TEMPERATURE, 0.05);
+            const convection = Force.generateConvectionForce(
+                body,
+                AMBIENT_TEMPERATURE,
+                CONVECTION_FORCE,
+                MIN_TEMPERATURE_DIFFERENCE,
+            );
             body.addForce(convection);
         }
     }
