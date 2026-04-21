@@ -239,7 +239,7 @@ export class World {
                     continue;
                 }
 
-                if (!canCollide(a.collisionFilter, b.collisionFilter)) {
+                if (!canCollide(a, b)) {
                     continue;
                 }
 
