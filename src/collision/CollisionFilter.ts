@@ -46,8 +46,8 @@ export const enum CollisionCategory {
  * ```
  */
 export type CollisionFilter = {
-    category: number;
-    mask: number;
+    category: CollisionCategory;
+    mask: CollisionCategory;
 };
 
 export const DEFAULT_COLLISION_FILTER: CollisionFilter = {
