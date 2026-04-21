@@ -89,7 +89,7 @@ export function temperatureToColor(temperature: number, minTemp: number, maxTemp
     return `rgb(${r}, ${g}, ${b})`;
 }
 
-function exchangeHeat(a: RigidBody, b: RigidBody, dt: number, k = 0.1) {
+export function exchangeHeat(a: RigidBody, b: RigidBody, dt: number, k = 0.1) {
     const deltaT = a.temperature - b.temperature;
     if (deltaT === 0) return;
 
@@ -102,4 +102,17 @@ function exchangeHeat(a: RigidBody, b: RigidBody, dt: number, k = 0.1) {
     if (!b.isStatic()) {
         b.temperature += heat / b.mass;
     }
+}
+
+export function dissipateHeat(body: RigidBody, ambientTemperature: number, dt: number, cooling = 0.01) {
+    if (body.isStatic()) return;
+
+    const deltaT = body.temperature - ambientTemperature;
+    if (deltaT === 0) return;
+
+    // const perimeter = body.shape.getPerimeter(); // TODO: implement getting perimeter
+    const perimeter = 10;
+    const heatLoss = cooling * perimeter * deltaT * dt;
+
+    body.temperature -= heatLoss / body.mass;
 }
