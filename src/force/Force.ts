@@ -207,4 +207,64 @@ export class Force {
 
         return new Vec2(0, buoyancyMagnitude);
     }
+
+    static generateWaterDragForce(body: RigidBody, waterSurfaceY: number, dragCoefficient: number): Vec2 {
+        const maxY = body.maxY;
+        const minY = body.minY;
+
+        const height = maxY - minY;
+
+        if (height <= 0) {
+            return new Vec2(0, 0);
+        }
+
+        // Same submerged logic as buoyancy
+        const submergedHeight = Math.max(0, Math.min(waterSurfaceY - minY, height));
+
+        if (submergedHeight === 0) {
+            return new Vec2(0, 0);
+        }
+
+        const submergedFraction = submergedHeight / height;
+
+        const v = body.velocity;
+        const speedSq = v.magnitudeSquared();
+
+        if (speedSq === 0) {
+            return new Vec2(0, 0);
+        }
+
+        const speed = Math.sqrt(speedSq);
+
+        // Quadratic drag
+        const dragMagnitude = dragCoefficient * speedSq * submergedFraction;
+
+        // Opposite to velocity
+        return v.scaleNew(-dragMagnitude / speed);
+    }
+
+    static generateAngularWaterDragTorque(
+        body: RigidBody,
+        waterSurfaceY: number,
+        angularDragCoefficient: number,
+    ): number {
+        const maxY = body.maxY;
+        const minY = body.minY;
+
+        const height = maxY - minY;
+
+        if (height <= 0) {
+            return 0;
+        }
+
+        const submergedHeight = Math.max(0, Math.min(waterSurfaceY - minY, height));
+
+        if (submergedHeight === 0) {
+            return 0;
+        }
+
+        const submergedFraction = submergedHeight / height;
+
+        return -body.angularVelocity * angularDragCoefficient * submergedFraction;
+    }
 }
