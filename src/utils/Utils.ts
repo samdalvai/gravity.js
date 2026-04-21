@@ -34,7 +34,7 @@ export function assert(...args: (boolean | string)[]): void {
     }
 }
 
-export function randomConvexBody(x: number, y: number, radius: number, numVertices: number = -1): RigidBody {
+export function randomConvexBody(x: number, y: number, radius: number, numVertices: number = -1, mass = 1): RigidBody {
     if (numVertices < 3) throw Error('Must have at least 3 vertices');
 
     const angles: number[] = [];
@@ -49,7 +49,7 @@ export function randomConvexBody(x: number, y: number, radius: number, numVertic
         vertices.push(new Vec2(Math.cos(angle), Math.sin(angle)).scaleNew(radius));
     }
 
-    return BodiesFactory.polygon({ vertices, x, y, mass: 1 });
+    return BodiesFactory.polygon({ vertices, x, y, mass });
 }
 
 // a.id << 16 → shifts a.id into the upper 16 bits of a 32-bit integer
