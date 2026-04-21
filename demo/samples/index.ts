@@ -4,6 +4,7 @@ import thousandCirclesDemo from './1000Circles';
 import randomConvexShapesDemo from './1000RandomConvexShapes';
 import blackHoleOrbitDemo from './BlackHoleOrbit';
 import breakableJointsDemo from './BreakableJoints';
+import buoyancyDemo from './Buoyancy';
 import clothSimulationDemo from './ClothSimulation';
 import collisionFilteringDemo from './ColllisionFiltering';
 import complexSceneDemo from './ComplexScene';
@@ -45,6 +46,7 @@ export const DEMOS: DemoRunner[] = [
     electroStaticDemo,
     convectionDemo,
     collisionFilteringDemo,
+    buoyancyDemo,
 ];
 
 export const DEMO_LABELS = DEMOS.map((demo, index) => `Demo ${index}: ${demo.label}`);
