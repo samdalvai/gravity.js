@@ -163,4 +163,17 @@ export class Force {
 
         return new Vec2(dirX * forceScalar, dirY * forceScalar);
     }
+
+    static generateConvectionForce(body: RigidBody, ambientTemperature: number, strength: number): Vec2 {
+        if (body.isStatic()) {
+            return new Vec2(0, 0);
+        }
+
+        const deltaT = body.temperature - ambientTemperature;
+        if (deltaT <= 0) {
+            return new Vec2(0, 0);
+        }
+
+        return new Vec2(0, strength * deltaT);
+    }
 }
