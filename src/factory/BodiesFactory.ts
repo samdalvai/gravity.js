@@ -1,4 +1,4 @@
-import { CollisionFilter } from '../collision/CollisionFilter';
+import { CollisionCategory } from '../collision/CollisionFilter';
 import { RigidBody } from '../core/RigidBody';
 import { Vec2 } from '../math/Vec2';
 import { BoxShape } from '../shapes/BoxShape';
@@ -16,7 +16,8 @@ export type BodyOptions = {
     angularVelocity?: number;
     canRotate?: boolean;
     isBullet?: boolean;
-    collisionFilter?: CollisionFilter;
+    collisionCategory?: CollisionCategory;
+    collisionMask?: CollisionCategory;
 } & BodyMaterialOptions;
 
 type MassOnly = {
@@ -138,8 +139,12 @@ function applyBodyOptions(body: RigidBody, options: BodyOptions): RigidBody {
         body.isBullet = options.isBullet;
     }
 
-    if (options.collisionFilter !== undefined) {
-        body.collisionFilter = options.collisionFilter;
+    if (options.collisionCategory !== undefined) {
+        body.collisionCategory = options.collisionCategory;
+    }
+
+    if (options.collisionMask !== undefined) {
+        body.collisionMask = options.collisionMask;
     }
 
     body.shape.updateVertices(body.rotation, body.position);

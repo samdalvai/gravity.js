@@ -14,16 +14,12 @@ describe('World grounding', () => {
         const world = new World(0);
 
         const a = new RigidBody(new CircleShape(20), 0, 0, 1);
-        a.collisionFilter = {
-            category: CollisionCategory.DEFAULT,
-            mask: CollisionCategory.NONE,
-        };
+        a.collisionCategory = CollisionCategory.DEFAULT;
+        a.collisionMask = CollisionCategory.NONE;
 
         const b = new RigidBody(new CircleShape(20), 0, 0, 1);
-        b.collisionFilter = {
-            category: CollisionCategory.PROJECTILE,
-            mask: CollisionCategory.ALL,
-        };
+        b.collisionCategory = CollisionCategory.PROJECTILE;
+        b.collisionMask = CollisionCategory.ALL;
 
         const detectCollisionSpy = jest.spyOn(NarrowPhase, 'detectCollision');
 
