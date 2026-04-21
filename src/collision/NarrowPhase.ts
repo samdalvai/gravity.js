@@ -14,11 +14,14 @@ import { CircleShape } from '../shapes/CircleShape';
 import { PolygonShape } from '../shapes/PolygonShape';
 import { ShapeType } from '../shapes/Shape';
 import * as Utils from '../utils/Utils';
+import { canCollide } from './CollisionFilter';
 import { ContactManifold, ContactPoint } from './ContactManifold';
 
 export const manifoldPool = new ContactManifoldPool(MAX_BODIES);
 
 export function detectCollision(bodyA: RigidBody, bodyB: RigidBody): ContactManifold | null {
+    if (!canCollide(bodyA.collisionFilter, bodyB.collisionFilter)) return null;
+
     const aType = bodyA.shapeType;
     const bType = bodyB.shapeType;
 
