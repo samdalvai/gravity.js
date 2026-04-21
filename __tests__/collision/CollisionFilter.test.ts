@@ -1,12 +1,7 @@
 import { describe, expect, test } from '@jest/globals';
 
 import { BodiesFactory } from '../../src';
-import {
-    CollisionCategory,
-    CollisionFilter,
-    DEFAULT_COLLISION_FILTER,
-    canCollide,
-} from '../../src/collision/CollisionFilter';
+import { CollisionCategory, canCollide } from '../../src/collision/CollisionFilter';
 
 describe('CollisionFilter', () => {
     test('BodiesFactory.circle uses the default collision filter when none is provided', () => {
@@ -17,70 +12,88 @@ describe('CollisionFilter', () => {
             mass: 1,
         });
 
-        expect(body.collisionFilter).toEqual(DEFAULT_COLLISION_FILTER);
+        expect(body.collisionCategory).toBe(CollisionCategory.DEFAULT);
+        expect(body.collisionMask).toBe(CollisionCategory.ALL);
     });
 
     test('Filters with DEFAULT settings collide with each other', () => {
-        const a: CollisionFilter = {
-            category: CollisionCategory.DEFAULT,
-            mask: CollisionCategory.ALL,
-        };
-
-        const b: CollisionFilter = {
-            category: CollisionCategory.DEFAULT,
-            mask: CollisionCategory.ALL,
-        };
-
+        const a = BodiesFactory.circle({ radius: 30, x: 0, y: 0, mass: 1 });
+        const b = BodiesFactory.circle({ radius: 30, x: 0, y: 0, mass: 1 });
         expect(canCollide(a, b)).toBe(true);
         expect(canCollide(b, a)).toBe(true);
     });
 
     test('A NONE mask blocks collisions even when categories would otherwise match', () => {
-        const a: CollisionFilter = {
-            category: CollisionCategory.DEFAULT,
-            mask: CollisionCategory.NONE,
-        };
+        const a = BodiesFactory.circle({
+            radius: 30,
+            x: 0,
+            y: 0,
+            mass: 1,
+            collisionCategory: CollisionCategory.DEFAULT,
+            collisionMask: CollisionCategory.NONE,
+        });
 
-        const b: CollisionFilter = {
-            category: CollisionCategory.PROJECTILE,
-            mask: CollisionCategory.ALL,
-        };
-
+        const b = BodiesFactory.circle({
+            radius: 30,
+            x: 0,
+            y: 0,
+            mass: 1,
+            collisionCategory: CollisionCategory.PROJECTILE,
+            collisionMask: CollisionCategory.ALL,
+        });
         expect(canCollide(a, b)).toBe(false);
         expect(canCollide(b, a)).toBe(false);
     });
 
     test('Both filters must allow each other for a collision to happen', () => {
-        const a: CollisionFilter = {
-            category: CollisionCategory.DEFAULT,
-            mask: CollisionCategory.PROJECTILE,
-        };
+        const a = BodiesFactory.circle({
+            radius: 30,
+            x: 0,
+            y: 0,
+            mass: 1,
+            collisionCategory: CollisionCategory.DEFAULT,
+            collisionMask: CollisionCategory.PROJECTILE,
+        });
 
-        const b: CollisionFilter = {
-            category: CollisionCategory.PROJECTILE,
-            mask: CollisionCategory.PARTICLE,
-        };
-
+        const b = BodiesFactory.circle({
+            radius: 30,
+            x: 0,
+            y: 0,
+            mass: 1,
+            collisionCategory: CollisionCategory.PROJECTILE,
+            collisionMask: CollisionCategory.PARTICLE,
+        });
         expect(canCollide(a, b)).toBe(false);
         expect(canCollide(b, a)).toBe(false);
     });
 
     test('A filter can allow exactly one category', () => {
-        const a: CollisionFilter = {
-            category: CollisionCategory.DEFAULT,
-            mask: CollisionCategory.PROJECTILE,
-        };
+        const a = BodiesFactory.circle({
+            radius: 30,
+            x: 0,
+            y: 0,
+            mass: 1,
+            collisionCategory: CollisionCategory.DEFAULT,
+            collisionMask: CollisionCategory.PROJECTILE,
+        });
 
-        const projectile: CollisionFilter = {
-            category: CollisionCategory.PROJECTILE,
-            mask: CollisionCategory.DEFAULT,
-        };
+        const projectile = BodiesFactory.circle({
+            radius: 30,
+            x: 0,
+            y: 0,
+            mass: 1,
+            collisionCategory: CollisionCategory.PROJECTILE,
+            collisionMask: CollisionCategory.DEFAULT,
+        });
 
-        const particle: CollisionFilter = {
-            category: CollisionCategory.PARTICLE,
-            mask: CollisionCategory.DEFAULT,
-        };
-
+        const particle = BodiesFactory.circle({
+            radius: 30,
+            x: 0,
+            y: 0,
+            mass: 1,
+            collisionCategory: CollisionCategory.PARTICLE,
+            collisionMask: CollisionCategory.DEFAULT,
+        });
         expect(canCollide(a, projectile)).toBe(true);
         expect(canCollide(projectile, a)).toBe(true);
         expect(canCollide(a, particle)).toBe(false);
@@ -88,26 +101,41 @@ describe('CollisionFilter', () => {
     });
 
     test('A mask can allow a union of categories', () => {
-        const a: CollisionFilter = {
-            category: CollisionCategory.SENSOR,
-            mask: CollisionCategory.DEFAULT | CollisionCategory.PROJECTILE,
-        };
+        const a = BodiesFactory.circle({
+            radius: 30,
+            x: 0,
+            y: 0,
+            mass: 1,
+            collisionCategory: CollisionCategory.SENSOR,
+            collisionMask: CollisionCategory.DEFAULT | CollisionCategory.PROJECTILE,
+        });
 
-        const defaultBody: CollisionFilter = {
-            category: CollisionCategory.DEFAULT,
-            mask: CollisionCategory.SENSOR,
-        };
+        const defaultBody = BodiesFactory.circle({
+            radius: 30,
+            x: 0,
+            y: 0,
+            mass: 1,
+            collisionCategory: CollisionCategory.DEFAULT,
+            collisionMask: CollisionCategory.SENSOR,
+        });
 
-        const projectile: CollisionFilter = {
-            category: CollisionCategory.PROJECTILE,
-            mask: CollisionCategory.SENSOR,
-        };
+        const projectile = BodiesFactory.circle({
+            radius: 30,
+            x: 0,
+            y: 0,
+            mass: 1,
+            collisionCategory: CollisionCategory.PROJECTILE,
+            collisionMask: CollisionCategory.SENSOR,
+        });
 
-        const particle: CollisionFilter = {
-            category: CollisionCategory.PARTICLE,
-            mask: CollisionCategory.SENSOR,
-        };
-
+        const particle = BodiesFactory.circle({
+            radius: 30,
+            x: 0,
+            y: 0,
+            mass: 1,
+            collisionCategory: CollisionCategory.PARTICLE,
+            collisionMask: CollisionCategory.SENSOR,
+        });
         expect(canCollide(a, defaultBody)).toBe(true);
         expect(canCollide(defaultBody, a)).toBe(true);
         expect(canCollide(a, projectile)).toBe(true);
@@ -117,21 +145,32 @@ describe('CollisionFilter', () => {
     });
 
     test('Removing DEFAULT from ALL blocks DEFAULT but still allows other categories', () => {
-        const particle: CollisionFilter = {
-            category: CollisionCategory.PARTICLE,
-            mask: CollisionCategory.ALL & ~CollisionCategory.DEFAULT,
-        };
+        const particle = BodiesFactory.circle({
+            radius: 30,
+            x: 0,
+            y: 0,
+            mass: 1,
+            collisionCategory: CollisionCategory.PARTICLE,
+            collisionMask: CollisionCategory.ALL & ~CollisionCategory.DEFAULT,
+        });
 
-        const defaultBody: CollisionFilter = {
-            category: CollisionCategory.DEFAULT,
-            mask: CollisionCategory.ALL,
-        };
+        const defaultBody = BodiesFactory.circle({
+            radius: 30,
+            x: 0,
+            y: 0,
+            mass: 1,
+            collisionCategory: CollisionCategory.DEFAULT,
+            collisionMask: CollisionCategory.ALL,
+        });
 
-        const sensor: CollisionFilter = {
-            category: CollisionCategory.SENSOR,
-            mask: CollisionCategory.ALL,
-        };
-
+        const sensor = BodiesFactory.circle({
+            radius: 30,
+            x: 0,
+            y: 0,
+            mass: 1,
+            collisionCategory: CollisionCategory.SENSOR,
+            collisionMask: CollisionCategory.ALL,
+        });
         expect(canCollide(particle, defaultBody)).toBe(false);
         expect(canCollide(defaultBody, particle)).toBe(false);
         expect(canCollide(particle, sensor)).toBe(true);
@@ -139,31 +178,45 @@ describe('CollisionFilter', () => {
     });
 
     test('A body does not collide with its own category when its mask excludes it', () => {
-        const a: CollisionFilter = {
-            category: CollisionCategory.PARTICLE,
-            mask: CollisionCategory.ALL & ~CollisionCategory.PARTICLE,
-        };
+        const a = BodiesFactory.circle({
+            radius: 30,
+            x: 0,
+            y: 0,
+            mass: 1,
+            collisionCategory: CollisionCategory.PARTICLE,
+            collisionMask: CollisionCategory.ALL & ~CollisionCategory.PARTICLE,
+        });
 
-        const b: CollisionFilter = {
-            category: CollisionCategory.PARTICLE,
-            mask: CollisionCategory.PARTICLE,
-        };
-
+        const b = BodiesFactory.circle({
+            radius: 30,
+            x: 0,
+            y: 0,
+            mass: 1,
+            collisionCategory: CollisionCategory.PARTICLE,
+            collisionMask: CollisionCategory.PARTICLE,
+        });
         expect(canCollide(a, b)).toBe(false);
         expect(canCollide(b, a)).toBe(false);
     });
 
     test('A NONE category never matches another body mask', () => {
-        const a: CollisionFilter = {
-            category: CollisionCategory.NONE,
-            mask: CollisionCategory.ALL,
-        };
+        const a = BodiesFactory.circle({
+            radius: 30,
+            x: 0,
+            y: 0,
+            mass: 1,
+            collisionCategory: CollisionCategory.NONE,
+            collisionMask: CollisionCategory.ALL,
+        });
 
-        const b: CollisionFilter = {
-            category: CollisionCategory.DEFAULT,
-            mask: CollisionCategory.ALL,
-        };
-
+        const b = BodiesFactory.circle({
+            radius: 30,
+            x: 0,
+            y: 0,
+            mass: 1,
+            collisionCategory: CollisionCategory.DEFAULT,
+            collisionMask: CollisionCategory.ALL,
+        });
         expect(canCollide(a, b)).toBe(false);
         expect(canCollide(b, a)).toBe(false);
     });
