@@ -746,6 +746,7 @@ export default class Application {
         const coulombForceStrength = 100;
         const bodies = this.world.getBodies();
 
+        // TODO: could be improved using spatial partitioning and cutoff or other techniques, see Barnes–Hut algorithm
         for (let i = 0; i < bodies.length - 1; i++) {
             const bodyA = bodies[i];
             for (let j = i + 1; j < bodies.length; j++) {
