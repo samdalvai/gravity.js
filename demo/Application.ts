@@ -767,8 +767,11 @@ export default class Application {
         if (!this.convectionForce) {
             return;
         }
-
-        // TODO: apply convection force
+        const bodies = this.world.getBodies();
+        for (let i = 0; i < bodies.length; i++) {
+            // TODO: update bodies color fill based on temperature
+            // TODO: apply convection force
+        }
     }
 
     private advanceSimulation(): void {
