@@ -775,6 +775,8 @@ export default class Application {
         for (let i = 0; i < bodies.length; i++) {
             // TODO: update bodies color fill based on temperature
             // TODO: apply convection force
+
+            // TODO: apply cooling if there is no contact
         }
     }
 
