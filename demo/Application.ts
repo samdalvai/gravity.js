@@ -49,6 +49,7 @@ export default class Application {
     private grabJoint: GrabJoint | null = null;
     private dragForce: number | null = null;
     private grab = true;
+    private coulombForce = false;
 
     // Inputs
     private generateParticle = false;
@@ -100,6 +101,10 @@ export default class Application {
 
     setDragForce(drag: number | null): void {
         this.dragForce = drag;
+    }
+
+    setCoulombForce(active: boolean): void {
+        this.coulombForce = active;
     }
 
     async setup(): Promise<void> {
@@ -733,6 +738,25 @@ export default class Application {
         }
     }
 
+    private applyCoulombForce(): void {
+        if (!this.coulombForce) {
+            return;
+        }
+
+        const coulombForceStrength = 100;
+        const bodies = this.world.getBodies();
+
+        for (let i = 0; i < bodies.length - 1; i++) {
+            const bodyA = bodies[i];
+            for (let j = i + 1; j < bodies.length; j++) {
+                const bodyB = bodies[j];
+                const coulombForce = Force.generateCoulombForce(bodyA, bodyB, coulombForceStrength);
+                bodyA.addForce(coulombForce);
+                bodyB.addForce(coulombForce.negateNew());
+            }
+        }
+    }
+
     private advanceSimulation(): void {
         for (let i = 0; i < SETTINGS.subSteps; i++) {
             this.stepSimulation();
@@ -840,6 +864,7 @@ export default class Application {
         this.testBody = null;
         this.blackHole = null;
         this.dragForce = null;
+        this.coulombForce = false;
         this.generateParticle = false;
         this.leftButtonPressed = false;
         this.rightButtonPressed = false;
@@ -917,6 +942,7 @@ export default class Application {
     private stepSimulation(): void {
         this.applyBlackHoleForce();
         this.applyDragForce();
+        this.applyCoulombForce();
         this.world.update(SETTINGS.dt);
     }
 
