@@ -265,11 +265,6 @@ export class Force {
 
         const submergedFraction = submergedHeight / height;
 
-        const torque = -body.angularVelocity * angularDragCoefficient * submergedFraction;
-
-        console.log('angularDragCoefficient: ', angularDragCoefficient);
-        console.log('submergedFraction: ', submergedFraction);
-
         return -body.angularVelocity * angularDragCoefficient * submergedFraction;
     }
 }
