@@ -4,6 +4,7 @@ import type Application from '../Application';
 export const FLOOR_WIDTH = 3200;
 export const FLOOR_HEIGHT = 50;
 export const FLOOR_POSITION_Y = -350;
+export const FENCE_WIDTH = 50;
 const STRESS_DEMO_COLUMNS = 25;
 const STRESS_DEMO_ROWS = 40;
 const SQUARE_CAGE_INNER_SIZE = 1000;
@@ -45,20 +46,19 @@ export function generateFloor(world: World, app: Application): RigidBody {
 }
 
 export function generateFences(world: World, app: Application): [RigidBody, RigidBody] {
-    const fenceWidth = 50;
     const fenceHeight = 900 + FLOOR_HEIGHT;
     const leftFence = BodiesFactory.box({
-        width: fenceWidth,
+        width: FENCE_WIDTH,
         height: fenceHeight,
-        x: -(FLOOR_WIDTH / 2 + fenceWidth / 2),
+        x: -(FLOOR_WIDTH / 2 + FENCE_WIDTH / 2),
         y: FLOOR_POSITION_Y + FLOOR_HEIGHT / 2 + fenceHeight / 2 - FLOOR_HEIGHT,
         mass: 0.0,
     });
 
     const rightFence = BodiesFactory.box({
-        width: fenceWidth,
+        width: FENCE_WIDTH,
         height: fenceHeight,
-        x: FLOOR_WIDTH / 2 + fenceWidth / 2,
+        x: FLOOR_WIDTH / 2 + FENCE_WIDTH / 2,
         y: FLOOR_POSITION_Y + FLOOR_HEIGHT / 2 + fenceHeight / 2 - FLOOR_HEIGHT,
         mass: 0.0,
     });
