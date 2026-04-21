@@ -1,13 +1,13 @@
-import { BodiesFactory, Utils, type World } from '../../src';
+import { BodiesFactory, RigidBody, SETTINGS, Utils, type World } from '../../src';
 import type Application from '../Application';
 import Graphics from '../graphics/Graphics';
-import { FLOOR_HEIGHT, defineDemo, generateFences, generateFloor } from './shared';
+import { FENCE_WIDTH, FLOOR_HEIGHT, defineDemo, generateFences, generateFloor } from './shared';
 
 function setupConvectionForce(world: World, app: Application): void {
     Graphics.zoom = 0.5;
 
     const MIN_TEMPERATURE = 0;
-    const MAX_TEMPERATURE = 2500;
+    const MAX_TEMPERATURE = 5_000;
 
     const floor = generateFloor(world, app);
     floor.temperature = MAX_TEMPERATURE;
@@ -25,18 +25,31 @@ function setupConvectionForce(world: World, app: Application): void {
     app.setBodyFillColor(fences[1], temperatureToColor(floor.temperature, MIN_TEMPERATURE, MAX_TEMPERATURE));
 
     const numOfParticles = 2_500;
+    const particleRadius = 5;
+    const BASE_Y = floor.position.y + FLOOR_HEIGHT / 2 + particleRadius;
+    const MAX_X = fences[0].position.x + FENCE_WIDTH / 2 + particleRadius;
 
     for (let i = 0; i < numOfParticles; i++) {
-        const radius = 5;
         const particle = BodiesFactory.circle({
-            radius: radius,
-            x: Utils.randomNumber(-1500, 1500),
-            y: Utils.randomNumber(floor.position.y + FLOOR_HEIGHT / 2 + radius, 100),
+            radius: particleRadius,
+            x: Utils.randomNumber(-MAX_X, MAX_X),
+            y: Utils.randomNumber(BASE_Y, 250),
             mass: 0.1,
             temperature: MIN_TEMPERATURE,
         });
 
         app.setBodyFillColor(particle, temperatureToColor(particle.temperature, MIN_TEMPERATURE, MAX_TEMPERATURE));
+        particle.onContact = info => {
+            const bodyA = info.bodyA;
+            const bodyB = info.bodyB;
+            const colorA = temperatureToColor(bodyA.temperature, MIN_TEMPERATURE, MAX_TEMPERATURE);
+            const colorB = temperatureToColor(bodyB.temperature, MIN_TEMPERATURE, MAX_TEMPERATURE);
+
+            app.setBodyFillColor(bodyA, colorA);
+            app.setBodyFillColor(bodyB, colorB);
+
+            exchangeHeat(bodyA, bodyB, SETTINGS.dt);
+        };
 
         world.addBody(particle);
     }
@@ -73,4 +86,19 @@ export function temperatureToColor(temperature: number, minTemp: number, maxTemp
     }
 
     return `rgb(${r}, ${g}, ${b})`;
+}
+
+function exchangeHeat(a: RigidBody, b: RigidBody, dt: number, k = 0.1) {
+    const deltaT = a.temperature - b.temperature;
+    if (deltaT === 0) return;
+
+    const heat = k * deltaT * dt;
+
+    if (!a.isStatic()) {
+        a.temperature -= heat / a.mass;
+    }
+
+    if (!b.isStatic()) {
+        b.temperature += heat / b.mass;
+    }
 }
