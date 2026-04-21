@@ -833,8 +833,8 @@ export default class Application {
             if (body.isStatic()) continue;
 
             const buoyancy = Force.generateBuoyancyForce(body, waterSurfaceY, this.liquid.density, GRAVITY);
-            const waterDrag = Force.generateWaterDragForce(body, waterSurfaceY, 0.1);
-            const waterAngularDrag = Force.generateAngularWaterDragTorque(body, waterSurfaceY, 1);
+            const waterDrag = Force.generateLinearWaterDragForce(body, waterSurfaceY, 0.2);
+            const waterAngularDrag = Force.generateAngularWaterDragTorque(body, waterSurfaceY, 0.75);
 
             body.addForce(buoyancy);
             body.addForce(waterDrag);

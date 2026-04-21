@@ -208,7 +208,7 @@ export class Force {
         return new Vec2(0, buoyancyMagnitude);
     }
 
-    static generateWaterDragForce(body: RigidBody, waterSurfaceY: number, dragCoefficient: number): Vec2 {
+    static generateLinearWaterDragForce(body: RigidBody, waterSurfaceY: number, dragCoefficient: number): Vec2 {
         const maxY = body.maxY;
         const minY = body.minY;
 
@@ -264,6 +264,11 @@ export class Force {
         }
 
         const submergedFraction = submergedHeight / height;
+
+        const torque = -body.angularVelocity * angularDragCoefficient * submergedFraction;
+
+        console.log('angularDragCoefficient: ', angularDragCoefficient);
+        console.log('submergedFraction: ', submergedFraction);
 
         return -body.angularVelocity * angularDragCoefficient * submergedFraction;
     }
