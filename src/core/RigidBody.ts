@@ -1,4 +1,4 @@
-import { CollisionFilter, DEFAULT_COLLISION_FILTER } from '../collision/CollisionFilter';
+import { CollisionCategory } from '../collision/CollisionFilter';
 import { ContactInfo } from '../collision/ContactManifold';
 import { Vec2 } from '../math/Vec2';
 import { CircleShape } from '../shapes/CircleShape';
@@ -54,7 +54,8 @@ export class RigidBody {
     readonly shapeType: ShapeType;
 
     // Collision filters
-    collisionFilter: CollisionFilter;
+    collisionCategory: CollisionCategory;
+    collisionMask: CollisionCategory;
 
     // AABB
     minX = 0;
@@ -113,7 +114,8 @@ export class RigidBody {
         this.surfaceSpeed = 0;
         this.temperature = 0;
 
-        this.collisionFilter = DEFAULT_COLLISION_FILTER;
+        this.collisionCategory = CollisionCategory.DEFAULT;
+        this.collisionMask = CollisionCategory.ALL;
 
         this.shape.updateVertices(this.rotation, this.position);
         this.shape.updateAABB(this);
