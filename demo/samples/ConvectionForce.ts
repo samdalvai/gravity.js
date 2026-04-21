@@ -110,8 +110,7 @@ export function dissipateHeat(body: RigidBody, ambientTemperature: number, dt: n
     const deltaT = body.temperature - ambientTemperature;
     if (deltaT === 0) return;
 
-    // const perimeter = body.shape.getPerimeter(); // TODO: implement getting perimeter
-    const perimeter = 10;
+    const perimeter = body.shape.getPerimeter();
     const heatLoss = cooling * perimeter * deltaT * dt;
 
     body.temperature -= heatLoss / body.mass;
