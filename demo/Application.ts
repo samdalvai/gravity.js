@@ -38,6 +38,14 @@ const PLAYER_MAX_SPEED = 350;
 const PLAYER_ACCELERATION = 10;
 const PLAYER_JUMP_IMPULSE = 600;
 
+// TODO: can we bring this to library?
+export interface AABB {
+    minX: number;
+    minY: number;
+    maxX: number;
+    maxY: number;
+}
+
 export default class Application {
     private world: World;
     private running = false;
@@ -61,6 +69,7 @@ export default class Application {
     private grab = true;
     private coulombForce = false;
     private convectionForce = false;
+    private liquid: { aabb: AABB; density: number } | null = null;
 
     // Inputs
     private generateParticle = false;
@@ -124,6 +133,10 @@ export default class Application {
 
     setConvectionForce(active: boolean): void {
         this.convectionForce = active;
+    }
+
+    setLiquid(liquid: { aabb: AABB; density: number }): void {
+        this.liquid = liquid;
     }
 
     async setup(): Promise<void> {
@@ -585,6 +598,13 @@ export default class Application {
             Graphics.drawBody(body, this.bodyRenderRegistry.getStyle(body), this.debug);
         }
 
+        if (this.liquid) {
+            const liquidAABB = this.liquid.aabb;
+            const width = liquidAABB.maxX - liquidAABB.minX;
+            const height = liquidAABB.maxY - liquidAABB.minY;
+            Graphics.drawFillRect(liquidAABB.minX, liquidAABB.minY, width, height, 'rgba(149, 224, 255, 0.5)');
+        }
+
         // Draw all joints anchor points and debug properties
         if (this.debug) {
             if (this.showAABB) {
@@ -801,6 +821,19 @@ export default class Application {
         }
     }
 
+    private applyBuoyancyForce(): void {
+        if (!this.liquid) {
+            return;
+        }
+        const bodies = this.world.getBodies();
+
+        for (let i = 0; i < bodies.length; i++) {
+            const body = bodies[i];
+
+            // TODO: apply buoyancy
+        }
+    }
+
     private advanceSimulation(): void {
         for (let i = 0; i < SETTINGS.subSteps; i++) {
             this.stepSimulation();
@@ -904,12 +937,15 @@ export default class Application {
         this.grabJoint = null;
         this.bgTexture = null;
         this.bodyRenderRegistry.clear();
+
         this.player = null;
         this.testBody = null;
         this.blackHole = null;
         this.dragForce = null;
         this.coulombForce = false;
         this.convectionForce = false;
+        this.liquid = null;
+
         this.generateParticle = false;
         this.leftButtonPressed = false;
         this.rightButtonPressed = false;
@@ -989,6 +1025,7 @@ export default class Application {
         this.applyDragForce();
         this.applyCoulombForce();
         this.applyConvectionForce();
+        this.applyBuoyancyForce();
         this.world.update(SETTINGS.dt);
     }
 
