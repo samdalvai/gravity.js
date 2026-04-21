@@ -1,10 +1,4 @@
-import {
-    BodiesFactory,
-    DistanceJoint,
-    RigidBody,
-    Vec2,
-    World,
-} from '../../src';
+import { BodiesFactory, DistanceJoint, RigidBody, Vec2, World } from '../../src';
 import type Application from '../Application';
 
 export const FLOOR_WIDTH = 3200;
@@ -50,7 +44,7 @@ export function generateFloor(world: World, app: Application): RigidBody {
     return floor;
 }
 
-export function generateFences(world: World, app: Application): void {
+export function generateFences(world: World, app: Application): [RigidBody, RigidBody] {
     const fenceWidth = 50;
     const fenceHeight = 900 + FLOOR_HEIGHT;
     const leftFence = BodiesFactory.box({
@@ -73,6 +67,8 @@ export function generateFences(world: World, app: Application): void {
     app.setBodyTexture(rightFence, 'transparent');
     world.addBody(leftFence);
     world.addBody(rightFence);
+
+    return [leftFence, rightFence];
 }
 
 export function generateSquareCage(world: World, app: Application): CageBounds {

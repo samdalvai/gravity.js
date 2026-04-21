@@ -88,6 +88,10 @@ export default class Application {
         this.bodyRenderRegistry.setTexture(body, texture);
     }
 
+    removeBodyTexture(body: RigidBody): void {
+        this.bodyRenderRegistry.delete(body);
+    }
+
     setBodyFillColor(body: RigidBody, fillColor: string): void {
         this.bodyRenderRegistry.setFillColor(body, fillColor);
     }
