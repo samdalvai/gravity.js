@@ -35,6 +35,9 @@ export class RigidBody {
     private _friction: number;
     private _density: number;
     private _rollingResistance: number;
+
+    // Special material properties
+    charge: number;
     surfaceSpeed: number;
 
     // Grounded variables
@@ -100,6 +103,8 @@ export class RigidBody {
         this._restitution = 0.2;
         this._friction = 0.7;
         this._rollingResistance = 0.5;
+
+        this.charge = 0;
         this.surfaceSpeed = 0;
 
         this.shape.updateVertices(this.rotation, this.position);
