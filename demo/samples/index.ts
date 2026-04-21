@@ -7,6 +7,7 @@ import breakableJointsDemo from './BreakableJoints';
 import clothSimulationDemo from './ClothSimulation';
 import complexSceneDemo from './ComplexScene';
 import continuousCollisionDetectionDemo from './ContinuousCollisionDetection';
+import convectionDemo from './ConvectionForce';
 import dragDemo from './Drag';
 import electroStaticDemo from './ElectrostaticForce';
 import plankDemo from './Plank';
@@ -41,6 +42,7 @@ export const DEMOS: DemoRunner[] = [
     breakableJointsDemo,
     dragDemo,
     electroStaticDemo,
+    convectionDemo,
 ];
 
 export const DEMO_LABELS = DEMOS.map((demo, index) => `Demo ${index}: ${demo.label}`);
