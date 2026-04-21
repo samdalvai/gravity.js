@@ -89,7 +89,7 @@ export function temperatureToColor(temperature: number, minTemp: number, maxTemp
     return `rgb(${r}, ${g}, ${b})`;
 }
 
-export function exchangeHeat(a: RigidBody, b: RigidBody, dt: number, k = 0.1) {
+export function exchangeHeat(a: RigidBody, b: RigidBody, dt: number, k = 0.5) {
     const deltaT = a.temperature - b.temperature;
     if (deltaT === 0) return;
 
@@ -104,7 +104,7 @@ export function exchangeHeat(a: RigidBody, b: RigidBody, dt: number, k = 0.1) {
     }
 }
 
-export function dissipateHeat(body: RigidBody, ambientTemperature: number, dt: number, cooling = 0.01) {
+export function dissipateHeat(body: RigidBody, ambientTemperature: number, dt: number, cooling = 0.001) {
     if (body.isStatic()) return;
 
     const deltaT = body.temperature - ambientTemperature;
