@@ -19,6 +19,7 @@ import Graphics from './graphics/Graphics';
 import InputManager, { MouseButton } from './input/InputManager';
 import BodyRenderRegistry from './render/BodyRenderRegistry';
 import { DEMOS, DEMO_LABELS } from './samples';
+import { dissipateHeat } from './samples/ConvectionForce';
 import UIManager, { UIState } from './ui/UIManager';
 
 const BODY_REMOVAL_THRESHOLD = 25_000;
@@ -774,9 +775,11 @@ export default class Application {
         const bodies = this.world.getBodies();
 
         for (let i = 0; i < bodies.length; i++) {
+            const body = bodies[i];
             // TODO: update bodies color fill based on temperature
             // TODO: apply convection force
             // TODO: apply cooling if there is no contact (simplify to always dissipate heat)
+            dissipateHeat(body, 0, SETTINGS.dt);
         }
     }
 
