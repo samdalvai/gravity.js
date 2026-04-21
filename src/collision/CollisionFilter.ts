@@ -3,12 +3,12 @@ import { RigidBody } from '../core/RigidBody';
 export const enum CollisionCategory {
     NONE = 0,
     DEFAULT = 1 << 0,
-    PROJECTILE = 1 << 2,
-    PARTICLE = 1 << 3,
-    SENSOR = 1 << 4,
-    LAYER1 = 1 << 5,
-    LAYER2 = 1 << 6,
-    LAYER3 = 1 << 7,
+    PROJECTILE = 1 << 1,
+    PARTICLE = 1 << 2,
+    SENSOR = 1 << 3,
+    LAYER1 = 1 << 4,
+    LAYER2 = 1 << 5,
+    LAYER3 = 1 << 6,
     ALL = 0xffffffff,
 }
 
