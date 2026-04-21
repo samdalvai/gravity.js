@@ -32,4 +32,19 @@ describe('Force', () => {
         expect(waterDrag.x).toBeCloseTo(0);
         expect(waterDrag.y).toBeCloseTo(maxForce);
     });
+
+    test('Angular water drag scales with moment of inertia so damping stays effective for larger bodies', () => {
+        const body = BodiesFactory.box({
+            width: 40,
+            height: 20,
+            x: 0,
+            y: 0,
+            mass: 2,
+        });
+        body.angularVelocity = 3;
+
+        const torque = Force.generateAngularWaterDragTorque(body, 20, 0.75);
+
+        expect(torque).toBeCloseTo(-body.angularVelocity * 0.75 * body.I);
+    });
 });

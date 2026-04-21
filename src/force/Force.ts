@@ -277,6 +277,8 @@ export class Force {
 
         const submergedFraction = submergedHeight / height;
 
-        return -body.angularVelocity * angularDragCoefficient * submergedFraction;
+        // Scale by moment of inertia so the coefficient behaves like an angular damping rate.
+        // Otherwise large bodies barely slow down because angular acceleration is torque / I.
+        return -body.angularVelocity * angularDragCoefficient * submergedFraction * body.I;
     }
 }
