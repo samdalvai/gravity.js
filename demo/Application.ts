@@ -832,7 +832,6 @@ export default class Application {
             if (body.isStatic()) continue;
 
             const buoyancy = Force.generateBuoyancyForce(body, this.liquid.aabb.maxY, this.liquid.density, GRAVITY);
-            console.log('Buoyancy: ', buoyancy);
             body.addForce(buoyancy);
         }
     }
