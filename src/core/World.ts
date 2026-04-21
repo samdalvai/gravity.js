@@ -239,6 +239,10 @@ export class World {
                     continue;
                 }
 
+                if (!canCollide(a.collisionFilter, b.collisionFilter)) {
+                    continue;
+                }
+
                 // Objects may be colliding
                 this.potentialPairs.push([a, b]);
             }
@@ -253,8 +257,6 @@ export class World {
         // Narrow phase check, potential pairs may still not collide
         for (let [a, b] of this.potentialPairs) {
             if (a.isStatic() && b.isStatic()) continue;
-
-            if (!canCollide(a.collisionFilter, b.collisionFilter)) continue;
 
             // Improve coherence
             if (a.id > b.id) {
