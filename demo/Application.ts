@@ -29,24 +29,29 @@ const PLAYER_ACCELERATION = 10;
 const PLAYER_JUMP_IMPULSE = 600;
 
 export default class Application {
+    private world: World;
     private running = false;
     private paused = false;
-    private world: World;
-    private bgTexture: ImageBitmap | null = null;
-    private readonly bodyRenderRegistry = new BodyRenderRegistry();
-    private generateParticle = false;
+
+    // Demos
     private demoIndex = 19;
     private demoShortcutBuffer = '';
     private demoShortcutTimer: number | null = null;
 
-    private player: RigidBody | null = null;
+    // Textures
+    private bgTexture: ImageBitmap | null = null;
+    private readonly bodyRenderRegistry = new BodyRenderRegistry();
 
+    // Mechanics
+    private player: RigidBody | null = null;
     private testBody: RigidBody | null = null;
     private blackHole: RigidBody | null = null;
     private grabJoint: GrabJoint | null = null;
     private dragForce: number | null = null;
+    private grab = true;
 
     // Inputs
+    private generateParticle = false;
     private leftButtonPressed: boolean = false;
     private rightButtonPressed: boolean = false;
     private middleMousePressed = false;
@@ -59,7 +64,6 @@ export default class Application {
     private showContacts = true;
     private showAABB = false;
     private showRuntimeStatsHud = true;
-    private grab = true;
     private readonly uiManager = new UIManager();
 
     constructor() {
