@@ -1,5 +1,7 @@
-import { describe, expect, test } from '@jest/globals';
+import { describe, expect, jest, test } from '@jest/globals';
 
+import { CollisionCategory } from '../../src/collision/CollisionFilter';
+import * as NarrowPhase from '../../src/collision/NarrowPhase';
 import { FIXED_DELTA_TIME } from '../../src/core/Constants';
 import { RigidBody } from '../../src/core/RigidBody';
 import { World } from '../../src/core/World';
@@ -8,6 +10,34 @@ import { CapsuleShape } from '../../src/shapes/CapsuleShape';
 import { CircleShape } from '../../src/shapes/CircleShape';
 
 describe('World grounding', () => {
+    test('broad phase skips pairs rejected by collision filters', () => {
+        const world = new World(0);
+
+        const a = new RigidBody(new CircleShape(20), 0, 0, 1);
+        a.collisionFilter = {
+            category: CollisionCategory.DEFAULT,
+            mask: CollisionCategory.NONE,
+        };
+
+        const b = new RigidBody(new CircleShape(20), 0, 0, 1);
+        b.collisionFilter = {
+            category: CollisionCategory.PROJECTILE,
+            mask: CollisionCategory.ALL,
+        };
+
+        const detectCollisionSpy = jest.spyOn(NarrowPhase, 'detectCollision');
+
+        world.addBody(a);
+        world.addBody(b);
+
+        world.update(FIXED_DELTA_TIME);
+
+        expect(detectCollisionSpy).not.toHaveBeenCalled();
+        expect(world.getManifolds()).toHaveLength(0);
+
+        detectCollisionSpy.mockRestore();
+    });
+
     test('grounded follows the collision manifold body order, not the broad phase pair order', () => {
         const world = new World(0);
 
