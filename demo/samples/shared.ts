@@ -38,19 +38,19 @@ export function defineDemo(label: string, setup: DemoSetup): DemoRunner {
     return Object.assign(setup, { label }) as DemoRunner;
 }
 
-export function generateFloor(world: World, app: Application): RigidBody {
-    const floor = BodiesFactory.box({ width: FLOOR_WIDTH, height: FLOOR_HEIGHT, x: 0, y: FLOOR_POSITION_Y, mass: 0.0 });
+export function generateFloor(world: World, app: Application, width = FLOOR_WIDTH): RigidBody {
+    const floor = BodiesFactory.box({ width: width, height: FLOOR_HEIGHT, x: 0, y: FLOOR_POSITION_Y, mass: 0.0 });
     app.setBodyTexture(floor, 'transparent');
     world.addBody(floor);
     return floor;
 }
 
-export function generateFences(world: World, app: Application): [RigidBody, RigidBody] {
+export function generateFences(world: World, app: Application, floorWidth = FLOOR_WIDTH): [RigidBody, RigidBody] {
     const fenceHeight = 900 + FLOOR_HEIGHT;
     const leftFence = BodiesFactory.box({
         width: FENCE_WIDTH,
         height: fenceHeight,
-        x: -(FLOOR_WIDTH / 2 + FENCE_WIDTH / 2),
+        x: -(floorWidth / 2 + FENCE_WIDTH / 2),
         y: FLOOR_POSITION_Y + FLOOR_HEIGHT / 2 + fenceHeight / 2 - FLOOR_HEIGHT,
         mass: 0.0,
     });
@@ -58,7 +58,7 @@ export function generateFences(world: World, app: Application): [RigidBody, Rigi
     const rightFence = BodiesFactory.box({
         width: FENCE_WIDTH,
         height: fenceHeight,
-        x: FLOOR_WIDTH / 2 + FENCE_WIDTH / 2,
+        x: floorWidth / 2 + FENCE_WIDTH / 2,
         y: FLOOR_POSITION_Y + FLOOR_HEIGHT / 2 + fenceHeight / 2 - FLOOR_HEIGHT,
         mass: 0.0,
     });
