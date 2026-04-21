@@ -196,7 +196,7 @@ export class Force {
         }
 
         // Amount of the AABB below the water surface
-        const submergedHeight = Math.max(0, Math.min(maxY - waterSurfaceY, height));
+        const submergedHeight = Math.max(0, Math.min(waterSurfaceY - minY, height));
 
         if (submergedHeight === 0) {
             return new Vec2(0, 0);
@@ -205,6 +205,6 @@ export class Force {
         const submergedArea = width * submergedHeight;
         const buoyancyMagnitude = liquidDensity * submergedArea * gravity;
 
-        return new Vec2(0, -buoyancyMagnitude);
+        return new Vec2(0, buoyancyMagnitude);
     }
 }
