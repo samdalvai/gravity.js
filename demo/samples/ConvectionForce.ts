@@ -25,8 +25,6 @@ function setupConvectionForce(world: World, app: Application): void {
     app.setBodyFillColor(floor, temperatureToColor(floor.temperature, MIN_TEMPERATURE, MAX_TEMPERATURE));
 
     const fences = generateFences(world, app, FLOOR_WIDTH);
-    // fences[0].temperature = MAX_TEMPERATURE;
-    // fences[1].temperature = MAX_TEMPERATURE;
 
     app.removeBodyTexture(fences[0]);
     app.removeBodyTexture(fences[1]);
