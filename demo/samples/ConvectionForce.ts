@@ -8,14 +8,15 @@ function setupConvectionForce(world: World, app: Application): void {
 
     const MIN_TEMPERATURE = 0;
     const MAX_TEMPERATURE = 5_000;
+    const FLOOR_WIDTH = 1500;
 
-    const floor = generateFloor(world, app);
+    const floor = generateFloor(world, app, FLOOR_WIDTH);
     floor.temperature = MAX_TEMPERATURE;
 
     app.removeBodyTexture(floor);
     app.setBodyFillColor(floor, temperatureToColor(floor.temperature, MIN_TEMPERATURE, MAX_TEMPERATURE));
 
-    const fences = generateFences(world, app);
+    const fences = generateFences(world, app, FLOOR_WIDTH);
     fences[0].temperature = MAX_TEMPERATURE;
     fences[1].temperature = MAX_TEMPERATURE;
 
