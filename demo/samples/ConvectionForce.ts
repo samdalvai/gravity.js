@@ -8,7 +8,7 @@ export const MIN_TEMPERATURE = 0;
 export const MAX_TEMPERATURE = 5_000;
 export const PARTICLE_MASS = 0.015;
 export const HEATING_FACTOR = 0.65;
-export const DISSIPATION_FACTOR = 0.00005;
+export const DISSIPATION_FACTOR = 0.000001;
 export const CONVECTION_FORCE = 0.03;
 export const MIN_TEMPERATURE_DIFFERENCE = 1000;
 
@@ -52,7 +52,7 @@ function setupConvectionForce(world: World, app: Application): void {
         { x: 960, y: -275, rotation: -0.5, height: STATIC_WALL_HEIGHT / 1.5 },
         { x: 770, y: -525, rotation: -0.8, height: STATIC_WALL_HEIGHT / 1.5 },
         { x: 450, y: -720, rotation: -1.2, height: STATIC_WALL_HEIGHT / 1.1 },
-        { x: 275, y: -275, rotation: 0, height: STATIC_WALL_HEIGHT * 1.5 },
+        { x: 275, y: -250, rotation: 0, height: STATIC_WALL_HEIGHT * 1.5 },
     ];
 
     const WALL_COLOR = 'rgb(90, 45, 20)';
@@ -67,8 +67,6 @@ function setupConvectionForce(world: World, app: Application): void {
     const BASE_Y = floor.position.y + floorHeight / 2 + particleRadius;
     const MIN_X = floor.position.x - floorWidth / 2 + particleRadius + STATIC_WALL_WIDTH;
     const MAX_X = floor.position.x + floorWidth / 2 + particleRadius - STATIC_WALL_WIDTH;
-    console.log(MIN_X);
-    console.log(MAX_X);
 
     for (let i = 0; i < numOfParticles; i++) {
         const particle = BodiesFactory.circle({
