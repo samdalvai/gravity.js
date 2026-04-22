@@ -1,4 +1,5 @@
 export { Force } from './force/Force';
+export * as Buoyancy from './force/Buoyancy';
 
 export {
     FIXED_DELTA_TIME,
