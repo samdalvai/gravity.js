@@ -14,7 +14,7 @@ type BuoyancyResult = {
 type SubmergedShape = {
     area: number;
     centroid: Vec2;
-};
+} | null;
 
 // instead of the body default centroid compute submerged real area and return real centroid
 /**
@@ -131,7 +131,7 @@ export function generateBuoyancyForce(
     return approximateBuoyancy(body, waterSurfaceY, liquidDensity, gravity);
 }
 
-function getSubmergedPolygon(vertices: readonly Vec2[], waterSurfaceY: number): SubmergedShape | null {
+function getSubmergedPolygon(vertices: readonly Vec2[], waterSurfaceY: number): SubmergedShape {
     const clipped: Vec2[] = [];
 
     for (let i = 0; i < vertices.length; i++) {
@@ -183,7 +183,7 @@ function getSubmergedPolygon(vertices: readonly Vec2[], waterSurfaceY: number): 
     };
 }
 
-function getSubmergedCircle(center: Vec2, radius: number, waterSurfaceY: number): SubmergedShape | null {
+function getSubmergedCircle(center: Vec2, radius: number, waterSurfaceY: number): SubmergedShape {
     const cx = center.x;
     const cy = center.y;
 
@@ -272,6 +272,7 @@ function approximateBuoyancy(
     };
 }
 
+// TODO: do we need real submerged area also here?
 export function generateLinearWaterDragForce(
     body: RigidBody,
     waterSurfaceY: number,
@@ -318,6 +319,7 @@ export function generateLinearWaterDragForce(
     return v.scaleNew(-dragMagnitude / speed);
 }
 
+// TODO: do we need real submerged area also here?
 export function generateAngularWaterDragTorque(
     body: RigidBody,
     waterSurfaceY: number,
