@@ -620,91 +620,99 @@ export default class Application {
             Graphics.drawFillRect(liquidAABB.minX, liquidAABB.minY, width, height, 'rgba(149, 224, 255, 0.5)');
 
             const waterSurfaceY = liquidAABB.maxY;
+
+            const polygonBuoyancy = (body: RigidBody) => {
+                const polygon = body.shape as PolygonShape;
+                const vertices = polygon.worldVertices;
+
+                // Compute clipped submerged area
+                const clipped: Vec2[] = [];
+
+                for (let i = 0; i < vertices.length; i++) {
+                    const a = vertices[i];
+                    const b = vertices[(i + 1) % vertices.length];
+
+                    const aUnder = a.y <= waterSurfaceY;
+                    const bUnder = b.y <= waterSurfaceY;
+
+                    if (aUnder) {
+                        clipped.push(a.copy());
+                    }
+
+                    if (aUnder !== bUnder) {
+                        const t = (waterSurfaceY - a.y) / (b.y - a.y);
+                        const x = a.x + (b.x - a.x) * t;
+                        clipped.push(new Vec2(x, waterSurfaceY));
+                    }
+                }
+
+                Graphics.drawFillPolygon(body.position.x, body.position.y, clipped, 'rgba(255, 0, 0, 0.50)');
+
+                // Compute centroid of the new area
+                let doubleArea = 0;
+                let cx = 0;
+                let cy = 0;
+
+                for (let i = 0; i < clipped.length; i++) {
+                    const current = clipped[i];
+                    const next = clipped[(i + 1) % clipped.length];
+
+                    const cross = current.cross(next);
+                    doubleArea += cross;
+                    cx += (current.x + next.x) * cross;
+                    cy += (current.y + next.y) * cross;
+                }
+
+                if (doubleArea === 0) {
+                    return;
+                }
+
+                const factor = 1 / (3 * doubleArea);
+                const centroid = new Vec2(cx * factor, cy * factor);
+
+                Graphics.drawFillCircle(centroid.x, centroid.y, 5, 'blue');
+            };
+
+            const circleBuoyancy = (body: RigidBody) => {
+                const circle = body.shape as CircleShape;
+                const r = circle.radius;
+                const cx = body.position.x;
+                const cy = body.position.y;
+
+                const d = waterSurfaceY - cy;
+
+                // Fully above
+                if (d <= -r) {
+                    return;
+                }
+
+                let area: number;
+
+                // Fully submerged
+                if (d >= r) {
+                    area = Math.PI * r * r;
+                    Graphics.drawFillCircle(cx, cy, r, 'rgba(255, 0, 0, 0.50)');
+                    Graphics.drawFillCircle(cx, cy, 5, 'blue');
+                    return;
+                }
+
+                area = r * r * Math.acos(-d / r) + d * Math.sqrt(r * r - d * d);
+
+                const a = Math.sqrt(r * r - d * d);
+                const yOffset = -(2 * Math.pow(a, 3)) / (3 * area);
+                const centroid = new Vec2(cx, cy + yOffset);
+
+                Graphics.drawFillCircleClippedBelow(cx, cy, r, waterSurfaceY, 'rgba(255, 0, 0, 0.50)');
+                Graphics.drawFillCircle(centroid.x, centroid.y, 5, 'blue');
+            };
             // TODO: debug submerged area
             for (const body of this.world.getBodies()) {
                 if (body.shapeType === ShapeType.POLYGON || body.shapeType === ShapeType.BOX) {
-                    const polygon = body.shape as PolygonShape;
-                    const vertices = polygon.worldVertices;
-
-                    // Compute clipped submerged area
-                    const clipped: Vec2[] = [];
-
-                    for (let i = 0; i < vertices.length; i++) {
-                        const a = vertices[i];
-                        const b = vertices[(i + 1) % vertices.length];
-
-                        const aUnder = a.y <= waterSurfaceY;
-                        const bUnder = b.y <= waterSurfaceY;
-
-                        if (aUnder) {
-                            clipped.push(a.copy());
-                        }
-
-                        if (aUnder !== bUnder) {
-                            const t = (waterSurfaceY - a.y) / (b.y - a.y);
-                            const x = a.x + (b.x - a.x) * t;
-                            clipped.push(new Vec2(x, waterSurfaceY));
-                        }
-                    }
-
-                    Graphics.drawFillPolygon(body.position.x, body.position.y, clipped, 'rgba(255, 0, 0, 0.50)');
-
-                    // Compute centroid of the new area
-                    let doubleArea = 0;
-                    let cx = 0;
-                    let cy = 0;
-
-                    for (let i = 0; i < clipped.length; i++) {
-                        const current = clipped[i];
-                        const next = clipped[(i + 1) % clipped.length];
-
-                        const cross = current.cross(next);
-                        doubleArea += cross;
-                        cx += (current.x + next.x) * cross;
-                        cy += (current.y + next.y) * cross;
-                    }
-
-                    if (doubleArea === 0) {
-                        continue;
-                    }
-
-                    const factor = 1 / (3 * doubleArea);
-                    const centroid = new Vec2(cx * factor, cy * factor);
-
-                    Graphics.drawFillCircle(centroid.x, centroid.y, 5, 'blue');
+                    polygonBuoyancy(body);
                 }
 
                 if (body.shapeType === ShapeType.CIRCLE) {
-                    const circle = body.shape as CircleShape;
-                    const r = circle.radius;
-                    const cx = body.position.x;
-                    const cy = body.position.y;
-
-                    const d = waterSurfaceY - cy;
-
-                    // Fully above
-                    if (d <= -r) {
-                        continue;
-                    }
-
-                    let area: number;
-
-                    // Fully submerged
-                    if (d >= r) {
-                        area = Math.PI * r * r;
-                        Graphics.drawFillCircle(cx, cy, r, 'rgba(255, 0, 0, 0.50)');
-                        Graphics.drawFillCircle(cx, cy, 5, 'blue');
-                        continue;
-                    }
-
-                    area = r * r * Math.acos(-d / r) + d * Math.sqrt(r * r - d * d);
-
-                    const a = Math.sqrt(r * r - d * d);
-                    const yOffset = -(2 * Math.pow(a, 3)) / (3 * area);
-                    const centroid = new Vec2(cx, cy + yOffset);
-
-                    Graphics.drawFillCircleClippedBelow(cx, cy, r, waterSurfaceY, 'rgba(255, 0, 0, 0.50)');
-                    Graphics.drawFillCircle(centroid.x, centroid.y, 5, 'blue');
+                    circleBuoyancy(body);
                 }
             }
         }
