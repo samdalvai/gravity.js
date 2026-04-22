@@ -1,6 +1,7 @@
 // TODO: To be improved by computing submerged area and applyin the force at that centroid
 import { RigidBody } from '../core/RigidBody';
 import { Vec2 } from '../math/Vec2';
+import { CapsuleShape } from '../shapes/CapsuleShape';
 import { CircleShape } from '../shapes/CircleShape';
 import { PolygonShape } from '../shapes/PolygonShape';
 import { ShapeType } from '../shapes/Shape';
@@ -51,6 +52,63 @@ export function generateBuoyancyForce(
         const r = circle.radius;
 
         const result = getSubmergedCircle(body.position, r, waterSurfaceY);
+
+        if (!result) {
+            return null;
+        }
+
+        const submergedArea = result.area;
+        const buoyancyMagnitude = liquidDensity * submergedArea * gravity;
+        const force = new Vec2(0, buoyancyMagnitude);
+
+        return {
+            force,
+            applicationPoint: result.centroid,
+        };
+    }
+
+    if (body.shapeType === ShapeType.CAPSULE) {
+        const capsule = body.shape as CapsuleShape;
+        const axis = capsule.worldCenter1.subNew(capsule.worldCenter2);
+        const axisLength = Math.sqrt(axis.magnitudeSquared());
+
+        if (axisLength === 0) {
+            const result = getSubmergedCircle(body.position, capsule.radius, waterSurfaceY);
+
+            if (!result) {
+                return null;
+            }
+
+            const submergedArea = result.area;
+            const buoyancyMagnitude = liquidDensity * submergedArea * gravity;
+            const force = new Vec2(0, buoyancyMagnitude);
+
+            return {
+                force,
+                applicationPoint: result.centroid,
+            };
+        }
+
+        const axisDirection = axis.divNew(axisLength);
+
+        const topCapVertices = buildHalfDiskVertices(capsule.worldCenter1, axisDirection, capsule.radius);
+        const bottomCapVertices = buildHalfDiskVertices(
+            capsule.worldCenter2,
+            axisDirection.negateNew(),
+            capsule.radius,
+        );
+
+        const capsuleVertices: Vec2[] = [];
+
+        for (let i = 0; i < topCapVertices.length; i++) {
+            capsuleVertices.push(topCapVertices[i]);
+        }
+
+        for (let i = 0; i < bottomCapVertices.length; i++) {
+            capsuleVertices.push(bottomCapVertices[i]);
+        }
+
+        const result = getSubmergedPolygon(capsuleVertices, waterSurfaceY);
 
         if (!result) {
             return null;
@@ -152,6 +210,26 @@ function getSubmergedCircle(center: Vec2, radius: number, waterSurfaceY: number)
         area: area,
         centroid,
     };
+}
+
+function buildHalfDiskVertices(center: Vec2, axisDirection: Vec2, radius: number, segments = 32): Vec2[] {
+    const axisDirectionLength = Math.sqrt(axisDirection.magnitudeSquared());
+
+    if (axisDirectionLength === 0) {
+        return [];
+    }
+
+    const normal = axisDirection.divNew(axisDirectionLength);
+    const vertices: Vec2[] = [];
+
+    // Approximate the capsule cap with a half-disk so it does not overlap the inner body rectangle.
+    for (let i = 0; i <= segments; i++) {
+        const angle = -Math.PI / 2 + (i / segments) * Math.PI;
+        const point = center.addNew(normal.rotate(angle).scaleNew(radius));
+        vertices.push(point);
+    }
+
+    return vertices;
 }
 
 function approximateBuoyancy(
