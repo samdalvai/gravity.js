@@ -701,6 +701,7 @@ export default class Application {
                     const yOffset = -(2 * Math.pow(a, 3)) / (3 * area);
                     const centroid = new Vec2(cx, cy + yOffset);
 
+                    Graphics.drawFillCircleClippedBelow(cx, cy, r, waterSurfaceY, 'rgba(255, 0, 0, 0.50)');
                     Graphics.drawFillCircle(centroid.x, centroid.y, 5, 'blue');
                 }
             }
