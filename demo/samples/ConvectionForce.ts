@@ -15,8 +15,15 @@ export const MIN_TEMPERATURE_DIFFERENCE = 1000;
 const STATIC_WALL_WIDTH = 50;
 const STATIC_WALL_HEIGHT = 500;
 
-function createStaticWall(world: World, app: Application, x: number, y: number, rotation: number): RigidBody {
-    const wall = BodiesFactory.box({ width: STATIC_WALL_WIDTH, height: STATIC_WALL_HEIGHT, x, y, mass: 0.0, rotation });
+function createStaticWall(
+    world: World,
+    app: Application,
+    x: number,
+    y: number,
+    rotation: number,
+    height = STATIC_WALL_HEIGHT,
+): RigidBody {
+    const wall = BodiesFactory.box({ width: STATIC_WALL_WIDTH, height, x, y, mass: 0.0, rotation });
     app.removeBodyTexture(wall);
     world.addBody(wall);
     return wall;
@@ -96,6 +103,20 @@ function setupConvectionForce(world: World, app: Application): void {
     //     mass: 0.0,
     // });
     // world.addBody(fenceRight);
+
+    const staticWallsOptions = [
+        { x: -225, y: -275, rotation: 0, height: STATIC_WALL_HEIGHT },
+        { x: -145, y: 110, rotation: -0.5, height: STATIC_WALL_HEIGHT / 1.5 },
+        { x: 60, y: 350, rotation: -0.95, height: STATIC_WALL_HEIGHT / 1.5 },
+        // { x: 0, y: 0, rotation: 0 },
+        // { x: 0, y: 0, rotation: 0 },
+        // { x: 0, y: 0, rotation: 0 },
+        // { x: 0, y: 0, rotation: 0 },
+    ];
+
+    for (const option of staticWallsOptions) {
+        createStaticWall(world, app, option.x, option.y, option.rotation, option.height);
+    }
 }
 
 const convectionDemo = defineDemo('Convection force', setupConvectionForce);
