@@ -840,6 +840,7 @@ export default class Application {
         const bodies = this.world.getBodies();
         const liquidAABB = this.liquid.aabb;
         const waterSurfaceY = liquidAABB.maxY;
+        const gravity = SETTINGS.applyGravity ? GRAVITY : 0;
 
         for (let i = 0; i < bodies.length; i++) {
             const body = bodies[i];
@@ -850,12 +851,17 @@ export default class Application {
             // If objects overlap on X axis but don't overlap on Y axis the cannot collide
             if (liquidAABB.maxY < body.minY || liquidAABB.minY > body.maxY) continue;
 
-            const buoyancy = Buoyancy.generateBuoyancyForce(body, waterSurfaceY, this.liquid.density, GRAVITY);
+            const buoyancy = Buoyancy.generateBuoyancyForce(body, waterSurfaceY, this.liquid.density, gravity);
 
             if (buoyancy) {
                 body.addForceAtPoint(buoyancy.force, buoyancy.applicationPoint);
 
-                const waterDrag = Buoyancy.generateLinearWaterDragForce(body, buoyancy.submergedArea, 0.05, SETTINGS.dt);
+                const waterDrag = Buoyancy.generateLinearWaterDragForce(
+                    body,
+                    buoyancy.submergedArea,
+                    0.05,
+                    SETTINGS.dt,
+                );
                 const waterAngularDrag = Buoyancy.generateAngularWaterDragTorque(body, buoyancy.submergedArea, 1);
                 body.addForce(waterDrag);
                 body.addTorque(waterAngularDrag);
