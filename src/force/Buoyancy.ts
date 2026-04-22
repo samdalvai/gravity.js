@@ -1,6 +1,8 @@
 // TODO: To be improved by computing submerged area and applyin the force at that centroid
 import { RigidBody } from '../core/RigidBody';
 import { Vec2 } from '../math/Vec2';
+import { PolygonShape } from '../shapes/PolygonShape';
+import { ShapeType } from '../shapes/Shape';
 
 type BuoyancyResult = {
     force: Vec2;
@@ -18,9 +20,62 @@ export function generateBuoyancyForce(
     liquidDensity: number,
     gravity: number,
 ): BuoyancyResult {
-    
+    if (body.shapeType === ShapeType.POLYGON || body.shapeType === ShapeType.BOX) {
+        const polygon = body.shape as PolygonShape;
+        const vertices = polygon.worldVertices;
 
+        // Compute clipped submerged area
+        const clipped: Vec2[] = [];
 
+        for (let i = 0; i < vertices.length; i++) {
+            const a = vertices[i];
+            const b = vertices[(i + 1) % vertices.length];
+
+            const aUnder = a.y <= waterSurfaceY;
+            const bUnder = b.y <= waterSurfaceY;
+
+            if (aUnder) {
+                clipped.push(a.copy());
+            }
+
+            if (aUnder !== bUnder) {
+                const t = (waterSurfaceY - a.y) / (b.y - a.y);
+                const x = a.x + (b.x - a.x) * t;
+                clipped.push(new Vec2(x, waterSurfaceY));
+            }
+        }
+
+        // Compute centroid of the new area
+        let doubleArea = 0;
+        let cx = 0;
+        let cy = 0;
+
+        for (let i = 0; i < clipped.length; i++) {
+            const current = clipped[i];
+            const next = clipped[(i + 1) % clipped.length];
+
+            const cross = current.cross(next);
+            doubleArea += cross;
+            cx += (current.x + next.x) * cross;
+            cy += (current.y + next.y) * cross;
+        }
+
+        if (doubleArea === 0) {
+            return null;
+        }
+
+        const factor = 1 / (3 * doubleArea);
+        const centroid = new Vec2(cx * factor, cy * factor);
+        const signedArea = doubleArea * 0.5;
+        const submergedArea = Math.abs(signedArea);
+        const buoyancyMagnitude = liquidDensity * submergedArea * gravity;
+        const force = new Vec2(0, buoyancyMagnitude);
+
+        return {
+            force,
+            applicationPoint: centroid,
+        };
+    }
 
     // Approximation if there is no algorithm to compute the real buoyancy
     return approximateBuoyancy(body, waterSurfaceY, liquidDensity, gravity);
