@@ -1,6 +1,7 @@
 import {
     BodiesFactory,
     Buoyancy,
+    CapsuleShape,
     CircleShape,
     DistanceJoint,
     FIXED_DELTA_TIME,
@@ -713,6 +714,39 @@ export default class Application {
 
                 if (body.shapeType === ShapeType.CIRCLE) {
                     circleBuoyancy(body);
+                }
+
+                if (body.shapeType === ShapeType.CAPSULE) {
+                    // Split into rectangle and two circles
+                    const capsule = body.shape as CapsuleShape;
+                    const circle1 = BodiesFactory.circle({
+                        radius: capsule.radius,
+                        x: capsule.worldCenter1.x,
+                        y: capsule.worldCenter1.y,
+                        density: body.density,
+                        rotation: body.rotation,
+                    });
+
+                    const circle2 = BodiesFactory.circle({
+                        radius: capsule.radius,
+                        x: capsule.worldCenter2.x,
+                        y: capsule.worldCenter2.y,
+                        density: body.density,
+                        rotation: body.rotation,
+                    });
+
+                    const capsuleBody = BodiesFactory.box({
+                        width: capsule.radius * 2,
+                        height: capsule.halfHeight * 2,
+                        x: body.position.x,
+                        y: body.position.y,
+                        density: body.density,
+                        rotation: body.rotation,
+                    });
+
+                    circleBuoyancy(circle1);
+                    circleBuoyancy(circle2);
+                    polygonBuoyancy(capsuleBody);
                 }
             }
         }
