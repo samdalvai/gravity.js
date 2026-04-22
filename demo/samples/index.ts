@@ -4,7 +4,7 @@ import thousandCirclesDemo from './1000Circles';
 import randomConvexShapesDemo from './1000RandomConvexShapes';
 import blackHoleOrbitDemo from './BlackHoleOrbit';
 import breakableJointsDemo from './BreakableJoints';
-import buoyancyDemo from './Buoyancy';
+import buoyancyDemo from './BuoyancyForce';
 import clothSimulationDemo from './ClothSimulation';
 import collisionFilteringDemo from './ColllisionFiltering';
 import complexSceneDemo from './ComplexScene';
