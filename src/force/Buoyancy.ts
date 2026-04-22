@@ -72,6 +72,7 @@ export function generateBuoyancyForce(
         const axis = capsule.worldCenter1.subNew(capsule.worldCenter2);
         const axisLength = Math.sqrt(axis.magnitudeSquared());
 
+        // Capsule is basically a circle
         if (axisLength === 0) {
             const result = getSubmergedCircle(body.position, capsule.radius, waterSurfaceY);
 
@@ -91,6 +92,8 @@ export function generateBuoyancyForce(
 
         const axisDirection = axis.divNew(axisLength);
 
+        // We approximate the whole capsule as a polygon, with caps made by segments, then we compute
+        // buoyancy and centroid for the approximated polygon
         const topCapVertices = buildHalfDiskVertices(capsule.worldCenter1, axisDirection, capsule.radius);
         const bottomCapVertices = buildHalfDiskVertices(
             capsule.worldCenter2,
