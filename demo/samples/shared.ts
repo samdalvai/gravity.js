@@ -5,6 +5,8 @@ export const FLOOR_WIDTH = 3200;
 export const FLOOR_HEIGHT = 50;
 export const FLOOR_POSITION_Y = -350;
 export const FENCE_WIDTH = 50;
+export const FENCE_HEIGHT = FLOOR_HEIGHT + 900;
+
 const STRESS_DEMO_COLUMNS = 25;
 const STRESS_DEMO_ROWS = 40;
 const SQUARE_CAGE_INNER_SIZE = 1000;
@@ -39,27 +41,39 @@ export function defineDemo(label: string, setup: DemoSetup): DemoRunner {
 }
 
 export function generateFloor(world: World, app: Application, width = FLOOR_WIDTH): RigidBody {
-    const floor = BodiesFactory.box({ width: width, height: FLOOR_HEIGHT, x: 0, y: FLOOR_POSITION_Y, mass: 0.0 });
+    const floor = BodiesFactory.box({ width, height: FLOOR_HEIGHT, x: 0, y: FLOOR_POSITION_Y, mass: 0.0 });
     app.setBodyTexture(floor, 'transparent');
     world.addBody(floor);
     return floor;
 }
 
+export function generateCeiling(world: World, app: Application, width = FLOOR_WIDTH): RigidBody {
+    const ceiling = BodiesFactory.box({
+        width,
+        height: FLOOR_HEIGHT,
+        x: 0,
+        y: FLOOR_POSITION_Y - FLOOR_HEIGHT / 2 + FENCE_HEIGHT - FLOOR_HEIGHT / 2,
+        mass: 0,
+    });
+    app.setBodyTexture(ceiling, 'transparent');
+    world.addBody(ceiling);
+    return ceiling;
+}
+
 export function generateFences(world: World, app: Application, floorWidth = FLOOR_WIDTH): [RigidBody, RigidBody] {
-    const fenceHeight = 900 + FLOOR_HEIGHT;
     const leftFence = BodiesFactory.box({
         width: FENCE_WIDTH,
-        height: fenceHeight,
+        height: FENCE_HEIGHT,
         x: -(floorWidth / 2 + FENCE_WIDTH / 2),
-        y: FLOOR_POSITION_Y + FLOOR_HEIGHT / 2 + fenceHeight / 2 - FLOOR_HEIGHT,
+        y: FLOOR_POSITION_Y + FLOOR_HEIGHT / 2 + FENCE_HEIGHT / 2 - FLOOR_HEIGHT,
         mass: 0.0,
     });
 
     const rightFence = BodiesFactory.box({
         width: FENCE_WIDTH,
-        height: fenceHeight,
+        height: FENCE_HEIGHT,
         x: floorWidth / 2 + FENCE_WIDTH / 2,
-        y: FLOOR_POSITION_Y + FLOOR_HEIGHT / 2 + fenceHeight / 2 - FLOOR_HEIGHT,
+        y: FLOOR_POSITION_Y + FLOOR_HEIGHT / 2 + FENCE_HEIGHT / 2 - FLOOR_HEIGHT,
         mass: 0.0,
     });
 

@@ -1,7 +1,7 @@
 import { BodiesFactory, RigidBody, SETTINGS, Utils, type World } from '../../src';
 import type Application from '../Application';
 import Graphics from '../graphics/Graphics';
-import { FENCE_WIDTH, FLOOR_HEIGHT, defineDemo, generateFences, generateFloor } from './shared';
+import { FENCE_WIDTH, FLOOR_HEIGHT, defineDemo, generateCeiling, generateFences, generateFloor } from './shared';
 
 export const AMBIENT_TEMPERATURE = 0;
 export const MIN_TEMPERATURE = 0;
@@ -9,7 +9,7 @@ export const MAX_TEMPERATURE = 5_000;
 export const PARTICLE_MASS = 0.015;
 export const HEATING_FACTOR = 0.65;
 export const DISSIPATION_FACTOR = 0.00005;
-export const CONVECTION_FORCE = 0.030;
+export const CONVECTION_FORCE = 0.03;
 export const MIN_TEMPERATURE_DIFFERENCE = 1000;
 
 function setupConvectionForce(world: World, app: Application): void {
@@ -20,26 +20,17 @@ function setupConvectionForce(world: World, app: Application): void {
 
     const floor = generateFloor(world, app, FLOOR_WIDTH);
     floor.temperature = MAX_TEMPERATURE;
-
     app.removeBodyTexture(floor);
     app.setBodyFillColor(floor, temperatureToColor(floor.temperature, MIN_TEMPERATURE, MAX_TEMPERATURE));
 
     const fences = generateFences(world, app, FLOOR_WIDTH);
-
     app.removeBodyTexture(fences[0]);
     app.removeBodyTexture(fences[1]);
     app.setBodyFillColor(fences[0], WALL_COLOR);
     app.setBodyFillColor(fences[1], WALL_COLOR);
 
-    const ceiling = BodiesFactory.box({
-        width: FLOOR_WIDTH + FENCE_WIDTH * 2,
-        height: FLOOR_HEIGHT,
-        x: 0,
-        y: fences[0].maxY + FLOOR_HEIGHT / 2,
-        mass: 0,
-        restitution: 0,
-    });
 
+    const ceiling = generateCeiling(world, app, FLOOR_WIDTH);
     app.removeBodyTexture(ceiling);
     app.setBodyFillColor(ceiling, WALL_COLOR);
     world.addBody(ceiling);
