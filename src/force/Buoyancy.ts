@@ -17,7 +17,21 @@ export function generateBuoyancyForce(
     waterSurfaceY: number,
     liquidDensity: number,
     gravity: number,
-): Vec2 {
+): BuoyancyResult {
+    
+
+
+
+    // Approximation if there is no algorithm to compute the real buoyancy
+    return approximateBuoyancy(body, waterSurfaceY, liquidDensity, gravity);
+}
+
+function approximateBuoyancy(
+    body: RigidBody,
+    waterSurfaceY: number,
+    liquidDensity: number,
+    gravity: number,
+): BuoyancyResult {
     const maxX = body.maxX;
     const minX = body.minX;
     const maxY = body.maxY;
@@ -27,21 +41,26 @@ export function generateBuoyancyForce(
     const height = maxY - minY;
 
     if (width <= 0 || height <= 0) {
-        return new Vec2(0, 0);
+        return null;
     }
 
     // Amount of the AABB below the water surface
     const submergedHeight = Math.max(0, Math.min(waterSurfaceY - minY, height));
 
     if (submergedHeight === 0) {
-        return new Vec2(0, 0);
+        return null;
     }
 
     const submergedFraction = submergedHeight / height;
     const submergedArea = body.shape.getArea() * submergedFraction;
     const buoyancyMagnitude = liquidDensity * submergedArea * gravity;
+    const force = new Vec2(0, buoyancyMagnitude);
+    const applicationPoint = body.position.copy();
 
-    return new Vec2(0, buoyancyMagnitude);
+    return {
+        force,
+        applicationPoint,
+    };
 }
 
 export function generateLinearWaterDragForce(
