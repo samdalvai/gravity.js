@@ -15,51 +15,76 @@ export const MIN_TEMPERATURE_DIFFERENCE = 1000;
 function setupConvectionForce(world: World, app: Application): void {
     Graphics.zoom = 0.5;
 
-    const FLOOR_WIDTH = 1500;
-    const WALL_COLOR = 'rgb(90, 45, 20)';
+    // const FLOOR_WIDTH = 1500;
+    // const WALL_COLOR = 'rgb(90, 45, 20)';
 
-    const floor = generateFloor(world, app, FLOOR_WIDTH);
-    floor.temperature = MAX_TEMPERATURE;
-    app.removeBodyTexture(floor);
-    app.setBodyFillColor(floor, temperatureToColor(floor.temperature, MIN_TEMPERATURE, MAX_TEMPERATURE));
+    // const floor = generateFloor(world, app, FLOOR_WIDTH);
+    // floor.temperature = MAX_TEMPERATURE;
+    // app.removeBodyTexture(floor);
+    // app.setBodyFillColor(floor, temperatureToColor(floor.temperature, MIN_TEMPERATURE, MAX_TEMPERATURE));
 
-    const fences = generateFences(world, app, FLOOR_WIDTH);
-    app.removeBodyTexture(fences[0]);
-    app.removeBodyTexture(fences[1]);
-    app.setBodyFillColor(fences[0], WALL_COLOR);
-    app.setBodyFillColor(fences[1], WALL_COLOR);
+    // const fences = generateFences(world, app, FLOOR_WIDTH);
+    // app.removeBodyTexture(fences[0]);
+    // app.removeBodyTexture(fences[1]);
+    // app.setBodyFillColor(fences[0], WALL_COLOR);
+    // app.setBodyFillColor(fences[1], WALL_COLOR);
 
+    // const ceiling = generateCeiling(world, app, FLOOR_WIDTH);
+    // app.removeBodyTexture(ceiling);
+    // app.setBodyFillColor(ceiling, WALL_COLOR);
+    // world.addBody(ceiling);
 
-    const ceiling = generateCeiling(world, app, FLOOR_WIDTH);
-    app.removeBodyTexture(ceiling);
-    app.setBodyFillColor(ceiling, WALL_COLOR);
-    world.addBody(ceiling);
+    // const numOfParticles = 2_500;
+    // const particleRadius = 5;
+    // const BASE_Y = floor.position.y + FLOOR_HEIGHT / 2 + particleRadius;
+    // const MAX_X = fences[0].position.x + FENCE_WIDTH / 2 + particleRadius;
 
-    const numOfParticles = 2_500;
-    const particleRadius = 5;
-    const BASE_Y = floor.position.y + FLOOR_HEIGHT / 2 + particleRadius;
-    const MAX_X = fences[0].position.x + FENCE_WIDTH / 2 + particleRadius;
+    // for (let i = 0; i < numOfParticles; i++) {
+    //     const particle = BodiesFactory.circle({
+    //         radius: particleRadius,
+    //         x: Utils.randomNumber(-MAX_X, MAX_X),
+    //         y: Utils.randomNumber(BASE_Y, 250),
+    //         mass: PARTICLE_MASS,
+    //         temperature: MIN_TEMPERATURE,
+    //     });
 
-    for (let i = 0; i < numOfParticles; i++) {
-        const particle = BodiesFactory.circle({
-            radius: particleRadius,
-            x: Utils.randomNumber(-MAX_X, MAX_X),
-            y: Utils.randomNumber(BASE_Y, 250),
-            mass: PARTICLE_MASS,
-            temperature: MIN_TEMPERATURE,
-        });
+    //     app.setBodyFillColor(particle, temperatureToColor(particle.temperature, MIN_TEMPERATURE, MAX_TEMPERATURE));
+    //     particle.onContact = info => {
+    //         const bodyA = info.bodyA;
+    //         const bodyB = info.bodyB;
+    //         exchangeHeat(bodyA, bodyB, SETTINGS.dt, HEATING_FACTOR);
+    //     };
 
-        app.setBodyFillColor(particle, temperatureToColor(particle.temperature, MIN_TEMPERATURE, MAX_TEMPERATURE));
-        particle.onContact = info => {
-            const bodyA = info.bodyA;
-            const bodyB = info.bodyB;
-            exchangeHeat(bodyA, bodyB, SETTINGS.dt, HEATING_FACTOR);
-        };
+    //     world.addBody(particle);
+    // }
 
-        world.addBody(particle);
-    }
+    // app.setConvectionForce(true);
+    const floorWidth = 500;
+    const floorHeight = 50;
 
-    app.setConvectionForce(true);
+    const fenceWidth = 50;
+    const fenceHeight = 500;
+
+    const floor = BodiesFactory.box({ width: floorWidth, height: floorHeight, x: 0, y: -500, mass: 0.0 });
+    world.addBody(floor);
+
+    const fenceLeft = BodiesFactory.box({
+        width: fenceWidth,
+        height: fenceHeight,
+        x: floor.position.x - floorWidth / 2 - fenceWidth / 2,
+        y: floor.position.y + fenceHeight / 2 - floorHeight / 2,
+        mass: 0.0,
+    });
+    world.addBody(fenceLeft);
+
+    // const fenceRight = BodiesFactory.box({
+    //     width: fenceWidth,
+    //     height: fenceHeight,
+    //     x: floor.position.x + floorWidth / 2 + fenceWidth / 2,
+    //     y: floor.position.y + fenceHeight / 2 - floorHeight / 2,
+    //     mass: 0.0,
+    // });
+    // world.addBody(fenceRight);
 }
 
 const convectionDemo = defineDemo('Convection force', setupConvectionForce);
