@@ -49,41 +49,20 @@ export function generateBuoyancyForce(
     if (body.shapeType === ShapeType.CIRCLE) {
         const circle = body.shape as CircleShape;
         const r = circle.radius;
-        const cx = body.position.x;
-        const cy = body.position.y;
 
-        const d = waterSurfaceY - cy;
+        const result = getSubmergedCircle(body.position, r, waterSurfaceY);
 
-        // Fully above
-        if (d <= -r) {
+        if (!result) {
             return null;
         }
 
-        let submergedArea: number;
-
-        // Fully submerged
-        if (d >= r) {
-            submergedArea = Math.PI * r * r;
-            const buoyancyMagnitude = liquidDensity * submergedArea * gravity;
-            const force = new Vec2(0, buoyancyMagnitude);
-
-            return {
-                force,
-                applicationPoint: body.position.copy(),
-            };
-        }
-
-        submergedArea = r * r * Math.acos(-d / r) + d * Math.sqrt(r * r - d * d);
-
-        const a = Math.sqrt(r * r - d * d);
-        const yOffset = -(2 * Math.pow(a, 3)) / submergedArea;
-        const centroid = new Vec2(cx, cy + yOffset);
+        const submergedArea = result.area;
         const buoyancyMagnitude = liquidDensity * submergedArea * gravity;
         const force = new Vec2(0, buoyancyMagnitude);
 
         return {
             force,
-            applicationPoint: centroid,
+            applicationPoint: result.centroid,
         };
     }
 
@@ -139,6 +118,38 @@ function getSubmergedPolygon(vertices: readonly Vec2[], waterSurfaceY: number): 
 
     return {
         area: Math.abs(doubleArea) * 0.5,
+        centroid,
+    };
+}
+
+function getSubmergedCircle(center: Vec2, radius: number, waterSurfaceY: number): SubmergedShape | null {
+    const cx = center.x;
+    const cy = center.y;
+
+    const d = waterSurfaceY - cy;
+
+    // Fully above
+    if (d <= -radius) {
+        return null;
+    }
+
+    // Fully submerged
+    if (d >= radius) {
+        const area = Math.PI * radius * radius;
+        return {
+            area: area,
+            centroid: center.copy(),
+        };
+    }
+
+    const area = radius * radius * Math.acos(-d / radius) + d * Math.sqrt(radius * radius - d * d);
+
+    const a = Math.sqrt(radius * radius - d * d);
+    const yOffset = -(2 * Math.pow(a, 3)) / (3 * area);
+    const centroid = new Vec2(cx, cy + yOffset);
+
+    return {
+        area: area,
         centroid,
     };
 }
