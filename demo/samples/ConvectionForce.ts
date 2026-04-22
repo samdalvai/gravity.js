@@ -1,7 +1,7 @@
 import { BodiesFactory, RigidBody, SETTINGS, Utils, type World } from '../../src';
 import type Application from '../Application';
 import Graphics from '../graphics/Graphics';
-import { FENCE_WIDTH, FLOOR_HEIGHT, defineDemo, generateCeiling, generateFences, generateFloor } from './shared';
+import { defineDemo } from './shared';
 
 export const AMBIENT_TEMPERATURE = 0;
 export const MIN_TEMPERATURE = 0;
@@ -32,94 +32,64 @@ function createStaticWall(
 function setupConvectionForce(world: World, app: Application): void {
     Graphics.zoom = 0.5;
 
-    // const FLOOR_WIDTH = 1500;
-    // const WALL_COLOR = 'rgb(90, 45, 20)';
-
-    // const floor = generateFloor(world, app, FLOOR_WIDTH);
-    // floor.temperature = MAX_TEMPERATURE;
-    // app.removeBodyTexture(floor);
-    // app.setBodyFillColor(floor, temperatureToColor(floor.temperature, MIN_TEMPERATURE, MAX_TEMPERATURE));
-
-    // const fences = generateFences(world, app, FLOOR_WIDTH);
-    // app.removeBodyTexture(fences[0]);
-    // app.removeBodyTexture(fences[1]);
-    // app.setBodyFillColor(fences[0], WALL_COLOR);
-    // app.setBodyFillColor(fences[1], WALL_COLOR);
-
-    // const ceiling = generateCeiling(world, app, FLOOR_WIDTH);
-    // app.removeBodyTexture(ceiling);
-    // app.setBodyFillColor(ceiling, WALL_COLOR);
-    // world.addBody(ceiling);
-
-    // const numOfParticles = 2_500;
-    // const particleRadius = 5;
-    // const BASE_Y = floor.position.y + FLOOR_HEIGHT / 2 + particleRadius;
-    // const MAX_X = fences[0].position.x + FENCE_WIDTH / 2 + particleRadius;
-
-    // for (let i = 0; i < numOfParticles; i++) {
-    //     const particle = BodiesFactory.circle({
-    //         radius: particleRadius,
-    //         x: Utils.randomNumber(-MAX_X, MAX_X),
-    //         y: Utils.randomNumber(BASE_Y, 250),
-    //         mass: PARTICLE_MASS,
-    //         temperature: MIN_TEMPERATURE,
-    //     });
-
-    //     app.setBodyFillColor(particle, temperatureToColor(particle.temperature, MIN_TEMPERATURE, MAX_TEMPERATURE));
-    //     particle.onContact = info => {
-    //         const bodyA = info.bodyA;
-    //         const bodyB = info.bodyB;
-    //         exchangeHeat(bodyA, bodyB, SETTINGS.dt, HEATING_FACTOR);
-    //     };
-
-    //     world.addBody(particle);
-    // }
-
-    // app.setConvectionForce(true);
     const floorWidth = 500;
     const floorHeight = 50;
 
-    const fenceWidth = 50;
-    const fenceHeight = 500;
-
-    const floor = BodiesFactory.box({ width: floorWidth, height: floorHeight, x: 0, y: -500, mass: 0.0 });
+    const floor = BodiesFactory.box({ width: floorWidth, height: floorHeight, x: 0, y: -800, mass: 0.0 });
+    floor.temperature = MAX_TEMPERATURE;
     app.removeBodyTexture(floor);
+    app.setBodyFillColor(floor, temperatureToColor(floor.temperature, MIN_TEMPERATURE, MAX_TEMPERATURE));
     world.addBody(floor);
 
-    // const fenceLeft = BodiesFactory.box({
-    //     width: fenceWidth,
-    //     height: fenceHeight,
-    //     x: floor.position.x - floorWidth / 2 - fenceWidth / 2,
-    //     y: floor.position.y + fenceHeight / 2 - floorHeight / 2,
-    //     mass: 0.0,
-    // });
-    // world.addBody(fenceLeft);
-
-    // const fenceRight = BodiesFactory.box({
-    //     width: fenceWidth,
-    //     height: fenceHeight,
-    //     x: floor.position.x + floorWidth / 2 + fenceWidth / 2,
-    //     y: floor.position.y + fenceHeight / 2 - floorHeight / 2,
-    //     mass: 0.0,
-    // });
-    // world.addBody(fenceRight);
-
     const staticWallsOptions = [
-        { x: -225, y: -275, rotation: 0, height: STATIC_WALL_HEIGHT },
+        { x: -225, y: -400, rotation: 0, height: STATIC_WALL_HEIGHT * 1.5 },
         { x: -145, y: 110, rotation: -0.5, height: STATIC_WALL_HEIGHT / 1.5 },
         { x: 60, y: 350, rotation: -0.95, height: STATIC_WALL_HEIGHT / 1.5 },
         { x: 350, y: 475, rotation: -1.4, height: STATIC_WALL_HEIGHT / 1.5 },
         { x: 675, y: 465, rotation: -1.8, height: STATIC_WALL_HEIGHT / 1.5 },
         { x: 930, y: 310, rotation: -2.5, height: STATIC_WALL_HEIGHT / 1.5 },
-        // { x: 0, y: 0, rotation: 0 },
-        // { x: 0, y: 0, rotation: 0 },
-        // { x: 0, y: 0, rotation: 0 },
-        // { x: 0, y: 0, rotation: 0 },
+        { x: 1035, y: 25, rotation: -0, height: STATIC_WALL_HEIGHT / 1.5 },
+        { x: 960, y: -275, rotation: -0.5, height: STATIC_WALL_HEIGHT / 1.5 },
+        { x: 770, y: -525, rotation: -0.8, height: STATIC_WALL_HEIGHT / 1.5 },
+        { x: 450, y: -720, rotation: -1.2, height: STATIC_WALL_HEIGHT / 1.1 },
+        { x: 275, y: -275, rotation: 0, height: STATIC_WALL_HEIGHT * 1.5 },
     ];
 
+    const WALL_COLOR = 'rgb(90, 45, 20)';
+
     for (const option of staticWallsOptions) {
-        createStaticWall(world, app, option.x, option.y, option.rotation, option.height);
+        const wall = createStaticWall(world, app, option.x, option.y, option.rotation, option.height);
+        app.setBodyFillColor(wall, WALL_COLOR);
     }
+
+    const numOfParticles = 2_500;
+    const particleRadius = 5;
+    const BASE_Y = floor.position.y + floorHeight / 2 + particleRadius;
+    const MIN_X = floor.position.x - floorWidth / 2 + particleRadius + STATIC_WALL_WIDTH;
+    const MAX_X = floor.position.x + floorWidth / 2 + particleRadius - STATIC_WALL_WIDTH;
+    console.log(MIN_X);
+    console.log(MAX_X);
+
+    for (let i = 0; i < numOfParticles; i++) {
+        const particle = BodiesFactory.circle({
+            radius: particleRadius,
+            x: Utils.randomNumber(MIN_X, MAX_X),
+            y: Utils.randomNumber(BASE_Y, BASE_Y + 800),
+            mass: PARTICLE_MASS,
+            temperature: MIN_TEMPERATURE,
+        });
+
+        app.setBodyFillColor(particle, temperatureToColor(particle.temperature, MIN_TEMPERATURE, MAX_TEMPERATURE));
+        particle.onContact = info => {
+            const bodyA = info.bodyA;
+            const bodyB = info.bodyB;
+            exchangeHeat(bodyA, bodyB, SETTINGS.dt, HEATING_FACTOR);
+        };
+
+        world.addBody(particle);
+    }
+
+    app.setConvectionForce(true);
 }
 
 const convectionDemo = defineDemo('Convection force', setupConvectionForce);
