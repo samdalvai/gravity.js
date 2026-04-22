@@ -2,7 +2,16 @@
 import { RigidBody } from '../core/RigidBody';
 import { Vec2 } from '../math/Vec2';
 
-// instead of the body default centroid
+type BuoyancyResult = {
+    force: Vec2;
+    applicationPoint: Vec2;
+} | null;
+
+// instead of the body default centroid compute submerged real area and return real centroid
+/**
+ * Computes buoyancy force based on submerged area.
+ * The force should be applied by using {@link RigidBody.addForceAtPoint}.
+ */
 export function generateBuoyancyForce(
     body: RigidBody,
     waterSurfaceY: number,
