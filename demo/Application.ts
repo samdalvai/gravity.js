@@ -718,8 +718,7 @@ export default class Application {
                     return;
                 }
 
-                const area =
-                    radius * radius * Math.acos(-d / radius) + d * Math.sqrt(radius * radius - d * d);
+                const area = radius * radius * Math.acos(-d / radius) + d * Math.sqrt(radius * radius - d * d);
 
                 const a = Math.sqrt(radius * radius - d * d);
                 const yOffset = -(2 * Math.pow(a, 3)) / (3 * area);
@@ -790,16 +789,36 @@ export default class Application {
 
                     const axisDirection = axis.divNew(axisLength);
                     const halfWidthOffset = axisDirection.leftPerpNew().scaleNew(capsule.radius);
+
+                    const topCapVertices = buildHalfDiskVertices(capsule.worldCenter1, axisDirection, capsule.radius);
                     const capsuleBodyVertices = [
                         capsule.worldCenter1.addNew(halfWidthOffset),
                         capsule.worldCenter1.subNew(halfWidthOffset),
                         capsule.worldCenter2.subNew(halfWidthOffset),
                         capsule.worldCenter2.addNew(halfWidthOffset),
                     ];
+                    const bottomCapVertices = buildHalfDiskVertices(
+                        capsule.worldCenter2,
+                        axisDirection.negateNew(),
+                        capsule.radius,
+                    );
 
-                    circleCapBuoyancy(capsule.worldCenter1, axisDirection, capsule.radius);
-                    circleCapBuoyancy(capsule.worldCenter2, axisDirection.negateNew(), capsule.radius);
-                    polygonVerticesBuoyancy(capsuleBodyVertices);
+                    const capsuleVertices: Vec2[] = [];
+
+                    for (let i = 0; i < topCapVertices.length; i++) {
+                        capsuleVertices.push(topCapVertices[i]);
+                    }
+
+                    for (let i = 0; i < bottomCapVertices.length; i++) {
+                        capsuleVertices.push(bottomCapVertices[i]);
+                    }
+
+                    // Graphics.drawFillPolygon(0, 0, capsuleVertices, 'green');
+                    polygonVerticesBuoyancy(capsuleVertices);
+
+                    // circleCapBuoyancy(capsule.worldCenter1, axisDirection, capsule.radius);
+                    // circleCapBuoyancy(capsule.worldCenter2, axisDirection.negateNew(), capsule.radius);
+                    // polygonVerticesBuoyancy(capsuleBodyVertices);
                 }
             }
         }
