@@ -22,22 +22,22 @@ function setupBuoyancyForce(world: World, app: Application): void {
             maxX: LIQUID_MAX_X,
             maxY: LIQUID_MAX_Y,
         },
-        density: 0.05,
+        density: 0.1,
     });
 
     const numberOfObjects = 100;
 
-    // for (let i = 0; i < numberOfObjects; i++) {
-    //     const x = Utils.randomNumber(LIQUID_MIN_X, LIQUID_MAX_X);
-    //     const y = Utils.randomNumber(LIQUID_MAX_Y, LIQUID_MAX_Y + 200);
-    //     const radius = Utils.randomNumber(5, 50);
-    //     const numVertices = Utils.randomNumber(3, 10);
-    //     const mass = Utils.randomNumber(0.01, 5);
+    for (let i = 0; i < numberOfObjects; i++) {
+        const x = Utils.randomNumber(LIQUID_MIN_X, LIQUID_MAX_X);
+        const y = Utils.randomNumber(LIQUID_MAX_Y, LIQUID_MAX_Y + 200);
+        const radius = Utils.randomNumber(5, 50);
+        const numVertices = Utils.randomNumber(3, 10);
+        const mass = Utils.randomNumber(0.01, 5);
 
-    //     const object = Utils.randomConvexBody(x, y, radius, numVertices, mass);
+        const object = Utils.randomConvexBody(x, y, radius, numVertices, mass);
 
-    //     world.addBody(object);
-    // }
+        world.addBody(object);
+    }
 }
 
 const buoyancyDemo = defineDemo('Buoyancy demo', setupBuoyancyForce);
