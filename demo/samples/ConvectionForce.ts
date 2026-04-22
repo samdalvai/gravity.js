@@ -22,9 +22,14 @@ function createStaticWall(
     y: number,
     rotation: number,
     height = STATIC_WALL_HEIGHT,
+    temperature = 0,
 ): RigidBody {
-    const wall = BodiesFactory.box({ width: STATIC_WALL_WIDTH, height, x, y, mass: 0.0, rotation });
-    app.removeBodyTexture(wall);
+    const wall = BodiesFactory.box({ width: STATIC_WALL_WIDTH, height, x, y, mass: 0.0, rotation, temperature });
+    app.setBodyTexture(wall, 'transparent');
+
+    if (temperature > 0) {
+        app.removeBodyTexture(wall);
+    }
     world.addBody(wall);
     return wall;
 }
@@ -42,7 +47,8 @@ function setupConvectionForce(world: World, app: Application): void {
     world.addBody(floor);
 
     const staticWallsOptions = [
-        { x: -225, y: -500, rotation: 0, height: STATIC_WALL_HEIGHT * 1.9 },
+        { x: -225, y: -390, rotation: 0, height: STATIC_WALL_HEIGHT * 1.55 },
+        { x: -225, y: -900, rotation: 0, height: STATIC_WALL_HEIGHT * 0.5, temperature: MAX_TEMPERATURE },
         { x: -145, y: 110, rotation: -0.5, height: STATIC_WALL_HEIGHT / 1.5 },
         { x: 60, y: 350, rotation: -0.95, height: STATIC_WALL_HEIGHT / 1.5 },
         { x: 350, y: 475, rotation: -1.4, height: STATIC_WALL_HEIGHT / 1.5 },
@@ -53,13 +59,21 @@ function setupConvectionForce(world: World, app: Application): void {
         { x: 770, y: -525, rotation: -0.8, height: STATIC_WALL_HEIGHT / 1.5 },
         { x: 450, y: -720, rotation: -1.2, height: STATIC_WALL_HEIGHT / 1.1 },
         { x: 250, y: -250, rotation: 0, height: STATIC_WALL_HEIGHT * 1.5 },
-        { x: 250, y: -875, rotation: 0, height: STATIC_WALL_HEIGHT * 0.4 },
+        { x: 250, y: -900, rotation: 0, height: STATIC_WALL_HEIGHT * 0.5, temperature: MAX_TEMPERATURE },
     ];
 
     const WALL_COLOR = 'rgb(90, 45, 20)';
 
     for (const option of staticWallsOptions) {
-        const wall = createStaticWall(world, app, option.x, option.y, option.rotation, option.height);
+        const wall = createStaticWall(
+            world,
+            app,
+            option.x,
+            option.y,
+            option.rotation,
+            option.height,
+            option.temperature,
+        );
         app.setBodyFillColor(wall, WALL_COLOR);
     }
 
