@@ -7,6 +7,7 @@ import { PolygonShape } from '../shapes/PolygonShape';
 import { ShapeType } from '../shapes/Shape';
 
 type BuoyancyResult = {
+    submergedArea: number;
     force: Vec2;
     applicationPoint: Vec2;
 } | null;
@@ -42,6 +43,7 @@ export function generateBuoyancyForce(
         const force = new Vec2(0, buoyancyMagnitude);
 
         return {
+            submergedArea,
             force,
             applicationPoint: result.centroid,
         };
@@ -62,6 +64,7 @@ export function generateBuoyancyForce(
         const force = new Vec2(0, buoyancyMagnitude);
 
         return {
+            submergedArea,
             force,
             applicationPoint: result.centroid,
         };
@@ -85,6 +88,7 @@ export function generateBuoyancyForce(
             const force = new Vec2(0, buoyancyMagnitude);
 
             return {
+                submergedArea,
                 force,
                 applicationPoint: result.centroid,
             };
@@ -122,6 +126,7 @@ export function generateBuoyancyForce(
         const force = new Vec2(0, buoyancyMagnitude);
 
         return {
+            submergedArea,
             force,
             applicationPoint: result.centroid,
         };
@@ -267,35 +272,25 @@ function approximateBuoyancy(
     const applicationPoint = body.position.copy();
 
     return {
+        submergedArea,
         force,
         applicationPoint,
     };
 }
 
-// TODO: do we need real submerged area also here?
 export function generateLinearWaterDragForce(
     body: RigidBody,
-    waterSurfaceY: number,
+    submergedArea: number,
     dragCoefficient: number,
     dt: number,
 ): Vec2 {
-    const maxY = body.maxY;
-    const minY = body.minY;
+    const totalArea = body.shape.getArea();
 
-    const height = maxY - minY;
-
-    if (height <= 0) {
+    if (totalArea <= 0 || submergedArea <= 0) {
         return new Vec2(0, 0);
     }
 
-    // Same submerged logic as buoyancy
-    const submergedHeight = Math.max(0, Math.min(waterSurfaceY - minY, height));
-
-    if (submergedHeight === 0) {
-        return new Vec2(0, 0);
-    }
-
-    const submergedFraction = submergedHeight / height;
+    const submergedFraction = submergedArea / totalArea;
 
     const v = body.velocity;
     const speedSq = v.magnitudeSquared();
@@ -306,43 +301,28 @@ export function generateLinearWaterDragForce(
 
     const speed = Math.sqrt(speedSq);
 
-    // Quadratic drag
     let dragMagnitude = dragCoefficient * speedSq * submergedFraction;
 
     if (dt > 0) {
-        // Do not let water drag reverse the velocity in a single step.
         const maxForce = (body.mass * speed) / dt;
         dragMagnitude = Math.min(dragMagnitude, maxForce);
     }
 
-    // Opposite to velocity
     return v.scaleNew(-dragMagnitude / speed);
 }
 
-// TODO: do we need real submerged area also here?
 export function generateAngularWaterDragTorque(
     body: RigidBody,
-    waterSurfaceY: number,
+    submergedArea: number,
     angularDragCoefficient: number,
 ): number {
-    const maxY = body.maxY;
-    const minY = body.minY;
+    const totalArea = body.shape.getArea();
 
-    const height = maxY - minY;
-
-    if (height <= 0) {
+    if (totalArea <= 0 || submergedArea <= 0) {
         return 0;
     }
 
-    const submergedHeight = Math.max(0, Math.min(waterSurfaceY - minY, height));
+    const submergedFraction = submergedArea / totalArea;
 
-    if (submergedHeight === 0) {
-        return 0;
-    }
-
-    const submergedFraction = submergedHeight / height;
-
-    // Scale by moment of inertia so the coefficient behaves like an angular damping rate.
-    // Otherwise large bodies barely slow down because angular acceleration is torque / I.
     return -body.angularVelocity * angularDragCoefficient * submergedFraction * body.I;
 }
