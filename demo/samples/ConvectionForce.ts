@@ -30,19 +30,19 @@ function createStaticWall(
 }
 
 function setupConvectionForce(world: World, app: Application): void {
-    Graphics.zoom = 0.5;
+    Graphics.zoom = 0.4;
 
-    const floorWidth = 500;
+    const floorWidth = 525;
     const floorHeight = 50;
 
-    const floor = BodiesFactory.box({ width: floorWidth, height: floorHeight, x: 0, y: -800, mass: 0.0 });
+    const floor = BodiesFactory.box({ width: floorWidth, height: floorHeight, x: 12.5, y: -1000, mass: 0.0 });
     floor.temperature = MAX_TEMPERATURE;
     app.removeBodyTexture(floor);
     app.setBodyFillColor(floor, temperatureToColor(floor.temperature, MIN_TEMPERATURE, MAX_TEMPERATURE));
     world.addBody(floor);
 
     const staticWallsOptions = [
-        { x: -225, y: -400, rotation: 0, height: STATIC_WALL_HEIGHT * 1.5 },
+        { x: -225, y: -500, rotation: 0, height: STATIC_WALL_HEIGHT * 1.9 },
         { x: -145, y: 110, rotation: -0.5, height: STATIC_WALL_HEIGHT / 1.5 },
         { x: 60, y: 350, rotation: -0.95, height: STATIC_WALL_HEIGHT / 1.5 },
         { x: 350, y: 475, rotation: -1.4, height: STATIC_WALL_HEIGHT / 1.5 },
@@ -52,7 +52,8 @@ function setupConvectionForce(world: World, app: Application): void {
         { x: 960, y: -275, rotation: -0.5, height: STATIC_WALL_HEIGHT / 1.5 },
         { x: 770, y: -525, rotation: -0.8, height: STATIC_WALL_HEIGHT / 1.5 },
         { x: 450, y: -720, rotation: -1.2, height: STATIC_WALL_HEIGHT / 1.1 },
-        { x: 275, y: -250, rotation: 0, height: STATIC_WALL_HEIGHT * 1.5 },
+        { x: 250, y: -250, rotation: 0, height: STATIC_WALL_HEIGHT * 1.5 },
+        { x: 250, y: -875, rotation: 0, height: STATIC_WALL_HEIGHT * 0.4 },
     ];
 
     const WALL_COLOR = 'rgb(90, 45, 20)';
