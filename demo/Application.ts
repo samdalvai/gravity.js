@@ -855,8 +855,8 @@ export default class Application {
             if (buoyancy) {
                 body.addForceAtPoint(buoyancy.force, buoyancy.applicationPoint);
 
-                const waterDrag = Buoyancy.generateLinearWaterDragForce(body, waterSurfaceY, 0.2, SETTINGS.dt);
-                const waterAngularDrag = Buoyancy.generateAngularWaterDragTorque(body, waterSurfaceY, 0.75);
+                const waterDrag = Buoyancy.generateLinearWaterDragForce(body, buoyancy.submergedArea, 0.05, SETTINGS.dt);
+                const waterAngularDrag = Buoyancy.generateAngularWaterDragTorque(body, buoyancy.submergedArea, 1);
                 body.addForce(waterDrag);
                 body.addTorque(waterAngularDrag);
             }
