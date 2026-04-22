@@ -1,6 +1,7 @@
 // TODO: To be improved by computing submerged area and applyin the force at that centroid
 import { RigidBody } from '../core/RigidBody';
 import { Vec2 } from '../math/Vec2';
+import { CircleShape } from '../shapes/CircleShape';
 import { PolygonShape } from '../shapes/PolygonShape';
 import { ShapeType } from '../shapes/Shape';
 
@@ -68,6 +69,47 @@ export function generateBuoyancyForce(
         const centroid = new Vec2(cx * factor, cy * factor);
         const signedArea = doubleArea * 0.5;
         const submergedArea = Math.abs(signedArea);
+        const buoyancyMagnitude = liquidDensity * submergedArea * gravity;
+        const force = new Vec2(0, buoyancyMagnitude);
+
+        return {
+            force,
+            applicationPoint: centroid,
+        };
+    }
+
+    if (body.shapeType === ShapeType.CIRCLE) {
+        const circle = body.shape as CircleShape;
+        const r = circle.radius;
+        const cx = body.position.x;
+        const cy = body.position.y;
+
+        const d = waterSurfaceY - cy;
+
+        // Fully above
+        if (d <= -r) {
+            return null;
+        }
+
+        let submergedArea: number;
+
+        // Fully submerged
+        if (d >= r) {
+            submergedArea = Math.PI * r * r;
+            const buoyancyMagnitude = liquidDensity * submergedArea * gravity;
+            const force = new Vec2(0, buoyancyMagnitude);
+
+            return {
+                force,
+                applicationPoint: body.position.copy(),
+            };
+        }
+
+        submergedArea = r * r * Math.acos(-d / r) + d * Math.sqrt(r * r - d * d);
+
+        const a = Math.sqrt(r * r - d * d);
+        const yOffset = -(2 * Math.pow(a, 3)) / submergedArea;
+        const centroid = new Vec2(cx, cy + yOffset);
         const buoyancyMagnitude = liquidDensity * submergedArea * gravity;
         const force = new Vec2(0, buoyancyMagnitude);
 
