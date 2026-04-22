@@ -1,4 +1,3 @@
-// TODO: To be improved by computing submerged area and applyin the force at that centroid
 import { RigidBody } from '../core/RigidBody';
 import { Vec2 } from '../math/Vec2';
 import { CapsuleShape } from '../shapes/CapsuleShape';
@@ -17,7 +16,6 @@ type SubmergedShape = {
     centroid: Vec2;
 } | null;
 
-// instead of the body default centroid compute submerged real area and return real centroid
 /**
  * Computes buoyancy force based on submerged area.
  * The force should be applied by using {@link RigidBody.addForceAtPoint}.
