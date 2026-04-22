@@ -234,6 +234,13 @@ export class RigidBody {
         this._sumTorque += torque;
     }
 
+    addForceAtPoint(force: Vec2, worldPoint: Vec2): void {
+        this.addForce(force);
+
+        const r = worldPoint.subNew(this.position);
+        this.addTorque(r.cross(force));
+    }
+
     clearForces(): void {
         this._sumForces.x = 0.0;
         this._sumForces.y = 0.0;
