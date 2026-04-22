@@ -7,8 +7,10 @@ import {
     GrabJoint,
     MAX_BODIES,
     PIXELS_PER_METER,
+    PolygonShape,
     RigidBody,
     SETTINGS,
+    ShapeType,
     Vec2,
     WeldJoint,
     World,
@@ -223,7 +225,10 @@ export default class Application {
                         const firstNonStatic = this.world.getBodies().find(body => !body.isStatic());
 
                         if (firstNonStatic) {
-                            firstNonStatic.addForceAtPoint(new Vec2(0, 10000), new Vec2(firstNonStatic.position.x - 25, 0));
+                            firstNonStatic.addForceAtPoint(
+                                new Vec2(0, 10000),
+                                new Vec2(firstNonStatic.position.x - 25, 0),
+                            );
                         }
                     }
 
@@ -611,6 +616,62 @@ export default class Application {
             const width = liquidAABB.maxX - liquidAABB.minX;
             const height = liquidAABB.maxY - liquidAABB.minY;
             Graphics.drawFillRect(liquidAABB.minX, liquidAABB.minY, width, height, 'rgba(149, 224, 255, 0.5)');
+
+            const waterSurfaceY = liquidAABB.maxY;
+            // TODO: debug submerged area
+            for (const body of this.world.getBodies()) {
+                if (body.shapeType === ShapeType.POLYGON) {
+                    const polygon = body.shape as PolygonShape;
+                    const vertices = polygon.worldVertices;
+
+                    // Compute clipped submerged area
+                    const clipped: Vec2[] = [];
+
+                    for (let i = 0; i < vertices.length; i++) {
+                        const a = vertices[i];
+                        const b = vertices[(i + 1) % vertices.length];
+
+                        const aUnder = a.y <= waterSurfaceY;
+                        const bUnder = b.y <= waterSurfaceY;
+
+                        if (aUnder) {
+                            clipped.push(a.copy());
+                        }
+
+                        if (aUnder !== bUnder) {
+                            const t = (waterSurfaceY - a.y) / (b.y - a.y);
+                            const x = a.x + (b.x - a.x) * t;
+                            clipped.push(new Vec2(x, waterSurfaceY));
+                        }
+                    }
+
+                    Graphics.drawFillPolygon(body.position.x, body.position.y, clipped, 'rgba(255, 0, 0, 0.50)');
+
+                    // Compute centroid of the new area
+                    let doubleArea = 0;
+                    let cx = 0;
+                    let cy = 0;
+
+                    for (let i = 0; i < clipped.length; i++) {
+                        const current = clipped[i];
+                        const next = clipped[(i + 1) % clipped.length];
+
+                        const cross = current.cross(next);
+                        doubleArea += cross;
+                        cx += (current.x + next.x) * cross;
+                        cy += (current.y + next.y) * cross;
+                    }
+
+                    if (doubleArea === 0) {
+                        continue;
+                    }
+
+                    const factor = 1 / (3 * doubleArea);
+                    const centroid = new Vec2(cx * factor, cy * factor);
+
+                    Graphics.drawFillCircle(centroid.x, centroid.y, 5, 'blue');
+                }
+            }
         }
 
         // Draw all joints anchor points and debug properties
