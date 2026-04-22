@@ -1,5 +1,6 @@
 import {
     BodiesFactory,
+    CircleShape,
     DistanceJoint,
     FIXED_DELTA_TIME,
     Force,
@@ -668,6 +669,37 @@ export default class Application {
 
                     const factor = 1 / (3 * doubleArea);
                     const centroid = new Vec2(cx * factor, cy * factor);
+
+                    Graphics.drawFillCircle(centroid.x, centroid.y, 5, 'blue');
+                }
+
+                if (body.shapeType === ShapeType.CIRCLE) {
+                    const circle = body.shape as CircleShape;
+                    const r = circle.radius;
+                    const cx = body.position.x;
+                    const cy = body.position.y;
+
+                    const d = waterSurfaceY - cy;
+
+                    // Fully above
+                    if (d <= -r) {
+                        continue;
+                    }
+
+                    let area: number;
+
+                    // Fully submerged
+                    if (d >= r) {
+                        area = Math.PI * r * r;
+                        Graphics.drawFillCircle(cx, cy, 5, 'blue');
+                        continue;
+                    }
+
+                    area = r * r * Math.acos(-d / r) + d * Math.sqrt(r * r - d * d);
+
+                    const a = Math.sqrt(r * r - d * d);
+                    const yOffset = -(2 * Math.pow(a, 3)) / (3 * area);
+                    const centroid = new Vec2(cx, cy + yOffset);
 
                     Graphics.drawFillCircle(centroid.x, centroid.y, 5, 'blue');
                 }
