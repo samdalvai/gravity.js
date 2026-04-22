@@ -12,6 +12,16 @@ export const DISSIPATION_FACTOR = 0.00005;
 export const CONVECTION_FORCE = 0.03;
 export const MIN_TEMPERATURE_DIFFERENCE = 1000;
 
+const STATIC_WALL_WIDTH = 50;
+const STATIC_WALL_HEIGHT = 500;
+
+function createStaticWall(world: World, app: Application, x: number, y: number, rotation: number): RigidBody {
+    const wall = BodiesFactory.box({ width: STATIC_WALL_WIDTH, height: STATIC_WALL_HEIGHT, x, y, mass: 0.0, rotation });
+    app.removeBodyTexture(wall);
+    world.addBody(wall);
+    return wall;
+}
+
 function setupConvectionForce(world: World, app: Application): void {
     Graphics.zoom = 0.5;
 
@@ -66,16 +76,17 @@ function setupConvectionForce(world: World, app: Application): void {
     const fenceHeight = 500;
 
     const floor = BodiesFactory.box({ width: floorWidth, height: floorHeight, x: 0, y: -500, mass: 0.0 });
+    app.removeBodyTexture(floor);
     world.addBody(floor);
 
-    const fenceLeft = BodiesFactory.box({
-        width: fenceWidth,
-        height: fenceHeight,
-        x: floor.position.x - floorWidth / 2 - fenceWidth / 2,
-        y: floor.position.y + fenceHeight / 2 - floorHeight / 2,
-        mass: 0.0,
-    });
-    world.addBody(fenceLeft);
+    // const fenceLeft = BodiesFactory.box({
+    //     width: fenceWidth,
+    //     height: fenceHeight,
+    //     x: floor.position.x - floorWidth / 2 - fenceWidth / 2,
+    //     y: floor.position.y + fenceHeight / 2 - floorHeight / 2,
+    //     mass: 0.0,
+    // });
+    // world.addBody(fenceLeft);
 
     // const fenceRight = BodiesFactory.box({
     //     width: fenceWidth,
