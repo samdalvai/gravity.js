@@ -1,14 +1,20 @@
 import { Utils, type World } from '../../src';
 import type Application from '../Application';
+import { TEXTURES } from '../graphics/AssetStore';
 import Graphics from '../graphics/Graphics';
 import { FLOOR_HEIGHT, FLOOR_WIDTH, defineDemo, generateFences, generateFloor } from './shared';
 
 function setupBuoyancyForce(world: World, app: Application): void {
-    app.setBackground('darkBackground');
+    app.setBackground('transparent');
     Graphics.zoom = 0.75;
 
     const floor = generateFloor(world, app);
-    generateFences(world, app);
+    const fences = generateFences(world, app);
+
+    const texture: keyof typeof TEXTURES = 'metal';
+    app.setBodyTexture(floor, texture);
+    app.setBodyTexture(fences[0], texture);
+    app.setBodyTexture(fences[1], texture);
 
     const LIQUID_MIN_X = floor.position.x - FLOOR_WIDTH / 2;
     const LIQUID_MIN_Y = floor.position.y + FLOOR_HEIGHT / 2;
