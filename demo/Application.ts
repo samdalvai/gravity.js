@@ -621,12 +621,13 @@ export default class Application {
             Graphics.drawFillRect(liquidAABB.minX, liquidAABB.minY, width, height, 'rgba(149, 224, 255, 0.5)');
 
             const waterSurfaceY = liquidAABB.maxY;
+            type SubmergedPolygon = {
+                area: number;
+                centroid: Vec2;
+                vertices: Vec2[];
+            };
 
-            const polygonBuoyancy = (body: RigidBody) => {
-                const polygon = body.shape as PolygonShape;
-                const vertices = polygon.worldVertices;
-
-                // Compute clipped submerged area
+            const getSubmergedPolygon = (vertices: readonly Vec2[]): SubmergedPolygon | null => {
                 const clipped: Vec2[] = [];
 
                 for (let i = 0; i < vertices.length; i++) {
@@ -647,9 +648,10 @@ export default class Application {
                     }
                 }
 
-                Graphics.drawFillPolygon(body.position.x, body.position.y, clipped, 'rgba(255, 0, 0, 0.50)');
+                if (clipped.length < 3) {
+                    return null;
+                }
 
-                // Compute centroid of the new area
                 let doubleArea = 0;
                 let cx = 0;
                 let cy = 0;
@@ -665,46 +667,106 @@ export default class Application {
                 }
 
                 if (doubleArea === 0) {
-                    return;
+                    return null;
                 }
 
                 const factor = 1 / (3 * doubleArea);
                 const centroid = new Vec2(cx * factor, cy * factor);
 
+                return {
+                    area: Math.abs(doubleArea) * 0.5,
+                    centroid,
+                    vertices: clipped,
+                };
+            };
+
+            const drawSubmergedPolygon = (submergedPolygon: SubmergedPolygon) => {
+                Graphics.drawFillPolygon(0, 0, submergedPolygon.vertices, 'rgba(255, 0, 0, 0.50)');
+                Graphics.drawFillCircle(submergedPolygon.centroid.x, submergedPolygon.centroid.y, 5, 'blue');
+            };
+
+            const polygonVerticesBuoyancy = (vertices: readonly Vec2[]) => {
+                const submergedPolygon = getSubmergedPolygon(vertices);
+
+                if (!submergedPolygon) {
+                    return;
+                }
+
+                drawSubmergedPolygon(submergedPolygon);
+            };
+
+            const polygonBuoyancy = (body: RigidBody) => {
+                const polygon = body.shape as PolygonShape;
+                polygonVerticesBuoyancy(polygon.worldVertices);
+            };
+
+            const circleBuoyancyAt = (center: Vec2, radius: number) => {
+                const cx = center.x;
+                const cy = center.y;
+
+                const d = waterSurfaceY - cy;
+
+                // Fully above
+                if (d <= -radius) {
+                    return;
+                }
+
+                // Fully submerged
+                if (d >= radius) {
+                    Graphics.drawFillCircle(cx, cy, radius, 'rgba(255, 0, 0, 0.50)');
+                    Graphics.drawFillCircle(cx, cy, 5, 'blue');
+                    return;
+                }
+
+                const area =
+                    radius * radius * Math.acos(-d / radius) + d * Math.sqrt(radius * radius - d * d);
+
+                const a = Math.sqrt(radius * radius - d * d);
+                const yOffset = -(2 * Math.pow(a, 3)) / (3 * area);
+                const centroid = new Vec2(cx, cy + yOffset);
+
+                Graphics.drawFillCircleClippedBelow(cx, cy, radius, waterSurfaceY, 'rgba(255, 0, 0, 0.50)');
                 Graphics.drawFillCircle(centroid.x, centroid.y, 5, 'blue');
             };
 
             const circleBuoyancy = (body: RigidBody) => {
                 const circle = body.shape as CircleShape;
-                const r = circle.radius;
-                const cx = body.position.x;
-                const cy = body.position.y;
+                circleBuoyancyAt(body.position, circle.radius);
+            };
 
-                const d = waterSurfaceY - cy;
+            const buildHalfDiskVertices = (
+                center: Vec2,
+                axisDirection: Vec2,
+                radius: number,
+                segments = 32,
+            ): Vec2[] => {
+                const axisDirectionLength = Math.sqrt(axisDirection.magnitudeSquared());
 
-                // Fully above
-                if (d <= -r) {
+                if (axisDirectionLength === 0) {
+                    return [];
+                }
+
+                const normal = axisDirection.divNew(axisDirectionLength);
+                const vertices: Vec2[] = [];
+
+                // Approximate the capsule cap with a half-disk so it does not overlap the inner body rectangle.
+                for (let i = 0; i <= segments; i++) {
+                    const angle = -Math.PI / 2 + (i / segments) * Math.PI;
+                    const point = center.addNew(normal.rotate(angle).scaleNew(radius));
+                    vertices.push(point);
+                }
+
+                return vertices;
+            };
+
+            const circleCapBuoyancy = (center: Vec2, axisDirection: Vec2, radius: number) => {
+                const capVertices = buildHalfDiskVertices(center, axisDirection, radius);
+
+                if (capVertices.length === 0) {
                     return;
                 }
 
-                let area: number;
-
-                // Fully submerged
-                if (d >= r) {
-                    area = Math.PI * r * r;
-                    Graphics.drawFillCircle(cx, cy, r, 'rgba(255, 0, 0, 0.50)');
-                    Graphics.drawFillCircle(cx, cy, 5, 'blue');
-                    return;
-                }
-
-                area = r * r * Math.acos(-d / r) + d * Math.sqrt(r * r - d * d);
-
-                const a = Math.sqrt(r * r - d * d);
-                const yOffset = -(2 * Math.pow(a, 3)) / (3 * area);
-                const centroid = new Vec2(cx, cy + yOffset);
-
-                Graphics.drawFillCircleClippedBelow(cx, cy, r, waterSurfaceY, 'rgba(255, 0, 0, 0.50)');
-                Graphics.drawFillCircle(centroid.x, centroid.y, 5, 'blue');
+                polygonVerticesBuoyancy(capVertices);
             };
             // TODO: debug submerged area
             for (const body of this.world.getBodies()) {
@@ -717,36 +779,27 @@ export default class Application {
                 }
 
                 if (body.shapeType === ShapeType.CAPSULE) {
-                    // Split into rectangle and two circles
                     const capsule = body.shape as CapsuleShape;
-                    const circle1 = BodiesFactory.circle({
-                        radius: capsule.radius,
-                        x: capsule.worldCenter1.x,
-                        y: capsule.worldCenter1.y,
-                        density: body.density,
-                        rotation: body.rotation,
-                    });
+                    const axis = capsule.worldCenter1.subNew(capsule.worldCenter2);
+                    const axisLength = Math.sqrt(axis.magnitudeSquared());
 
-                    const circle2 = BodiesFactory.circle({
-                        radius: capsule.radius,
-                        x: capsule.worldCenter2.x,
-                        y: capsule.worldCenter2.y,
-                        density: body.density,
-                        rotation: body.rotation,
-                    });
+                    if (axisLength === 0) {
+                        circleBuoyancyAt(body.position, capsule.radius);
+                        continue;
+                    }
 
-                    const capsuleBody = BodiesFactory.box({
-                        width: capsule.radius * 2,
-                        height: capsule.halfHeight * 2,
-                        x: body.position.x,
-                        y: body.position.y,
-                        density: body.density,
-                        rotation: body.rotation,
-                    });
+                    const axisDirection = axis.divNew(axisLength);
+                    const halfWidthOffset = axisDirection.leftPerpNew().scaleNew(capsule.radius);
+                    const capsuleBodyVertices = [
+                        capsule.worldCenter1.addNew(halfWidthOffset),
+                        capsule.worldCenter1.subNew(halfWidthOffset),
+                        capsule.worldCenter2.subNew(halfWidthOffset),
+                        capsule.worldCenter2.addNew(halfWidthOffset),
+                    ];
 
-                    circleBuoyancy(circle1);
-                    circleBuoyancy(circle2);
-                    polygonBuoyancy(capsuleBody);
+                    circleCapBuoyancy(capsule.worldCenter1, axisDirection, capsule.radius);
+                    circleCapBuoyancy(capsule.worldCenter2, axisDirection.negateNew(), capsule.radius);
+                    polygonVerticesBuoyancy(capsuleBodyVertices);
                 }
             }
         }
