@@ -218,6 +218,15 @@ export default class Application {
                         this.loadDemo(this.demoIndex);
                     }
 
+                    if (inputEvent.key === 't') {
+                        // Test key, add what you want here
+                        const firstNonStatic = this.world.getBodies().find(body => !body.isStatic());
+
+                        if (firstNonStatic) {
+                            firstNonStatic.addForceAtPoint(new Vec2(0, 10000), new Vec2(firstNonStatic.position.x - 25, 0));
+                        }
+                    }
+
                     if (inputEvent.key === 'c') {
                         this.generateParticle = true;
                     }
