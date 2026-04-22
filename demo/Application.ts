@@ -1,5 +1,6 @@
 import {
     BodiesFactory,
+    Buoyancy,
     CircleShape,
     DistanceJoint,
     FIXED_DELTA_TIME,
@@ -940,9 +941,9 @@ export default class Application {
             // If objects overlap on X axis but don't overlap on Y axis the cannot collide
             if (liquidAABB.maxY < body.minY || liquidAABB.minY > body.maxY) continue;
 
-            const buoyancy = Force.generateBuoyancyForce(body, waterSurfaceY, this.liquid.density, GRAVITY);
-            const waterDrag = Force.generateLinearWaterDragForce(body, waterSurfaceY, 0.2, SETTINGS.dt);
-            const waterAngularDrag = Force.generateAngularWaterDragTorque(body, waterSurfaceY, 0.75);
+            const buoyancy = Buoyancy.generateBuoyancyForce(body, waterSurfaceY, this.liquid.density, GRAVITY);
+            const waterDrag = Buoyancy.generateLinearWaterDragForce(body, waterSurfaceY, 0.2, SETTINGS.dt);
+            const waterAngularDrag = Buoyancy.generateAngularWaterDragTorque(body, waterSurfaceY, 0.75);
 
             body.addForce(buoyancy);
             body.addForce(waterDrag);
