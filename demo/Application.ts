@@ -788,15 +788,8 @@ export default class Application {
                     }
 
                     const axisDirection = axis.divNew(axisLength);
-                    const halfWidthOffset = axisDirection.leftPerpNew().scaleNew(capsule.radius);
 
                     const topCapVertices = buildHalfDiskVertices(capsule.worldCenter1, axisDirection, capsule.radius);
-                    const capsuleBodyVertices = [
-                        capsule.worldCenter1.addNew(halfWidthOffset),
-                        capsule.worldCenter1.subNew(halfWidthOffset),
-                        capsule.worldCenter2.subNew(halfWidthOffset),
-                        capsule.worldCenter2.addNew(halfWidthOffset),
-                    ];
                     const bottomCapVertices = buildHalfDiskVertices(
                         capsule.worldCenter2,
                         axisDirection.negateNew(),
@@ -813,12 +806,7 @@ export default class Application {
                         capsuleVertices.push(bottomCapVertices[i]);
                     }
 
-                    // Graphics.drawFillPolygon(0, 0, capsuleVertices, 'green');
                     polygonVerticesBuoyancy(capsuleVertices);
-
-                    // circleCapBuoyancy(capsule.worldCenter1, axisDirection, capsule.radius);
-                    // circleCapBuoyancy(capsule.worldCenter2, axisDirection.negateNew(), capsule.radius);
-                    // polygonVerticesBuoyancy(capsuleBodyVertices);
                 }
             }
         }
