@@ -173,6 +173,26 @@ export default class Graphics {
         this.ctx.fill();
     }
 
+    static drawFillCircleClippedBelow(x: number, y: number, radius: number, clipY: number, color = 'white'): void {
+        const ctx = this.ctx;
+
+        ctx.save();
+
+        // Clip region: everything BELOW clipY
+        ctx.beginPath();
+        ctx.rect(-1e6, -1e6, 2e6, clipY + 1e6);
+        // big rectangle from top of canvas down to clipY
+        ctx.clip();
+
+        // Draw full circle, but it will be clipped
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.fill();
+
+        ctx.restore();
+    }
+
     static drawPolygon(vertices: Vec2[], color = 'white'): void {
         this.ctx.strokeStyle = color;
         this.ctx.beginPath();
