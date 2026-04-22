@@ -105,10 +105,6 @@ function setupConvectionForce(world: World, app: Application): void {
     app.setConvectionForce(true);
 }
 
-const convectionDemo = defineDemo('Convection force', setupConvectionForce);
-
-export default convectionDemo;
-
 export function temperatureToColor(temperature: number, minTemp: number, maxTemp: number): string {
     const t = Math.max(0, Math.min(1, (temperature - minTemp) / (maxTemp - minTemp)));
 
@@ -165,3 +161,7 @@ export function dissipateHeat(body: RigidBody, ambientTemperature: number, dt: n
 
     body.temperature = Math.max(ambientTemperature, body.temperature - heatLoss / body.mass);
 }
+
+const convectionDemo = defineDemo('Convection force', setupConvectionForce);
+
+export default convectionDemo;

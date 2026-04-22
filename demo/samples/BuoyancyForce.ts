@@ -3,7 +3,7 @@ import type Application from '../Application';
 import Graphics from '../graphics/Graphics';
 import { FLOOR_HEIGHT, FLOOR_WIDTH, defineDemo, generateFences, generateFloor } from './shared';
 
-function setupBuoyancy(world: World, app: Application): void {
+function setupBuoyancyForce(world: World, app: Application): void {
     app.setBackground('darkBackground');
     Graphics.zoom = 0.75;
 
@@ -40,6 +40,6 @@ function setupBuoyancy(world: World, app: Application): void {
     }
 }
 
-const buoyancyDemo = defineDemo('Buoyancy demo', setupBuoyancy);
+const buoyancyDemo = defineDemo('Buoyancy demo', setupBuoyancyForce);
 
 export default buoyancyDemo;
