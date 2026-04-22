@@ -620,7 +620,7 @@ export default class Application {
             const waterSurfaceY = liquidAABB.maxY;
             // TODO: debug submerged area
             for (const body of this.world.getBodies()) {
-                if (body.shapeType === ShapeType.POLYGON) {
+                if (body.shapeType === ShapeType.POLYGON || body.shapeType === ShapeType.BOX) {
                     const polygon = body.shape as PolygonShape;
                     const vertices = polygon.worldVertices;
 
