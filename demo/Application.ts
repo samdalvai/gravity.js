@@ -692,6 +692,7 @@ export default class Application {
                     // Fully submerged
                     if (d >= r) {
                         area = Math.PI * r * r;
+                        Graphics.drawFillCircle(cx, cy, r, 'rgba(255, 0, 0, 0.50)');
                         Graphics.drawFillCircle(cx, cy, 5, 'blue');
                         continue;
                     }
@@ -942,12 +943,15 @@ export default class Application {
             if (liquidAABB.maxY < body.minY || liquidAABB.minY > body.maxY) continue;
 
             const buoyancy = Buoyancy.generateBuoyancyForce(body, waterSurfaceY, this.liquid.density, GRAVITY);
-            const waterDrag = Buoyancy.generateLinearWaterDragForce(body, waterSurfaceY, 0.2, SETTINGS.dt);
-            const waterAngularDrag = Buoyancy.generateAngularWaterDragTorque(body, waterSurfaceY, 0.75);
 
-            body.addForce(buoyancy);
-            body.addForce(waterDrag);
-            body.addTorque(waterAngularDrag);
+            if (buoyancy) {
+                body.addForceAtPoint(buoyancy.force, buoyancy.applicationPoint);
+
+                const waterDrag = Buoyancy.generateLinearWaterDragForce(body, waterSurfaceY, 0.2, SETTINGS.dt);
+                const waterAngularDrag = Buoyancy.generateAngularWaterDragTorque(body, waterSurfaceY, 0.75);
+                body.addForce(waterDrag);
+                body.addTorque(waterAngularDrag);
+            }
         }
     }
 
