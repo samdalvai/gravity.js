@@ -1,7 +1,7 @@
 import { BodiesFactory, RigidBody, SETTINGS, Utils, type World } from '../../src';
 import type Application from '../Application';
 import Graphics from '../graphics/Graphics';
-import { FENCE_WIDTH, FLOOR_HEIGHT, defineDemo, generateCeiling, generateFences, generateFloor } from './shared';
+import { defineDemo } from './shared';
 
 export const AMBIENT_TEMPERATURE = 0;
 export const MIN_TEMPERATURE = 0;
@@ -35,55 +35,6 @@ function createStaticWall(
 }
 
 function setupConvectionForce(world: World, app: Application): void {
-    // Simpler version
-    // Graphics.zoom = 0.5;
-
-    // const FLOOR_WIDTH = 1500;
-    // const WALL_COLOR = 'rgb(90, 45, 20)';
-
-    // const floor = generateFloor(world, app, FLOOR_WIDTH);
-    // floor.temperature = MAX_TEMPERATURE;
-    // app.removeBodyTexture(floor);
-    // app.setBodyFillColor(floor, temperatureToColor(floor.temperature, MIN_TEMPERATURE, MAX_TEMPERATURE));
-
-    // const fences = generateFences(world, app, FLOOR_WIDTH);
-    // app.removeBodyTexture(fences[0]);
-    // app.removeBodyTexture(fences[1]);
-    // app.setBodyFillColor(fences[0], WALL_COLOR);
-    // app.setBodyFillColor(fences[1], WALL_COLOR);
-
-    // const ceiling = generateCeiling(world, app, FLOOR_WIDTH);
-    // app.removeBodyTexture(ceiling);
-    // app.setBodyFillColor(ceiling, WALL_COLOR);
-    // world.addBody(ceiling);
-
-    // const numOfParticles = 2_500;
-    // const particleRadius = 5;
-    // const BASE_Y = floor.position.y + FLOOR_HEIGHT / 2 + particleRadius;
-    // const MAX_X = fences[0].position.x + FENCE_WIDTH / 2 + particleRadius;
-
-    // for (let i = 0; i < numOfParticles; i++) {
-    //     const particle = BodiesFactory.circle({
-    //         radius: particleRadius,
-    //         x: Utils.randomNumber(-MAX_X, MAX_X),
-    //         y: Utils.randomNumber(BASE_Y, 250),
-    //         mass: PARTICLE_MASS,
-    //         temperature: MIN_TEMPERATURE,
-    //     });
-
-    //     app.setBodyFillColor(particle, temperatureToColor(particle.temperature, MIN_TEMPERATURE, MAX_TEMPERATURE));
-    //     particle.onContact = info => {
-    //         const bodyA = info.bodyA;
-    //         const bodyB = info.bodyB;
-    //         exchangeHeat(bodyA, bodyB, SETTINGS.dt, HEATING_FACTOR);
-    //     };
-
-    //     world.addBody(particle);
-    // }
-
-    // app.setConvectionForce(true);
-
-    // Chimney version
     Graphics.zoom = 0.4;
 
     const floorWidth = 525;
