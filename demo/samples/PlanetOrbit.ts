@@ -144,6 +144,7 @@ function setupPlanetOrbit(world: World, app: Application): void {
 function applyBodyStyle(app: Application, body: RigidBody, spec: CelestialBodySpec): void {
     if (USE_PLANET_TEXTURES && spec.texture) {
         app.setBodyTexture(body, spec.texture);
+        app.setBodyTextureScale(body, 1.2);
         return;
     }
 
