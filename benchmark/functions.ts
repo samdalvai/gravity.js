@@ -32,6 +32,12 @@ for (let i = 0; i < numBodies; i++) {
     worldOld.addBody(pOld);
 }
 
+const floor = BodiesFactory.box({ width: 5000, height: 50, x: 0, y: -600, mass: 0 });
+world.addBody(floor);
+
+const floorOld = BodiesFactoryOld.box({ width: 5000, height: 50, x: 0, y: -600, mass: 0 });
+worldOld.addBody(floorOld);
+
 const DT = 1 / 60;
 
 export function runOriginal() {
