@@ -2,7 +2,7 @@ import './benchmarks';
 import { benchmarks } from './registry';
 
 const WARMUP_MS = 500;
-const SAMPLE_MS = 500;
+const SAMPLE_MS = 1_000;
 const SAMPLES = 5;
 
 if (benchmarks.length === 0) {
