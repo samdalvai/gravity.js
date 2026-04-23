@@ -6,6 +6,17 @@ export const TEXTURES = {
     metal: 'assets/metal.png',
     transparent: 'assets/transparent.png',
 
+    // Planet orbit sprites
+    planetSun: 'assets/planets/sun.png',
+    planetMercury: 'assets/planets/mercury.png',
+    planetVenus: 'assets/planets/venus.png',
+    planetEarth: 'assets/planets/earth.png',
+    planetMars: 'assets/planets/mars.png',
+    planetJupiter: 'assets/planets/jupiter.png',
+    planetSaturn: 'assets/planets/saturn.png',
+    planetUranus: 'assets/planets/uranus.png',
+    planetNeptune: 'assets/planets/neptune.png',
+
     // Skeleton ragdoll
     bob: 'assets/ragdoll/bob.png',
     head: 'assets/ragdoll/head.png',
