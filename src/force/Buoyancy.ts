@@ -11,7 +11,7 @@ type BuoyancyResult = {
     applicationPoint: Vec2;
 } | null;
 
-type SubmergedShape = {
+type SubmergedShapeResult = {
     area: number;
     centroid: Vec2;
 } | null;
@@ -30,7 +30,7 @@ export function generateBuoyancyForce(
         const polygon = body.shape as PolygonShape;
         const vertices = polygon.worldVertices;
 
-        const result = getSubmergedPolygon(vertices, waterSurfaceY);
+        const result = getSubmergedPolygonData(vertices, waterSurfaceY);
 
         if (!result) {
             return null;
@@ -51,7 +51,7 @@ export function generateBuoyancyForce(
         const circle = body.shape as CircleShape;
         const r = circle.radius;
 
-        const result = getSubmergedCircle(body.position, r, waterSurfaceY);
+        const result = getSubmergedCircleData(body.position, r, waterSurfaceY);
 
         if (!result) {
             return null;
@@ -75,7 +75,7 @@ export function generateBuoyancyForce(
 
         // Capsule is basically a circle
         if (axisLength === 0) {
-            const result = getSubmergedCircle(body.position, capsule.radius, waterSurfaceY);
+            const result = getSubmergedCircleData(body.position, capsule.radius, waterSurfaceY);
 
             if (!result) {
                 return null;
@@ -113,7 +113,7 @@ export function generateBuoyancyForce(
             capsuleVertices.push(bottomCapVertices[i]);
         }
 
-        const result = getSubmergedPolygon(capsuleVertices, waterSurfaceY);
+        const result = getSubmergedPolygonData(capsuleVertices, waterSurfaceY);
 
         if (!result) {
             return null;
@@ -134,7 +134,7 @@ export function generateBuoyancyForce(
     return approximateBuoyancy(body, waterSurfaceY, liquidDensity, gravity);
 }
 
-function getSubmergedPolygon(vertices: readonly Vec2[], waterSurfaceY: number): SubmergedShape {
+function getSubmergedPolygonData(vertices: readonly Vec2[], waterSurfaceY: number): SubmergedShapeResult {
     const clipped: Vec2[] = [];
 
     for (let i = 0; i < vertices.length; i++) {
@@ -186,7 +186,7 @@ function getSubmergedPolygon(vertices: readonly Vec2[], waterSurfaceY: number): 
     };
 }
 
-function getSubmergedCircle(center: Vec2, radius: number, waterSurfaceY: number): SubmergedShape {
+function getSubmergedCircleData(center: Vec2, radius: number, waterSurfaceY: number): SubmergedShapeResult {
     const cx = center.x;
     const cy = center.y;
 
