@@ -104,10 +104,6 @@ export class World {
             const body = bodies[i];
             if (SETTINGS.applyGravity) {
                 // Apply the weight force to all bodies
-                // const weightForce = Force.generateWeightForce(body, this.G * body.gravityScale);
-                // body.addForce(weightForce);
-
-                // Benchmark this
                 Force.applyWeightForce(body, this.G * body.gravityScale);
             }
 
