@@ -11,7 +11,7 @@ function setupPlanetOrbit(world: World, app: Application): void {
     SETTINGS.applyGravity = false;
 
     const sun = BodiesFactory.circle({
-        radius: 50,
+        radius: 100,
         x: 0,
         y: 0,
         density: 1_000,
@@ -25,10 +25,49 @@ function setupPlanetOrbit(world: World, app: Application): void {
         y: 500,
         density: 1,
     });
+    mercury.velocity = getOrbitalSpeed(sun, mercury, GRAVITY);
     app.setBodyFillColor(mercury, 'orange');
     world.addBody(mercury);
 
-    mercury.velocity = getOrbitalSpeed(sun, mercury, GRAVITY);
+    const venus = BodiesFactory.circle({
+        radius: 15,
+        x: 750,
+        y: -750,
+        density: 1,
+    });
+    venus.velocity = getOrbitalSpeed(sun, venus, GRAVITY);
+    app.setBodyFillColor(venus, 'yellow');
+    world.addBody(venus);
+
+    const earth = BodiesFactory.circle({
+        radius: 30,
+        x: -1000,
+        y: 1000,
+        density: 1,
+    });
+    earth.velocity = getOrbitalSpeed(sun, earth, GRAVITY);
+    app.setBodyFillColor(earth, 'green');
+    world.addBody(earth);
+
+    const mars = BodiesFactory.circle({
+        radius: 25,
+        x: -1250,
+        y: -1250,
+        density: 1,
+    });
+    mars.velocity = getOrbitalSpeed(sun, mars, GRAVITY);
+    app.setBodyFillColor(mars, 'red');
+    world.addBody(mars);
+
+    const jupiter = BodiesFactory.circle({
+        radius: 25,
+        x: 1500,
+        y: 1500,
+        density: 100,
+    });
+    jupiter.velocity = getOrbitalSpeed(sun, jupiter, GRAVITY);
+    app.setBodyFillColor(jupiter, 'orange');
+    world.addBody(jupiter);
 
     app.setGravitationalForce(true);
 }
