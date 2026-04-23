@@ -108,6 +108,10 @@ export default class Application {
         this.bodyRenderRegistry.setTexture(body, texture);
     }
 
+    setBodyTextureScale(body: RigidBody, textureScale: number): void {
+        this.bodyRenderRegistry.setTextureScale(body, textureScale);
+    }
+
     removeBodyTexture(body: RigidBody): void {
         this.bodyRenderRegistry.delete(body);
     }
