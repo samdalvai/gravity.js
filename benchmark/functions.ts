@@ -1,5 +1,9 @@
-import { BodiesFactory, Utils, World } from '../src';
-import { BodiesFactory as BodiesFactoryOld, World as WorldOld } from '../src_old';
+import { BodiesFactory, Utils, Vec2, World } from '../src';
+import { BodiesFactory as BodiesFactoryOld, Vec2 as Vec2Old, World as WorldOld } from '../src_old';
+
+declare const process: {
+    on(event: 'exit', listener: () => void): void;
+};
 
 const world = new World(-9.8);
 const worldOld = new WorldOld(-9.8);
@@ -31,9 +35,16 @@ for (let i = 0; i < numBodies; i++) {
 const DT = 1 / 60;
 
 export function runOriginal() {
-    world.update(DT);
+    worldOld.update(DT);
 }
 
 export function runModified() {
-    worldOld.update(DT);
+    world.update(DT);
 }
+
+process.on('exit', () => {
+    console.log('');
+    console.log('Vec2 allocations');
+    console.log(`original: ${Vec2.allocations.toLocaleString()}`);
+    console.log(`modified: ${Vec2Old.allocations.toLocaleString()}`);
+});
