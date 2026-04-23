@@ -15,6 +15,7 @@ import {
     World,
 } from '../src';
 import { Utils } from '../src';
+import { dissipateHeat, generateConvectionForce } from '../src/force/Temperature';
 import AssetStore, { TEXTURES } from './graphics/AssetStore';
 import Graphics from './graphics/Graphics';
 import InputManager, { MouseButton } from './input/InputManager';
@@ -27,8 +28,6 @@ import {
     MAX_TEMPERATURE,
     MIN_TEMPERATURE,
     MIN_TEMPERATURE_DIFFERENCE,
-    dissipateHeat,
-    temperatureToColor,
 } from './samples/ConvectionForce';
 import UIManager, { UIState } from './ui/UIManager';
 
@@ -812,10 +811,10 @@ export default class Application {
 
             dissipateHeat(body, AMBIENT_TEMPERATURE, SETTINGS.dt, DISSIPATION_FACTOR);
 
-            const color = temperatureToColor(body.temperature, MIN_TEMPERATURE, MAX_TEMPERATURE);
+            const color = Utils.temperatureToColor(body.temperature, MIN_TEMPERATURE, MAX_TEMPERATURE);
 
             this.setBodyFillColor(body, color);
-            const convection = Force.generateConvectionForce(
+            const convection = generateConvectionForce(
                 body,
                 AMBIENT_TEMPERATURE,
                 CONVECTION_FORCE,
