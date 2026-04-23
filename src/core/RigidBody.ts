@@ -41,6 +41,7 @@ export class RigidBody {
     charge: number;
     surfaceSpeed: number;
     temperature: number;
+    gravityScale: number;
 
     // Grounded variables
     isGrounded = false;
@@ -113,6 +114,7 @@ export class RigidBody {
         this.charge = 0;
         this.surfaceSpeed = 0;
         this.temperature = 0;
+        this.gravityScale = 1;
 
         this.collisionCategory = CollisionCategory.DEFAULT;
         this.collisionMask = CollisionCategory.ALL;
