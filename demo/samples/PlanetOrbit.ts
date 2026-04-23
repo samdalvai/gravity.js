@@ -18,7 +18,6 @@ function setupPlanetOrbit(world: World, app: Application): void {
     });
     app.setBodyFillColor(sun, 'white');
     world.addBody(sun);
-    console.log('mass: ', sun.mass);
 
     const mercury = BodiesFactory.circle({
         radius: 10,
@@ -28,13 +27,22 @@ function setupPlanetOrbit(world: World, app: Application): void {
     });
     app.setBodyFillColor(mercury, 'orange');
     world.addBody(mercury);
-    console.log('mercury: ', mercury.mass);
 
     mercury.velocity = getOrbitalSpeed(sun, mercury, GRAVITY);
 
     app.setGravitationalForce(true);
 }
 
+/**
+ * Computes the tangential velocity for a circular orbit of `planet` around `sun`.
+ *
+ * Uses: v = sqrt(G * (M + m) / r)
+ * - M = sun mass
+ * - m = planet mass
+ * - r = distance between bodies
+ *
+ * The returned vector is perpendicular to the radius (tangential direction).
+ */
 function getOrbitalSpeed(sun: RigidBody, planet: RigidBody, G: number): Vec2 {
     const rVec = planet.position.subNew(sun.position);
     const r = rVec.magnitude();
