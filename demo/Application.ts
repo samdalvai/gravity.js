@@ -10,12 +10,12 @@ import {
     PIXELS_PER_METER,
     RigidBody,
     SETTINGS,
+    Temperature,
+    Utils,
     Vec2,
     WeldJoint,
     World,
 } from '../src';
-import { Utils } from '../src';
-import { dissipateHeat, generateConvectionForce } from '../src/force/Temperature';
 import AssetStore, { TEXTURES } from './graphics/AssetStore';
 import Graphics from './graphics/Graphics';
 import InputManager, { MouseButton } from './input/InputManager';
@@ -809,12 +809,12 @@ export default class Application {
         for (let i = 0; i < bodies.length; i++) {
             const body = bodies[i];
 
-            dissipateHeat(body, AMBIENT_TEMPERATURE, SETTINGS.dt, DISSIPATION_FACTOR);
+            Temperature.dissipateHeat(body, AMBIENT_TEMPERATURE, SETTINGS.dt, DISSIPATION_FACTOR);
 
             const color = Utils.temperatureToColor(body.temperature, MIN_TEMPERATURE, MAX_TEMPERATURE);
 
             this.setBodyFillColor(body, color);
-            const convection = generateConvectionForce(
+            const convection = Temperature.generateConvectionForce(
                 body,
                 AMBIENT_TEMPERATURE,
                 CONVECTION_FORCE,
