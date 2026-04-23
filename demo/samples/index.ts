@@ -12,6 +12,7 @@ import continuousCollisionDetectionDemo from './ContinuousCollisionDetection';
 import convectionDemo from './ConvectionForce';
 import dragDemo from './Drag';
 import electroStaticDemo from './ElectrostaticForce';
+import planetOrbitDemo from './PlanetOrbit';
 import plankDemo from './Plank';
 import pyramidOfBoxesDemo from './PyramidOfBoxes';
 import simpleWhipDemo from './SimpleWhip';
@@ -39,6 +40,7 @@ export const DEMOS: DemoRunner[] = [
     thousandBoxesDemo,
     thousandCapsulesDemo,
     randomConvexShapesDemo,
+    planetOrbitDemo,
     blackHoleOrbitDemo,
     weldedBoxesDemo,
     breakableJointsDemo,
