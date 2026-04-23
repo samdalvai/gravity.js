@@ -274,9 +274,11 @@ export class World {
             if (newManifold == null) continue;
 
             const key = Utils.pairKey(a, b);
-            if (SETTINGS.warmStarting && this.manifoldMap.has(key)) {
-                const oldManifold = this.manifoldMap.get(key)!;
-                newManifold.tryWarmStart(oldManifold);
+            if (SETTINGS.warmStarting) {
+                const oldManifold = this.manifoldMap.get(key);
+                if (oldManifold !== undefined) {
+                    newManifold.tryWarmStart(oldManifold);
+                }
             }
 
             newManifoldMap.set(key, newManifold);
