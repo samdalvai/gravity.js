@@ -27,7 +27,8 @@ export class World {
     private manifolds: ContactManifold[] = [];
     private joints: Joint[] = [];
 
-    private potentialPairs: [RigidBody, RigidBody][] = [];
+    /** Pairs are allocated in blocks of 2 */
+    private potentialPairs: RigidBody[] = [];
     private manifoldMap: Map<number, ContactManifold> = new Map();
 
     private readonly manifoldPool = NarrowPhase.manifoldPool;
@@ -245,7 +246,7 @@ export class World {
                 }
 
                 // Objects may be colliding
-                this.potentialPairs.push([a, b]);
+                this.potentialPairs.push(a, b);
             }
         }
     }
@@ -256,12 +257,17 @@ export class World {
         const newManifoldMap: Map<number, ContactManifold> = new Map();
 
         // Narrow phase check, potential pairs may still not collide
-        for (let [a, b] of this.potentialPairs) {
+        for (let i = 0; i < this.potentialPairs.length; i += 2) {
+            let a = this.potentialPairs[i];
+            let b = this.potentialPairs[i + 1];
+
             if (a.isStatic() && b.isStatic()) continue;
 
             // Improve coherence
             if (a.id > b.id) {
-                [a, b] = [b, a];
+                const temp = a;
+                a = b;
+                b = temp;
             }
 
             const newManifold = NarrowPhase.detectCollision(a, b);
