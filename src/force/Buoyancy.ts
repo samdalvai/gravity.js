@@ -5,6 +5,9 @@ import { CircleShape } from '../shapes/CircleShape';
 import { PolygonShape } from '../shapes/PolygonShape';
 import { ShapeType } from '../shapes/Shape';
 
+// TODO: should we refactor behaviour to automatically apply all the forces needed instead of relying on docs?
+// this holds true for all types of forces
+
 type BuoyancyResult = {
     submergedArea: number;
     force: Vec2;
@@ -17,12 +20,19 @@ type SubmergedShapeResult = {
 } | null;
 
 /**
- * Computes buoyancy force based on submerged area.
- * The force should be applied by using {@link RigidBody.addForceAtPoint}.
+ * Computes buoyancy force based on submerged area of a body shaope
+ * 
+ * @param body The optionally submerged body
+ * @param liquidSurfaceY The liquid surface max y coordinates
+ * @param liquidDensity The liquid density
+ * @param gravity The world gfravity
+ * @returns The submerged area, the buoyancy force and the centroid where to apply it
+ * 
+ * The force should be applied by using {@link RigidBody.addForceAtPoint}. Should be used in combination with {@link generateLinearWaterDragForce} and {@link generateAngularWaterDragTorque} for realistic behaviour
  */
 export function generateBuoyancyForce(
     body: RigidBody,
-    waterSurfaceY: number,
+    liquidSurfaceY: number,
     liquidDensity: number,
     gravity: number,
 ): BuoyancyResult {
@@ -30,7 +40,7 @@ export function generateBuoyancyForce(
         const polygon = body.shape as PolygonShape;
         const vertices = polygon.worldVertices;
 
-        const result = getSubmergedPolygonData(vertices, waterSurfaceY);
+        const result = getSubmergedPolygonData(vertices, liquidSurfaceY);
 
         if (!result) {
             return null;
@@ -51,7 +61,7 @@ export function generateBuoyancyForce(
         const circle = body.shape as CircleShape;
         const r = circle.radius;
 
-        const result = getSubmergedCircleData(body.position, r, waterSurfaceY);
+        const result = getSubmergedCircleData(body.position, r, liquidSurfaceY);
 
         if (!result) {
             return null;
@@ -75,7 +85,7 @@ export function generateBuoyancyForce(
 
         // Capsule is basically a circle
         if (axisLength === 0) {
-            const result = getSubmergedCircleData(body.position, capsule.radius, waterSurfaceY);
+            const result = getSubmergedCircleData(body.position, capsule.radius, liquidSurfaceY);
 
             if (!result) {
                 return null;
@@ -113,7 +123,7 @@ export function generateBuoyancyForce(
             capsuleVertices.push(bottomCapVertices[i]);
         }
 
-        const result = getSubmergedPolygonData(capsuleVertices, waterSurfaceY);
+        const result = getSubmergedPolygonData(capsuleVertices, liquidSurfaceY);
 
         if (!result) {
             return null;
@@ -131,7 +141,7 @@ export function generateBuoyancyForce(
     }
 
     // Approximation if there is no algorithm to compute the real buoyancy
-    return approximateBuoyancy(body, waterSurfaceY, liquidDensity, gravity);
+    return approximateBuoyancy(body, liquidSurfaceY, liquidDensity, gravity);
 }
 
 function getSubmergedPolygonData(vertices: readonly Vec2[], waterSurfaceY: number): SubmergedShapeResult {
