@@ -52,7 +52,7 @@ export default class Application {
     private paused = false;
 
     // Demos
-    private demoIndex = 1;
+    private demoIndex = 15;
     private demoShortcutBuffer = '';
     private demoShortcutTimer: number | null = null;
 
@@ -63,6 +63,7 @@ export default class Application {
     // Mechanics
     private player: RigidBody | null = null;
     private testBody: RigidBody | null = null;
+    private gravitationalForce = false;
     private blackHole: RigidBody | null = null;
     private grabJoint: GrabJoint | null = null;
     private dragForce: number | null = null;
@@ -117,6 +118,10 @@ export default class Application {
 
     setTestBody(body: RigidBody) {
         this.testBody = body;
+    }
+
+    setGravitationalForce(active: boolean): void {
+        this.gravitationalForce = active;
     }
 
     setBlackHole(body: RigidBody | null): void {
@@ -750,6 +755,31 @@ export default class Application {
         }
     }
 
+    // TODO: investigate Barnes–Hut and Quad trees to avoid n^2 checks: https://chatgpt.com/g/g-p-695b6a95aaf081918dffee25540de481-physics-engine/c/69e90b7f-7548-838c-a1df-1d2be6c303df
+    private applyGravitationalForce(): void {
+        if (!this.gravitationalForce) {
+            return;
+        }
+
+        const bodies = this.world.getBodies();
+        for (let i = 0; i < bodies.length - 1; i++) {
+            const a = bodies[i];
+            for (let j = i + 1; j < bodies.length; j++) {
+                const b = bodies[j];
+
+                const attraction = Force.generateGravitationalForce(
+                    a,
+                    b,
+                    GRAVITY,
+                    80 * 80,
+                    BODY_REMOVAL_THRESHOLD * BODY_REMOVAL_THRESHOLD,
+                );
+                a.addForce(attraction);
+                b.addForce(attraction.negateNew());
+            }
+        }
+    }
+
     private applyBlackHoleForce(): void {
         if (!this.blackHole) {
             return;
@@ -780,6 +810,7 @@ export default class Application {
         }
     }
 
+    // TODO: investigate Barnes–Hut and Quad trees to avoid n^2 checks: https://chatgpt.com/g/g-p-695b6a95aaf081918dffee25540de481-physics-engine/c/69e90b7f-7548-838c-a1df-1d2be6c303df
     private applyCoulombForce(): void {
         if (!this.coulombForce) {
             return;
@@ -966,6 +997,7 @@ export default class Application {
 
         this.player = null;
         this.testBody = null;
+        this.gravitationalForce = false;
         this.blackHole = null;
         this.dragForce = null;
         this.coulombForce = false;
@@ -1047,6 +1079,7 @@ export default class Application {
     }
 
     private stepSimulation(): void {
+        this.applyGravitationalForce();
         this.applyBlackHoleForce();
         this.applyDragForce();
         this.applyCoulombForce();
