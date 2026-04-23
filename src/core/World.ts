@@ -226,10 +226,10 @@ export class World {
         this.potentialPairs.length = 0;
 
         // Broad phase check with prune & sweep algorithm
-        for (let i = 0; i < bodies.length; i++) {
+        for (let i = 0, len = bodies.length; i < len; i++) {
             const a = bodies[i];
 
-            for (let j = i + 1; j < bodies.length; j++) {
+            for (let j = i + 1; j < len; j++) {
                 const b = bodies[j];
 
                 // If objects don't overlap on X axis they cannot collide
