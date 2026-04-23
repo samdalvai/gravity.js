@@ -108,13 +108,15 @@ export class World {
             }
 
             // Apply forces to all bodies
-            for (const force of this.forces) {
-                body.addForce(force);
+            const forces = this.forces;
+            for (let j = 0; j < forces.length; j++) {
+                body.addForce(forces[j]);
             }
 
             // Apply torque to all bodiesx
-            for (const torque of this.torques) {
-                body.addTorque(torque);
+            const torques = this.torques;
+            for (let j = 0; j < torques.length; j++) {
+                body.addTorque(torques[j]);
             }
 
             // Update last grounded time
