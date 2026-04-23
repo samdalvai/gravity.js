@@ -487,6 +487,7 @@ export class ContactManifold extends Constraint {
         }
 
         if (!solved) {
+            console.error('Error solving contact block: ', this);
             Utils.assert(false);
         }
 
