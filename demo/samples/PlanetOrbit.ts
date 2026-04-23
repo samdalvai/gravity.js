@@ -215,6 +215,6 @@ function getOrbitalSpeed(sun: RigidBody, planet: RigidBody, G: number): Vec2 {
     return tangent.scaleNew(v);
 }
 
-const planetOrbitDemo = defineDemo('Planets orbit', setupPlanetOrbit);
+const planetOrbitDemo = defineDemo('Solar system orbit', setupPlanetOrbit);
 
 export default planetOrbitDemo;
