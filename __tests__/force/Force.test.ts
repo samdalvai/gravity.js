@@ -12,9 +12,17 @@ describe('Force', () => {
         });
 
         const buoyancy = Buoyancy.generateBuoyancyForce(body, 20, 0.5, 10);
+        const expectedArea = Math.PI * 10 * 10;
 
-        expect(buoyancy.x).toBe(0);
-        expect(buoyancy.y).toBeCloseTo(Math.PI * 10 * 10 * 0.5 * 10);
+        if (!buoyancy) {
+            throw new Error('Expected circle to be fully submerged');
+        }
+
+        expect(buoyancy.submergedArea).toBeCloseTo(expectedArea);
+        expect(buoyancy.force.x).toBe(0);
+        expect(buoyancy.force.y).toBeCloseTo(expectedArea * 0.5 * 10);
+        expect(buoyancy.applicationPoint.x).toBe(0);
+        expect(buoyancy.applicationPoint.y).toBe(0);
     });
 
     test('Water drag is clamped so it cannot reverse velocity in one step', () => {
@@ -26,14 +34,15 @@ describe('Force', () => {
             velocity: new Vec2(0, -100),
         });
 
-        const waterDrag = Buoyancy.generateLinearWaterDragForce(body, 10, 0.2, FIXED_DELTA_TIME);
+        const submergedArea = body.shape.getArea();
+        const waterDrag = Buoyancy.generateLinearWaterDragForce(body, submergedArea, 0.2, FIXED_DELTA_TIME);
         const maxForce = (body.mass * body.velocity.magnitude()) / FIXED_DELTA_TIME;
 
         expect(waterDrag.x).toBeCloseTo(0);
         expect(waterDrag.y).toBeCloseTo(maxForce);
     });
 
-    test('Angular water drag scales with moment of inertia so damping stays effective for larger bodies', () => {
+    test('Angular water drag scales with submerged area and moment of inertia', () => {
         const body = BodiesFactory.box({
             width: 40,
             height: 20,
@@ -43,8 +52,10 @@ describe('Force', () => {
         });
         body.angularVelocity = 3;
 
-        const torque = Buoyancy.generateAngularWaterDragTorque(body, 20, 0.75);
+        const submergedArea = 20;
+        const submergedFraction = submergedArea / body.shape.getArea();
+        const torque = Buoyancy.generateAngularWaterDragTorque(body, submergedArea, 0.75);
 
-        expect(torque).toBeCloseTo(-body.angularVelocity * 0.75 * body.I);
+        expect(torque).toBeCloseTo(-body.angularVelocity * 0.75 * submergedFraction * body.I);
     });
 });
