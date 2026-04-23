@@ -1,4 +1,5 @@
 import { BodiesFactory, RigidBody, SETTINGS, Utils, type World } from '../../src';
+import { exchangeHeat } from '../../src/force/Temperature';
 import type Application from '../Application';
 import Graphics from '../graphics/Graphics';
 import { defineDemo } from './shared';
@@ -43,7 +44,7 @@ function setupConvectionForce(world: World, app: Application): void {
     const floor = BodiesFactory.box({ width: floorWidth, height: floorHeight, x: 12.5, y: -1000, mass: 0.0 });
     floor.temperature = MAX_TEMPERATURE;
     app.removeBodyTexture(floor);
-    app.setBodyFillColor(floor, temperatureToColor(floor.temperature, MIN_TEMPERATURE, MAX_TEMPERATURE));
+    app.setBodyFillColor(floor, Utils.temperatureToColor(floor.temperature, MIN_TEMPERATURE, MAX_TEMPERATURE));
     world.addBody(floor);
 
     const staticWallsOptions = [
@@ -92,74 +93,20 @@ function setupConvectionForce(world: World, app: Application): void {
             temperature: MIN_TEMPERATURE,
         });
 
-        app.setBodyFillColor(particle, temperatureToColor(particle.temperature, MIN_TEMPERATURE, MAX_TEMPERATURE));
+        app.setBodyFillColor(
+            particle,
+            Utils.temperatureToColor(particle.temperature, MIN_TEMPERATURE, MAX_TEMPERATURE),
+        );
         particle.onContact = info => {
             const bodyA = info.bodyA;
             const bodyB = info.bodyB;
-            exchangeHeat(bodyA, bodyB, SETTINGS.dt, HEATING_FACTOR);
+            exchangeHeat(bodyA, bodyB, SETTINGS.dt, HEATING_FACTOR, MIN_TEMPERATURE, MAX_TEMPERATURE);
         };
 
         world.addBody(particle);
     }
 
     app.setConvectionForce(true);
-}
-
-export function temperatureToColor(temperature: number, minTemp: number, maxTemp: number): string {
-    const t = Math.max(0, Math.min(1, (temperature - minTemp) / (maxTemp - minTemp)));
-
-    let r = 0;
-    let g = 0;
-    let b = 0;
-
-    if (t < 0.33) {
-        // black -> red
-        const k = t / 0.33;
-        r = Math.round(255 * k);
-    } else if (t < 0.66) {
-        // red -> yellow
-        const k = (t - 0.33) / 0.33;
-        r = 255;
-        g = Math.round(180 * k);
-    } else {
-        // yellow -> white
-        const k = (t - 0.66) / 0.34;
-        r = 255;
-        g = 180 + Math.round(75 * k);
-        b = Math.round(220 * k);
-    }
-
-    return `rgb(${r}, ${g}, ${b})`;
-}
-
-export function exchangeHeat(a: RigidBody, b: RigidBody, dt: number, k = 0.5) {
-    const deltaT = a.temperature - b.temperature;
-    if (deltaT === 0) return;
-
-    const heat = k * deltaT * dt;
-
-    if (!a.isStatic()) {
-        a.temperature -= heat / a.mass;
-    }
-
-    if (!b.isStatic()) {
-        b.temperature += heat / b.mass;
-    }
-
-    a.temperature = Utils.clamp(a.temperature, MIN_TEMPERATURE, MAX_TEMPERATURE);
-    b.temperature = Utils.clamp(b.temperature, MIN_TEMPERATURE, MAX_TEMPERATURE);
-}
-
-export function dissipateHeat(body: RigidBody, ambientTemperature: number, dt: number, cooling = 0.001) {
-    if (body.isStatic()) return;
-
-    const deltaT = body.temperature - ambientTemperature;
-    if (deltaT === 0) return;
-
-    const perimeter = body.shape.getPerimeter();
-    const heatLoss = cooling * perimeter * deltaT * dt;
-
-    body.temperature = Math.max(ambientTemperature, body.temperature - heatLoss / body.mass);
 }
 
 const convectionDemo = defineDemo('Convection force', setupConvectionForce);

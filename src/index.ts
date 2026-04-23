@@ -1,6 +1,3 @@
-export { Force } from './force/Force';
-export * as Buoyancy from './force/Buoyancy';
-
 export {
     FIXED_DELTA_TIME,
     GRAVITY,
@@ -28,3 +25,7 @@ export { SegmentShape } from './shapes/SegmentShape';
 export { ShapeType } from './shapes/Shape';
 
 export * as Utils from './utils/Utils';
+
+export { Force } from './force/Force';
+export * as Buoyancy from './force/Buoyancy';
+export * as Temperature from './force/Temperature';
