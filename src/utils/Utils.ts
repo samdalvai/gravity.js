@@ -66,3 +66,30 @@ export function pairKey(a: RigidBody, b: RigidBody): number {
 export function makeId(a: number, b: number): number {
     return ((a & 0xff) << 8) | (b & 0xff);
 }
+
+export function temperatureToColor(temperature: number, minTemp: number, maxTemp: number): string {
+    const t = Math.max(0, Math.min(1, (temperature - minTemp) / (maxTemp - minTemp)));
+
+    let r = 0;
+    let g = 0;
+    let b = 0;
+
+    if (t < 0.33) {
+        // black -> red
+        const k = t / 0.33;
+        r = Math.round(255 * k);
+    } else if (t < 0.66) {
+        // red -> yellow
+        const k = (t - 0.33) / 0.33;
+        r = 255;
+        g = Math.round(180 * k);
+    } else {
+        // yellow -> white
+        const k = (t - 0.66) / 0.34;
+        r = 255;
+        g = 180 + Math.round(75 * k);
+        b = Math.round(220 * k);
+    }
+
+    return `rgb(${r}, ${g}, ${b})`;
+}
