@@ -5,6 +5,7 @@ export interface BodyRenderStyle {
     fillColor?: string;
     strokeColor?: string;
     texture?: ImageBitmap | null;
+    textureScale?: number;
 }
 
 export default class BodyRenderRegistry {
@@ -30,6 +31,11 @@ export default class BodyRenderRegistry {
     setTexture(body: RigidBody, texture: keyof typeof TEXTURES): void {
         const style = this.ensureStyle(body);
         style.texture = AssetStore.getTexture(texture);
+    }
+
+    setTextureScale(body: RigidBody, textureScale: number): void {
+        const style = this.ensureStyle(body);
+        style.textureScale = textureScale;
     }
 
     private ensureStyle(body: RigidBody): BodyRenderStyle {

@@ -308,13 +308,20 @@ export default class Graphics {
         this.ctx.fill();
     }
 
-    static drawTexture(width: number, height: number, texture: CanvasImageSource, offsetX = 0, offsetY = 0): void {
+    static drawTexture(
+        width: number,
+        height: number,
+        texture: CanvasImageSource,
+        offsetX = 0,
+        offsetY = 0,
+        textureScale = 1,
+    ): void {
         this.ctx.save();
 
         this.ctx.translate(offsetX, offsetY);
 
         // This is needed because we flip the canvas with beginWorld()
-        this.ctx.scale(1, -1);
+        this.ctx.scale(textureScale, -textureScale);
         this.ctx.drawImage(texture, -width / 2, -height / 2, width, height);
         this.ctx.restore();
     }
@@ -345,6 +352,7 @@ export default class Graphics {
         const fillColor = renderStyle?.fillColor ?? 'gray';
         const strokeColor = renderStyle?.strokeColor ?? 'white';
         const texture = renderStyle?.texture ?? null;
+        const textureScale = renderStyle?.textureScale ?? 1;
 
         this.ctx.save();
         this.ctx.translate(x, y);
@@ -359,7 +367,7 @@ export default class Graphics {
                     if (debug) {
                         this.drawCircle(circleShape.radius, body.isBullet ? 'red' : strokeColor);
                     } else if (texture) {
-                        this.drawTexture(circleShape.radius * 2, circleShape.radius * 2, texture);
+                        this.drawTexture(circleShape.radius * 2, circleShape.radius * 2, texture, 0, 0, textureScale);
                     } else {
                         this.drawFillCircle(0, 0, circleShape.radius, fillColor);
                     }
@@ -372,7 +380,7 @@ export default class Graphics {
                     if (debug) {
                         this.drawPolygon(polygonShape.localVertices, strokeColor);
                     } else if (texture) {
-                        this.drawTexture(polygonShape.width, polygonShape.height, texture);
+                        this.drawTexture(polygonShape.width, polygonShape.height, texture, 0, 0, textureScale);
                     } else {
                         this.drawFillPolygon(0, 0, polygonShape.localVertices, fillColor);
                     }
@@ -385,7 +393,7 @@ export default class Graphics {
                     if (debug) {
                         this.drawBox(boxShape.width, boxShape.height, strokeColor);
                     } else if (texture) {
-                        this.drawTexture(boxShape.width, boxShape.height, texture);
+                        this.drawTexture(boxShape.width, boxShape.height, texture, 0, 0, textureScale);
                     } else {
                         this.drawFillBox(boxShape.width, boxShape.height, fillColor);
                     }
@@ -399,7 +407,12 @@ export default class Graphics {
                         this.drawCapsule(capsuleShape, strokeColor);
                     } else if (texture) {
                         // TODO: draw texture without stretching it
-                        this.drawTexture(capsuleShape.width, capsuleShape.height + capsuleShape.radius * 2, texture);
+                        this.drawTexture(
+                            capsuleShape.width,
+                            capsuleShape.height + capsuleShape.radius * 2,
+                            texture,
+                            textureScale,
+                        );
                     } else {
                         this.drawFillCapsule(capsuleShape, fillColor);
                     }
