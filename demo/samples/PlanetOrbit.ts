@@ -8,6 +8,7 @@ const AU_IN_KM = 149_597_870.7;
 const EARTH_RADIUS_KM = 6_371;
 const EARTH_ORBIT_PIXELS = 700;
 const EARTH_READABLE_RADIUS_PIXELS = 10;
+const USE_PLANET_TEXTURES = true;
 
 /**
  * 0 = compressed, readable demo scale.
@@ -29,15 +30,19 @@ type CelestialBodySpec = {
     radiusKm: number;
     massEarths: number;
     color: string;
+    texture?: TextureName;
     orbitAu?: number;
     orbitAngleDegrees?: number;
 };
+
+type TextureName = Parameters<Application['setBodyTexture']>[1];
 
 const SUN: CelestialBodySpec = {
     name: 'Sun',
     radiusKm: 695_700,
     massEarths: 332_946,
     color: '#fff7b2',
+    texture: 'planetSun',
 };
 
 const PLANETS: CelestialBodySpec[] = [
@@ -48,6 +53,7 @@ const PLANETS: CelestialBodySpec[] = [
         orbitAu: 0.3871,
         orbitAngleDegrees: 15,
         color: '#b7ada5',
+        texture: 'planetMercury',
     },
     {
         name: 'Venus',
@@ -56,6 +62,7 @@ const PLANETS: CelestialBodySpec[] = [
         orbitAu: 0.7233,
         orbitAngleDegrees: 105,
         color: '#d8b16f',
+        texture: 'planetVenus',
     },
     {
         name: 'Earth',
@@ -64,6 +71,7 @@ const PLANETS: CelestialBodySpec[] = [
         orbitAu: 1,
         orbitAngleDegrees: 190,
         color: '#4a9fe8',
+        texture: 'planetEarth',
     },
     {
         name: 'Mars',
@@ -72,6 +80,7 @@ const PLANETS: CelestialBodySpec[] = [
         orbitAu: 1.5237,
         orbitAngleDegrees: 280,
         color: '#c76245',
+        texture: 'planetMars',
     },
     {
         name: 'Jupiter',
@@ -80,6 +89,7 @@ const PLANETS: CelestialBodySpec[] = [
         orbitAu: 5.2044,
         orbitAngleDegrees: 335,
         color: '#d1a06f',
+        texture: 'planetJupiter',
     },
     {
         name: 'Saturn',
@@ -88,6 +98,7 @@ const PLANETS: CelestialBodySpec[] = [
         orbitAu: 9.5826,
         orbitAngleDegrees: 55,
         color: '#d7c28b',
+        texture: 'planetSaturn',
     },
     {
         name: 'Uranus',
@@ -96,6 +107,7 @@ const PLANETS: CelestialBodySpec[] = [
         orbitAu: 19.2184,
         orbitAngleDegrees: 145,
         color: '#9fe1df',
+        texture: 'planetUranus',
     },
     {
         name: 'Neptune',
@@ -104,6 +116,7 @@ const PLANETS: CelestialBodySpec[] = [
         orbitAu: 30.11,
         orbitAngleDegrees: 245,
         color: '#5279e8',
+        texture: 'planetNeptune',
     },
 ];
 
@@ -115,17 +128,26 @@ function setupPlanetOrbit(world: World, app: Application): void {
 
     const sun = createBody(SUN, new Vec2(0, 0));
     world.addBody(sun);
-    app.setBodyFillColor(sun, SUN.color);
+    applyBodyStyle(app, sun, SUN);
 
     for (const planetSpec of PLANETS) {
         const position = getOrbitPosition(planetSpec);
         const planet = createBody(planetSpec, position);
         planet.velocity = getOrbitalSpeed(sun, planet, GRAVITY);
         world.addBody(planet);
-        app.setBodyFillColor(planet, planetSpec.color);
+        applyBodyStyle(app, planet, planetSpec);
     }
 
     app.setGravitationalForce(true);
+}
+
+function applyBodyStyle(app: Application, body: RigidBody, spec: CelestialBodySpec): void {
+    if (USE_PLANET_TEXTURES && spec.texture) {
+        app.setBodyTexture(body, spec.texture);
+        return;
+    }
+
+    app.setBodyFillColor(body, spec.color);
 }
 
 function createBody(spec: CelestialBodySpec, position: Vec2): RigidBody {
