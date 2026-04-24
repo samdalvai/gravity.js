@@ -1,12 +1,8 @@
 export class Vec2 {
-    static allocations = 0;
-
     x: number;
     y: number;
 
     constructor(x = 0.0, y = 0.0) {
-        Vec2.allocations++;
-
         this.x = x;
         this.y = y;
     }

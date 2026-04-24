@@ -1,5 +1,5 @@
 import { BodiesFactory, Utils, Vec2, World as WorldNew } from '../src';
-import { BodiesFactory as BodiesFactoryOld, Vec2 as Vec2Old, World as WorldOld } from '../src_old';
+import { BodiesFactory as BodiesFactoryOld, Vec2 as Vec2Old, World as WorldOld } from '../src';
 
 declare const process: {
     on(event: 'exit', listener: () => void): void;
@@ -61,11 +61,7 @@ export function runModified() {
 }
 
 process.on('exit', () => {
-    console.log('');
-    console.log('Vec2 allocations');
-    console.log(`original: ${Vec2Old.allocations.toLocaleString()}`);
-    console.log(`modified: ${Vec2.allocations.toLocaleString()}`);
-
+    console.log('Simulations stats');
     console.log('Contacts');
     console.log(`original: ${worldOld.getManifolds().length}`);
     console.log(`modified: ${worldNew.getManifolds().length}`);
