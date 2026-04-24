@@ -887,7 +887,7 @@ export default class Application {
                     body,
                     buoyancy.submergedArea,
                     this.liquid.density,
-                    0.5,
+                    1,
                     SETTINGS.dt,
                 );
                 const waterAngularDrag = Buoyancy.generateAngularWaterDragTorque(
