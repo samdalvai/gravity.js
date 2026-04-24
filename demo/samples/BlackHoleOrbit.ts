@@ -6,7 +6,7 @@ import Graphics from '../graphics/Graphics';
 import { defineDemo } from './shared';
 
 function setupBlackHoleOrbit(world: World, app: Application): void {
-    app.setBackground('darkBackground');
+    // app.setBackground();
     Graphics.zoom = 0.4;
 
     const particleCount = 2_500;
