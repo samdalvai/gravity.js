@@ -11,7 +11,7 @@ import * as CCD from '../collision/CCD';
 import { canCollide } from '../collision/CollisionFilter';
 import { ContactManifold } from '../collision/ContactManifold';
 import * as NarrowPhase from '../collision/NarrowPhase';
-import { Force } from '../force/Force';
+import { applyWeightForce } from '../force/Gravity';
 import { Joint } from '../joint/Joint';
 import { Vec2 } from '../math/Vec2';
 import * as Utils from '../utils/Utils';
@@ -108,7 +108,7 @@ export class World {
             const body = bodies[i];
             if (SETTINGS.applyGravity) {
                 // Apply the weight force to all bodies
-                Force.applyWeightForce(body, this.G * body.gravityScale);
+                applyWeightForce(body, this.G * body.gravityScale);
             }
 
             // Apply forces to all bodies
