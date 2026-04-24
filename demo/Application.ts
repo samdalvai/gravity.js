@@ -1,5 +1,6 @@
 import {
     BodiesFactory,
+    CollisionCategory,
     DistanceJoint,
     FIXED_DELTA_TIME,
     Force,
@@ -14,7 +15,6 @@ import {
     WeldJoint,
     World,
 } from '../src';
-import { CollisionCategory } from '../src/collision/CollisionFilter';
 import AssetStore, { TEXTURES } from './graphics/AssetStore';
 import Graphics from './graphics/Graphics';
 import InputManager, { MouseButton } from './input/InputManager';
