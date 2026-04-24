@@ -1,6 +1,5 @@
-import { ContactManifold, ContactPoint } from '../collision/ContactManifold';
+import { ContactManifold } from '../collision/ContactManifold';
 import { RigidBody } from '../core/RigidBody';
-import { Vec2 } from '../math/Vec2';
 
 export class ContactManifoldPool {
     private readonly manifolds: ContactManifold[] = [];
@@ -14,10 +13,16 @@ export class ContactManifoldPool {
     acquire(
         bodyA: RigidBody,
         bodyB: RigidBody,
-        contactPoints: ContactPoint[],
+        contactCount: number,
         penetrationDepth: number,
         contactNormalX: number,
         contactNormalY: number,
+        contactPoint0X: number,
+        contactPoint0Y: number,
+        contactPoint0Id: number,
+        contactPoint1X: number,
+        contactPoint1Y: number,
+        contactPoint1Id: number,
         featureFlipped: boolean,
     ): ContactManifold {
         const manifold = this.manifolds.pop();
@@ -26,10 +31,16 @@ export class ContactManifoldPool {
             manifold.init(
                 bodyA,
                 bodyB,
-                contactPoints,
+                contactCount,
                 penetrationDepth,
                 contactNormalX,
                 contactNormalY,
+                contactPoint0X,
+                contactPoint0Y,
+                contactPoint0Id,
+                contactPoint1X,
+                contactPoint1Y,
+                contactPoint1Id,
                 featureFlipped,
             );
             return manifold;
@@ -38,10 +49,16 @@ export class ContactManifoldPool {
         return new ContactManifold(
             bodyA,
             bodyB,
-            contactPoints,
+            contactCount,
             penetrationDepth,
             contactNormalX,
             contactNormalY,
+            contactPoint0X,
+            contactPoint0Y,
+            contactPoint0Id,
+            contactPoint1X,
+            contactPoint1Y,
+            contactPoint1Id,
             featureFlipped,
         );
     }

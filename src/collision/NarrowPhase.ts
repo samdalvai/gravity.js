@@ -14,7 +14,7 @@ import { CircleShape } from '../shapes/CircleShape';
 import { PolygonShape } from '../shapes/PolygonShape';
 import { ShapeType } from '../shapes/Shape';
 import * as Utils from '../utils/Utils';
-import { ContactManifold, ContactPoint } from './ContactManifold';
+import { ContactManifold } from './ContactManifold';
 
 export const manifoldPool = new ContactManifoldPool(MAX_BODIES);
 
@@ -88,23 +88,102 @@ function createCollisionManifold(
     bodyB: RigidBody,
     normalX: number,
     normalY: number,
-    points: ContactPoint[],
+    contactCount: number,
+    contactPoint0X: number,
+    contactPoint0Y: number,
+    contactPoint0Separation: number,
+    contactPoint0Id: number,
+    contactPoint1X = 0.0,
+    contactPoint1Y = 0.0,
+    contactPoint1Separation = 0.0,
+    contactPoint1Id = 0,
 ): ContactManifold | null {
-    if (points.length === 0) {
+    if (contactCount === 0) {
         return null;
     }
 
-    let depth = 0;
-
-    for (const point of points) {
-        depth = Math.max(depth, -point.separation);
+    let depth = Math.max(0.0, -contactPoint0Separation);
+    if (contactCount === 2) {
+        depth = Math.max(depth, -contactPoint1Separation);
     }
 
     if (manifoldPool != null) {
-        return manifoldPool.acquire(bodyA, bodyB, points, depth, normalX, normalY, false);
+        return manifoldPool.acquire(
+            bodyA,
+            bodyB,
+            contactCount,
+            depth,
+            normalX,
+            normalY,
+            contactPoint0X,
+            contactPoint0Y,
+            contactPoint0Id,
+            contactPoint1X,
+            contactPoint1Y,
+            contactPoint1Id,
+            false,
+        );
     }
 
-    return new ContactManifold(bodyA, bodyB, points, depth, normalX, normalY, false);
+    return new ContactManifold(
+        bodyA,
+        bodyB,
+        contactCount,
+        depth,
+        normalX,
+        normalY,
+        contactPoint0X,
+        contactPoint0Y,
+        contactPoint0Id,
+        contactPoint1X,
+        contactPoint1Y,
+        contactPoint1Id,
+        false,
+    );
+}
+
+function createSingleContactManifold(
+    bodyA: RigidBody,
+    bodyB: RigidBody,
+    normalX: number,
+    normalY: number,
+    contactPointX: number,
+    contactPointY: number,
+    separation: number,
+    id: number,
+): ContactManifold | null {
+    return createCollisionManifold(bodyA, bodyB, normalX, normalY, 1, contactPointX, contactPointY, separation, id);
+}
+
+function createDoubleContactManifold(
+    bodyA: RigidBody,
+    bodyB: RigidBody,
+    normalX: number,
+    normalY: number,
+    contactPoint0X: number,
+    contactPoint0Y: number,
+    contactPoint0Separation: number,
+    contactPoint0Id: number,
+    contactPoint1X: number,
+    contactPoint1Y: number,
+    contactPoint1Separation: number,
+    contactPoint1Id: number,
+): ContactManifold | null {
+    return createCollisionManifold(
+        bodyA,
+        bodyB,
+        normalX,
+        normalY,
+        2,
+        contactPoint0X,
+        contactPoint0Y,
+        contactPoint0Separation,
+        contactPoint0Id,
+        contactPoint1X,
+        contactPoint1Y,
+        contactPoint1Separation,
+        contactPoint1Id,
+    );
 }
 
 export function collideCircles(bodyA: RigidBody, bodyB: RigidBody): ContactManifold | null {
@@ -142,13 +221,16 @@ export function collideCircles(bodyA: RigidBody, bodyB: RigidBody): ContactManif
     const pointBX = posB.x - normalX * radiusB;
     const pointBY = posB.y - normalY * radiusB;
 
-    return createCollisionManifold(bodyA, bodyB, normalX, normalY, [
-        {
-            point: new Vec2((pointAX + pointBX) * 0.5, (pointAY + pointBY) * 0.5),
-            separation: distance - radiusSum,
-            id: 0,
-        },
-    ]);
+    return createSingleContactManifold(
+        bodyA,
+        bodyB,
+        normalX,
+        normalY,
+        (pointAX + pointBX) * 0.5,
+        (pointAY + pointBY) * 0.5,
+        distance - radiusSum,
+        0,
+    );
 }
 
 export function collidePolygonCircle(bodyA: RigidBody, bodyB: RigidBody): ContactManifold | null {
@@ -211,13 +293,16 @@ export function collidePolygonCircle(bodyA: RigidBody, bodyB: RigidBody): Contac
         const pointBX = circleBX - normalX * circleB.radius;
         const pointBY = circleBY - normalY * circleB.radius;
 
-        return createCollisionManifold(bodyA, bodyB, normalX, normalY, [
-            {
-                point: new Vec2((pointAX + pointBX) * 0.5, (pointAY + pointBY) * 0.5),
-                separation: vertexSeparation - radius,
-                id: 0,
-            },
-        ]);
+        return createSingleContactManifold(
+            bodyA,
+            bodyB,
+            normalX,
+            normalY,
+            (pointAX + pointBX) * 0.5,
+            (pointAY + pointBY) * 0.5,
+            vertexSeparation - radius,
+            0,
+        );
     }
 
     if (u2 < 0.0 && separation > 0) {
@@ -247,13 +332,16 @@ export function collidePolygonCircle(bodyA: RigidBody, bodyB: RigidBody): Contac
         const pointBX = circleBX - normalX * circleB.radius;
         const pointBY = circleBY - normalY * circleB.radius;
 
-        return createCollisionManifold(bodyA, bodyB, normalX, normalY, [
-            {
-                point: new Vec2((pointAX + pointBX) * 0.5, (pointAY + pointBY) * 0.5),
-                separation: vertexSeparation - radius,
-                id: 0,
-            },
-        ]);
+        return createSingleContactManifold(
+            bodyA,
+            bodyB,
+            normalX,
+            normalY,
+            (pointAX + pointBX) * 0.5,
+            (pointAY + pointBY) * 0.5,
+            vertexSeparation - radius,
+            0,
+        );
     }
 
     const normalX = normals[normalIndex].x;
@@ -264,13 +352,16 @@ export function collidePolygonCircle(bodyA: RigidBody, bodyB: RigidBody): Contac
     const pointBX = circleBX - normalX * circleB.radius;
     const pointBY = circleBY - normalY * circleB.radius;
 
-    return createCollisionManifold(bodyA, bodyB, normalX, normalY, [
-        {
-            point: new Vec2((pointAX + pointBX) * 0.5, (pointAY + pointBY) * 0.5),
-            separation: separation - radius,
-            id: 0,
-        },
-    ]);
+    return createSingleContactManifold(
+        bodyA,
+        bodyB,
+        normalX,
+        normalY,
+        (pointAX + pointBX) * 0.5,
+        (pointAY + pointBY) * 0.5,
+        separation - radius,
+        0,
+    );
 }
 
 function clipConvexEdges(
@@ -334,48 +425,97 @@ function clipConvexEdges(
     const radius = radiusA + radiusB;
     const pointLowerOffset = 0.5 * (referenceRadius - incidentRadius - separationLower);
     const pointUpperOffset = 0.5 * (referenceRadius - incidentRadius - separationUpper);
-    const pointLower = new Vec2(vLowerX + normalX * pointLowerOffset, vLowerY + normalY * pointLowerOffset);
-    const pointUpper = new Vec2(vUpperX + normalX * pointUpperOffset, vUpperY + normalY * pointUpperOffset);
-
-    const points: ContactPoint[] = [
-        {
-            point: pointLower,
-            separation: separationLower - radius,
-            id: Utils.makeId(i11, i22),
-        },
-        {
-            point: pointUpper,
-            separation: separationUpper - radius,
-            id: Utils.makeId(i12, i21),
-        },
-    ];
+    let contactPoint0X = vLowerX + normalX * pointLowerOffset;
+    let contactPoint0Y = vLowerY + normalY * pointLowerOffset;
+    let contactPoint0Separation = separationLower - radius;
+    let contactPoint0Id = Utils.makeId(i11, i22);
+    let contactPoint1X = vUpperX + normalX * pointUpperOffset;
+    let contactPoint1Y = vUpperY + normalY * pointUpperOffset;
+    let contactPoint1Separation = separationUpper - radius;
+    let contactPoint1Id = Utils.makeId(i12, i21);
 
     if (flip) {
-        [points[0], points[1]] = [points[1], points[0]];
+        const tmpPointX = contactPoint0X;
+        const tmpPointY = contactPoint0Y;
+        const tmpSeparation = contactPoint0Separation;
+        const tmpId = contactPoint0Id;
+
+        contactPoint0X = contactPoint1X;
+        contactPoint0Y = contactPoint1Y;
+        contactPoint0Separation = contactPoint1Separation;
+        contactPoint0Id = contactPoint1Id;
+
+        contactPoint1X = tmpPointX;
+        contactPoint1Y = tmpPointY;
+        contactPoint1Separation = tmpSeparation;
+        contactPoint1Id = tmpId;
     }
 
-    const filteredPoints: ContactPoint[] = [];
+    const hasContact0 = contactPoint0Separation <= SETTINGS.contactSlop;
+    const hasContact1 = contactPoint1Separation <= SETTINGS.contactSlop;
+    const manifoldNormalX = flip ? -normalX : normalX;
+    const manifoldNormalY = flip ? -normalY : normalY;
 
-    // TODO: is this needed?
-    for (let i = 0; i < points.length; i++) {
-        const p = points[i];
-        if (p.separation <= SETTINGS.contactSlop) {
-            filteredPoints.push(p);
+    if (!hasContact0 && !hasContact1) {
+        return null;
+    }
+
+    if (hasContact0 && hasContact1) {
+        const dx = contactPoint0X - contactPoint1X;
+        const dy = contactPoint0Y - contactPoint1Y;
+
+        if (dx * dx + dy * dy <= SETTINGS.contactMergeThreshold) {
+            return createSingleContactManifold(
+                bodyA,
+                bodyB,
+                manifoldNormalX,
+                manifoldNormalY,
+                contactPoint0X,
+                contactPoint0Y,
+                contactPoint0Separation,
+                contactPoint0Id,
+            );
         }
+
+        return createDoubleContactManifold(
+            bodyA,
+            bodyB,
+            manifoldNormalX,
+            manifoldNormalY,
+            contactPoint0X,
+            contactPoint0Y,
+            contactPoint0Separation,
+            contactPoint0Id,
+            contactPoint1X,
+            contactPoint1Y,
+            contactPoint1Separation,
+            contactPoint1Id,
+        );
     }
 
-    if (
-        filteredPoints.length === 2 &&
-        (filteredPoints[0].point.x - filteredPoints[1].point.x) *
-            (filteredPoints[0].point.x - filteredPoints[1].point.x) +
-            (filteredPoints[0].point.y - filteredPoints[1].point.y) *
-                (filteredPoints[0].point.y - filteredPoints[1].point.y) <=
-            SETTINGS.contactMergeThreshold
-    ) {
-        filteredPoints.length = 1;
+    if (hasContact0) {
+        return createSingleContactManifold(
+            bodyA,
+            bodyB,
+            manifoldNormalX,
+            manifoldNormalY,
+            contactPoint0X,
+            contactPoint0Y,
+            contactPoint0Separation,
+            contactPoint0Id,
+        );
     }
 
-    return createCollisionManifold(bodyA, bodyB, flip ? -normalX : normalX, flip ? -normalY : normalY, filteredPoints);
+    return createSingleContactManifold(
+        bodyA,
+        bodyB,
+        manifoldNormalX,
+        manifoldNormalY,
+        contactPoint1X,
+        contactPoint1Y,
+        contactPoint1Separation,
+        contactPoint1Id,
+    );
 }
 
 function findMaxSeparation(
@@ -567,13 +707,16 @@ function collideConvexPolygons(
         const pointBX = vertexBX - normalX * radiusB;
         const pointBY = vertexBY - normalY * radiusB;
 
-        return createCollisionManifold(bodyA, bodyB, normalX, normalY, [
-            {
-                point: new Vec2((pointAX + pointBX) * 0.5, (pointAY + pointBY) * 0.5),
-                separation: distance - radius,
-                id,
-            },
-        ]);
+        return createSingleContactManifold(
+            bodyA,
+            bodyB,
+            normalX,
+            normalY,
+            (pointAX + pointBX) * 0.5,
+            (pointAY + pointBY) * 0.5,
+            distance - radius,
+            id,
+        );
     };
 
     if (separationA > 0 || separationB > 0) {
@@ -778,24 +921,20 @@ function collideSegmentRadiusPairs(
             const sq = (cqX - p1X) * normalAX + (cqY - p1Y) * normalAY;
 
             if (sp <= closestDistance || sq <= closestDistance) {
-                return createCollisionManifold(bodyA, bodyB, normalAX, normalAY, [
-                    {
-                        point: new Vec2(
-                            cpX + normalAX * (0.5 * (radiusA - radiusB - sp)),
-                            cpY + normalAY * (0.5 * (radiusA - radiusB - sp)),
-                        ),
-                        separation: sp - radius,
-                        id: Utils.makeId(0, 0),
-                    },
-                    {
-                        point: new Vec2(
-                            cqX + normalAX * (0.5 * (radiusA - radiusB - sq)),
-                            cqY + normalAY * (0.5 * (radiusA - radiusB - sq)),
-                        ),
-                        separation: sq - radius,
-                        id: Utils.makeId(0, 1),
-                    },
-                ]);
+                return createDoubleContactManifold(
+                    bodyA,
+                    bodyB,
+                    normalAX,
+                    normalAY,
+                    cpX + normalAX * (0.5 * (radiusA - radiusB - sp)),
+                    cpY + normalAY * (0.5 * (radiusA - radiusB - sp)),
+                    sp - radius,
+                    Utils.makeId(0, 0),
+                    cqX + normalAX * (0.5 * (radiusA - radiusB - sq)),
+                    cqY + normalAY * (0.5 * (radiusA - radiusB - sq)),
+                    sq - radius,
+                    Utils.makeId(0, 1),
+                );
             }
         } else {
             let cpX = p1X;
@@ -831,24 +970,20 @@ function collideSegmentRadiusPairs(
             const sq = (cqX - p2X) * normalBX + (cqY - p2Y) * normalBY;
 
             if (sp <= closestDistance || sq <= closestDistance) {
-                return createCollisionManifold(bodyA, bodyB, -normalBX, -normalBY, [
-                    {
-                        point: new Vec2(
-                            cpX + normalBX * (0.5 * (radiusB - radiusA - sp)),
-                            cpY + normalBY * (0.5 * (radiusB - radiusA - sp)),
-                        ),
-                        separation: sp - radius,
-                        id: Utils.makeId(0, 0),
-                    },
-                    {
-                        point: new Vec2(
-                            cqX + normalBX * (0.5 * (radiusB - radiusA - sq)),
-                            cqY + normalBY * (0.5 * (radiusB - radiusA - sq)),
-                        ),
-                        separation: sq - radius,
-                        id: Utils.makeId(1, 0),
-                    },
-                ]);
+                return createDoubleContactManifold(
+                    bodyA,
+                    bodyB,
+                    -normalBX,
+                    -normalBY,
+                    cpX + normalBX * (0.5 * (radiusB - radiusA - sp)),
+                    cpY + normalBY * (0.5 * (radiusB - radiusA - sp)),
+                    sp - radius,
+                    Utils.makeId(0, 0),
+                    cqX + normalBX * (0.5 * (radiusB - radiusA - sq)),
+                    cqY + normalBY * (0.5 * (radiusB - radiusA - sq)),
+                    sq - radius,
+                    Utils.makeId(1, 0),
+                );
             }
         }
     }
@@ -879,13 +1014,16 @@ function collideSegmentRadiusPairs(
     const idA = f1 === 0.0 ? 0 : 1;
     const idB = f2 === 0.0 ? 0 : 1;
 
-    return createCollisionManifold(bodyA, bodyB, normalX, normalY, [
-        {
-            point: new Vec2((pointAX + pointBX) * 0.5, (pointAY + pointBY) * 0.5),
-            separation: separation - radius,
-            id: Utils.makeId(idA, idB),
-        },
-    ]);
+    return createSingleContactManifold(
+        bodyA,
+        bodyB,
+        normalX,
+        normalY,
+        (pointAX + pointBX) * 0.5,
+        (pointAY + pointBY) * 0.5,
+        separation - radius,
+        Utils.makeId(idA, idB),
+    );
 }
 
 function collideSegmentRadiusAndCircle(
@@ -963,13 +1101,16 @@ function collideSegmentRadiusAndCircle(
     const contactBX = circleBX - normalX * circleB.radius;
     const contactBY = circleBY - normalY * circleB.radius;
 
-    return createCollisionManifold(bodyA, bodyB, normalX, normalY, [
-        {
-            point: new Vec2((contactAX + contactBX) * 0.5, (contactAY + contactBY) * 0.5),
-            separation,
-            id: 0,
-        },
-    ]);
+    return createSingleContactManifold(
+        bodyA,
+        bodyB,
+        normalX,
+        normalY,
+        (contactAX + contactBX) * 0.5,
+        (contactAY + contactBY) * 0.5,
+        separation,
+        0,
+    );
 }
 
 export function collideCapsuleCircle(bodyA: RigidBody, bodyB: RigidBody): ContactManifold | null {
