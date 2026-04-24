@@ -26,7 +26,7 @@ const COMPRESSED_ORBIT_EXPONENT = 0.62;
 const COMPRESSED_RADIUS_EXPONENT = 0.55;
 const MIN_READABLE_RADIUS_PIXELS = 3;
 const MASS_SCALE = 1;
-const PLANET_EXPLOSION_THRESHOLD = 1_000;
+const PLANET_EXPLOSION_THRESHOLD = 750;
 
 type CelestialBodySpec = {
     name: string;
@@ -195,23 +195,13 @@ function onContactCallBack(
     world: World,
     app: Application,
 ) {
-    const a = info.bodyA;
-    const b = info.bodyB;
+    const impactForce = info.impulseSum / SETTINGS.dt;
+    const impactStrength = impactForce / Math.sqrt(planet.mass);
 
-    let thisMass;
-    let otherMass;
-
-    if (a.id === planet.id) {
-        thisMass = a.mass;
-        otherMass = b.mass;
-    } else {
-        thisMass = b.mass;
-        otherMass = a.mass;
-    }
-
-    if (otherMass / thisMass >= 1 / PLANET_EXPLOSION_THRESHOLD) {
+    if (impactStrength >= PLANET_EXPLOSION_THRESHOLD) {
         const radius = planetSpec.radiusKm;
         const numDebries = Math.floor(radius / 1000);
+        const scaledPlanetRadius = getScaledRadius(planetSpec.radiusKm);
         const debriesRadius = EARTH_RADIUS_KM / 1000;
         const scaledDebriesRadius = getScaledRadius(debriesRadius);
         const mass = planet.mass / numDebries;
@@ -219,9 +209,10 @@ function onContactCallBack(
         for (let i = 0; i < numDebries; i++) {
             const vertices = Utils.randomNumber(3, 10);
             const color = planetSpec.color;
-            const pos = randomPointInRadius(planet.position, scaledDebriesRadius);
+            const pos = randomPointInRadius(planet.position, Math.max(0, scaledPlanetRadius - scaledDebriesRadius));
 
-            const debrie = Utils.randomConvexBody(pos.x, pos.y, debriesRadius, vertices, mass);
+            const debrie = Utils.randomConvexBody(pos.x, pos.y, scaledDebriesRadius, vertices, mass);
+            debrie.velocity = planet.velocity.copy();
             app.setBodyFillColor(debrie, color);
             world.addBody(debrie);
         }
