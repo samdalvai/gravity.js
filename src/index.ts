@@ -11,6 +11,8 @@ export { BodiesFactory } from './factory/BodiesFactory';
 export { RigidBody } from './core/RigidBody';
 export { World } from './core/World';
 
+export { CollisionCategory } from './collision/CollisionFilter';
+
 export { DistanceJoint } from './joint/DistanceJoint';
 export { WeldJoint } from './joint/WeldJoint';
 export { GrabJoint } from './joint/GrabJoint';
