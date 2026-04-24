@@ -1,5 +1,4 @@
-import { BodiesFactory, World } from '../../src';
-import { CollisionCategory } from '../../src/collision/CollisionFilter';
+import { BodiesFactory, CollisionCategory, World } from '../../src';
 import Application from '../Application';
 import { defineDemo } from './shared';
 
