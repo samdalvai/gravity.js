@@ -29,3 +29,4 @@ export * as Utils from './utils/Utils';
 export { Force } from './force/Force';
 export * as Buoyancy from './force/Buoyancy';
 export * as Temperature from './force/Temperature';
+export * as Gravity from './force/Gravity';
