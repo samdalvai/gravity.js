@@ -9,11 +9,6 @@ export class Force {
         return weightForce;
     }
 
-    static applyWeightForce(body: RigidBody, G: number): void {
-        const weigthForce = body.mass * G * PIXELS_PER_METER;
-        body.addForceY(weigthForce);
-    }
-
     static generateDragForce(body: RigidBody, k: number, dt: number): Vec2 {
         const v = body.velocity;
 
