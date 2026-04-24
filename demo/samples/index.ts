@@ -40,14 +40,14 @@ export const DEMOS: DemoRunner[] = [
     thousandBoxesDemo,
     thousandCapsulesDemo,
     randomConvexShapesDemo,
-    planetOrbitDemo,
-    blackHoleOrbitDemo,
     weldedBoxesDemo,
     breakableJointsDemo,
+    collisionFilteringDemo,
     dragDemo,
+    blackHoleOrbitDemo,
+    planetOrbitDemo,
     electroStaticDemo,
     convectionDemo,
-    collisionFilteringDemo,
     buoyancyDemo,
 ];
 
