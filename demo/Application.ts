@@ -53,7 +53,7 @@ export default class Application {
     private paused = false;
 
     // Demos
-    private demoIndex = 1;
+    private demoIndex = 23;
     private demoShortcutBuffer = '';
     private demoShortcutTimer: number | null = null;
 
@@ -886,10 +886,16 @@ export default class Application {
                 const waterDrag = Buoyancy.generateLinearWaterDragForce(
                     body,
                     buoyancy.submergedArea,
-                    0.05,
+                    this.liquid.density,
+                    0.5,
                     SETTINGS.dt,
                 );
-                const waterAngularDrag = Buoyancy.generateAngularWaterDragTorque(body, buoyancy.submergedArea, 1);
+                const waterAngularDrag = Buoyancy.generateAngularWaterDragTorque(
+                    body,
+                    buoyancy.submergedArea,
+                    this.liquid.density,
+                    1,
+                );
                 body.addForce(waterDrag);
                 body.addTorque(waterAngularDrag);
             }
