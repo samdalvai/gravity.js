@@ -87,7 +87,8 @@ export class ContactManifold extends Constraint {
         bodyB: RigidBody,
         contactPoints: ContactPoint[],
         penetrationDepth: number,
-        contactNormal: Vec2,
+        contactNormalX: number,
+        contactNormalY: number,
         featureFlipped: boolean,
     );
     constructor(
@@ -95,7 +96,8 @@ export class ContactManifold extends Constraint {
         bodyB?: RigidBody,
         contactPoints?: ContactPoint[],
         penetrationDepth?: number,
-        contactNormal?: Vec2,
+        contactNormalX?: number,
+        contactNormalY?: number,
         featureFlipped?: boolean,
     ) {
         super(bodyA as RigidBody, bodyB as RigidBody);
@@ -105,10 +107,11 @@ export class ContactManifold extends Constraint {
             bodyB != null &&
             contactPoints != null &&
             penetrationDepth != null &&
-            contactNormal != null &&
+            contactNormalX != null &&
+            contactNormalY != null &&
             featureFlipped != null
         ) {
-            this.init(bodyA, bodyB, contactPoints, penetrationDepth, contactNormal, featureFlipped);
+            this.init(bodyA, bodyB, contactPoints, penetrationDepth, contactNormalX, contactNormalY, featureFlipped);
         }
     }
 
@@ -117,16 +120,17 @@ export class ContactManifold extends Constraint {
         bodyB: RigidBody,
         contactPoints: ContactPoint[],
         penetrationDepth: number,
-        contactNormal: Vec2,
+        contactNormalX: number,
+        contactNormalY: number,
         featureFlipped: boolean,
     ): void {
         this.bodyA = bodyA;
         this.bodyB = bodyB;
         this.penetrationDepth = penetrationDepth;
-        this.contactNormalX = contactNormal.x;
-        this.contactNormalY = contactNormal.y;
-        this.contactTangentX = -contactNormal.y;
-        this.contactTangentY = contactNormal.x;
+        this.contactNormalX = contactNormalX;
+        this.contactNormalY = contactNormalY;
+        this.contactTangentX = -contactNormalY;
+        this.contactTangentY = contactNormalX;
 
         this.contactCount = contactPoints.length;
 

@@ -100,10 +100,10 @@ function createCollisionManifold(
     }
 
     if (manifoldPool != null) {
-        return manifoldPool.acquire(bodyA, bodyB, points, depth, normal, false);
+        return manifoldPool.acquire(bodyA, bodyB, points, depth, normal.x, normal.y, false);
     }
 
-    return new ContactManifold(bodyA, bodyB, points, depth, normal, false);
+    return new ContactManifold(bodyA, bodyB, points, depth, normal.x, normal.y, false);
 }
 
 export function collideCircles(bodyA: RigidBody, bodyB: RigidBody): ContactManifold | null {

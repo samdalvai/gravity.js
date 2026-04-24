@@ -16,17 +16,34 @@ export class ContactManifoldPool {
         bodyB: RigidBody,
         contactPoints: ContactPoint[],
         penetrationDepth: number,
-        contactNormal: Vec2,
+        contactNormalX: number,
+        contactNormalY: number,
         featureFlipped: boolean,
     ): ContactManifold {
         const manifold = this.manifolds.pop();
 
         if (manifold != null) {
-            manifold.init(bodyA, bodyB, contactPoints, penetrationDepth, contactNormal, featureFlipped);
+            manifold.init(
+                bodyA,
+                bodyB,
+                contactPoints,
+                penetrationDepth,
+                contactNormalX,
+                contactNormalY,
+                featureFlipped,
+            );
             return manifold;
         }
 
-        return new ContactManifold(bodyA, bodyB, contactPoints, penetrationDepth, contactNormal, featureFlipped);
+        return new ContactManifold(
+            bodyA,
+            bodyB,
+            contactPoints,
+            penetrationDepth,
+            contactNormalX,
+            contactNormalY,
+            featureFlipped,
+        );
     }
 
     release(manifold: ContactManifold): void {
