@@ -1,18 +1,14 @@
 import {
     BodiesFactory,
-    Buoyancy,
     DistanceJoint,
     FIXED_DELTA_TIME,
+    Force,
     GRAVITY,
     GrabJoint,
-    Gravity,
-    Interactions,
     MAX_BODIES,
     PIXELS_PER_METER,
-    Resistance,
     RigidBody,
     SETTINGS,
-    Temperature,
     Utils,
     Vec2,
     WeldJoint,
@@ -212,7 +208,7 @@ export default class Application {
                             const strength = 5000;
 
                             for (const body of this.world.getBodies()) {
-                                const explosionImpulse = Interactions.generateExplosionForce(
+                                const explosionImpulse = Force.interactions.generateExplosionForce(
                                     body,
                                     explosionPos,
                                     radius,
@@ -782,9 +778,9 @@ export default class Application {
         const bodies = this.world.getBodies();
 
         // Less efficient but more accurate method
-        // Gravity.applyGravitationalForces(bodies, GRAVITY, 0, BODY_REMOVAL_THRESHOLD * BODY_REMOVAL_THRESHOLD);
+        // Force.gravity.applyGravitationalForces(bodies, GRAVITY, 0, BODY_REMOVAL_THRESHOLD * BODY_REMOVAL_THRESHOLD);
 
-        Gravity.applyBarnesHutGravitationalForces(bodies, GRAVITY, 0, BODY_REMOVAL_THRESHOLD * BODY_REMOVAL_THRESHOLD);
+        Force.gravity.applyBarnesHutGravitationalForces(bodies, GRAVITY, 0, BODY_REMOVAL_THRESHOLD * BODY_REMOVAL_THRESHOLD);
     }
 
     private applyBlackHoleForce(): void {
@@ -799,7 +795,7 @@ export default class Application {
                 continue;
             }
 
-            const attraction = Gravity.generateGravitationalForce(body, blackHole, GRAVITY, 80 * 80, 950 * 950);
+            const attraction = Force.gravity.generateGravitationalForce(body, blackHole, GRAVITY, 80 * 80, 950 * 950);
             body.addForce(attraction);
         }
     }
@@ -812,7 +808,7 @@ export default class Application {
         const drag = this.dragForce;
 
         for (const body of this.world.getBodies()) {
-            const dragForce = Resistance.generateDragForce(body, drag, SETTINGS.dt);
+            const dragForce = Force.resistance.generateDragForce(body, drag, SETTINGS.dt);
             body.addForce(dragForce);
         }
     }
@@ -826,9 +822,9 @@ export default class Application {
         const bodies = this.world.getBodies();
 
         // Less efficient but more accurate method
-        // Interactions.applyCoulombForces(bodies, coulombForceStrength);
+        // interactions.applyCoulombForces(bodies, coulombForceStrength);
 
-        Interactions.applyBarnesHutCoulombForces(bodies, coulombForceStrength);
+        Force.interactions.applyBarnesHutCoulombForces(bodies, coulombForceStrength);
     }
 
     private applyConvectionForce(): void {
@@ -840,12 +836,12 @@ export default class Application {
         for (let i = 0; i < bodies.length; i++) {
             const body = bodies[i];
 
-            Temperature.dissipateHeat(body, AMBIENT_TEMPERATURE, SETTINGS.dt, DISSIPATION_FACTOR);
+            Force.temperature.dissipateHeat(body, AMBIENT_TEMPERATURE, SETTINGS.dt, DISSIPATION_FACTOR);
 
             const color = Utils.temperatureToColor(body.temperature, MIN_TEMPERATURE, MAX_TEMPERATURE);
 
             this.setBodyFillColor(body, color);
-            const convection = Temperature.generateConvectionForce(
+            const convection = Force.temperature.generateConvectionForce(
                 body,
                 AMBIENT_TEMPERATURE,
                 CONVECTION_FORCE,
@@ -873,19 +869,19 @@ export default class Application {
             // If objects overlap on X axis but don't overlap on Y axis the cannot collide
             if (liquidAABB.maxY < body.minY || liquidAABB.minY > body.maxY) continue;
 
-            const buoyancy = Buoyancy.generateBuoyancyForce(body, waterSurfaceY, this.liquid.density, gravity);
+            const buoyancy = Force.buoyancy.generateBuoyancyForce(body, waterSurfaceY, this.liquid.density, gravity);
 
             if (buoyancy) {
                 body.addForceAtPoint(buoyancy.force, buoyancy.applicationPoint);
 
-                const waterDrag = Buoyancy.generateLinearWaterDragForce(
+                const waterDrag = Force.buoyancy.generateLinearWaterDragForce(
                     body,
                     buoyancy.submergedArea,
                     this.liquid.density,
                     1,
                     SETTINGS.dt,
                 );
-                const waterAngularDrag = Buoyancy.generateAngularWaterDragTorque(
+                const waterAngularDrag = Force.buoyancy.generateAngularWaterDragTorque(
                     body,
                     buoyancy.submergedArea,
                     this.liquid.density,
