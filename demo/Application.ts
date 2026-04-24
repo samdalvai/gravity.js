@@ -157,7 +157,7 @@ export default class Application {
         this.running = Graphics.openWindow();
         this.uiManager.initialize(this.getUIState(), {
             onSelectDemo: index => this.loadDemo(index),
-            onRestartDemo: () => this.loadDemo(this.demoIndex),
+            onRestartDemo: () => this.loadDemo(this.demoIndex, false),
             onSetDebug: value => this.setDebug(value),
             onSetShowAABB: value => this.setShowAABB(value),
             onSetShowContacts: value => this.setShowContacts(value),
