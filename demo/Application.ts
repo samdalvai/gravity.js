@@ -790,7 +790,7 @@ export default class Application {
                     a,
                     b,
                     GRAVITY,
-                    80 * 80,
+                    0,
                     BODY_REMOVAL_THRESHOLD * BODY_REMOVAL_THRESHOLD,
                 );
                 a.addForce(attraction);
