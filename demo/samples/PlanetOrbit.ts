@@ -213,6 +213,16 @@ function onContactCallBack(
 
             const debrie = Utils.randomConvexBody(pos.x, pos.y, scaledDebriesRadius, vertices, mass);
             debrie.velocity = planet.velocity.copy();
+            const outwardDirection = debrie.position.subNew(planet.position);
+            if (outwardDirection.magnitudeSquared() === 0) {
+                const angle = Utils.randomNumber(0, Math.PI * 2);
+                outwardDirection.x = Math.cos(angle);
+                outwardDirection.y = Math.sin(angle);
+            } else {
+                outwardDirection.normalize();
+            }
+            const outwardSpeed = scaledPlanetRadius * Utils.randomNumber(1, 10);
+            debrie.applyImpulseLinear(outwardDirection.scaleNew(outwardSpeed * mass));
             app.setBodyFillColor(debrie, color);
             world.addBody(debrie);
         }
