@@ -63,8 +63,8 @@ export function runModified() {
 process.on('exit', () => {
     console.log('');
     console.log('Vec2 allocations');
-    console.log(`original: ${Vec2.allocations.toLocaleString()}`);
-    console.log(`modified: ${Vec2Old.allocations.toLocaleString()}`);
+    console.log(`original: ${Vec2Old.allocations.toLocaleString()}`);
+    console.log(`modified: ${Vec2.allocations.toLocaleString()}`);
 
     console.log('Contacts');
     console.log(`original: ${worldOld.getManifolds().length}`);
