@@ -47,3 +47,23 @@ export function generateGravitationalForce(
     // Calculate the final resulting attraction force vector
     return attractionDirection.scaleNew(attractionMagnitude);
 }
+
+/**
+ * Convenience version that applies all gravitaional forces to all bodies
+ */
+export function applyGravitationalForces(
+    bodies: readonly RigidBody[],
+    G: number,
+    minDistanceSquared: number,
+    maxDistanceSquared: number,
+): void {
+    for (let i = 0; i < bodies.length - 1; i++) {
+        const a = bodies[i];
+        for (let j = i + 1; j < bodies.length; j++) {
+            const b = bodies[j];
+            const attraction = generateGravitationalForce(a, b, G, minDistanceSquared, maxDistanceSquared);
+            a.addForce(attraction);
+            b.addForce(attraction.negateNew());
+        }
+    }
+}
