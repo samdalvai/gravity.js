@@ -4,11 +4,11 @@ import type Application from '../Application';
 import Graphics from '../graphics/Graphics';
 import { defineDemo } from './shared';
 
-const RADIUS = 2000;
+const RADIUS = 3_500;
 
 function setupElectroStaticForce(world: World, app: Application): void {
     SETTINGS.applyGravity = false;
-    Graphics.zoom = 0.5;
+    Graphics.zoom = 0.35;
 
     const numOfParticles = 2500;
     const center = new Vec2();
