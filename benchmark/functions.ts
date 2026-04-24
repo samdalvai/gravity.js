@@ -11,18 +11,18 @@ const worldOld = new WorldOld(-9.8);
 const numBodies = 1_000;
 
 for (let i = 0; i < numBodies; i++) {
-    const x = Utils.randomNumber(-250, 250);
-    const y = Utils.randomNumber(-500, 500);
+    const x = Utils.randomNumber(-500, 500);
+    const y = Utils.randomNumber(0, 500);
 
     const p = BodiesFactory.circle({
-        radius: 20,
+        radius: 10,
         x,
         y,
         mass: 1,
     });
 
     const pOld = BodiesFactoryOld.circle({
-        radius: 20,
+        radius: 10,
         x,
         y,
         mass: 1,
@@ -32,8 +32,10 @@ for (let i = 0; i < numBodies; i++) {
     worldOld.addBody(pOld);
 }
 
-const floor = BodiesFactory.box({ width: 5000, height: 50, x: 0, y: -600, mass: 0 });
-worldNew.addBody(floor);
+const floorNewLeft = BodiesFactory.box({ width: 5000, height: 50, x: 0, y: -600, mass: 0, rotation: 0.25 });
+const floorNewRight = BodiesFactory.box({ width: 5000, height: 50, x: 0, y: -600, mass: 0, rotation: -0.25 });
+worldNew.addBody(floorNewLeft);
+worldNew.addBody(floorNewRight);
 
 const floorOld = BodiesFactoryOld.box({ width: 5000, height: 50, x: 0, y: -600, mass: 0 });
 worldOld.addBody(floorOld);
@@ -45,6 +47,7 @@ const warmupIterations = 1_000;
 for (let i = 0; i < warmupIterations; i++) {
     worldOld.update(DT);
     worldNew.update(DT);
+    console.log('contacts: ', worldNew.getManifolds().length);
 }
 
 export function runOriginal() {
