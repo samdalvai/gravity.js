@@ -42,13 +42,6 @@ worldOld.addBody(floorOld);
 
 const DT = 1 / 60;
 
-const warmupIterations = 1_000;
-
-for (let i = 0; i < warmupIterations; i++) {
-    worldOld.update(DT);
-    worldNew.update(DT);
-}
-
 export function runOriginal() {
     worldOld.update(DT);
 }
