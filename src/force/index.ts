@@ -7,11 +7,18 @@ import * as spring from './Spring';
 import * as temperature from './Temperature';
 
 export const Force = {
+    /** Buoyancy, submerged-area, and water-drag helpers. */
     buoyancy,
+    /** Weight and body-to-body gravitational force helpers. */
     gravity,
+    /** Electrostatic and explosion interaction forces. */
     interactions,
-    resistance,
-    spring,
-    temperature,
+    /** Spatial partitioning utilities used by Barnes-Hut force solvers. */
     quadTree,
+    /** Linear and angular drag helpers for motion through a medium. */
+    resistance,
+    /** Spring force and damping helpers. */
+    spring,
+    /** Heat dissipation and convection force helpers. */
+    temperature,
 };
