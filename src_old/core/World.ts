@@ -23,12 +23,16 @@ export class World {
     private G: number;
 
     private bodies: RigidBody[] = [];
+    /** Pairs are allocated in blocks of 2 */
+    private potentialPairs: RigidBody[] = [];
 
-    private manifolds: ContactManifold[] = [];
     private joints: Joint[] = [];
 
-    private potentialPairs: [RigidBody, RigidBody][] = [];
+    private manifolds: ContactManifold[] = [];
+    private manifoldsNext: ContactManifold[] = [];
+
     private manifoldMap: Map<number, ContactManifold> = new Map();
+    private manifoldMapNext: Map<number, ContactManifold> = new Map();
 
     private readonly manifoldPool = NarrowPhase.manifoldPool;
 
@@ -104,21 +108,19 @@ export class World {
             const body = bodies[i];
             if (SETTINGS.applyGravity) {
                 // Apply the weight force to all bodies
-                // const weightForce = Force.generateWeightForce(body, this.G * body.gravityScale);
-                // body.addForce(weightForce);
-
-                // Apply the weight force to all bodies
                 Force.applyWeightForce(body, this.G * body.gravityScale);
             }
 
             // Apply forces to all bodies
-            for (const force of this.forces) {
-                body.addForce(force);
+            const forces = this.forces;
+            for (let j = 0; j < forces.length; j++) {
+                body.addForce(forces[j]);
             }
 
             // Apply torque to all bodiesx
-            for (const torque of this.torques) {
-                body.addTorque(torque);
+            const torques = this.torques;
+            for (let j = 0; j < torques.length; j++) {
+                body.addTorque(torques[j]);
             }
 
             // Update last grounded time
@@ -228,10 +230,10 @@ export class World {
         this.potentialPairs.length = 0;
 
         // Broad phase check with prune & sweep algorithm
-        for (let i = 0; i < bodies.length; i++) {
+        for (let i = 0, len = bodies.length; i < len; i++) {
             const a = bodies[i];
 
-            for (let j = i + 1; j < bodies.length; j++) {
+            for (let j = i + 1; j < len; j++) {
                 const b = bodies[j];
 
                 // If objects don't overlap on X axis they cannot collide
@@ -247,46 +249,65 @@ export class World {
                 }
 
                 // Objects may be colliding
-                this.potentialPairs.push([a, b]);
+                this.potentialPairs.push(a, b);
             }
         }
     }
 
     private narrowPhase() {
         const oldManifolds = this.manifolds;
-        const newManifolds: ContactManifold[] = [];
-        const newManifoldMap: Map<number, ContactManifold> = new Map();
+
+        const newManifolds = this.manifoldsNext;
+        const newMap = this.manifoldMapNext;
+
+        newManifolds.length = 0;
+        newMap.clear();
+
+        const pairs = this.potentialPairs;
+        const oldMap = this.manifoldMap;
+        const warmStarting = SETTINGS.warmStarting;
 
         // Narrow phase check, potential pairs may still not collide
-        for (let [a, b] of this.potentialPairs) {
+        for (let i = 0; i < pairs.length; i += 2) {
+            let a = pairs[i];
+            let b = pairs[i + 1];
+
             if (a.isStatic() && b.isStatic()) continue;
 
             // Improve coherence
             if (a.id > b.id) {
-                [a, b] = [b, a];
+                const tmp = a;
+                a = b;
+                b = tmp;
             }
 
             const newManifold = NarrowPhase.detectCollision(a, b);
             if (newManifold == null) continue;
 
             const key = Utils.pairKey(a, b);
-            if (SETTINGS.warmStarting && this.manifoldMap.has(key)) {
-                const oldManifold = this.manifoldMap.get(key)!;
-                newManifold.tryWarmStart(oldManifold);
+
+            if (warmStarting) {
+                const oldManifold = oldMap.get(key);
+                if (oldManifold !== undefined) {
+                    newManifold.tryWarmStart(oldManifold);
+                }
             }
 
-            newManifoldMap.set(key, newManifold);
+            newMap.set(key, newManifold);
             newManifolds.push(newManifold);
 
             this.setGrounded(newManifold);
         }
 
-        this.manifoldMap = newManifoldMap;
-        this.manifolds = newManifolds;
-
         for (let i = 0; i < oldManifolds.length; i++) {
             this.manifoldPool.release(oldManifolds[i]);
         }
+
+        this.manifolds = newManifolds;
+        this.manifoldsNext = oldManifolds;
+
+        this.manifoldMap = newMap;
+        this.manifoldMapNext = oldMap;
     }
 
     private solveConstraints(invDt: number) {
