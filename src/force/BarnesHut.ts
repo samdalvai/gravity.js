@@ -138,6 +138,26 @@ export function generateBarnesHutGravitationalForces(
 }
 
 /**
+ * Convenience version that builds the tree once and applies one gravitational force per body.
+ */
+export function applyBarnesHutGravitationalForces(
+    bodies: readonly RigidBody[],
+    G: number,
+    minDistanceSquared: number,
+    maxDistanceSquared: number,
+    theta = 0.5,
+): void {
+    const tree = buildBarnesHutQuadTree(bodies, 'gravity');
+
+    for (let i = 0; i < bodies.length; i++) {
+        const b = bodies[i];
+        const force = generateBarnesHutGravitationalForce(b, tree, G, minDistanceSquared, maxDistanceSquared, theta);
+
+        b.addForce(force);
+    }
+}
+
+/**
  * Computes the Coulomb force on one body by traversing a Barnes-Hut quadtree.
  *
  * Positive and negative charges are aggregated separately so mixed-charge cells
@@ -176,6 +196,24 @@ export function generateBarnesHutCoulombForces(
     }
 
     return forces;
+}
+
+/**
+ * Convenience version that builds the tree once applies one Coulomb force per body.
+ */
+export function applyBarnesHutCoulombForces(
+    bodies: readonly RigidBody[],
+    k: number,
+    theta = 0.5,
+    epsilon = 0.01,
+): void {
+    const tree = buildBarnesHutQuadTree(bodies, 'coulomb');
+
+    for (let i = 0; i < bodies.length; i++) {
+        const b = bodies[i];
+        const force = generateBarnesHutCoulombForce(b, tree, k, theta, epsilon);
+        b.addForce(force);
+    }
 }
 
 function createNode(centerX: number, centerY: number, halfSize: number): BarnesHutQuadTree {
@@ -248,9 +286,13 @@ function updateAggregates(node: BarnesHutQuadTree, body: RigidBody): void {
     if (body.mass !== 0) {
         const nextTotalMass = node.totalMass + body.mass;
         node.centerOfMassX =
-            nextTotalMass === 0 ? 0 : (node.centerOfMassX * node.totalMass + body.position.x * body.mass) / nextTotalMass;
+            nextTotalMass === 0
+                ? 0
+                : (node.centerOfMassX * node.totalMass + body.position.x * body.mass) / nextTotalMass;
         node.centerOfMassY =
-            nextTotalMass === 0 ? 0 : (node.centerOfMassY * node.totalMass + body.position.y * body.mass) / nextTotalMass;
+            nextTotalMass === 0
+                ? 0
+                : (node.centerOfMassY * node.totalMass + body.position.y * body.mass) / nextTotalMass;
         node.totalMass = nextTotalMass;
     }
 
@@ -367,10 +409,7 @@ function accumulateGravitationalForce(
         const distanceSquared = dx * dx + dy * dy;
 
         if (distanceSquared !== 0) {
-            const clampedDistanceSquared = Math.min(
-                Math.max(distanceSquared, minDistanceSquared),
-                maxDistanceSquared,
-            );
+            const clampedDistanceSquared = Math.min(Math.max(distanceSquared, minDistanceSquared), maxDistanceSquared);
             const inverseDistance = 1 / Math.sqrt(distanceSquared);
             const magnitude = (G * body.mass * node.totalMass) / clampedDistanceSquared;
             force.x += dx * inverseDistance * magnitude;
