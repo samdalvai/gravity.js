@@ -6,6 +6,9 @@ export interface BodyRenderStyle {
     strokeColor?: string;
     texture?: ImageBitmap | null;
     textureScale?: number;
+    label?: string;
+    labelColor?: string;
+    labelFontSize?: number;
 }
 
 export default class BodyRenderRegistry {
@@ -36,6 +39,19 @@ export default class BodyRenderRegistry {
     setTextureScale(body: RigidBody, textureScale: number): void {
         const style = this.ensureStyle(body);
         style.textureScale = textureScale;
+    }
+
+    setLabel(body: RigidBody, label: string, fontSize?: number, color?: string): void {
+        const style = this.ensureStyle(body);
+        style.label = label;
+
+        if (fontSize !== undefined) {
+            style.labelFontSize = fontSize;
+        }
+
+        if (color !== undefined) {
+            style.labelColor = color;
+        }
     }
 
     private ensureStyle(body: RigidBody): BodyRenderStyle {
