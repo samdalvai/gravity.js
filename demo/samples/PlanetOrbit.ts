@@ -201,7 +201,7 @@ function setupPlanetOrbit(world: World, app: Application): void {
             maxRadius,
             minMass,
             maxMass,
-            numBodies: 180,
+            numBodies: 300,
             colors: ['#f7fbff', '#b8deff'],
         });
     }
