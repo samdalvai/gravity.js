@@ -6,6 +6,7 @@ import {
     Force,
     GRAVITY,
     GrabJoint,
+    Gravity,
     MAX_BODIES,
     PIXELS_PER_METER,
     RigidBody,
@@ -771,7 +772,7 @@ export default class Application {
             for (let j = i + 1; j < bodies.length; j++) {
                 const b = bodies[j];
 
-                const attraction = Force.generateGravitationalForce(
+                const attraction = Gravity.generateGravitationalForce(
                     a,
                     b,
                     GRAVITY,
@@ -796,7 +797,7 @@ export default class Application {
                 continue;
             }
 
-            const attraction = Force.generateGravitationalForce(body, blackHole, GRAVITY, 80 * 80, 950 * 950);
+            const attraction = Gravity.generateGravitationalForce(body, blackHole, GRAVITY, 80 * 80, 950 * 950);
             body.addForce(attraction);
         }
     }
