@@ -1,12 +1,7 @@
 import { RigidBody } from '../core/RigidBody';
 import { Vec2 } from '../math/Vec2';
 
-export function generateExplosionForce(
-    body: RigidBody,
-    explosionSource: Vec2,
-    radius: number,
-    strength: number,
-): Vec2 {
+export function generateExplosionForce(body: RigidBody, explosionSource: Vec2, radius: number, strength: number): Vec2 {
     // Static bodies don't explode
     if (body.invMass === 0) return new Vec2();
 
@@ -56,4 +51,19 @@ export function generateCoulombForce(bodyA: RigidBody, bodyB: RigidBody, k: numb
     const forceScalar = (-k * (q1 * q2)) / safeDistSq;
 
     return new Vec2(dirX * forceScalar, dirY * forceScalar);
+}
+
+/**
+ * Convenience version that applies all voulomb forces to all bodies
+ */
+export function applyCoulombForces(bodies: readonly RigidBody[], k: number): void {
+    for (let i = 0; i < bodies.length - 1; i++) {
+        const a = bodies[i];
+        for (let j = i + 1; j < bodies.length; j++) {
+            const b = bodies[j];
+            const coulombForce = generateCoulombForce(a, b, k);
+            a.addForce(coulombForce);
+            b.addForce(coulombForce.negateNew());
+        }
+    }
 }
