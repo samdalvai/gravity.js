@@ -56,7 +56,7 @@ export default class Application {
     private paused = false;
 
     // Demos
-    private demoIndex = 15;
+    private demoIndex = 20;
     private demoShortcutBuffer = '';
     private demoShortcutTimer: number | null = null;
 
@@ -860,14 +860,22 @@ export default class Application {
         const bodies = this.world.getBodies();
 
         // TODO: could be improved using spatial partitioning and cutoff or other techniques, see Barnes–Hut algorithm
+        // for (let i = 0; i < bodies.length - 1; i++) {
+        //     const bodyA = bodies[i];
+        //     for (let j = i + 1; j < bodies.length; j++) {
+        //         const bodyB = bodies[j];
+        //         const coulombForce = Interactions.generateCoulombForce(bodyA, bodyB, coulombForceStrength);
+        //         bodyA.addForce(coulombForce);
+        //         bodyB.addForce(coulombForce.negateNew());
+        //     }
+        // }
+
+        const tree = BarnesHut.buildBarnesHutQuadTree(bodies, 'coulomb');
+
         for (let i = 0; i < bodies.length - 1; i++) {
-            const bodyA = bodies[i];
-            for (let j = i + 1; j < bodies.length; j++) {
-                const bodyB = bodies[j];
-                const coulombForce = Interactions.generateCoulombForce(bodyA, bodyB, coulombForceStrength);
-                bodyA.addForce(coulombForce);
-                bodyB.addForce(coulombForce.negateNew());
-            }
+            const b = bodies[i];
+            const coulombForce = BarnesHut.generateBarnesHutCoulombForce(b, tree, coulombForceStrength);
+            b.addForce(coulombForce);
         }
     }
 
