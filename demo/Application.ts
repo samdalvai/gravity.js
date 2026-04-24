@@ -780,7 +780,12 @@ export default class Application {
         // Less efficient but more accurate method
         // Force.gravity.applyGravitationalForces(bodies, GRAVITY, 0, BODY_REMOVAL_THRESHOLD * BODY_REMOVAL_THRESHOLD);
 
-        Force.gravity.applyBarnesHutGravitationalForces(bodies, GRAVITY, 0, BODY_REMOVAL_THRESHOLD * BODY_REMOVAL_THRESHOLD);
+        Force.gravity.applyBarnesHutGravitationalForces(
+            bodies,
+            GRAVITY,
+            0,
+            BODY_REMOVAL_THRESHOLD * BODY_REMOVAL_THRESHOLD,
+        );
     }
 
     private applyBlackHoleForce(): void {
@@ -856,8 +861,10 @@ export default class Application {
             return;
         }
         const bodies = this.world.getBodies();
-        const liquidAABB = this.liquid.aabb;
+        const liquid = this.liquid;
+        const liquidAABB = liquid.aabb;
         const waterSurfaceY = liquidAABB.maxY;
+        const density = liquid.density;
         const gravity = SETTINGS.applyGravity ? GRAVITY : 0;
 
         for (let i = 0; i < bodies.length; i++) {
@@ -869,27 +876,7 @@ export default class Application {
             // If objects overlap on X axis but don't overlap on Y axis the cannot collide
             if (liquidAABB.maxY < body.minY || liquidAABB.minY > body.maxY) continue;
 
-            const buoyancy = Force.buoyancy.generateBuoyancyForce(body, waterSurfaceY, this.liquid.density, gravity);
-
-            if (buoyancy) {
-                body.addForceAtPoint(buoyancy.force, buoyancy.applicationPoint);
-
-                const waterDrag = Force.buoyancy.generateLinearWaterDragForce(
-                    body,
-                    buoyancy.submergedArea,
-                    this.liquid.density,
-                    1,
-                    SETTINGS.dt,
-                );
-                const waterAngularDrag = Force.buoyancy.generateAngularWaterDragTorque(
-                    body,
-                    buoyancy.submergedArea,
-                    this.liquid.density,
-                    1,
-                );
-                body.addForce(waterDrag);
-                body.addTorque(waterAngularDrag);
-            }
+            Force.buoyancy.applyBuoyancyForces(body, waterSurfaceY, density, gravity);
         }
     }
 
