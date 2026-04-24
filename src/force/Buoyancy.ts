@@ -1,3 +1,4 @@
+import { SETTINGS } from '../core/Constants';
 import { RigidBody } from '../core/RigidBody';
 import { Vec2 } from '../math/Vec2';
 import { CapsuleShape } from '../shapes/CapsuleShape';
@@ -335,4 +336,38 @@ export function generateAngularWaterDragTorque(
     const submergedFraction = submergedArea / totalArea;
 
     return -body.angularVelocity * angularDragCoefficient * liquidDensity * submergedFraction * body.I;
+}
+
+/**
+ * Convenience version that applies buoyancy with linear and angular drag to a body
+ */
+export function applyBuoyancyForces(
+    body: RigidBody,
+    liquidSurfaceY: number,
+    liquidDensity: number,
+    gravity: number,
+    linearDragCoefficient = 1,
+    angularDragCoefficient = 1,
+) {
+    const buoyancy = generateBuoyancyForce(body, liquidSurfaceY, liquidDensity, gravity);
+
+    if (buoyancy) {
+        body.addForceAtPoint(buoyancy.force, buoyancy.applicationPoint);
+
+        const waterDrag = generateLinearWaterDragForce(
+            body,
+            buoyancy.submergedArea,
+            liquidDensity,
+            linearDragCoefficient,
+            SETTINGS.dt,
+        );
+        const waterAngularDrag = generateAngularWaterDragTorque(
+            body,
+            buoyancy.submergedArea,
+            liquidDensity,
+            angularDragCoefficient,
+        );
+        body.addForce(waterDrag);
+        body.addTorque(waterAngularDrag);
+    }
 }
