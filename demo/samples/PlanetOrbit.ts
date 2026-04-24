@@ -131,7 +131,7 @@ function setupPlanetOrbit(world: World, app: Application): void {
 
     const sun = createBody(SUN, new Vec2(0, 0));
     sun.onContact = info => {
-        onContactCallBack(sun, info, world);
+        onContactCallBack(sun, SUN, info, world, app);
     };
     world.addBody(sun);
     applyBodyStyle(app, sun, SUN);
@@ -142,7 +142,7 @@ function setupPlanetOrbit(world: World, app: Application): void {
         planet.velocity = getOrbitalSpeed(sun, planet, GRAVITY);
 
         planet.onContact = info => {
-            onContactCallBack(planet, info, world);
+            onContactCallBack(planet, planetSpec, info, world, app);
         };
 
         world.addBody(planet);
@@ -188,15 +188,45 @@ function setupPlanetOrbit(world: World, app: Application): void {
     app.setGravitationalForce(true);
 }
 
-function onContactCallBack(planet: RigidBody, info: ContactInfo, world: World) {
+function onContactCallBack(
+    planet: RigidBody,
+    planetSpec: CelestialBodySpec,
+    info: ContactInfo,
+    world: World,
+    app: Application,
+) {
     const a = info.bodyA;
     const b = info.bodyB;
-    const massSum = a.mass + b.mass;
-    console.log('Contact massSum: ', massSum);
 
-    // if (massSum > PLANET_EXPLOSION_THRESHOLD) {
-    if (massSum > 1) {
-        // TO be tuned
+    let thisMass;
+    let otherMass;
+
+    if (a.id === planet.id) {
+        thisMass = a.mass;
+        otherMass = b.mass;
+    } else {
+        thisMass = b.mass;
+        otherMass = a.mass;
+    }
+
+    if (otherMass / thisMass >= 1 / PLANET_EXPLOSION_THRESHOLD) {
+        const radius = planetSpec.radiusKm;
+        const numDebries = Math.floor(radius / 1000);
+        const debriesRadius = EARTH_RADIUS_KM / 1000;
+        const scaledDebriesRadius = getScaledRadius(debriesRadius);
+        const mass = planet.mass / numDebries;
+
+        for (let i = 0; i < numDebries; i++) {
+            const vertices = Utils.randomNumber(3, 10);
+            const color = planetSpec.color;
+            const pos = randomPointInRadius(planet.position, scaledDebriesRadius);
+
+            const debrie = Utils.randomConvexBody(pos.x, pos.y, debriesRadius, vertices, mass);
+            app.setBodyFillColor(debrie, color);
+            world.addBody(debrie);
+        }
+
+        planet.onContact = undefined;
         world.removeBody(planet);
     }
 }
@@ -253,6 +283,16 @@ function lerp(from: number, to: number, t: number): number {
 
 function degreesToRadians(degrees: number): number {
     return (degrees * Math.PI) / 180;
+}
+
+function randomPointInRadius(center: Vec2, radius: number): Vec2 {
+    const u = Math.random();
+    const v = Math.random();
+
+    const r = radius * Math.sqrt(u);
+    const theta = 2 * Math.PI * v;
+
+    return new Vec2(center.x + Math.cos(theta) * r, center.y + Math.sin(theta) * r);
 }
 
 /**
