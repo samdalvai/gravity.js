@@ -354,9 +354,10 @@ export class World {
         }
 
         this.bodies.length = 0;
+        this.potentialPairs.length = 0;
         this.manifolds.length = 0;
-        this.joints.length = 0;
         this.manifoldMap.clear();
+        this.joints.length = 0;
         this.forces.length = 0;
         this.torques.length = 0;
     }
