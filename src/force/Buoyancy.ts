@@ -21,13 +21,13 @@ type SubmergedShapeResult = {
 
 /**
  * Computes buoyancy force based on submerged area of a body shaope
- * 
+ *
  * @param body The optionally submerged body
  * @param liquidSurfaceY The liquid surface max y coordinates
  * @param liquidDensity The liquid density
  * @param gravity The world gfravity
  * @returns The submerged area, the buoyancy force and the centroid where to apply it
- * 
+ *
  * The force should be applied by using {@link RigidBody.addForceAtPoint}. Should be used in combination with {@link generateLinearWaterDragForce} and {@link generateAngularWaterDragTorque} for realistic behaviour
  */
 export function generateBuoyancyForce(
@@ -289,6 +289,7 @@ function approximateBuoyancy(
 export function generateLinearWaterDragForce(
     body: RigidBody,
     submergedArea: number,
+    liquidDensity: number,
     dragCoefficient: number,
     dt: number,
 ): Vec2 {
@@ -309,7 +310,7 @@ export function generateLinearWaterDragForce(
 
     const speed = Math.sqrt(speedSq);
 
-    let dragMagnitude = dragCoefficient * speedSq * submergedFraction;
+    let dragMagnitude = 0.5 * liquidDensity * dragCoefficient * speedSq * submergedFraction;
 
     if (dt > 0) {
         const maxForce = (body.mass * speed) / dt;
@@ -322,6 +323,7 @@ export function generateLinearWaterDragForce(
 export function generateAngularWaterDragTorque(
     body: RigidBody,
     submergedArea: number,
+    liquidDensity: number,
     angularDragCoefficient: number,
 ): number {
     const totalArea = body.shape.getArea();
@@ -332,5 +334,5 @@ export function generateAngularWaterDragTorque(
 
     const submergedFraction = submergedArea / totalArea;
 
-    return -body.angularVelocity * angularDragCoefficient * submergedFraction * body.I;
+    return -body.angularVelocity * angularDragCoefficient * liquidDensity * submergedFraction * body.I;
 }
