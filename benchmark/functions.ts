@@ -1,7 +1,6 @@
 import { BodiesFactory, SETTINGS, Utils, Vec2, World } from '../src';
-import { applyBarnesHutCoulombForces, applyBarnesHutGravitationalForces } from '../src/force/BarnesHut';
-import { applyGravitationalForces } from '../src/force/Gravity';
-import { applyCoulombForces } from '../src/force/Interactions';
+import { applyBarnesHutGravitationalForces, applyGravitationalForces } from '../src/force/Gravity';
+import { applyBarnesHutCoulombForces, applyCoulombForces } from '../src/force/Interactions';
 
 declare const process: {
     on(event: 'exit', listener: () => void): void;

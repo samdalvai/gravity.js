@@ -4,4 +4,4 @@ export * as Interactions from './Interactions';
 export * as Resistance from './Resistance';
 export * as Spring from './Spring';
 export * as Temperature from './Temperature';
-export * as BarnesHut from './BarnesHut';
+export * as QuadTree from './QuadTree';
