@@ -46,6 +46,7 @@ export interface UIState {
     demoIndex: number;
     demoLabels: string[];
     debug: boolean;
+    showLabels: boolean;
     showAABB: boolean;
     showContacts: boolean;
     showRuntimeStatsHud: boolean;
@@ -61,6 +62,7 @@ export interface UIActions {
     onSelectDemo(index: number): void;
     onRestartDemo(): void;
     onSetDebug(value: boolean): void;
+    onSetShowLabels(value: boolean): void;
     onSetShowAABB(value: boolean): void;
     onSetShowContacts(value: boolean): void;
     onSetShowRuntimeStatsHud(value: boolean): void;
@@ -82,6 +84,7 @@ export default class UIManager {
 
     // Checkboxes
     private debugCheckbox: HTMLInputElement | null = null;
+    private showLabelsCheckbox: HTMLInputElement | null = null;
     private showAABBCheckbox: HTMLInputElement | null = null;
     private ccdCheckbox: HTMLInputElement | null = null;
     private showContactsCheckbox: HTMLInputElement | null = null;
@@ -172,6 +175,7 @@ export default class UIManager {
 
         const toggleGroup = createGroup();
         this.debugCheckbox = createCheckbox(toggleGroup, 'Debug', checked => actions.onSetDebug(checked));
+        this.showLabelsCheckbox = createCheckbox(toggleGroup, 'Labels', checked => actions.onSetShowLabels(checked));
         this.showAABBCheckbox = createCheckbox(toggleGroup, 'Show AABB', checked => actions.onSetShowAABB(checked));
         this.showContactsCheckbox = createCheckbox(toggleGroup, 'Show Contacts', checked =>
             actions.onSetShowContacts(checked),
@@ -267,6 +271,7 @@ export default class UIManager {
         if (
             !this.demoSelect ||
             !this.debugCheckbox ||
+            !this.showLabelsCheckbox ||
             !this.showAABBCheckbox ||
             !this.showContactsCheckbox ||
             !this.ccdCheckbox ||
@@ -282,6 +287,7 @@ export default class UIManager {
         this.demoSelect.value = `${state.demoIndex}`;
 
         this.debugCheckbox.checked = state.debug;
+        this.showLabelsCheckbox.checked = state.showLabels;
         this.showAABBCheckbox.checked = state.showAABB;
         this.showContactsCheckbox.checked = state.showContacts;
 

@@ -86,6 +86,7 @@ export default class Application {
     private debug = true;
     private FPS = 0;
     private lastFPSUpdate = 0;
+    private showLabels = true;
     private showContacts = true;
     private showAABB = false;
     private showRuntimeStatsHud = true;
@@ -113,6 +114,10 @@ export default class Application {
 
     setBodyTextureScale(body: RigidBody, textureScale: number): void {
         this.bodyRenderRegistry.setTextureScale(body, textureScale);
+    }
+
+    setBodyLabel(body: RigidBody, label: string, fontSize?: number, color?: string): void {
+        this.bodyRenderRegistry.setLabel(body, label, fontSize, color);
     }
 
     removeBodyTexture(body: RigidBody): void {
@@ -161,6 +166,7 @@ export default class Application {
             onSelectDemo: index => this.loadDemo(index),
             onRestartDemo: () => this.loadDemo(this.demoIndex, false),
             onSetDebug: value => this.setDebug(value),
+            onSetShowLabels: value => this.setShowLabels(value),
             onSetShowAABB: value => this.setShowAABB(value),
             onSetShowContacts: value => this.setShowContacts(value),
             onSetShowRuntimeStatsHud: value => this.setShowRuntimeStatsHud(value),
@@ -616,7 +622,7 @@ export default class Application {
 
         // Draw all bodies
         for (const body of this.world.getBodies()) {
-            Graphics.drawBody(body, this.bodyRenderRegistry.getStyle(body), this.debug);
+            Graphics.drawBody(body, this.bodyRenderRegistry.getStyle(body), this.debug, this.showLabels);
         }
 
         if (this.liquid) {
@@ -1041,6 +1047,11 @@ export default class Application {
         this.syncUI();
     }
 
+    private setShowLabels(value: boolean): void {
+        this.showLabels = value;
+        this.syncUI();
+    }
+
     private setShowAABB(value: boolean): void {
         this.showAABB = value;
         this.syncUI();
@@ -1115,6 +1126,7 @@ export default class Application {
             demoIndex: this.demoIndex,
             demoLabels: DEMO_LABELS,
             debug: this.debug,
+            showLabels: this.showLabels,
             showAABB: this.showAABB,
             showContacts: this.showContacts,
             showRuntimeStatsHud: this.showRuntimeStatsHud,

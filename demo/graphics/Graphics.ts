@@ -345,7 +345,7 @@ export default class Graphics {
         this.ctx.restore();
     }
 
-    static drawBody(body: RigidBody, renderStyle?: BodyRenderStyle, debug = false): void {
+    static drawBody(body: RigidBody, renderStyle?: BodyRenderStyle, debug = false, showLabels = true): void {
         const x = body.position.x;
         const y = body.position.y;
         const rotation = body.rotation;
@@ -353,6 +353,9 @@ export default class Graphics {
         const strokeColor = renderStyle?.strokeColor ?? 'white';
         const texture = renderStyle?.texture ?? null;
         const textureScale = renderStyle?.textureScale ?? 1;
+        const label = renderStyle?.label;
+        const labelColor = renderStyle?.labelColor ?? 'white';
+        const labelFontSize = renderStyle?.labelFontSize ?? 12;
 
         this.ctx.save();
         this.ctx.translate(x, y);
@@ -439,5 +442,17 @@ export default class Graphics {
         }
 
         this.ctx.restore();
+
+        if (showLabels && label) {
+            this.ctx.save();
+            this.ctx.translate(body.maxX, body.maxY);
+            this.ctx.scale(1 / this.zoom, -1 / this.zoom);
+            this.ctx.fillStyle = labelColor;
+            this.ctx.font = `${labelFontSize}px Arial`;
+            this.ctx.textAlign = 'left';
+            this.ctx.textBaseline = 'bottom';
+            this.ctx.fillText(label, 8, -8);
+            this.ctx.restore();
+        }
     }
 }
