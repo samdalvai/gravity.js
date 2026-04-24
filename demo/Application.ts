@@ -225,7 +225,7 @@ export default class Application {
                     }
 
                     if (key === 'r' && inputEvent.shiftKey) {
-                        this.loadDemo(this.demoIndex);
+                        this.loadDemo(this.demoIndex, false);
                     }
 
                     if (inputEvent.key === 't') {
@@ -988,7 +988,7 @@ export default class Application {
         this.loadDemo(index);
     }
 
-    private loadDemo(index: number): void {
+    private loadDemo(index: number, resetGravity = true): void {
         const demo = DEMOS[index];
 
         if (!demo) {
@@ -1006,6 +1006,9 @@ export default class Application {
         this.bgTexture = null;
         this.bodyRenderRegistry.clear();
 
+        if (resetGravity) {
+            SETTINGS.applyGravity = true;
+        }
         this.player = null;
         this.testBody = null;
         this.gravitationalForce = false;
