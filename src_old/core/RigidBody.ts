@@ -232,10 +232,6 @@ export class RigidBody {
         this._sumForces.addAssign(force);
     }
 
-    addForceY(value: number) {
-        this._sumForces.y += value;
-    }
-
     addTorque(torque: number): void {
         this._sumTorque += torque;
     }

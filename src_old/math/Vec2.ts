@@ -6,7 +6,7 @@ export class Vec2 {
 
     constructor(x = 0.0, y = 0.0) {
         Vec2.allocations++;
-
+        
         this.x = x;
         this.y = y;
     }
