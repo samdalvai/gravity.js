@@ -9,8 +9,8 @@ import {
     Interactions,
     MAX_BODIES,
     PIXELS_PER_METER,
-    RigidBody,
     Resistance,
+    RigidBody,
     SETTINGS,
     Temperature,
     Utils,
@@ -18,6 +18,7 @@ import {
     WeldJoint,
     World,
 } from '../src';
+import { CollisionCategory } from '../src/collision/CollisionFilter';
 import AssetStore, { TEXTURES } from './graphics/AssetStore';
 import Graphics from './graphics/Graphics';
 import InputManager, { MouseButton } from './input/InputManager';
@@ -221,7 +222,13 @@ export default class Application {
                     } else if (key === 'f') {
                         const x = InputManager.mousePosition.x;
                         const y = InputManager.mousePosition.y;
-                        const blackHole = BodiesFactory.circle({ radius: 0.0001, x, y, density: 50_000_000_000_000 });
+                        const blackHole = BodiesFactory.circle({
+                            radius: 0.0001,
+                            x,
+                            y,
+                            density: 50_000_000_000_000,
+                            collisionMask: CollisionCategory.NONE,
+                        });
                         this.setBlackHole(blackHole);
                     }
 
