@@ -9,7 +9,7 @@ const EARTH_RADIUS_KM = 6_371;
 const EARTH_ORBIT_PIXELS = 700;
 const EARTH_READABLE_RADIUS_PIXELS = 10;
 const USE_PLANET_TEXTURES = true;
-const ADD_ASTEROID_BELT = false;
+const ADD_ASTEROID_BELT = true;
 
 /**
  * 0 = compressed, readable demo scale.
@@ -145,22 +145,29 @@ function setupPlanetOrbit(world: World, app: Application): void {
 
         const marsOrbit = mars.orbitAu!;
         const jupiterOrbit = jupiter.orbitAu!;
-        const middle = (marsOrbit + jupiterOrbit) / 2;
-
-        const distance = getScaledOrbitDistance(middle);
-        const numAsteroids = 100;
+        const orbitGap = jupiterOrbit - marsOrbit;
+        const innerDistance = getScaledOrbitDistance(marsOrbit + orbitGap * 0.18);
+        const outerDistance = getScaledOrbitDistance(marsOrbit + orbitGap * 0.46);
+        const marsRadius = getScaledRadius(mars.radiusKm);
+        const jupiterRadius = getScaledRadius(jupiter.radiusKm);
+        const minRadius = Math.max(1.5, marsRadius * 0.2);
+        const maxRadius = Math.max(minRadius + 0.5, marsRadius * 0.35 + jupiterRadius * 0.02);
+        const marsMass = mars.massEarths * MASS_SCALE;
+        const minMass = Math.max(0.001, marsMass * 0.01);
+        const maxMass = Math.max(minMass * 2, marsMass * 0.05);
+        const numAsteroids = 120;
 
         for (let i = 0; i < numAsteroids; i++) {
             const orbitAngleDegrees = Utils.randomNumber(0, 360);
             const orbitAnglesRadians = degreesToRadians(orbitAngleDegrees);
-            const distributedDist = distance + Utils.randomNumber(-10, 10);
+            const distributedDist = Utils.randomNumber(innerDistance, outerDistance);
             const pos = new Vec2(
                 Math.cos(orbitAnglesRadians) * distributedDist,
                 Math.sin(orbitAnglesRadians) * distributedDist,
             );
             const numVertices = Utils.randomNumber(3, 10);
-            const radius = Utils.randomNumber(1, 10);
-            const mass = Utils.randomNumber(0.01, 1);
+            const radius = Utils.randomNumber(minRadius, maxRadius);
+            const mass = Utils.randomNumber(minMass, maxMass);
             const asteroid = Utils.randomConvexBody(pos.x, pos.y, radius, numVertices, mass);
             asteroid.velocity = getOrbitalSpeed(sun, asteroid, GRAVITY);
             app.setBodyFillColor(asteroid, 'darkbrown');
