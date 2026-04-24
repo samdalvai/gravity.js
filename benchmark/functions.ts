@@ -10,17 +10,18 @@ const gravity = 9.8;
 const worldNew = new WorldNew(gravity);
 const worldOld = new WorldOld(gravity);
 
-const numBodies = 1_000;
+const numBodies = 4_900;
 
 for (let i = 0; i < numBodies; i++) {
     const x = Utils.randomNumber(-500, 500);
-    const y = Utils.randomNumber(0, 500);
+    const y = Utils.randomNumber(0, 1000);
 
     const p = BodiesFactory.circle({
         radius: 10,
         x,
         y,
         mass: 1,
+        restitution: 0,
     });
 
     const pOld = BodiesFactoryOld.circle({
@@ -28,17 +29,26 @@ for (let i = 0; i < numBodies; i++) {
         x,
         y,
         mass: 1,
+        restitution: 0,
     });
 
     worldNew.addBody(p);
     worldOld.addBody(pOld);
 }
 
-const floorNew = BodiesFactory.box({ width: 5000, height: 50, x: 0, y: -600, mass: 0 });
+const floorNew = BodiesFactory.box({ width: 5000, height: 50, x: 0, y: -200, mass: 0 });
+const leftFenceNew = BodiesFactory.box({ width: 50, height: 5000, x: -600, y: 0, mass: 0 });
+const rightFenceNew = BodiesFactory.box({ width: 50, height: 5000, x: 600, y: 0, mass: 0 });
 worldNew.addBody(floorNew);
+worldNew.addBody(leftFenceNew);
+worldNew.addBody(rightFenceNew);
 
-const floorOld = BodiesFactoryOld.box({ width: 5000, height: 50, x: 0, y: -600, mass: 0 });
+const floorOld = BodiesFactoryOld.box({ width: 5000, height: 50, x: 0, y: -200, mass: 0 });
+const leftFenceOld = BodiesFactoryOld.box({ width: 50, height: 5000, x: -600, y: 0, mass: 0 });
+const rightFenceOld = BodiesFactoryOld.box({ width: 50, height: 5000, x: 600, y: 0, mass: 0 });
 worldOld.addBody(floorOld);
+worldOld.addBody(leftFenceOld);
+worldOld.addBody(rightFenceOld);
 
 const DT = 1 / 60;
 
