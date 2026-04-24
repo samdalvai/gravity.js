@@ -1,4 +1,4 @@
-import { BodiesFactory, GRAVITY, SETTINGS, Vec2 } from '../../src';
+import { BodiesFactory, GRAVITY, SETTINGS, Utils, Vec2 } from '../../src';
 import type { RigidBody, World } from '../../src';
 import type Application from '../Application';
 import Graphics from '../graphics/Graphics';
@@ -137,6 +137,22 @@ function setupPlanetOrbit(world: World, app: Application): void {
         world.addBody(planet);
         applyBodyStyle(app, planet, planetSpec);
     }
+
+    const mars = PLANETS.find(planet => planet.name === 'Mars')!;
+    const jupiter = PLANETS.find(planet => planet.name === 'Jupiter')!;
+
+    const marsOrbit = mars.orbitAu!;
+    const jupiterOrbit = jupiter.orbitAu!;
+    const middle = (marsOrbit + jupiterOrbit) / 2;
+
+    console.log('middle: ', middle);
+    const distance = getScaledOrbitDistance(middle);
+    console.log('distance: ', distance);
+    const orbitAngleDegrees = jupiter.orbitAngleDegrees!;
+    const orbitAnglesRadians = degreesToRadians(orbitAngleDegrees);
+    const pos = new Vec2(Math.cos(orbitAnglesRadians) * distance, Math.sin(orbitAnglesRadians) * distance);
+    const test = Utils.randomConvexBody(pos.x, pos.y, 10, 3, 1);
+    world.addBody(test);
 
     app.setGravitationalForce(true);
 }
