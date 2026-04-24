@@ -1,5 +1,6 @@
 import { BodiesFactory, SETTINGS, Utils, Vec2, World } from '../src';
-import { applyBarnesHutCoulombForces } from '../src/force/BarnesHut';
+import { applyBarnesHutCoulombForces, applyBarnesHutGravitationalForces } from '../src/force/BarnesHut';
+import { applyGravitationalForces } from '../src/force/Gravity';
 import { applyCoulombForces } from '../src/force/Interactions';
 
 declare const process: {
@@ -44,11 +45,13 @@ const bodies = world.getBodies();
 const coulombForceStrength = 100;
 
 export function runOriginal() {
-    applyCoulombForces(bodies, coulombForceStrength);
+    // applyCoulombForces(bodies, coulombForceStrength);
+    applyGravitationalForces(bodies, 9.8, 0, 10_000);
 }
 
 export function runModified() {
-    applyBarnesHutCoulombForces(bodies, coulombForceStrength);
+    // applyBarnesHutCoulombForces(bodies, coulombForceStrength);
+    applyBarnesHutGravitationalForces(bodies, 9.8, 0, 10_000);
 }
 
 process.on('exit', () => {

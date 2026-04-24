@@ -162,6 +162,9 @@ export function applyBarnesHutGravitationalForces(
  *
  * Positive and negative charges are aggregated separately so mixed-charge cells
  * can still be approximated without collapsing everything into a single net charge.
+ * 
+ * Use `theta = 0` to disable approximation and recover the exact pairwise sum.
+ * Smaller `theta` is more accurate, larger `theta` is faster.
  */
 export function generateBarnesHutCoulombForce(
     body: RigidBody,
