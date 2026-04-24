@@ -16,7 +16,7 @@ Learn more at [pikuma.com](https://pikuma.com/).
 - Basic CCD for bullets with circle shape
 - Texture rendering for shapes
 - Set of demos showcasing different scenarios
-- Generation of various forces: attraction, explosion, drag, friction
+- Generation of various forces: attraction, explosion, drag, friction, convection, buoyancy
 
 # How to run
 
