@@ -136,6 +136,7 @@ function setupPlanetOrbit(world: World, app: Application): void {
     };
     world.addBody(sun);
     applyBodyStyle(app, sun, SUN);
+    app.setBodyLabel(sun, SUN.name, 15, '#fff7b2');
 
     for (const planetSpec of PLANETS) {
         const position = getOrbitPosition(planetSpec);
@@ -148,6 +149,7 @@ function setupPlanetOrbit(world: World, app: Application): void {
 
         world.addBody(planet);
         applyBodyStyle(app, planet, planetSpec);
+        app.setBodyLabel(planet, planetSpec.name, 13, planetSpec.color);
     }
 
     if (ADD_ASTEROID_BELT) {
