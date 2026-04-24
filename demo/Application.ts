@@ -54,7 +54,7 @@ export default class Application {
     private paused = false;
 
     // Demos
-    private demoIndex = 23;
+    private demoIndex = 15;
     private demoShortcutBuffer = '';
     private demoShortcutTimer: number | null = null;
 
