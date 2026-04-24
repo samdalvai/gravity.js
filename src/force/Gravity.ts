@@ -49,7 +49,7 @@ export function generateGravitationalForce(
 }
 
 /**
- * Convenience version that applies all gravitaional forces to all bodies
+ * Convenience version that applies all gravitational forces to all bodies
  */
 export function applyGravitationalForces(
     bodies: readonly RigidBody[],
