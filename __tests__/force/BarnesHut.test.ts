@@ -1,15 +1,9 @@
 import { describe, expect, test } from '@jest/globals';
 
 import { BodiesFactory, RigidBody, Vec2 } from '../../src';
-import {
-    buildBarnesHutQuadTree,
-    generateBarnesHutCoulombForce,
-    generateBarnesHutCoulombForces,
-    generateBarnesHutGravitationalForce,
-    generateBarnesHutGravitationalForces,
-} from '../../src/force/BarnesHut';
-import { generateGravitationalForce } from '../../src/force/Gravity';
-import { generateCoulombForce } from '../../src/force/Interactions';
+import { generateBarnesHutGravitationalForce, generateGravitationalForce } from '../../src/force/Gravity';
+import { generateBarnesHutCoulombForce, generateCoulombForce } from '../../src/force/Interactions';
+import { buildQuadTree } from '../../src/force/QuadTree';
 
 describe('BarnesHut', () => {
     test('Gravity matches the exact pairwise sum when theta is 0', () => {
@@ -24,15 +18,18 @@ describe('BarnesHut', () => {
         const minDistanceSquared = 25;
         const maxDistanceSquared = 250_000;
 
-        const tree = buildBarnesHutQuadTree(bodies, 'gravity');
-        const exact = bodies.map((body) => exactGravitationalForce(body, bodies, G, minDistanceSquared, maxDistanceSquared));
-        const barnesHut = generateBarnesHutGravitationalForces(bodies, G, minDistanceSquared, maxDistanceSquared, 0);
+        const tree = buildQuadTree(bodies, 'gravity');
+        const exact = bodies.map(body =>
+            exactGravitationalForce(body, bodies, G, minDistanceSquared, maxDistanceSquared),
+        );
 
         expect(tree?.bodyCount).toBe(bodies.length);
 
         for (let i = 0; i < bodies.length; i++) {
-            expect(barnesHut[i].x).toBeCloseTo(exact[i].x, 10);
-            expect(barnesHut[i].y).toBeCloseTo(exact[i].y, 10);
+            const b = bodies[i];
+            const force = generateBarnesHutGravitationalForce(b, tree, G, minDistanceSquared, maxDistanceSquared, 0);
+            expect(force.x).toBeCloseTo(exact[i].x, 10);
+            expect(force.y).toBeCloseTo(exact[i].y, 10);
         }
     });
 
@@ -49,7 +46,7 @@ describe('BarnesHut', () => {
         const G = 1.2;
         const minDistanceSquared = 25;
         const maxDistanceSquared = 500_000;
-        const tree = buildBarnesHutQuadTree(bodies, 'gravity');
+        const tree = buildQuadTree(bodies, 'gravity');
 
         const exact = exactGravitationalForce(bodies[0], bodies, G, minDistanceSquared, maxDistanceSquared);
         const barnesHut = generateBarnesHutGravitationalForce(
@@ -75,15 +72,16 @@ describe('BarnesHut', () => {
         ];
 
         const k = 300;
-        const tree = buildBarnesHutQuadTree(bodies, 'coulomb');
-        const exact = bodies.map((body) => exactCoulombForce(body, bodies, k));
-        const barnesHut = generateBarnesHutCoulombForces(bodies, k, 0);
+        const tree = buildQuadTree(bodies, 'coulomb');
+        const exact = bodies.map(body => exactCoulombForce(body, bodies, k));
 
         expect(tree?.bodyCount).toBe(5);
 
         for (let i = 0; i < bodies.length; i++) {
-            expect(barnesHut[i].x).toBeCloseTo(exact[i].x, 10);
-            expect(barnesHut[i].y).toBeCloseTo(exact[i].y, 10);
+            const b = bodies[i];
+            const force = generateBarnesHutCoulombForce(b, tree, k, 0);
+            expect(force.x).toBeCloseTo(exact[i].x, 10);
+            expect(force.y).toBeCloseTo(exact[i].y, 10);
         }
     });
 
@@ -99,7 +97,7 @@ describe('BarnesHut', () => {
         ];
 
         const k = 500;
-        const tree = buildBarnesHutQuadTree(bodies, 'coulomb');
+        const tree = buildQuadTree(bodies, 'coulomb');
 
         const exact = exactCoulombForce(bodies[0], bodies, k);
         const barnesHut = generateBarnesHutCoulombForce(bodies[0], tree, k, 0.9);
@@ -126,11 +124,7 @@ function exactGravitationalForce(
     return total;
 }
 
-function exactCoulombForce(
-    body: RigidBody,
-    bodies: readonly RigidBody[],
-    k: number,
-): Vec2 {
+function exactCoulombForce(body: RigidBody, bodies: readonly RigidBody[], k: number): Vec2 {
     const total = new Vec2();
 
     for (let i = 0; i < bodies.length; i++) {
