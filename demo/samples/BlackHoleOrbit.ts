@@ -1,7 +1,8 @@
 import { BodiesFactory, GRAVITY, SETTINGS, Utils, Vec2 } from '../../src';
 import type { World } from '../../src';
-import Graphics from '../graphics/Graphics';
+import { CollisionCategory } from '../../src/collision/CollisionFilter';
 import type Application from '../Application';
+import Graphics from '../graphics/Graphics';
 import { defineDemo } from './shared';
 
 function setupBlackHoleOrbit(world: World, app: Application): void {
@@ -11,7 +12,13 @@ function setupBlackHoleOrbit(world: World, app: Application): void {
     const particleCount = 2_500;
     SETTINGS.applyGravity = false;
 
-    const blackHole = BodiesFactory.circle({ radius: 0.0001, x: 0, y: 0, mass: 600_000 });
+    const blackHole = BodiesFactory.circle({
+        radius: 0.0001,
+        x: 0,
+        y: 0,
+        mass: 600_000,
+        collisionMask: CollisionCategory.NONE,
+    });
     app.setBlackHole(blackHole);
 
     const particleRadius = 2.5;
