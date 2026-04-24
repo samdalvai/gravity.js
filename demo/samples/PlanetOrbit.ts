@@ -11,6 +11,7 @@ const EARTH_ORBIT_PIXELS = 700;
 const EARTH_READABLE_RADIUS_PIXELS = 10;
 const USE_PLANET_TEXTURES = true;
 const ADD_ASTEROID_BELT = true;
+const ADD_KUIPER_BELT = true;
 
 /**
  * 0 = compressed, readable demo scale.
@@ -165,24 +166,44 @@ function setupPlanetOrbit(world: World, app: Application): void {
         const marsMass = mars.massEarths * MASS_SCALE;
         const minMass = Math.max(0.001, marsMass * 0.01);
         const maxMass = Math.max(minMass * 2, marsMass * 0.05);
-        const numAsteroids = 120;
 
-        for (let i = 0; i < numAsteroids; i++) {
-            const orbitAngleDegrees = Utils.randomNumber(0, 360);
-            const orbitAnglesRadians = degreesToRadians(orbitAngleDegrees);
-            const distributedDist = Utils.randomNumber(innerDistance, outerDistance);
-            const pos = new Vec2(
-                Math.cos(orbitAnglesRadians) * distributedDist,
-                Math.sin(orbitAnglesRadians) * distributedDist,
-            );
-            const numVertices = Utils.randomNumber(3, 10);
-            const radius = Utils.randomNumber(minRadius, maxRadius);
-            const mass = Utils.randomNumber(minMass, maxMass);
-            const asteroid = Utils.randomConvexBody(pos.x, pos.y, radius, numVertices, mass);
-            asteroid.velocity = getOrbitalSpeed(sun, asteroid, GRAVITY);
-            app.setBodyFillColor(asteroid, 'darkbrown');
-            world.addBody(asteroid);
-        }
+        createBelt(world, app, sun, {
+            innerDistance,
+            outerDistance,
+            minRadius,
+            maxRadius,
+            minMass,
+            maxMass,
+            numBodies: 120,
+            colors: ['darkbrown'],
+        });
+    }
+
+    if (ADD_KUIPER_BELT) {
+        const neptune = PLANETS.find(planet => planet.name === 'Neptune')!;
+
+        const neptuneOrbit = neptune.orbitAu!;
+        const kuiperOuterOrbit = 50;
+        const orbitGap = kuiperOuterOrbit - neptuneOrbit;
+        const innerDistance = getScaledOrbitDistance(neptuneOrbit + orbitGap * 0.12);
+        const outerDistance = getScaledOrbitDistance(neptuneOrbit + orbitGap * 0.92);
+        const neptuneRadius = getScaledRadius(neptune.radiusKm);
+        const minRadius = Math.max(1.5, neptuneRadius * 0.12);
+        const maxRadius = Math.max(minRadius + 0.5, neptuneRadius * 0.22);
+        const neptuneMass = neptune.massEarths * MASS_SCALE;
+        const minMass = Math.max(0.001, neptuneMass * 0.0005);
+        const maxMass = Math.max(minMass * 2, neptuneMass * 0.003);
+
+        createBelt(world, app, sun, {
+            innerDistance,
+            outerDistance,
+            minRadius,
+            maxRadius,
+            minMass,
+            maxMass,
+            numBodies: 180,
+            colors: ['#f7fbff', '#b8deff'],
+        });
     }
 
     app.setGravitationalForce(true);
@@ -294,6 +315,39 @@ function randomPointInRadius(center: Vec2, radius: number): Vec2 {
     const theta = 2 * Math.PI * v;
 
     return new Vec2(center.x + Math.cos(theta) * r, center.y + Math.sin(theta) * r);
+}
+
+function createBelt(
+    world: World,
+    app: Application,
+    sun: RigidBody,
+    config: {
+        innerDistance: number;
+        outerDistance: number;
+        minRadius: number;
+        maxRadius: number;
+        minMass: number;
+        maxMass: number;
+        numBodies: number;
+        colors: string[];
+    },
+): void {
+    for (let i = 0; i < config.numBodies; i++) {
+        const orbitAngleDegrees = Utils.randomNumber(0, 360);
+        const orbitAnglesRadians = degreesToRadians(orbitAngleDegrees);
+        const distributedDist = Utils.randomNumber(config.innerDistance, config.outerDistance);
+        const pos = new Vec2(
+            Math.cos(orbitAnglesRadians) * distributedDist,
+            Math.sin(orbitAnglesRadians) * distributedDist,
+        );
+        const numVertices = Utils.randomNumber(3, 10);
+        const radius = Utils.randomNumber(config.minRadius, config.maxRadius);
+        const mass = Utils.randomNumber(config.minMass, config.maxMass);
+        const asteroid = Utils.randomConvexBody(pos.x, pos.y, radius, numVertices, mass);
+        asteroid.velocity = getOrbitalSpeed(sun, asteroid, GRAVITY);
+        app.setBodyFillColor(asteroid, config.colors[Math.floor(Math.random() * config.colors.length)]);
+        world.addBody(asteroid);
+    }
 }
 
 /**
