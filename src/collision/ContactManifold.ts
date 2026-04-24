@@ -4,12 +4,6 @@ import { RigidBody } from '../core/RigidBody';
 import { Vec2 } from '../math/Vec2';
 import * as Utils from '../utils/Utils';
 
-export interface ContactPoint {
-    point: Vec2;
-    separation: number;
-    id: number;
-}
-
 export interface ContactInfo {
     // Relevant contact infos
     bodyA: RigidBody;
@@ -85,19 +79,31 @@ export class ContactManifold extends Constraint {
     constructor(
         bodyA: RigidBody,
         bodyB: RigidBody,
-        contactPoints: ContactPoint[],
+        contactCount: number,
         penetrationDepth: number,
         contactNormalX: number,
         contactNormalY: number,
+        contactPoint0X: number,
+        contactPoint0Y: number,
+        contactPoint0Id: number,
+        contactPoint1X: number,
+        contactPoint1Y: number,
+        contactPoint1Id: number,
         featureFlipped: boolean,
     );
     constructor(
         bodyA?: RigidBody,
         bodyB?: RigidBody,
-        contactPoints?: ContactPoint[],
+        contactCount?: number,
         penetrationDepth?: number,
         contactNormalX?: number,
         contactNormalY?: number,
+        contactPoint0X?: number,
+        contactPoint0Y?: number,
+        contactPoint0Id?: number,
+        contactPoint1X?: number,
+        contactPoint1Y?: number,
+        contactPoint1Id?: number,
         featureFlipped?: boolean,
     ) {
         super(bodyA as RigidBody, bodyB as RigidBody);
@@ -105,23 +111,49 @@ export class ContactManifold extends Constraint {
         if (
             bodyA != null &&
             bodyB != null &&
-            contactPoints != null &&
+            contactCount != null &&
             penetrationDepth != null &&
             contactNormalX != null &&
             contactNormalY != null &&
+            contactPoint0X != null &&
+            contactPoint0Y != null &&
+            contactPoint0Id != null &&
+            contactPoint1X != null &&
+            contactPoint1Y != null &&
+            contactPoint1Id != null &&
             featureFlipped != null
         ) {
-            this.init(bodyA, bodyB, contactPoints, penetrationDepth, contactNormalX, contactNormalY, featureFlipped);
+            this.init(
+                bodyA,
+                bodyB,
+                contactCount,
+                penetrationDepth,
+                contactNormalX,
+                contactNormalY,
+                contactPoint0X,
+                contactPoint0Y,
+                contactPoint0Id,
+                contactPoint1X,
+                contactPoint1Y,
+                contactPoint1Id,
+                featureFlipped,
+            );
         }
     }
 
     init(
         bodyA: RigidBody,
         bodyB: RigidBody,
-        contactPoints: ContactPoint[],
+        contactCount: number,
         penetrationDepth: number,
         contactNormalX: number,
         contactNormalY: number,
+        contactPoint0X: number,
+        contactPoint0Y: number,
+        contactPoint0Id: number,
+        contactPoint1X: number,
+        contactPoint1Y: number,
+        contactPoint1Id: number,
         featureFlipped: boolean,
     ): void {
         this.bodyA = bodyA;
@@ -132,16 +164,16 @@ export class ContactManifold extends Constraint {
         this.contactTangentX = -contactNormalY;
         this.contactTangentY = contactNormalX;
 
-        this.contactCount = contactPoints.length;
+        this.contactCount = contactCount;
 
-        this.contactPoint0X = contactPoints[0].point.x;
-        this.contactPoint0Y = contactPoints[0].point.y;
-        this.contactPoint0Id = contactPoints[0].id;
+        this.contactPoint0X = contactPoint0X;
+        this.contactPoint0Y = contactPoint0Y;
+        this.contactPoint0Id = contactPoint0Id;
 
         if (this.contactCount === 2) {
-            this.contactPoint1X = contactPoints[1].point.x;
-            this.contactPoint1Y = contactPoints[1].point.y;
-            this.contactPoint1Id = contactPoints[1].id;
+            this.contactPoint1X = contactPoint1X;
+            this.contactPoint1Y = contactPoint1Y;
+            this.contactPoint1Id = contactPoint1Id;
         } else {
             this.contactPoint1X = 0.0;
             this.contactPoint1Y = 0.0;
