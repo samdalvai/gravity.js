@@ -1,6 +1,5 @@
-import { BodiesFactory, GRAVITY, SETTINGS, Utils, Vec2 } from '../../src';
+import { BodiesFactory, CollisionCategory, GRAVITY, SETTINGS, Utils, Vec2 } from '../../src';
 import type { World } from '../../src';
-import { CollisionCategory } from '../../src/collision/CollisionFilter';
 import type Application from '../Application';
 import Graphics from '../graphics/Graphics';
 import { defineDemo } from './shared';
