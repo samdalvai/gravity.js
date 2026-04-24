@@ -1,4 +1,5 @@
 import {
+    BarnesHut,
     BodiesFactory,
     Buoyancy,
     DistanceJoint,
@@ -781,22 +782,42 @@ export default class Application {
         }
 
         const bodies = this.world.getBodies();
-        for (let i = 0; i < bodies.length - 1; i++) {
-            const a = bodies[i];
-            for (let j = i + 1; j < bodies.length; j++) {
-                const b = bodies[j];
+        const tree = BarnesHut.buildBarnesHutQuadTree(bodies, 'gravity');
 
-                const attraction = Gravity.generateGravitationalForce(
-                    a,
-                    b,
-                    GRAVITY,
-                    0,
-                    BODY_REMOVAL_THRESHOLD * BODY_REMOVAL_THRESHOLD,
-                );
-                a.addForce(attraction);
-                b.addForce(attraction.negateNew());
-            }
+        for (let i = 0; i < bodies.length; i++) {
+            const b = bodies[i];
+            const attraction = BarnesHut.generateBarnesHutGravitationalForce(
+                b,
+                tree,
+                GRAVITY,
+                0,
+                BODY_REMOVAL_THRESHOLD * BODY_REMOVAL_THRESHOLD,
+                0.5,
+            );
+            b.addForce(attraction);
         }
+
+        // let count = 0;
+
+        // for (let i = 0; i < bodies.length - 1; i++) {
+        //     const a = bodies[i];
+        //     for (let j = i + 1; j < bodies.length; j++) {
+        //         const b = bodies[j];
+        //         count++;
+
+        //         const attraction = Gravity.generateGravitationalForce(
+        //             a,
+        //             b,
+        //             GRAVITY,
+        //             0,
+        //             BODY_REMOVAL_THRESHOLD * BODY_REMOVAL_THRESHOLD,
+        //         );
+        //         a.addForce(attraction);
+        //         b.addForce(attraction.negateNew());
+        //     }
+        // }
+
+        // console.log('checks: ', count);
     }
 
     private applyBlackHoleForce(): void {
