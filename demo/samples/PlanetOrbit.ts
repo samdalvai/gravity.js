@@ -1,5 +1,6 @@
 import { BodiesFactory, GRAVITY, SETTINGS, Utils, Vec2 } from '../../src';
 import type { RigidBody, World } from '../../src';
+import { ContactInfo } from '../../src/collision/ContactManifold';
 import type Application from '../Application';
 import Graphics from '../graphics/Graphics';
 import { defineDemo } from './shared';
@@ -25,6 +26,7 @@ const COMPRESSED_ORBIT_EXPONENT = 0.62;
 const COMPRESSED_RADIUS_EXPONENT = 0.55;
 const MIN_READABLE_RADIUS_PIXELS = 3;
 const MASS_SCALE = 1;
+const PLANET_EXPLOSION_THRESHOLD = 1_000;
 
 type CelestialBodySpec = {
     name: string;
@@ -128,6 +130,9 @@ function setupPlanetOrbit(world: World, app: Application): void {
     SETTINGS.applyGravity = false;
 
     const sun = createBody(SUN, new Vec2(0, 0));
+    sun.onContact = info => {
+        onContactCallBack(sun, info, world);
+    };
     world.addBody(sun);
     applyBodyStyle(app, sun, SUN);
 
@@ -135,6 +140,11 @@ function setupPlanetOrbit(world: World, app: Application): void {
         const position = getOrbitPosition(planetSpec);
         const planet = createBody(planetSpec, position);
         planet.velocity = getOrbitalSpeed(sun, planet, GRAVITY);
+
+        planet.onContact = info => {
+            onContactCallBack(planet, info, world);
+        };
+
         world.addBody(planet);
         applyBodyStyle(app, planet, planetSpec);
     }
@@ -176,6 +186,19 @@ function setupPlanetOrbit(world: World, app: Application): void {
     }
 
     app.setGravitationalForce(true);
+}
+
+function onContactCallBack(planet: RigidBody, info: ContactInfo, world: World) {
+    const a = info.bodyA;
+    const b = info.bodyB;
+    const massSum = a.mass + b.mass;
+    console.log('Contact massSum: ', massSum);
+
+    // if (massSum > PLANET_EXPLOSION_THRESHOLD) {
+    if (massSum > 1) {
+        // TO be tuned
+        world.removeBody(planet);
+    }
 }
 
 function applyBodyStyle(app: Application, body: RigidBody, spec: CelestialBodySpec): void {
