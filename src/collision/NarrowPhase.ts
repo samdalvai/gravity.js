@@ -86,7 +86,8 @@ function isPolygonLikeShape(shapeType: ShapeType): boolean {
 function createCollisionManifold(
     bodyA: RigidBody,
     bodyB: RigidBody,
-    normal: Vec2,
+    normalX: number,
+    normalY: number,
     points: ContactPoint[],
 ): ContactManifold | null {
     if (points.length === 0) {
@@ -100,10 +101,10 @@ function createCollisionManifold(
     }
 
     if (manifoldPool != null) {
-        return manifoldPool.acquire(bodyA, bodyB, points, depth, normal.x, normal.y, false);
+        return manifoldPool.acquire(bodyA, bodyB, points, depth, normalX, normalY, false);
     }
 
-    return new ContactManifold(bodyA, bodyB, points, depth, normal.x, normal.y, false);
+    return new ContactManifold(bodyA, bodyB, points, depth, normalX, normalY, false);
 }
 
 export function collideCircles(bodyA: RigidBody, bodyB: RigidBody): ContactManifold | null {
@@ -136,13 +137,12 @@ export function collideCircles(bodyA: RigidBody, bodyB: RigidBody): ContactManif
         normalY = dy * invDistance;
     }
 
-    const normal = new Vec2(normalX, normalY);
     const pointAX = posA.x + normalX * radiusA;
     const pointAY = posA.y + normalY * radiusA;
     const pointBX = posB.x - normalX * radiusB;
     const pointBY = posB.y - normalY * radiusB;
 
-    return createCollisionManifold(bodyA, bodyB, normal, [
+    return createCollisionManifold(bodyA, bodyB, normalX, normalY, [
         {
             point: new Vec2((pointAX + pointBX) * 0.5, (pointAY + pointBY) * 0.5),
             separation: distance - radiusSum,
@@ -210,9 +210,8 @@ export function collidePolygonCircle(bodyA: RigidBody, bodyB: RigidBody): Contac
         const pointAY = vertex1.y + normalY * polygonA.radius;
         const pointBX = circleBX - normalX * circleB.radius;
         const pointBY = circleBY - normalY * circleB.radius;
-        const normal = new Vec2(normalX, normalY);
 
-        return createCollisionManifold(bodyA, bodyB, normal, [
+        return createCollisionManifold(bodyA, bodyB, normalX, normalY, [
             {
                 point: new Vec2((pointAX + pointBX) * 0.5, (pointAY + pointBY) * 0.5),
                 separation: vertexSeparation - radius,
@@ -247,9 +246,8 @@ export function collidePolygonCircle(bodyA: RigidBody, bodyB: RigidBody): Contac
         const pointAY = vertex2.y + normalY * polygonA.radius;
         const pointBX = circleBX - normalX * circleB.radius;
         const pointBY = circleBY - normalY * circleB.radius;
-        const normal = new Vec2(normalX, normalY);
 
-        return createCollisionManifold(bodyA, bodyB, normal, [
+        return createCollisionManifold(bodyA, bodyB, normalX, normalY, [
             {
                 point: new Vec2((pointAX + pointBX) * 0.5, (pointAY + pointBY) * 0.5),
                 separation: vertexSeparation - radius,
@@ -265,9 +263,8 @@ export function collidePolygonCircle(bodyA: RigidBody, bodyB: RigidBody): Contac
     const pointAY = circleBY + normalY * (polygonA.radius - planeOffset);
     const pointBX = circleBX - normalX * circleB.radius;
     const pointBY = circleBY - normalY * circleB.radius;
-    const normal = new Vec2(normalX, normalY);
 
-    return createCollisionManifold(bodyA, bodyB, normal, [
+    return createCollisionManifold(bodyA, bodyB, normalX, normalY, [
         {
             point: new Vec2((pointAX + pointBX) * 0.5, (pointAY + pointBY) * 0.5),
             separation: separation - radius,
@@ -378,12 +375,7 @@ function clipConvexEdges(
         filteredPoints.length = 1;
     }
 
-    return createCollisionManifold(
-        bodyA,
-        bodyB,
-        new Vec2(flip ? -normalX : normalX, flip ? -normalY : normalY),
-        filteredPoints,
-    );
+    return createCollisionManifold(bodyA, bodyB, flip ? -normalX : normalX, flip ? -normalY : normalY, filteredPoints);
 }
 
 function findMaxSeparation(
@@ -574,9 +566,8 @@ function collideConvexPolygons(
         const pointAY = vertexAY + normalY * radiusA;
         const pointBX = vertexBX - normalX * radiusB;
         const pointBY = vertexBY - normalY * radiusB;
-        const normal = new Vec2(normalX, normalY);
 
-        return createCollisionManifold(bodyA, bodyB, normal, [
+        return createCollisionManifold(bodyA, bodyB, normalX, normalY, [
             {
                 point: new Vec2((pointAX + pointBX) * 0.5, (pointAY + pointBY) * 0.5),
                 separation: distance - radius,
@@ -787,9 +778,7 @@ function collideSegmentRadiusPairs(
             const sq = (cqX - p1X) * normalAX + (cqY - p1Y) * normalAY;
 
             if (sp <= closestDistance || sq <= closestDistance) {
-                const normalA = new Vec2(normalAX, normalAY);
-
-                return createCollisionManifold(bodyA, bodyB, normalA, [
+                return createCollisionManifold(bodyA, bodyB, normalAX, normalAY, [
                     {
                         point: new Vec2(
                             cpX + normalAX * (0.5 * (radiusA - radiusB - sp)),
@@ -809,7 +798,6 @@ function collideSegmentRadiusPairs(
                 ]);
             }
         } else {
-            const manifoldNormal = new Vec2(-normalBX, -normalBY);
             let cpX = p1X;
             let cpY = p1Y;
             let cqX = q1X;
@@ -843,7 +831,7 @@ function collideSegmentRadiusPairs(
             const sq = (cqX - p2X) * normalBX + (cqY - p2Y) * normalBY;
 
             if (sp <= closestDistance || sq <= closestDistance) {
-                return createCollisionManifold(bodyA, bodyB, manifoldNormal, [
+                return createCollisionManifold(bodyA, bodyB, -normalBX, -normalBY, [
                     {
                         point: new Vec2(
                             cpX + normalBX * (0.5 * (radiusB - radiusA - sp)),
@@ -890,9 +878,8 @@ function collideSegmentRadiusPairs(
     const pointBY = closest2Y - normalY * radiusB;
     const idA = f1 === 0.0 ? 0 : 1;
     const idB = f2 === 0.0 ? 0 : 1;
-    const normal = new Vec2(normalX, normalY);
 
-    return createCollisionManifold(bodyA, bodyB, normal, [
+    return createCollisionManifold(bodyA, bodyB, normalX, normalY, [
         {
             point: new Vec2((pointAX + pointBX) * 0.5, (pointAY + pointBY) * 0.5),
             separation: separation - radius,
@@ -975,9 +962,8 @@ function collideSegmentRadiusAndCircle(
     const contactAY = pointAY + normalY * radiusA;
     const contactBX = circleBX - normalX * circleB.radius;
     const contactBY = circleBY - normalY * circleB.radius;
-    const normal = new Vec2(normalX, normalY);
 
-    return createCollisionManifold(bodyA, bodyB, normal, [
+    return createCollisionManifold(bodyA, bodyB, normalX, normalY, [
         {
             point: new Vec2((contactAX + contactBX) * 0.5, (contactAY + contactBY) * 0.5),
             separation,
