@@ -5,8 +5,10 @@ declare const process: {
     on(event: 'exit', listener: () => void): void;
 };
 
-const worldNew = new WorldNew(-9.8);
-const worldOld = new WorldOld(-9.8);
+const gravity = 9.8;
+
+const worldNew = new WorldNew(gravity);
+const worldOld = new WorldOld(gravity);
 
 const numBodies = 1_000;
 
@@ -32,10 +34,8 @@ for (let i = 0; i < numBodies; i++) {
     worldOld.addBody(pOld);
 }
 
-const floorNewLeft = BodiesFactory.box({ width: 5000, height: 50, x: 0, y: -600, mass: 0, rotation: 0.25 });
-const floorNewRight = BodiesFactory.box({ width: 5000, height: 50, x: 0, y: -600, mass: 0, rotation: -0.25 });
-worldNew.addBody(floorNewLeft);
-worldNew.addBody(floorNewRight);
+const floorNew = BodiesFactory.box({ width: 5000, height: 50, x: 0, y: -600, mass: 0 });
+worldNew.addBody(floorNew);
 
 const floorOld = BodiesFactoryOld.box({ width: 5000, height: 50, x: 0, y: -600, mass: 0 });
 worldOld.addBody(floorOld);
@@ -47,7 +47,6 @@ const warmupIterations = 1_000;
 for (let i = 0; i < warmupIterations; i++) {
     worldOld.update(DT);
     worldNew.update(DT);
-    console.log('contacts: ', worldNew.getManifolds().length);
 }
 
 export function runOriginal() {
