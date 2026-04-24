@@ -25,4 +25,4 @@ export { SegmentShape } from './shapes/SegmentShape';
 export { ShapeType } from './shapes/Shape';
 
 export * as Utils from './utils/Utils';
-export * from './force';
+export { Force } from './force';

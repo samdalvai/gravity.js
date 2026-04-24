@@ -1,7 +1,17 @@
-export * as Buoyancy from './Buoyancy';
-export * as Gravity from './Gravity';
-export * as Interactions from './Interactions';
-export * as Resistance from './Resistance';
-export * as Spring from './Spring';
-export * as Temperature from './Temperature';
-export * as QuadTree from './QuadTree';
+import * as buoyancy from './Buoyancy';
+import * as gravity from './Gravity';
+import * as interactions from './Interactions';
+import * as quadTree from './QuadTree';
+import * as resistance from './Resistance';
+import * as spring from './Spring';
+import * as temperature from './Temperature';
+
+export const Force = {
+    buoyancy,
+    gravity,
+    interactions,
+    resistance,
+    spring,
+    temperature,
+    quadTree,
+};
