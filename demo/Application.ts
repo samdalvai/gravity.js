@@ -3,13 +3,14 @@ import {
     Buoyancy,
     DistanceJoint,
     FIXED_DELTA_TIME,
-    Force,
     GRAVITY,
     GrabJoint,
     Gravity,
+    Interactions,
     MAX_BODIES,
     PIXELS_PER_METER,
     RigidBody,
+    Resistance,
     SETTINGS,
     Temperature,
     Utils,
@@ -204,7 +205,7 @@ export default class Application {
                             const strength = 5000;
 
                             for (const body of this.world.getBodies()) {
-                                const explosionImpulse = Force.generateExplosionForce(
+                                const explosionImpulse = Interactions.generateExplosionForce(
                                     body,
                                     explosionPos,
                                     radius,
@@ -810,7 +811,7 @@ export default class Application {
         const drag = this.dragForce;
 
         for (const body of this.world.getBodies()) {
-            const dragForce = Force.generateDragForce(body, drag, SETTINGS.dt);
+            const dragForce = Resistance.generateDragForce(body, drag, SETTINGS.dt);
             body.addForce(dragForce);
         }
     }
@@ -829,7 +830,7 @@ export default class Application {
             const bodyA = bodies[i];
             for (let j = i + 1; j < bodies.length; j++) {
                 const bodyB = bodies[j];
-                const coulombForce = Force.generateCoulombForce(bodyA, bodyB, coulombForceStrength);
+                const coulombForce = Interactions.generateCoulombForce(bodyA, bodyB, coulombForceStrength);
                 bodyA.addForce(coulombForce);
                 bodyB.addForce(coulombForce.negateNew());
             }
