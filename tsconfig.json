@@ -11,8 +11,7 @@
     "src/**/*",
     "__tests__/**/*",
     "demo/**/*",
-    "benchmark/**/*",
-    "benchmark copy/functions.ts"
+    "benchmark/**/*"
   ],
   "exclude": [
     "node_modules"
