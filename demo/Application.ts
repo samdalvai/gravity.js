@@ -700,7 +700,7 @@ export default class Application {
             ['Paused', this.paused ? 'ON' : 'OFF'],
             ['AABB', this.showAABB ? 'ON' : 'OFF'],
             ['Contacts', this.showContacts ? 'ON' : 'OFF'],
-            ['BodiesFactory', `${this.world.getBodies().length}/${MAX_BODIES}`],
+            ['Bodies', `${this.world.getBodies().length}/${MAX_BODIES}`],
             ['Collisions', `${numContacts}`],
             ['FPS', this.FPS.toFixed(2)],
             ['Zoom', Graphics.zoom.toFixed(2)],
