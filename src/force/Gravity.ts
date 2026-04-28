@@ -2,6 +2,7 @@ import { PIXELS_PER_METER } from '../core/Constants';
 import { RigidBody } from '../core/RigidBody';
 import { Vec2 } from '../math/Vec2';
 import { QuadNode, buildQuadTree, canApproximate } from './QuadTree';
+import { buildQuadTree as buildQuadTreeVec } from './QuadTree_new';
 
 export function generateWeightForce(body: RigidBody, G: number): Vec2 {
     const weightForce = new Vec2(0.0, body.mass * G * PIXELS_PER_METER);
@@ -152,5 +153,35 @@ export function applyBarnesHutGravitationalForces(
         const force = generateBarnesHutGravitationalForce(b, tree, G, minDistanceSquared, maxDistanceSquared, theta);
 
         b.addForce(force);
+    }
+}
+
+const DEFAULT_THETA = 0.5;
+const DEFAULT_EPSILON = 1;
+
+/**
+ * Builds the quadtree and applies one gravitational force per body.
+ */
+export function applyBarnesHutGravitationalForcesVectorized(
+    bodies: readonly RigidBody[],
+    G: number,
+    theta = DEFAULT_THETA,
+    epsilon = DEFAULT_EPSILON,
+): void {
+    const tree = buildQuadTreeVec(bodies, theta, epsilon);
+
+    if (tree === null) {
+        return;
+    }
+
+    const force = new Vec2();
+    const thetaSquared = theta * theta;
+
+    for (let i = 0; i < bodies.length; i++) {
+        const body = bodies[i];
+        if (body.mass === 0) continue;
+
+        tree.forceOn(body, G, force, thetaSquared);
+        body.addForce(force);
     }
 }
