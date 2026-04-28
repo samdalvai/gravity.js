@@ -1,5 +1,9 @@
 import { BodiesFactory, SETTINGS, Utils, Vec2, World } from '../src';
-import { applyBarnesHutGravitationalForces, applyBarnesHutGravitationalForcesVectorized, applyGravitationalForces } from '../src/force/Gravity';
+import {
+    applyBarnesHutGravitationalForces,
+    applyBarnesHutGravitationalForcesVectorized,
+    applyGravitationalForces,
+} from '../src/force/Gravity';
 import { applyBarnesHutCoulombForces, applyCoulombForces } from '../src/force/Interactions';
 
 declare const process: {
@@ -9,7 +13,7 @@ declare const process: {
 const RADIUS = 2000;
 SETTINGS.applyGravity = false;
 
-const numOfParticles = 5000;
+const numOfParticles = 10000;
 const center = new Vec2();
 
 const world = new World(9.8);
@@ -52,7 +56,7 @@ export function runOriginal() {
 export function runModified() {
     // applyBarnesHutCoulombForces(bodies, coulombForceStrength);
     // applyBarnesHutGravitationalForces(bodies, 9.8, 0, 10_000);
-    applyBarnesHutGravitationalForcesVectorized(bodies, 9.8, 0, 10_000);
+    applyBarnesHutGravitationalForcesVectorized(bodies, 9.8);
 }
 
 process.on('exit', () => {
