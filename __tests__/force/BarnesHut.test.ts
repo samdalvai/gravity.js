@@ -1,8 +1,13 @@
 import { describe, expect, test } from '@jest/globals';
 
 import { BodiesFactory, RigidBody, Vec2 } from '../../src';
+import { ChargeQuadTree, buildChargeQuadTree } from '../../src/force/ChargeQuadTree';
 import { generateBarnesHutGravitationalForce, generateGravitationalForce } from '../../src/force/Gravity';
-import { generateBarnesHutCoulombForce, generateCoulombForce } from '../../src/force/Interactions';
+import {
+    generateBarnesHutCoulombForce,
+    generateBarnesHutCoulombForceVectorized,
+    generateCoulombForce,
+} from '../../src/force/Interactions';
 import { buildQuadTree } from '../../src/force/QuadTree';
 
 describe('BarnesHut', () => {
@@ -103,6 +108,74 @@ describe('BarnesHut', () => {
         const barnesHut = generateBarnesHutCoulombForce(bodies[0], tree, k, 0.9);
 
         expectRelativeVectorError(barnesHut, exact, 0.08);
+    });
+
+    test('Vectorized Coulomb matches the exact pairwise sum when theta is 0', () => {
+        const bodies = [
+            BodiesFactory.circle({ radius: 4, x: 0, y: 0, mass: 1, charge: 3 }),
+            BodiesFactory.circle({ radius: 4, x: 50, y: 0, mass: 1, charge: 2 }),
+            BodiesFactory.circle({ radius: 4, x: -30, y: 40, mass: 1, charge: -4 }),
+            BodiesFactory.circle({ radius: 4, x: 10, y: -60, mass: 1, charge: 5 }),
+            BodiesFactory.circle({ radius: 4, x: 80, y: 20, mass: 1, charge: -1 }),
+            BodiesFactory.circle({ radius: 4, x: 5, y: 5, mass: 1, charge: 0 }),
+        ];
+
+        const k = 300;
+        const tree = buildChargeQuadTree(bodies);
+        const exact = bodies.map(body => exactCoulombForce(body, bodies, k));
+
+        expect(tree?.nodes[ChargeQuadTree.ROOT].positiveCharge).toBe(10);
+        expect(tree?.nodes[ChargeQuadTree.ROOT].negativeCharge).toBe(5);
+
+        for (let i = 0; i < bodies.length; i++) {
+            const b = bodies[i];
+            const force = generateBarnesHutCoulombForceVectorized(b, tree, k, 0);
+            expect(force.x).toBeCloseTo(exact[i].x, 10);
+            expect(force.y).toBeCloseTo(exact[i].y, 10);
+        }
+    });
+
+    test('Vectorized Coulomb stays close to the exact force for distant mixed-charge clusters', () => {
+        const bodies = [
+            BodiesFactory.circle({ radius: 3, x: 0, y: 0, mass: 1, charge: 6 }),
+            BodiesFactory.circle({ radius: 3, x: 220, y: 210, mass: 1, charge: 2 }),
+            BodiesFactory.circle({ radius: 3, x: 236, y: 198, mass: 1, charge: 3 }),
+            BodiesFactory.circle({ radius: 3, x: 228, y: 222, mass: 1, charge: 1 }),
+            BodiesFactory.circle({ radius: 3, x: -210, y: 205, mass: 1, charge: -2 }),
+            BodiesFactory.circle({ radius: 3, x: -224, y: 214, mass: 1, charge: -3 }),
+            BodiesFactory.circle({ radius: 3, x: -232, y: 196, mass: 1, charge: -1 }),
+        ];
+
+        const k = 500;
+        const tree = buildChargeQuadTree(bodies);
+
+        const exact = exactCoulombForce(bodies[0], bodies, k);
+        const barnesHut = generateBarnesHutCoulombForceVectorized(bodies[0], tree, k, 0.9);
+
+        expectRelativeVectorError(barnesHut, exact, 0.08);
+    });
+
+    test('Coulomb includes charged bodies even when they have no mass', () => {
+        const bodies = [
+            BodiesFactory.circle({ radius: 4, x: 0, y: 0, mass: 0, charge: 3 }),
+            BodiesFactory.circle({ radius: 4, x: 60, y: 0, mass: 0, charge: -2 }),
+            BodiesFactory.circle({ radius: 4, x: -20, y: 45, mass: 1, charge: 4 }),
+            BodiesFactory.circle({ radius: 4, x: 20, y: 10, mass: 1, charge: 0 }),
+        ];
+
+        const k = 250;
+        const tree = buildChargeQuadTree(bodies);
+        const exact = bodies.map(body => exactCoulombForce(body, bodies, k));
+
+        expect(tree?.nodes[ChargeQuadTree.ROOT].positiveCharge).toBe(7);
+        expect(tree?.nodes[ChargeQuadTree.ROOT].negativeCharge).toBe(2);
+
+        for (let i = 0; i < bodies.length; i++) {
+            const b = bodies[i];
+            const force = generateBarnesHutCoulombForceVectorized(b, tree, k, 0);
+            expect(force.x).toBeCloseTo(exact[i].x, 10);
+            expect(force.y).toBeCloseTo(exact[i].y, 10);
+        }
     });
 });
 

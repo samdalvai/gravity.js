@@ -1,5 +1,6 @@
 import { RigidBody } from '../core/RigidBody';
 import { Vec2 } from '../math/Vec2';
+import { ChargeQuadTree, buildChargeQuadTree } from './ChargeQuadTree';
 import { QuadNode, buildQuadTree, canApproximate } from './QuadTree';
 
 export function generateExplosionForce(body: RigidBody, explosionSource: Vec2, radius: number, strength: number): Vec2 {
@@ -108,6 +109,45 @@ export function applyBarnesHutCoulombForces(
     for (let i = 0; i < bodies.length; i++) {
         const b = bodies[i];
         const force = generateBarnesHutCoulombForce(b, tree, k, theta, epsilon);
+        b.addForce(force);
+    }
+}
+
+/**
+ * Computes the Coulomb force on one body using the flat charge quadtree.
+ */
+export function generateBarnesHutCoulombForceVectorized(
+    body: RigidBody,
+    tree: ChargeQuadTree | null,
+    k: number,
+    theta = 0.5,
+    epsilon = 0.01,
+): Vec2 {
+    if (tree === null || body.charge === 0) {
+        return new Vec2();
+    }
+
+    const force = new Vec2();
+    return tree.forceOn(body, k, force, theta * theta, epsilon);
+}
+
+/**
+ * Builds the flat charge quadtree and applies one Coulomb force per body.
+ */
+export function applyBarnesHutCoulombForcesVectorized(
+    bodies: readonly RigidBody[],
+    k: number,
+    theta = 0.5,
+    epsilon = 0.01,
+): void {
+    const tree = buildChargeQuadTree(bodies, theta);
+    const force = new Vec2();
+    const thetaSquared = theta * theta;
+
+    for (let i = 0; i < bodies.length; i++) {
+        const b = bodies[i];
+        if (b.charge === 0 || tree === null) continue;
+        tree.forceOn(b, k, force, thetaSquared, epsilon);
         b.addForce(force);
     }
 }
