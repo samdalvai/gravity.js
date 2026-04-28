@@ -2,7 +2,7 @@ import { PIXELS_PER_METER } from '../core/Constants';
 import { RigidBody } from '../core/RigidBody';
 import { Vec2 } from '../math/Vec2';
 import { QuadNode, buildQuadTree, canApproximate } from './QuadTree';
-import { buildQuadTree as buildQuadTreeVec } from './QuadTree_new';
+import { buildQuadTree as buildQuadTreeVec } from './GravityQuadTree';
 
 export function generateWeightForce(body: RigidBody, G: number): Vec2 {
     const weightForce = new Vec2(0.0, body.mass * G * PIXELS_PER_METER);
