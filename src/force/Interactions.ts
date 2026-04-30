@@ -55,7 +55,7 @@ export function generateCoulombForce(bodyA: RigidBody, bodyB: RigidBody, k: numb
 }
 
 /**
- * Convenience version that applies all voulomb forces to all bodies
+ * Convenience version that applies all coulomb forces to all bodies
  */
 export function applyCoulombForces(bodies: readonly RigidBody[], k: number): void {
     for (let i = 0; i < bodies.length - 1; i++) {
@@ -69,14 +69,17 @@ export function applyCoulombForces(bodies: readonly RigidBody[], k: number): voi
     }
 }
 
+const DEFAULT_THETA = 0.5;
+const DEFAULT_EPSILON = 0.01;
+
 /**
  * Builds the flat charge quadtree and applies one Coulomb force per body.
  */
 export function applyBarnesHutCoulombForces(
     bodies: readonly RigidBody[],
     k: number,
-    theta = 0.5,
-    epsilon = 0.01,
+    theta = DEFAULT_THETA,
+    epsilon = DEFAULT_EPSILON,
 ): void {
     const tree = buildChargeQuadTree(bodies, theta);
     const force = new Vec2();
