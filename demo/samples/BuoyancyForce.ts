@@ -6,7 +6,7 @@ import { FLOOR_HEIGHT, FLOOR_WIDTH, defineDemo, generateFences, generateFloor } 
 
 function setupBuoyancyForce(world: World, app: Application): void {
     app.setBackground('transparent');
-    Graphics.zoom = 0.75;
+    Graphics.zoom = 0.5;
 
     const floor = generateFloor(world, app);
     const fences = generateFences(world, app);
