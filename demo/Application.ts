@@ -779,14 +779,7 @@ export default class Application {
 
         // Less efficient but more accurate method
         // Force.gravity.applyGravitationalForces(bodies, GRAVITY, 0, BODY_REMOVAL_THRESHOLD * BODY_REMOVAL_THRESHOLD);
-
-        // Force.gravity.applyBarnesHutGravitationalForces(
-        //     bodies,
-        //     GRAVITY,
-        //     0,
-        //     BODY_REMOVAL_THRESHOLD * BODY_REMOVAL_THRESHOLD,
-        // );
-        Force.gravity.applyBarnesHutGravitationalForcesVectorized(bodies, GRAVITY);
+        Force.gravity.applyBarnesHutGravitationalForces(bodies, GRAVITY);
     }
 
     private applyBlackHoleForce(): void {
@@ -829,9 +822,7 @@ export default class Application {
 
         // Less efficient but more accurate method
         // interactions.applyCoulombForces(bodies, coulombForceStrength);
-
         Force.interactions.applyBarnesHutCoulombForces(bodies, coulombForceStrength);
-        // Force.interactions.applyBarnesHutCoulombForcesVectorized(bodies, coulombForceStrength);
     }
 
     private applyConvectionForce(): void {
