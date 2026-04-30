@@ -1,5 +1,5 @@
-import { BodiesFactory, SETTINGS, Utils, Vec2, World } from '../src';
-import { applyBarnesHutCoulombForces, applyBarnesHutCoulombForcesVectorized } from '../src/force/Interactions';
+import { BodiesFactory, GRAVITY, SETTINGS, Utils, Vec2, World } from '../src';
+import { applyGravitationalForces, applyBarnesHutGravitationalForces } from '../src/force/Gravity';
 
 declare const process: {
     on(event: 'exit', listener: () => void): void;
@@ -40,14 +40,13 @@ function randomPointInRadius(center: Vec2, radius: number): Vec2 {
 }
 
 const bodies = world.getBodies();
-const coulombForceStrength = 100;
 
 export function runOriginal() {
-    applyBarnesHutCoulombForces(bodies, coulombForceStrength);
+    applyGravitationalForces(bodies, GRAVITY, 0, 100_000 * 100_000);
 }
 
 export function runModified() {
-    applyBarnesHutCoulombForcesVectorized(bodies, coulombForceStrength);
+    applyBarnesHutGravitationalForces(bodies, GRAVITY);
 }
 
 process.on('exit', () => {

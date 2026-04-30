@@ -1,27 +1,27 @@
 import { RigidBody } from '../core/RigidBody';
 import { Vec2 } from '../math/Vec2';
 
-export type Quad = {
+export type GravityQuad = {
     centerX: number;
     centerY: number;
     size: number;
 };
 
-export type QuadNode = {
+export type GravityQuadNode = {
     children: number;
     next: number;
     posX: number;
     posY: number;
     mass: number;
-    quad: Quad;
+    quad: GravityQuad;
 };
 
-export class QuadTree {
+export class GravityQuadTree {
     static readonly ROOT = 0;
 
     thetaSquared: number;
     epsilonSquared: number;
-    readonly nodes: QuadNode[] = [];
+    readonly nodes: GravityQuadNode[] = [];
     private readonly parents: number[] = [];
 
     constructor(theta = 0.5, epsilon = 1) {
@@ -29,7 +29,7 @@ export class QuadTree {
         this.epsilonSquared = epsilon * epsilon;
     }
 
-    static newContaining(bodies: readonly RigidBody[]): Quad | null {
+    static newContaining(bodies: readonly RigidBody[]): GravityQuad | null {
         let minX = Number.POSITIVE_INFINITY;
         let minY = Number.POSITIVE_INFINITY;
         let maxX = Number.NEGATIVE_INFINITY;
@@ -60,7 +60,7 @@ export class QuadTree {
     }
 
     build(bodies: readonly RigidBody[]): boolean {
-        const quad = QuadTree.newContaining(bodies);
+        const quad = GravityQuadTree.newContaining(bodies);
         if (quad === null) {
             this.nodes.length = 0;
             this.parents.length = 0;
@@ -78,7 +78,7 @@ export class QuadTree {
         return true;
     }
 
-    clear(quad: Quad): void {
+    clear(quad: GravityQuad): void {
         this.nodes.length = 0;
         this.parents.length = 0;
         this.nodes.push(createNode(0, quad));
@@ -87,7 +87,7 @@ export class QuadTree {
     insert(pos: Vec2, mass: number): void {
         if (mass === 0) return;
 
-        let node = QuadTree.ROOT;
+        let node = GravityQuadTree.ROOT;
 
         while (this.nodes[node].children !== 0) {
             const quadrant = findQuadrant(this.nodes[node].quad, pos.x, pos.y);
@@ -164,7 +164,7 @@ export class QuadTree {
             return out;
         }
 
-        let nodeIndex = QuadTree.ROOT;
+        let nodeIndex = GravityQuadTree.ROOT;
 
         for (;;) {
             const node = this.nodes[nodeIndex];
@@ -217,12 +217,12 @@ export class QuadTree {
     }
 }
 
-export function buildQuadTree(bodies: readonly RigidBody[], theta = 0.5, epsilon = 1): QuadTree | null {
-    const tree = new QuadTree(theta, epsilon);
+export function buildGravityQuadTree(bodies: readonly RigidBody[], theta = 0.5, epsilon = 1): GravityQuadTree | null {
+    const tree = new GravityQuadTree(theta, epsilon);
     return tree.build(bodies) ? tree : null;
 }
 
-export function canApproximate(node: QuadNode, RigidBody: RigidBody, theta: number): boolean {
+export function canApproximate(node: GravityQuadNode, RigidBody: RigidBody, theta: number): boolean {
     const dx = node.posX - RigidBody.position.x;
     const dy = node.posY - RigidBody.position.y;
     const distanceSquared = dx * dx + dy * dy;
@@ -230,7 +230,7 @@ export function canApproximate(node: QuadNode, RigidBody: RigidBody, theta: numb
     return theta > 0 && node.quad.size * node.quad.size < distanceSquared * theta * theta;
 }
 
-function createNode(next: number, quad: Quad): QuadNode {
+function createNode(next: number, quad: GravityQuad): GravityQuadNode {
     return {
         children: 0,
         next,
@@ -241,11 +241,11 @@ function createNode(next: number, quad: Quad): QuadNode {
     };
 }
 
-function findQuadrant(quad: Quad, x: number, y: number): number {
+function findQuadrant(quad: GravityQuad, x: number, y: number): number {
     return ((y > quad.centerY ? 1 : 0) << 1) | (x > quad.centerX ? 1 : 0);
 }
 
-function intoQuadrant(quad: Quad, quadrant: number): Quad {
+function intoQuadrant(quad: GravityQuad, quadrant: number): GravityQuad {
     const size = quad.size * 0.5;
 
     return {

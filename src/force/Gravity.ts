@@ -1,8 +1,7 @@
 import { PIXELS_PER_METER } from '../core/Constants';
 import { RigidBody } from '../core/RigidBody';
 import { Vec2 } from '../math/Vec2';
-import { QuadNode, buildQuadTree, canApproximate } from './QuadTree';
-import { buildQuadTree as buildQuadTreeVec } from './GravityQuadTree';
+import { buildGravityQuadTree } from './GravityQuadTree';
 
 export function generateWeightForce(body: RigidBody, G: number): Vec2 {
     const weightForce = new Vec2(0.0, body.mass * G * PIXELS_PER_METER);
@@ -70,105 +69,19 @@ export function applyGravitationalForces(
     }
 }
 
-/**
- * Computes the gravitational force on one body by traversing a Barnes-Hut quadtree.
- *
- * Use `theta = 0` to disable approximation and recover the exact pairwise sum.
- * Smaller `theta` is more accurate, larger `theta` is faster.
- */
-export function generateBarnesHutGravitationalForce(
-    body: RigidBody,
-    tree: QuadNode | null,
-    G: number,
-    minDistanceSquared: number,
-    maxDistanceSquared: number,
-    theta = 0.5,
-): Vec2 {
-    if (tree === null || body.mass === 0) {
-        return new Vec2();
-    }
-
-    const force = new Vec2();
-    accumulateGravitationalForce(force, body, tree, G, minDistanceSquared, maxDistanceSquared, theta);
-    return force;
-}
-
-function accumulateGravitationalForce(
-    force: Vec2,
-    body: RigidBody,
-    node: QuadNode,
-    G: number,
-    minDistanceSquared: number,
-    maxDistanceSquared: number,
-    theta: number,
-): void {
-    if (node.bodyCount === 0 || node.totalMass === 0) {
-        return;
-    }
-
-    if (node.children === null) {
-        for (let i = 0; i < node.bodies.length; i++) {
-            const other = node.bodies[i];
-            if (other.id === body.id) continue;
-            force.addAssign(generateGravitationalForce(body, other, G, minDistanceSquared, maxDistanceSquared));
-        }
-        return;
-    }
-
-    if (canApproximate(node, body, theta)) {
-        const dx = node.centerOfMassX - body.position.x;
-        const dy = node.centerOfMassY - body.position.y;
-        const distanceSquared = dx * dx + dy * dy;
-
-        if (distanceSquared !== 0) {
-            const clampedDistanceSquared = Math.min(Math.max(distanceSquared, minDistanceSquared), maxDistanceSquared);
-            const inverseDistance = 1 / Math.sqrt(distanceSquared);
-            const magnitude = (G * body.mass * node.totalMass) / clampedDistanceSquared;
-            force.x += dx * inverseDistance * magnitude;
-            force.y += dy * inverseDistance * magnitude;
-        }
-
-        return;
-    }
-
-    for (let i = 0; i < node.children.length; i++) {
-        accumulateGravitationalForce(force, body, node.children[i], G, minDistanceSquared, maxDistanceSquared, theta);
-    }
-}
-
-/**
- * Convenience version that builds the tree once and applies one gravitational force per body.
- */
-export function applyBarnesHutGravitationalForces(
-    bodies: readonly RigidBody[],
-    G: number,
-    minDistanceSquared: number,
-    maxDistanceSquared: number,
-    theta = 0.5,
-): void {
-    const tree = buildQuadTree(bodies, 'gravity');
-
-    for (let i = 0; i < bodies.length; i++) {
-        const b = bodies[i];
-        const force = generateBarnesHutGravitationalForce(b, tree, G, minDistanceSquared, maxDistanceSquared, theta);
-
-        b.addForce(force);
-    }
-}
-
 const DEFAULT_THETA = 0.5;
 const DEFAULT_EPSILON = 1;
 
 /**
  * Builds the quadtree and applies one gravitational force per body.
  */
-export function applyBarnesHutGravitationalForcesVectorized(
+export function applyBarnesHutGravitationalForces(
     bodies: readonly RigidBody[],
     G: number,
     theta = DEFAULT_THETA,
     epsilon = DEFAULT_EPSILON,
 ): void {
-    const tree = buildQuadTreeVec(bodies, theta, epsilon);
+    const tree = buildGravityQuadTree(bodies, theta, epsilon);
 
     if (tree === null) {
         return;
