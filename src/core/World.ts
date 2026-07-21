@@ -64,7 +64,7 @@ export class World {
         }
     }
 
-    getBodies(): RigidBody[] {
+    getBodies(): readonly RigidBody[] {
         return this.bodies;
     }
 
