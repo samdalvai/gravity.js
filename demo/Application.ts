@@ -747,7 +747,7 @@ export default class Application {
     }
 
     private removeOutOfBoundsBodies(): void {
-        const bodies = this.world.getBodies().slice();
+        const bodies = this.world.getBodies();
 
         for (const body of bodies) {
             if (
