@@ -96,6 +96,12 @@ export default class Application {
         return this.running;
     }
 
+    addBodyToWorld(body: RigidBody): void {
+        if (this.world.getBodies().length >= MAX_BODIES) return;
+
+        this.world.addBody(body);
+    }
+
     setRunning(newValue: boolean): void {
         this.running = newValue;
     }
@@ -277,7 +283,7 @@ export default class Application {
                             isBullet: true,
                         });
                         this.setBodyTexture(bullet, 'rockRound');
-                        this.world.addBody(bullet);
+                        this.addBodyToWorld(bullet);
                     }
 
                     if (inputEvent.key === 'p') {
@@ -331,7 +337,7 @@ export default class Application {
                             friction: 0.8,
                         });
                         this.setBodyFillColor(this.player, 'orange');
-                        this.world.addBody(this.player);
+                        this.addBodyToWorld(this.player);
                     }
 
                     if (inputEvent.key === 'x') {
@@ -347,7 +353,7 @@ export default class Application {
                             restitution: 0.2,
                             friction: 0.7,
                         });
-                        this.world.addBody(capsule);
+                        this.addBodyToWorld(capsule);
                     }
 
                     if (inputEvent.key === 'z') {
@@ -363,7 +369,7 @@ export default class Application {
                             restitution: 0.2,
                             friction: 0.7,
                         });
-                        this.world.addBody(segment);
+                        this.addBodyToWorld(segment);
                     }
 
                     if (inputEvent.key === 'r' && !inputEvent.ctrlKey && !inputEvent.metaKey) {
@@ -374,7 +380,7 @@ export default class Application {
                         const vertices = Utils.randomNumber(3, 10);
 
                         const body = Utils.randomConvexBody(x, y, radius, vertices);
-                        this.world.addBody(body);
+                        this.addBodyToWorld(body);
                     }
 
                     if (inputEvent.code === 'Space') {
@@ -483,7 +489,7 @@ export default class Application {
                                             friction: 0.7,
                                         });
                                         this.setBodyTexture(ball, 'basketball');
-                                        this.world.addBody(ball);
+                                        this.addBodyToWorld(ball);
                                     }
                                 }
                                 break;
@@ -499,7 +505,7 @@ export default class Application {
                                         friction: 0.7,
                                     });
                                     this.setBodyTexture(box, 'crate');
-                                    this.world.addBody(box);
+                                    this.addBodyToWorld(box);
                                 }
                                 break;
                             case MouseButton.MIDDLE:
@@ -580,7 +586,7 @@ export default class Application {
                     friction: 0.5,
                 });
                 this.setBodyTexture(particle, 'rockRound');
-                this.world.addBody(particle);
+                this.addBodyToWorld(particle);
             }
         }
 
