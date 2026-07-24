@@ -1,5 +1,5 @@
-import { BodiesFactory, DistanceJoint, Vec2 } from '../../src';
-import type { RigidBody, World } from '../../src';
+import { BodiesFactory, DistanceJoint, Vec2 } from 'gravity.js';
+import type { RigidBody, World } from 'gravity.js';
 import type Application from '../Application';
 import {
     JOINT_TUNING,

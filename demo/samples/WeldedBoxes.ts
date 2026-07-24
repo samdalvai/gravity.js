@@ -1,5 +1,5 @@
-import { BodiesFactory, WeldJoint } from '../../src';
-import type { RigidBody, World } from '../../src';
+import { BodiesFactory, WeldJoint } from 'gravity.js';
+import type { RigidBody, World } from 'gravity.js';
 import type Application from '../Application';
 import { defineDemo, generateFloor } from './shared';
 

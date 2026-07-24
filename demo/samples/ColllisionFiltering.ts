@@ -1,4 +1,4 @@
-import { BodiesFactory, CollisionCategory, World } from '../../src';
+import { BodiesFactory, CollisionCategory, World } from 'gravity.js';
 import Application from '../Application';
 import { defineDemo } from './shared';
 

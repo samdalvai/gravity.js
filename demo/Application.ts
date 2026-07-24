@@ -14,7 +14,7 @@ import {
     Vec2,
     WeldJoint,
     World,
-} from '../src';
+} from 'gravity.js';
 import AssetStore, { TEXTURES } from './graphics/AssetStore';
 import Graphics from './graphics/Graphics';
 import InputManager, { MouseButton } from './input/InputManager';

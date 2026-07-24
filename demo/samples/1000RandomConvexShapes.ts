@@ -1,5 +1,5 @@
-import { Utils } from '../../src';
-import type { World } from '../../src';
+import { Utils } from 'gravity.js';
+import type { World } from 'gravity.js';
 import type Application from '../Application';
 import { defineDemo, generateSquareCage, populateStressDemo } from './shared';
 
