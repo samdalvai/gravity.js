@@ -12,6 +12,7 @@ export { RigidBody } from './core/RigidBody';
 export { World } from './core/World';
 
 export { CollisionCategory } from './collision/CollisionFilter';
+export { ContactInfo } from './collision/ContactManifold';
 
 export { DistanceJoint } from './joint/DistanceJoint';
 export { WeldJoint } from './joint/WeldJoint';
