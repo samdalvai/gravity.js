@@ -1,5 +1,5 @@
-import { BodiesFactory, Vec2 } from '../../src';
-import type { World } from '../../src';
+import { BodiesFactory, Vec2 } from 'gravity.js';
+import type { World } from 'gravity.js';
 import type Application from '../Application';
 import Graphics from '../graphics/Graphics';
 import { JOINT_TUNING, createDistanceJoint, defineDemo, generateFences, generateFloor } from './shared';
