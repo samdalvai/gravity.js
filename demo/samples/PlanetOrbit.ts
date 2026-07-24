@@ -1,6 +1,6 @@
 import { BodiesFactory, GRAVITY, SETTINGS, Utils, Vec2 } from '../../src';
 import type { RigidBody, World } from '../../src';
-import { ContactInfo } from '../../src/collision/ContactManifold';
+import { ContactInfo } from '../../src';
 import type Application from '../Application';
 import Graphics from '../graphics/Graphics';
 import { defineDemo } from './shared';
