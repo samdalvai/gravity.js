@@ -1,4 +1,4 @@
-import { RigidBody } from '../../src';
+import { RigidBody } from 'gravity.js';
 import AssetStore, { TEXTURES } from '../graphics/AssetStore';
 
 export interface BodyRenderStyle {

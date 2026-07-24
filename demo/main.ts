@@ -1,4 +1,4 @@
-import { FIXED_DELTA_TIME } from '../src';
+import { FIXED_DELTA_TIME } from 'gravity.js';
 import Application from './Application';
 
 async function run() {

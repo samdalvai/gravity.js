@@ -1,4 +1,4 @@
-import type { World } from '../../src';
+import type { World } from 'gravity.js';
 import type Application from '../Application';
 import { defineDemo, generateFences, generateFloor } from './shared';
 

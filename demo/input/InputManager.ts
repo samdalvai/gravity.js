@@ -1,4 +1,4 @@
-import { Vec2 } from '../../src';
+import { Vec2 } from 'gravity.js';
 
 export enum MouseButton {
     LEFT = 0,

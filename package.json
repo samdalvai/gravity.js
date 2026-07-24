@@ -14,8 +14,15 @@
   "files": [
     "lib"
   ],
+  "targets": {
+    "demo": {
+      "distDir": "dist",
+      "publicUrl": "./"
+    }
+  },
   "scripts": {
-    "start": "rm -rf .parcel-cache && parcel index.html",
+    "prestart": "npm run build:package",
+    "start": "rm -rf .parcel-cache && parcel index.html --target demo",
     "clean": "rm -rf .parcel-cache & find dist -maxdepth 1 -type f -exec rm {} +",
     "benchmark": "rm -rf .benchmark-dist && tsc --outDir .benchmark-dist --rootDir . --module commonjs --target es2020 benchmark/index.ts && node .benchmark-dist/benchmark/index.js",
     "test": "jest",
@@ -23,7 +30,8 @@
     "lint": "eslint . --ext .js,.ts",
     "lint:fix": "eslint . --ext .js,.ts --fix",
     "build:package": "tsc --project tsconfig.build.json",
-    "build": "parcel build index.html --dist-dir dist --public-url ./"
+    "prebuild": "npm run build:package",
+    "build": "parcel build index.html --target demo"
   },
   "author": "Samuel Dalvai",
   "license": "MIT",
