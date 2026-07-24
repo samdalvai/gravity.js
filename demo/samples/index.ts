@@ -6,7 +6,7 @@ import blackHoleOrbitDemo from './BlackHoleOrbit';
 import breakableJointsDemo from './BreakableJoints';
 import buoyancyDemo from './BuoyancyForce';
 import clothSimulationDemo from './ClothSimulation';
-import collisionFilteringDemo from './ColllisionFiltering';
+import collisionFilteringDemo from './CollisionFiltering';
 import complexSceneDemo from './ComplexScene';
 import continuousCollisionDetectionDemo from './ContinuousCollisionDetection';
 import convectionDemo from './ConvectionForce';

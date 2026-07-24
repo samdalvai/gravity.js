@@ -1,6 +1,6 @@
 import { RigidBody } from '../core/RigidBody';
 
-export const enum CollisionCategory {
+export enum CollisionCategory {
     NONE = 0,
     DEFAULT = 1 << 0,
     PROJECTILE = 1 << 1,
