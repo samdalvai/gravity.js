@@ -46,7 +46,6 @@ export class World {
     }
 
     addBody(body: RigidBody): void {
-        return
         if (this.bodies.length >= MAX_BODIES) throw new Error('Max number of bodies exceeded');
 
         this.bodies.push(body);
