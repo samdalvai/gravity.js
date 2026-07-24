@@ -1,5 +1,5 @@
-import { BodiesFactory, SETTINGS, Utils } from '../../src';
-import type { World } from '../../src';
+import { BodiesFactory, SETTINGS, Utils } from 'gravity.js';
+import type { World } from 'gravity.js';
 import type Application from '../Application';
 import Graphics from '../graphics/Graphics';
 import { defineDemo } from './shared';

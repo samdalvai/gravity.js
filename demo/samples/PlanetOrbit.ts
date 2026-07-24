@@ -1,6 +1,5 @@
-import { BodiesFactory, GRAVITY, SETTINGS, Utils, Vec2 } from '../../src';
-import type { RigidBody, World } from '../../src';
-import { ContactInfo } from '../../src';
+import { BodiesFactory, ContactInfo, GRAVITY, SETTINGS, Utils, Vec2 } from 'gravity.js';
+import type { RigidBody, World } from 'gravity.js';
 import type Application from '../Application';
 import Graphics from '../graphics/Graphics';
 import { defineDemo } from './shared';

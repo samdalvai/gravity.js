@@ -1,4 +1,4 @@
-import { BodiesFactory, DistanceJoint, RigidBody, Vec2, World } from '../../src';
+import { BodiesFactory, DistanceJoint, RigidBody, Vec2, World } from 'gravity.js';
 import type Application from '../Application';
 
 export const FLOOR_WIDTH = 3200;
