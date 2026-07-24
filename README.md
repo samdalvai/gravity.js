@@ -30,13 +30,23 @@ Learn more at [pikuma.com](https://pikuma.com/).
 npm install
 ```
 
-## Run
+## Run the demo in development mode
 
 ```
 npm start
 ```
 
-Now open the browser at http://localhost:1234
+This builds the Gravity.js package once, changes under `src` rebuild the package and refresh the demo automatically.
+
+## Run the demo from the packaged version only
+
+```
+npm run start:package
+```
+
+This builds the package once and starts the Parcel development server without watching the engine source. Restart the command to include later changes under `src`.
+
+For either command, open the URL printed by Parcel (usually http://localhost:1234).
 
 # Example scenarios
 
