@@ -163,7 +163,11 @@ export default class UIManager {
             option.textContent = label;
             this.demoSelect!.appendChild(option);
         });
-        this.demoSelect.addEventListener('change', () => actions.onSelectDemo(Number.parseInt(this.demoSelect!.value)));
+        this.demoSelect.addEventListener('change', () => {
+            const index = Number.parseInt(this.demoSelect!.value);
+            this.demoSelect!.blur();
+            actions.onSelectDemo(index);
+        });
         createLabeledControl(demoGroup, 'Demo', this.demoSelect);
 
         this.restartButton = document.createElement('button');
