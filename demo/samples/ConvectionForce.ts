@@ -1,5 +1,4 @@
-import { BodiesFactory, RigidBody, SETTINGS, Utils, type World } from '../../src';
-import { exchangeHeat } from '../../src/force/Temperature';
+import { BodiesFactory, Force, RigidBody, SETTINGS, Utils, type World } from '../../src';
 import type Application from '../Application';
 import Graphics from '../graphics/Graphics';
 import { defineDemo } from './shared';
@@ -100,7 +99,7 @@ function setupConvectionForce(world: World, app: Application): void {
         particle.onContact = info => {
             const bodyA = info.bodyA;
             const bodyB = info.bodyB;
-            exchangeHeat(bodyA, bodyB, SETTINGS.dt, HEATING_FACTOR, MIN_TEMPERATURE, MAX_TEMPERATURE);
+            Force.temperature.exchangeHeat(bodyA, bodyB, SETTINGS.dt, HEATING_FACTOR, MIN_TEMPERATURE, MAX_TEMPERATURE);
         };
 
         world.addBody(particle);
