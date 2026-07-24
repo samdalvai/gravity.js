@@ -61,5 +61,8 @@
       "@babel/preset-env",
       "@babel/preset-typescript"
     ]
+  },
+    "@parcel/resolver-default": {
+    "packageExports": true
   }
 }
