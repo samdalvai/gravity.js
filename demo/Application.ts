@@ -1000,7 +1000,6 @@ export default class Application {
         this.rightButtonPressed = false;
         this.middleMousePressed = false;
         this.controlPressed = false;
-        Graphics.resetView();
         demo(this.world, this);
         this.syncUI();
     }
