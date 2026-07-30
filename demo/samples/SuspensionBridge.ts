@@ -99,6 +99,6 @@ function setupSuspensionBridge(world: World, app: Application): void {
     );
 }
 
-const suspensionBridgeDemo = defineDemo('A suspension bridge', setupSuspensionBridge);
+const suspensionBridgeDemo = defineDemo('Suspension bridge', setupSuspensionBridge);
 
 export default suspensionBridgeDemo;

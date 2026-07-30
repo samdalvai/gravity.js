@@ -107,6 +107,6 @@ function setupSkeletonRagdoll(world: World, app: Application): void {
     );
 }
 
-const skeletonRagdollDemo = defineDemo('A skeleton ragdoll', setupSkeletonRagdoll);
+const skeletonRagdollDemo = defineDemo('Skeleton ragdoll', setupSkeletonRagdoll);
 
 export default skeletonRagdollDemo;

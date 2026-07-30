@@ -48,6 +48,6 @@ function setupSimpleWhip(world: World, app: Application): void {
     }
 }
 
-const simpleWhipDemo = defineDemo('A simple whip', setupSimpleWhip);
+const simpleWhipDemo = defineDemo('Simple whip', setupSimpleWhip);
 
 export default simpleWhipDemo;

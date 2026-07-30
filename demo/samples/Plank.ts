@@ -58,6 +58,6 @@ function setupPlank(world: World, app: Application): void {
     world.addBody(heavyBox);
 }
 
-const plankDemo = defineDemo('A plank', setupPlank);
+const plankDemo = defineDemo('Plank', setupPlank);
 
 export default plankDemo;

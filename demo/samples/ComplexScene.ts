@@ -150,6 +150,6 @@ function setupComplexScene(world: World, app: Application): void {
     world.addBody(pig4);
 }
 
-const complexSceneDemo = defineDemo('A complex scene', setupComplexScene);
+const complexSceneDemo = defineDemo('Complex scene', setupComplexScene);
 
 export default complexSceneDemo;
