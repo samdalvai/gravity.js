@@ -15,6 +15,7 @@ import {
     WeldJoint,
     World,
 } from 'gravity.js';
+
 import AssetStore, { TEXTURES } from './graphics/AssetStore';
 import Graphics from './graphics/Graphics';
 import InputManager, { MouseButton } from './input/InputManager';
@@ -294,12 +295,6 @@ export default class Application {
                         this.stepSimulation();
                     }
 
-                    if (inputEvent.key === ',') {
-                        // Note: this is not physically accurate, as contacts cannot work correctly with
-                        // negative delta time, this is just used for testing purposes
-                        this.world.update(-SETTINGS.dt);
-                    }
-
                     if (inputEvent.key === '+') {
                         this.setSolverIterations(SETTINGS.solverIterations + 1);
                     }
@@ -567,7 +562,7 @@ export default class Application {
             this.player.velocity.x = Utils.clamp(this.player.velocity.x, -PLAYER_MAX_SPEED, PLAYER_MAX_SPEED);
         }
 
-        this.advanceSimulation();
+        this.stepSimulation();
 
         if (this.generateParticle) {
             const x = InputManager.mousePosition.x;
@@ -879,12 +874,6 @@ export default class Application {
         }
     }
 
-    private advanceSimulation(): void {
-        for (let i = 0; i < SETTINGS.subSteps; i++) {
-            this.stepSimulation();
-        }
-    }
-
     private updateMouseWorldPosition(inputEvent: MouseEvent): void {
         const screenX = inputEvent.x - Graphics.width() / 2;
         const screenY = -(inputEvent.y - Graphics.height() / 2);
@@ -1080,7 +1069,7 @@ export default class Application {
         this.applyCoulombForce();
         this.applyConvectionForce();
         this.applyBuoyancyForce();
-        this.world.update(SETTINGS.dt);
+        this.world.update();
     }
 
     private getUIState(): UIState {

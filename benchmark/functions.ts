@@ -8,7 +8,7 @@ declare const process: {
 const RADIUS = 2000;
 SETTINGS.applyGravity = false;
 
-const numOfParticles = 10000;
+const numOfParticles = 5000;
 const center = new Vec2();
 
 const world = new World(9.8);

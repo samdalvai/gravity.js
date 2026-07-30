@@ -2,7 +2,6 @@ import { describe, expect, jest, test } from '@jest/globals';
 
 import { CollisionCategory } from '../../src/collision/CollisionFilter';
 import * as NarrowPhase from '../../src/collision/NarrowPhase';
-import { FIXED_DELTA_TIME } from '../../src/core/Constants';
 import { RigidBody } from '../../src/core/RigidBody';
 import { World } from '../../src/core/World';
 import { BoxShape } from '../../src/shapes/BoxShape';
@@ -26,7 +25,7 @@ describe('World grounding', () => {
         world.addBody(a);
         world.addBody(b);
 
-        world.update(FIXED_DELTA_TIME);
+        world.update();
 
         expect(detectCollisionSpy).not.toHaveBeenCalled();
         expect(world.getManifolds()).toHaveLength(0);
@@ -43,7 +42,7 @@ describe('World grounding', () => {
         world.addBody(circle);
         world.addBody(floor);
 
-        world.update(FIXED_DELTA_TIME);
+        world.update();
 
         expect(circle.isGrounded).toBe(true);
         expect(floor.isGrounded).toBe(false);
@@ -58,7 +57,7 @@ describe('World grounding', () => {
         world.addBody(support);
         world.addBody(capsule);
 
-        world.update(FIXED_DELTA_TIME);
+        world.update();
 
         expect(capsule.isGrounded).toBe(true);
         expect(support.isGrounded).toBe(false);
@@ -73,7 +72,7 @@ describe('World grounding', () => {
         world.addBody(support);
         world.addBody(box);
 
-        world.update(FIXED_DELTA_TIME);
+        world.update();
 
         expect(box.isGrounded).toBe(true);
         expect(support.isGrounded).toBe(false);
