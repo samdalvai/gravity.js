@@ -10,7 +10,6 @@ const SHORTCUT_SECTIONS = [
             '[ S ] Toggle contact and joint debug',
             '[ P ] Pause simulation',
             '[ . ] Step simulation',
-            '[ , ] Step backward (testing only)',
             '[ + ] [ - ] Increase or decrease solver iterations',
             '[ * ] [ / ] Increase or decrease substeps',
         ],
