@@ -1063,13 +1063,14 @@ export default class Application {
     }
 
     private stepSimulation(): void {
-        this.applyGravitationalForce();
-        this.applyBlackHoleForce();
-        this.applyDragForce();
-        this.applyCoulombForce();
-        this.applyConvectionForce();
-        this.applyBuoyancyForce();
-        this.world.update();
+        this.world.update(() => {
+            this.applyGravitationalForce();
+            this.applyBlackHoleForce();
+            this.applyDragForce();
+            this.applyCoulombForce();
+            this.applyConvectionForce();
+            this.applyBuoyancyForce();
+        });
     }
 
     private getUIState(): UIState {

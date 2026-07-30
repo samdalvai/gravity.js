@@ -100,7 +100,7 @@ export class World {
         this.torques.push(torque);
     }
 
-    update(): void {
+    update(beforeSubStep?: (dt: number) => void): void {
         const settings = SETTINGS;
         const dt = settings.dt;
         const subSteps = settings.subSteps;
@@ -108,6 +108,8 @@ export class World {
         const bodies = this.bodies;
 
         for (let i = 0; i < subSteps; i++) {
+            beforeSubStep?.(dt);
+
             // Loop all bodies of the world applying forces
             for (let i = 0; i < bodies.length; i++) {
                 const body = bodies[i];
