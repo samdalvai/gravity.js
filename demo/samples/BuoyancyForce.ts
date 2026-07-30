@@ -46,6 +46,6 @@ function setupBuoyancyForce(world: World, app: Application): void {
     }
 }
 
-const buoyancyDemo = defineDemo('Buoyancy demo', setupBuoyancyForce);
+const buoyancyDemo = defineDemo('Buoyancy force', setupBuoyancyForce);
 
 export default buoyancyDemo;

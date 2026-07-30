@@ -28,6 +28,6 @@ function setupPyramidOfBoxes(world: World, app: Application): void {
     }
 }
 
-const pyramidOfBoxesDemo = defineDemo('A pyramid of boxes', setupPyramidOfBoxes);
+const pyramidOfBoxesDemo = defineDemo('Pyramid of boxes', setupPyramidOfBoxes);
 
 export default pyramidOfBoxesDemo;

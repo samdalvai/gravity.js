@@ -13,6 +13,6 @@ function setupSingleBox(world: World, app: Application): void {
     world.addBody(body);
 }
 
-const singleBoxDemo = defineDemo('A single box', setupSingleBox);
+const singleBoxDemo = defineDemo('Single box', setupSingleBox);
 
 export default singleBoxDemo;

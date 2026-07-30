@@ -26,6 +26,6 @@ function setupStackOfBoxes(world: World, app: Application): void {
     }
 }
 
-const stackOfBoxesDemo = defineDemo('A stack of boxes', setupStackOfBoxes);
+const stackOfBoxesDemo = defineDemo('Stack of boxes', setupStackOfBoxes);
 
 export default stackOfBoxesDemo;
