@@ -2,11 +2,39 @@ import { describe, expect, jest, test } from '@jest/globals';
 
 import { CollisionCategory } from '../../src/collision/CollisionFilter';
 import * as NarrowPhase from '../../src/collision/NarrowPhase';
+import { FIXED_DELTA_TIME, SETTINGS } from '../../src/core/Constants';
 import { RigidBody } from '../../src/core/RigidBody';
 import { World } from '../../src/core/World';
+import { Vec2 } from '../../src/math/Vec2';
 import { BoxShape } from '../../src/shapes/BoxShape';
 import { CapsuleShape } from '../../src/shapes/CapsuleShape';
 import { CircleShape } from '../../src/shapes/CircleShape';
+
+describe('World substeps', () => {
+    test('applies continuous external forces during every substep', () => {
+        const previousSubSteps = SETTINGS.subSteps;
+        SETTINGS.subSteps = 4;
+
+        try {
+            const world = new World(0);
+            const body = new RigidBody(new CircleShape(10), 0, 0, 1);
+            const force = new Vec2(60, 0);
+            let callbackCount = 0;
+
+            world.addBody(body);
+            world.update(dt => {
+                expect(dt).toBe(FIXED_DELTA_TIME / SETTINGS.subSteps);
+                callbackCount++;
+                body.addForce(force);
+            });
+
+            expect(callbackCount).toBe(SETTINGS.subSteps);
+            expect(body.velocity.x).toBeCloseTo(force.x * FIXED_DELTA_TIME);
+        } finally {
+            SETTINGS.subSteps = previousSubSteps;
+        }
+    });
+});
 
 describe('World grounding', () => {
     test('broad phase skips pairs rejected by collision filters', () => {
