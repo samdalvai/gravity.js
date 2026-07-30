@@ -6,6 +6,10 @@ export const GRAVITY = 9.8;
 
 export const MIN_BULLET_SPEED_SQUARED = 1_000_000;
 
+/**
+ * Setting are a global configuration tha affect each world created, if
+ * you change some property this will affect all simulations at the same time
+ */
 export const SETTINGS = {
     // Simulation settings
     applyGravity: true,
