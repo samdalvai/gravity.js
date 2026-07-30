@@ -18,6 +18,10 @@ Learn more at [pikuma.com](https://pikuma.com/).
 - Set of demos showcasing different scenarios
 - Generation of various forces: attraction, explosion, drag, friction, convection, buoyancy
 
+# Documentation
+
+See the [Gravity.js integration and API guide](docs/USAGE.md) for installation in another project, fixed-step simulation setup, body and joint creation, collision handling, forces, rendering integration, and the complete public API.
+
 # How to run
 
 ## Prerequisites
