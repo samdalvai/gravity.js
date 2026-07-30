@@ -100,56 +100,62 @@ export class World {
         this.torques.push(torque);
     }
 
-    update(dt: number): void {
+    update(): void {
+        const settings = SETTINGS;
+        const dt = settings.dt;
+        const subSteps = settings.subSteps;
+
         const bodies = this.bodies;
 
-        // Loop all bodies of the world applying forces
-        for (let i = 0; i < bodies.length; i++) {
-            const body = bodies[i];
-            if (SETTINGS.applyGravity) {
-                // Apply the weight force to all bodies
-                applyWeightForce(body, this.G * body.gravityScale);
+        for (let i = 0; i < subSteps; i++) {
+            // Loop all bodies of the world applying forces
+            for (let i = 0; i < bodies.length; i++) {
+                const body = bodies[i];
+                if (SETTINGS.applyGravity) {
+                    // Apply the weight force to all bodies
+                    applyWeightForce(body, this.G * body.gravityScale);
+                }
+
+                // Apply forces to all bodies
+                const forces = this.forces;
+                for (let j = 0; j < forces.length; j++) {
+                    body.addForce(forces[j]);
+                }
+
+                // Apply torque to all bodiesx
+                const torques = this.torques;
+                for (let j = 0; j < torques.length; j++) {
+                    body.addTorque(torques[j]);
+                }
+
+                // Update last grounded time
+                if (body.isGrounded) {
+                    body.lastGroundedTime = 0;
+                } else {
+                    // Since we have fixed dt we can safely assume that the last frame dt is the same as this one
+                    body.lastGroundedTime += dt;
+                }
+
+                // Reset grounded value at the beginning of each frame
+                body.isGrounded = false;
             }
 
-            // Apply forces to all bodies
-            const forces = this.forces;
-            for (let j = 0; j < forces.length; j++) {
-                body.addForce(forces[j]);
+            // Integrate all the forces
+            for (let i = 0; i < bodies.length; i++) {
+                const body = bodies[i];
+                body.integrateForces(dt);
             }
 
-            // Apply torque to all bodiesx
-            const torques = this.torques;
-            for (let j = 0; j < torques.length; j++) {
-                body.addTorque(torques[j]);
-            }
+            if (SETTINGS.ccd) {
+                this.ccd(dt);
 
-            // Update last grounded time
-            if (body.isGrounded) {
-                body.lastGroundedTime = 0;
+                for (let i = 0; i < this.dtFractions.length; i++) {
+                    const dtFraction = this.dtFractions[i];
+                    this.step(dtFraction);
+                }
             } else {
-                // Since we have fixed dt we can safely assume that the last frame dt is the same as this one
-                body.lastGroundedTime += dt;
+                this.step(dt);
             }
-
-            // Reset grounded value at the beginning of each frame
-            body.isGrounded = false;
-        }
-
-        // Integrate all the forces
-        for (let i = 0; i < bodies.length; i++) {
-            const body = bodies[i];
-            body.integrateForces(dt);
-        }
-
-        if (SETTINGS.ccd) {
-            this.ccd(dt);
-
-            for (let i = 0; i < this.dtFractions.length; i++) {
-                const dtFraction = this.dtFractions[i];
-                this.step(dtFraction);
-            }
-        } else {
-            this.step(dt);
         }
     }
 
