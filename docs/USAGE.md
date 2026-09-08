@@ -386,11 +386,17 @@ Create a world with a positive downward gravity magnitude:
 ```ts
 const world = new World(GRAVITY); // 9.8 m/s² downward, scaled by PIXELS_PER_METER
 const space = new World(0);       // no automatic weight force
+const largeWorld = new World(GRAVITY, { maxBodies: 20_000 });
+const unlimitedWorld = new World(0, { maxBodies: Infinity });
 ```
+
+The optional second argument is a `WorldOptions` object. `maxBodies` defaults to `MAX_BODIES` (5,000) and must be a non-negative safe integer or `Infinity` to disable the limit. Invalid limits throw a `RangeError`. The readonly `world.maxBodies` property exposes the limit; it is independent for each world and preserved by `clear()`.
+
+The contact manifold pool grows on demand and reuses released contacts. Setting a larger body limit does not preallocate bodies or manifolds.
 
 | Method | Behavior |
 | --- | --- |
-| `addBody(body)` | Adds a body. Throws after `MAX_BODIES` bodies. |
+| `addBody(body)` | Adds a body. Throws if the world already contains `world.maxBodies` bodies. |
 | `removeBody(body)` | Removes the body with the matching ID. Does not automatically remove attached joints. |
 | `getBodies()` | Returns a readonly view of the current body array. Do not mutate it by casting. |
 | `addJoint(joint)` | Adds a distance, weld, or grab joint. |
@@ -790,12 +796,14 @@ Utils.randomColor(): string
 Utils.clamp(value, low, high): number
 Utils.assert(...conditionsAndMessages): void
 Utils.randomConvexBody(x, y, radius, numVertices?, mass?): RigidBody
-Utils.pairKey(a, b): number
+Utils.pairKey(a, b): Utils.PairKey // number | string
 Utils.makeId(a, b): number
 Utils.temperatureToColor(temperature, minTemperature, maxTemperature): string
 ```
 
 `pairKey` and `makeId` are mainly useful for engine-style caches. `randomConvexBody` is convenient for prototypes and test scenes.
+
+Treat `pairKey` results as opaque keys: they are independent of body order and preserve full body IDs. Keys remain numeric when both IDs fit in 16 bits and use strings for larger IDs. Caches previously typed as `Map<number, ...>` should use `Map<Utils.PairKey, ...>`.
 
 `randomNumber` defaults to the range `[1, 10)`. When using `randomConvexBody`, pass `numVertices >= 3`; although the declaration marks that argument optional, the current default is rejected by the implementation.
 
@@ -841,7 +849,7 @@ These are public for engine tuning but should normally remain at their defaults:
 | --- | --- |
 | `FIXED_DELTA_TIME` | `1 / 60` second |
 | `PIXELS_PER_METER` | `100` |
-| `MAX_BODIES` | `5,000` |
+| `MAX_BODIES` | `5,000`; default per-world body limit, overridable with `WorldOptions.maxBodies` |
 | `GRAVITY` | `9.8` |
 | `MIN_BULLET_SPEED_SQUARED` | `1,000,000` `(pixels/second)²` |
 
@@ -874,7 +882,7 @@ The root `gravity.js` entry point exports:
 
 | Group | Exports |
 | --- | --- |
-| Simulation | `World`, `RigidBody`, `BodiesFactory` |
+| Simulation | `World`, `RigidBody`, `BodiesFactory`, TypeScript type `WorldOptions` |
 | Math | `Vec2`, `Utils` |
 | Shapes | `BoxShape`, `CapsuleShape`, `CircleShape`, `PolygonShape`, `SegmentShape`, `ShapeType` |
 | Joints | `DistanceJoint`, `WeldJoint`, `GrabJoint` |
