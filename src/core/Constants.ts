@@ -1,6 +1,7 @@
 export const FIXED_DELTA_TIME = 1 / 60;
 
 export const PIXELS_PER_METER = 100;
+/** Default body limit for worlds that do not specify maxBodies. */
 export const MAX_BODIES = 5_000;
 export const GRAVITY = 9.8;
 
