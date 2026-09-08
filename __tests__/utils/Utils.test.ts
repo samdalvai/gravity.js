@@ -39,10 +39,29 @@ describe('Utils', () => {
         expect(Utils.clamp(-50, 10, 3)).toBe(10);
     });
 
-    test('Bodies paur key should return the same value regardless of the ordering', () => {
+    test('body pair key is independent of ordering', () => {
         const a = new RigidBody(new CircleShape(10), 100, 100, 10);
         const b = new RigidBody(new CircleShape(10), 100, 100, 10);
 
         expect(Utils.pairKey(a, b)).toBe(Utils.pairKey(b, a));
+    });
+
+    test('body pair keys preserve full IDs across integer boundaries', () => {
+        const a = new RigidBody(new CircleShape(1), 0, 0, 1);
+        const b = new RigidBody(new CircleShape(1), 0, 0, 1);
+        const ids = [0, 1, 32768, 65535, 65536, 65537, 2 ** 32, 2 ** 32 + 1, Number.MAX_SAFE_INTEGER];
+        const keys = new Set<Utils.PairKey>();
+
+        for (let i = 0; i < ids.length; i++) {
+            for (let j = i + 1; j < ids.length; j++) {
+                Object.defineProperty(a, 'id', { value: ids[i] });
+                Object.defineProperty(b, 'id', { value: ids[j] });
+                const key = Utils.pairKey(a, b);
+
+                expect(Utils.pairKey(b, a)).toBe(key);
+                expect(keys.has(key)).toBe(false);
+                keys.add(key);
+            }
+        }
     });
 });
