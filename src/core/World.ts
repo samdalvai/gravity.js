@@ -18,7 +18,13 @@ import * as Utils from '../utils/Utils';
 import { MAX_BODIES, MIN_BULLET_SPEED_SQUARED, SETTINGS } from './Constants';
 import { RigidBody } from './RigidBody';
 
+export interface WorldOptions {
+    /** Maximum live bodies. Defaults to MAX_BODIES; Infinity disables the limit. */
+    maxBodies?: number;
+}
+
 export class World {
+    readonly maxBodies: number;
     private readonly up = new Vec2(0, 1);
     private G: number;
 
@@ -31,8 +37,8 @@ export class World {
     private manifolds: ContactManifold[] = [];
     private manifoldsNext: ContactManifold[] = [];
 
-    private manifoldMap: Map<number, ContactManifold> = new Map();
-    private manifoldMapNext: Map<number, ContactManifold> = new Map();
+    private manifoldMap: Map<Utils.PairKey, ContactManifold> = new Map();
+    private manifoldMapNext: Map<Utils.PairKey, ContactManifold> = new Map();
 
     private readonly manifoldPool = NarrowPhase.manifoldPool;
 
@@ -41,12 +47,18 @@ export class World {
 
     private dtFractions: number[] = [];
 
-    constructor(gravity: number) {
+    constructor(gravity: number, options: WorldOptions = {}) {
+        const maxBodies = options.maxBodies ?? MAX_BODIES;
+        if (maxBodies !== Infinity && (!Number.isSafeInteger(maxBodies) || maxBodies < 0)) {
+            throw new RangeError('maxBodies must be a non-negative safe integer or Infinity');
+        }
+
+        this.maxBodies = maxBodies;
         this.G = -gravity;
     }
 
     addBody(body: RigidBody): void {
-        if (this.bodies.length >= MAX_BODIES) throw new Error('Max number of bodies exceeded');
+        if (this.bodies.length >= this.maxBodies) throw new Error('Max number of bodies exceeded');
 
         this.bodies.push(body);
     }

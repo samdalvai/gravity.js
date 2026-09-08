@@ -6,7 +6,6 @@ import {
     Force,
     GRAVITY,
     GrabJoint,
-    MAX_BODIES,
     PIXELS_PER_METER,
     RigidBody,
     SETTINGS,
@@ -98,7 +97,7 @@ export default class Application {
     }
 
     addBodyToWorld(body: RigidBody): void {
-        if (this.world.getBodies().length >= MAX_BODIES) return;
+        if (this.world.getBodies().length >= this.world.maxBodies) return;
 
         this.world.addBody(body);
     }
@@ -701,7 +700,7 @@ export default class Application {
             ['Paused', this.paused ? 'ON' : 'OFF'],
             ['AABB', this.showAABB ? 'ON' : 'OFF'],
             ['Contacts', this.showContacts ? 'ON' : 'OFF'],
-            ['Bodies', `${this.world.getBodies().length}/${MAX_BODIES}`],
+            ['Bodies', `${this.world.getBodies().length}/${this.world.maxBodies}`],
             ['Collisions', `${numContacts}`],
             ['FPS', this.FPS.toFixed(2)],
             ['Zoom', Graphics.zoom.toFixed(2)],

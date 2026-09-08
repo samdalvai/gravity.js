@@ -52,15 +52,20 @@ export function randomConvexBody(x: number, y: number, radius: number, numVertic
     return BodiesFactory.polygon({ vertices, x, y, mass });
 }
 
-// a.id << 16 → shifts a.id into the upper 16 bits of a 32-bit integer
-// b.id & 0xffff → ensures that only the lower 16 bits of b.id are used
-// | -> bitwise OR combines them into a single 32-bit integer
-export function pairKey(a: RigidBody, b: RigidBody): number {
-    if (a.id < b.id) {
-        return (a.id << 16) | (b.id & 0xffff);
-    } else {
-        return (b.id << 16) | (a.id & 0xffff);
+/** Opaque unordered body-pair key. */
+export type PairKey = number | string;
+
+export function pairKey(a: RigidBody, b: RigidBody): PairKey {
+    const low = Math.min(a.id, b.id);
+    const high = Math.max(a.id, b.id);
+
+    // Preserve allocation-free numeric keys while both IDs fit in 16 bits.
+    if (high <= 0xffff) {
+        return (low << 16) | high;
     }
+
+    // Body IDs increase across worlds and resets. Never truncate larger IDs.
+    return `${low}:${high}`;
 }
 
 export function makeId(a: number, b: number): number {
