@@ -29,6 +29,14 @@ export interface WorldOptions {
 
 export type ContactMaterialCallback = (materialA: number, materialB: number, bodyA: RigidBody, bodyB: RigidBody) => number;
 
+interface PersistentContact {
+    bodyA: RigidBody;
+    bodyB: RigidBody;
+    manifold: ContactManifold | null;
+    touching: boolean;
+    seen: boolean;
+}
+
 /** Per-update counters and timings. Enable with `SETTINGS.collectMetrics`. */
 export interface WorldMetrics {
     updateMs: number;
@@ -76,10 +84,7 @@ export class World {
     private joints: Joint[] = [];
 
     private manifolds: ContactManifold[] = [];
-    private manifoldsNext: ContactManifold[] = [];
-
-    private manifoldMap: Map<Utils.PairKey, ContactManifold> = new Map();
-    private manifoldMapNext: Map<Utils.PairKey, ContactManifold> = new Map();
+    private readonly contacts: Map<Utils.PairKey, PersistentContact> = new Map();
 
     private readonly manifoldPool = NarrowPhase.manifoldPool;
 
@@ -117,6 +122,7 @@ export class World {
 
             // It suffices to look for the position going below the screen
             if (body.id === current.id) {
+                this.destroyContactsForBody(body);
                 this.bodies[i] = this.bodies[this.bodies.length - 1];
                 this.bodies.pop();
                 return;
@@ -177,7 +183,21 @@ export class World {
         }
 
         const bodies = this.bodies;
+        let start = collectMetrics ? now() : 0;
+        this.broadPhase();
+        if (collectMetrics) {
+            this.metrics.broadPhaseCalls++;
+            this.metrics.broadPhaseMs += now() - start;
+        }
 
+        start = collectMetrics ? now() : 0;
+        this.narrowPhase();
+        if (collectMetrics) {
+            this.metrics.narrowPhaseCalls++;
+            this.metrics.narrowPhaseMs += now() - start;
+        }
+
+        let applyWarmStarting = true;
         for (let i = 0; i < subSteps; i++) {
             beforeSubStep?.(dt);
 
@@ -224,10 +244,12 @@ export class World {
 
                 for (let i = 0; i < this.dtFractions.length; i++) {
                     const dtFraction = this.dtFractions[i];
-                    this.step(dtFraction);
+                    this.step(dtFraction, applyWarmStarting);
+                    applyWarmStarting = false;
                 }
             } else {
-                this.step(dt);
+                this.step(dt, applyWarmStarting);
+                applyWarmStarting = false;
             }
         }
 
@@ -272,27 +294,14 @@ export class World {
         }
     }
 
-    private step(dt: number) {
+    private step(dt: number, applyWarmStarting: boolean) {
         const bodies = this.bodies;
         const invDt = dt === 0 ? 0 : 1 / dt;
         const collectMetrics = SETTINGS.collectMetrics;
 
         let start = collectMetrics ? now() : 0;
-        this.broadPhase();
-        if (collectMetrics) {
-            this.metrics.broadPhaseCalls++;
-            this.metrics.broadPhaseMs += now() - start;
-        }
-
-        start = collectMetrics ? now() : 0;
-        this.narrowPhase();
-        if (collectMetrics) {
-            this.metrics.narrowPhaseCalls++;
-            this.metrics.narrowPhaseMs += now() - start;
-        }
-
-        start = collectMetrics ? now() : 0;
-        this.solveConstraints(invDt);
+        for (let i = 0; i < this.manifolds.length; i++) this.setGrounded(this.manifolds[i]);
+        this.solveConstraints(invDt, applyWarmStarting);
         if (collectMetrics) {
             this.metrics.solveMs += now() - start;
         }
@@ -363,85 +372,92 @@ export class World {
     }
 
     private narrowPhase() {
-        const oldManifolds = this.manifolds;
-
-        const newManifolds = this.manifoldsNext;
-        const newMap = this.manifoldMapNext;
-
-        newManifolds.length = 0;
-        newMap.clear();
-
         const pairs = this.potentialPairs;
-        const oldMap = this.manifoldMap;
         const warmStarting = SETTINGS.warmStarting;
 
-        // Narrow phase check, potential pairs may still not collide
+        for (const contact of this.contacts.values()) contact.seen = false;
+        this.manifolds.length = 0;
+
         for (let i = 0; i < pairs.length; i += 2) {
             let a = pairs[i];
             let b = pairs[i + 1];
-
             if (a.isStatic() && b.isStatic()) continue;
-
             if (SETTINGS.collectMetrics) this.metrics.narrowPhaseTests++;
 
-            // Improve coherence
             if (a.id > b.id) {
                 const tmp = a;
                 a = b;
                 b = tmp;
             }
 
+            const key = Utils.pairKey(a, b);
+            let contact = this.contacts.get(key);
+            if (contact === undefined) {
+                contact = { bodyA: a, bodyB: b, manifold: null, touching: false, seen: true };
+                this.contacts.set(key, contact);
+            } else {
+                contact.seen = true;
+            }
+
+            const oldManifold = contact.manifold;
             const newManifold = NarrowPhase.detectCollision(a, b);
-            if (newManifold == null) continue;
+            if (newManifold == null) {
+                if (contact.touching && oldManifold != null) this.emitContactEnd(oldManifold);
+                contact.touching = false;
+                if (oldManifold != null) this.manifoldPool.release(oldManifold);
+                contact.manifold = null;
+                continue;
+            }
 
             newManifold.setMaterialProperties(
                 this.frictionCallback(a.friction, b.friction, a, b),
                 this.restitutionCallback(a.restitution, b.restitution, a, b),
             );
-
-            const key = Utils.pairKey(a, b);
-
-            if (warmStarting) {
-                const oldManifold = oldMap.get(key);
-                if (oldManifold !== undefined) {
-                    newManifold.tryWarmStart(oldManifold);
-                }
+            let manifold = newManifold;
+            if (oldManifold != null) {
+                if (warmStarting) newManifold.tryWarmStart(oldManifold);
+                oldManifold.updateFrom(newManifold, warmStarting);
+                this.manifoldPool.release(newManifold);
+                manifold = oldManifold;
             }
 
-            newMap.set(key, newManifold);
-            newManifolds.push(newManifold);
+            contact.manifold = manifold;
+            this.manifolds.push(manifold);
+            if (!contact.touching) this.emitContactBegin(manifold);
+            contact.touching = true;
+            this.setGrounded(manifold);
+        }
 
-            this.setGrounded(newManifold);
+        for (const [key, contact] of this.contacts) {
+            if (contact.seen) continue;
+            if (contact.touching && contact.manifold != null) this.emitContactEnd(contact.manifold);
+            if (contact.manifold != null) this.manifoldPool.release(contact.manifold);
+            this.contacts.delete(key);
         }
 
         if (SETTINGS.collectMetrics) {
-            this.metrics.manifoldCount = newManifolds.length;
-            for (let i = 0; i < newManifolds.length; i++) {
+            this.metrics.manifoldCount = this.manifolds.length;
+            for (let i = 0; i < this.manifolds.length; i++) {
                 this.metrics.maxPenetrationDepth = Math.max(
                     this.metrics.maxPenetrationDepth,
-                    newManifolds[i].penetrationDepth,
+                    this.manifolds[i].penetrationDepth,
                 );
             }
         }
-
-        for (let i = 0; i < oldManifolds.length; i++) {
-            this.manifoldPool.release(oldManifolds[i]);
-        }
-
-        this.manifolds = newManifolds;
-        this.manifoldsNext = oldManifolds;
-
-        this.manifoldMap = newMap;
-        this.manifoldMapNext = oldMap;
     }
 
-    private solveConstraints(invDt: number) {
+    private solveConstraints(invDt: number, applyWarmStarting: boolean) {
         // Presolve constraints
         const hertz = Math.min(SETTINGS.contactHertz, 0.125 * invDt);
         const contactSoftness = makeSoft(hertz, SETTINGS.contactDampingRatio, invDt > 0 ? 1 / invDt : 0);
         const staticSoftness = makeSoft(2 * hertz, SETTINGS.contactDampingRatio, invDt > 0 ? 1 / invDt : 0);
         for (let i = 0; i < this.manifolds.length; i++) {
-            this.manifolds[i].preSolve(invDt, contactSoftness, staticSoftness);
+            const manifold = this.manifolds[i];
+            if (applyWarmStarting) {
+                manifold.preSolve(invDt, contactSoftness, staticSoftness, true);
+            } else {
+                manifold.refreshForSubStep(invDt, contactSoftness, staticSoftness);
+            }
         }
 
         for (let i = 0; i < this.joints.length; i++) this.joints[i].preSolve(invDt);
@@ -475,6 +491,29 @@ export class World {
         }
     }
 
+    private emitContactBegin(manifold: ContactManifold): void {
+        manifold.bodyA.onContactBegin?.(manifold.contactInfo);
+        manifold.bodyB.onContactBegin?.(manifold.contactInfo);
+    }
+
+    private emitContactEnd(manifold: ContactManifold): void {
+        manifold.bodyA.onContactEnd?.(manifold.contactInfo);
+        manifold.bodyB.onContactEnd?.(manifold.contactInfo);
+    }
+
+    private destroyContactsForBody(body: RigidBody): void {
+        for (const [key, contact] of this.contacts) {
+            if (contact.bodyA !== body && contact.bodyB !== body) continue;
+            if (contact.touching && contact.manifold != null) this.emitContactEnd(contact.manifold);
+            if (contact.manifold != null) {
+                const index = this.manifolds.indexOf(contact.manifold);
+                if (index >= 0) this.manifolds.splice(index, 1);
+                this.manifoldPool.release(contact.manifold);
+            }
+            this.contacts.delete(key);
+        }
+    }
+
     private solveContactRestitutionAndFriction() {
         for (let i = 0; i < SETTINGS.solverIterations; i++) {
             for (let j = 0; j < this.manifolds.length; j++) {
@@ -494,14 +533,15 @@ export class World {
     }
 
     clear() {
-        for (let i = 0; i < this.manifolds.length; i++) {
-            this.manifoldPool.release(this.manifolds[i]);
+        for (const contact of this.contacts.values()) {
+            if (contact.touching && contact.manifold != null) this.emitContactEnd(contact.manifold);
+            if (contact.manifold != null) this.manifoldPool.release(contact.manifold);
         }
 
         this.bodies.length = 0;
         this.potentialPairs.length = 0;
         this.manifolds.length = 0;
-        this.manifoldMap.clear();
+        this.contacts.clear();
         this.joints.length = 0;
         this.forces.length = 0;
         this.torques.length = 0;

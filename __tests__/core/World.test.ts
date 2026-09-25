@@ -65,6 +65,73 @@ describe('World body limits', () => {
 });
 
 describe('World contact cache', () => {
+    test('updates broad and narrow phase once across temporal substeps', () => {
+        const previousSubSteps = SETTINGS.subSteps;
+        const previousCollectMetrics = SETTINGS.collectMetrics;
+        SETTINGS.subSteps = 4;
+        SETTINGS.collectMetrics = true;
+
+        try {
+            const world = new World(0);
+            world.addBody(new RigidBody(new CircleShape(10), 0, 0, 1));
+            world.addBody(new RigidBody(new CircleShape(10), 15, 0, 1));
+            world.update();
+
+            expect(world.getMetrics().broadPhaseCalls).toBe(1);
+            expect(world.getMetrics().narrowPhaseCalls).toBe(1);
+            world.clear();
+        } finally {
+            SETTINGS.subSteps = previousSubSteps;
+            SETTINGS.collectMetrics = previousCollectMetrics;
+        }
+    });
+
+    test('retains a manifold instance while its broad-phase pair persists', () => {
+        const world = new World(0);
+        world.addBody(new RigidBody(new CircleShape(10), 0, 0, 1));
+        world.addBody(new RigidBody(new CircleShape(10), 15, 0, 1));
+
+        world.update();
+        const first = world.getManifolds()[0];
+        world.update();
+
+        expect(world.getManifolds()[0]).toBe(first);
+        world.clear();
+    });
+
+    test('emits contact transitions and releases contacts when a body is removed', () => {
+        const world = new World(0);
+        const a = new RigidBody(new CircleShape(10), 0, 0, 1);
+        const b = new RigidBody(new CircleShape(10), 15, 0, 1);
+        const onBegin = jest.fn();
+        const onEnd = jest.fn();
+        a.onContactBegin = onBegin;
+        a.onContactEnd = onEnd;
+        world.addBody(a);
+        world.addBody(b);
+
+        world.update();
+        expect(onBegin).toHaveBeenCalledTimes(1);
+        expect(onEnd).not.toHaveBeenCalled();
+
+        b.position.x = 100;
+        b.shape.updateVertices(b.rotation, b.position);
+        b.shape.updateAABB(b);
+        world.update();
+        expect(onEnd).toHaveBeenCalledTimes(1);
+        expect(world.getManifolds()).toHaveLength(0);
+
+        b.position.x = 15;
+        b.shape.updateVertices(b.rotation, b.position);
+        b.shape.updateAABB(b);
+        world.update();
+        expect(onBegin).toHaveBeenCalledTimes(2);
+
+        world.removeBody(b);
+        expect(onEnd).toHaveBeenCalledTimes(2);
+        expect(world.getManifolds()).toHaveLength(0);
+    });
+
     test('uses per-world material callbacks when building a contact', () => {
         const frictionCallback = jest.fn(() => 0.25);
         const restitutionCallback = jest.fn(() => 0.75);

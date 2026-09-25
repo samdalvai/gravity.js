@@ -320,7 +320,35 @@ export class ContactManifold extends Constraint {
         this.restitution = restitution;
     }
 
-    override preSolve(invDt: number, contactSoftness?: ContactSoftness, staticSoftness?: ContactSoftness): void {
+    /** Replaces geometry in this pooled manifold while retaining matching point impulses. */
+    updateFrom(source: ContactManifold, copyWarmStarting: boolean): void {
+        this.init(
+            source.bodyA,
+            source.bodyB,
+            source.contactCount,
+            source.penetrationDepth,
+            source.contactNormalX,
+            source.contactNormalY,
+            source.contactPoint0X,
+            source.contactPoint0Y,
+            source.contactPoint0Id,
+            source.contactPoint1X,
+            source.contactPoint1Y,
+            source.contactPoint1Id,
+            source.featureFlipped,
+            source.contactPoint0Separation,
+            source.contactPoint1Separation,
+        );
+        this.setMaterialProperties(source.friction, source.restitution);
+        if (copyWarmStarting) this.copyWarmStartState(source);
+    }
+
+    override preSolve(
+        invDt: number,
+        contactSoftness?: ContactSoftness,
+        staticSoftness?: ContactSoftness,
+        applyWarmStarting = true,
+    ): void {
         const tangentBias = this.featureFlipped
             ? this.bodyB.surfaceSpeed - this.bodyA.surfaceSpeed
             : this.bodyA.surfaceSpeed - this.bodyB.surfaceSpeed;
@@ -330,12 +358,12 @@ export class ContactManifold extends Constraint {
             : (contactSoftness ?? makeSoft(hertz, SETTINGS.contactDampingRatio, invDt > 0 ? 1 / invDt : 0));
 
         for (let i = 0; i < this.numContacts; i++) {
-            this.preSolveContact(i, tangentBias, invDt, softness);
+            this.preSolveContact(i, tangentBias, invDt, softness, applyWarmStarting);
         }
 
         const rollingK = this.bodyA.invI + this.bodyB.invI;
         this.rollingEffectiveMass = rollingK > 0.0 ? 1.0 / rollingK : 0.0;
-        if (SETTINGS.warmStarting) {
+        if (SETTINGS.warmStarting && applyWarmStarting) {
             this.applyRollingImpulse(this.rollingImpulseSum);
         }
 
@@ -360,6 +388,16 @@ export class ContactManifold extends Constraint {
         }
     }
 
+    /** Refreshes only the geometric error needed by later temporal substeps. */
+    refreshForSubStep(invDt: number, contactSoftness: ContactSoftness, staticSoftness: ContactSoftness): void {
+        this.updateSeparationFromAnchors();
+        const softness = (this.bodyA.isStatic() || this.bodyB.isStatic()) ? staticSoftness : contactSoftness;
+        for (let i = 0; i < this.numContacts; i++) {
+            const separation = i === 0 ? this.contactPoint0Separation : this.contactPoint1Separation;
+            this.setSoftNormalParameters(i, separation, invDt, softness);
+        }
+    }
+
     /** Solves restitution and friction after position integration. */
     solveRestitutionAndFriction(): void {
         for (let i = 0; i < this.numContacts; i++) this.solveRestitutionContact(i);
@@ -368,6 +406,10 @@ export class ContactManifold extends Constraint {
     }
 
     tryWarmStart(oldManifold: ContactManifold) {
+        this.copyWarmStartState(oldManifold);
+    }
+
+    private copyWarmStartState(oldManifold: ContactManifold) {
         let matched = false;
         if (
             this.matchesContact(
@@ -430,7 +472,13 @@ export class ContactManifold extends Constraint {
         }
     }
 
-    private preSolveContact(index: number, tangentBias: number, invDt: number, softness: ContactSoftness): void {
+    private preSolveContact(
+        index: number,
+        tangentBias: number,
+        invDt: number,
+        softness: ContactSoftness,
+        applyWarmStarting: boolean,
+    ): void {
         const contactPointX = index === 0 ? this.contactPoint0X : this.contactPoint1X;
         const contactPointY = index === 0 ? this.contactPoint0Y : this.contactPoint1Y;
 
@@ -462,21 +510,7 @@ export class ContactManifold extends Constraint {
         }
 
         const separation = index === 0 ? this.contactPoint0Separation : this.contactPoint1Separation;
-        let normalBias = 0.0;
-        let normalMassScale = 1.0;
-        let normalImpulseScale = 0.0;
-
-        if (separation > 0.0) {
-            // Speculative contacts allow closing motion only up to the available gap.
-            normalBias = separation * invDt;
-        } else if (SETTINGS.positionCorrection) {
-            normalBias = Math.max(
-                softness.massScale * softness.biasRate * separation,
-                -SETTINGS.contactPushSpeed,
-            );
-            normalMassScale = softness.massScale;
-            normalImpulseScale = softness.impulseScale;
-        }
+        this.setSoftNormalParameters(index, separation, invDt, softness);
 
         const bodyAInvMass = this.bodyA.invMass;
         const bodyAInvI = this.bodyA.invI;
@@ -497,14 +531,11 @@ export class ContactManifold extends Constraint {
             this.normalJwb0 = normalJwb;
             this.tangentJwa0 = tangentJwa;
             this.tangentJwb0 = tangentJwb;
-            this.normalBias0 = normalBias;
-            this.normalMassScale0 = normalMassScale;
-            this.normalImpulseScale0 = normalImpulseScale;
             this.tangentBias0 = tangentBias;
             this.normalEffectiveMass0 = normalEffectiveMass;
             this.tangentEffectiveMass0 = tangentEffectiveMass;
 
-            if (SETTINGS.warmStarting) {
+            if (SETTINGS.warmStarting && applyWarmStarting) {
                 this.contactPoint0TotalNormalImpulse += this.normalImpulseSum0;
                 this.applyNormalImpulse(0, this.normalImpulseSum0);
                 this.applyTangentImpulse(0, this.tangentImpulseSum0);
@@ -514,14 +545,11 @@ export class ContactManifold extends Constraint {
             this.normalJwb1 = normalJwb;
             this.tangentJwa1 = tangentJwa;
             this.tangentJwb1 = tangentJwb;
-            this.normalBias1 = normalBias;
-            this.normalMassScale1 = normalMassScale;
-            this.normalImpulseScale1 = normalImpulseScale;
             this.tangentBias1 = tangentBias;
             this.normalEffectiveMass1 = normalEffectiveMass;
             this.tangentEffectiveMass1 = tangentEffectiveMass;
 
-            if (SETTINGS.warmStarting) {
+            if (SETTINGS.warmStarting && applyWarmStarting) {
                 this.contactPoint1TotalNormalImpulse += this.normalImpulseSum1;
                 this.applyNormalImpulse(1, this.normalImpulseSum1);
                 this.applyTangentImpulse(1, this.tangentImpulseSum1);
@@ -709,6 +737,38 @@ export class ContactManifold extends Constraint {
         this.applyNormalImpulse(index, appliedImpulse);
     }
 
+    private setSoftNormalParameters(
+        index: number,
+        separation: number,
+        invDt: number,
+        softness: ContactSoftness,
+    ): void {
+        let normalBias = 0.0;
+        let normalMassScale = 1.0;
+        let normalImpulseScale = 0.0;
+
+        if (separation > 0.0) {
+            normalBias = separation * invDt;
+        } else if (SETTINGS.positionCorrection) {
+            normalBias = Math.max(
+                softness.massScale * softness.biasRate * separation,
+                -SETTINGS.contactPushSpeed,
+            );
+            normalMassScale = softness.massScale;
+            normalImpulseScale = softness.impulseScale;
+        }
+
+        if (index === 0) {
+            this.normalBias0 = normalBias;
+            this.normalMassScale0 = normalMassScale;
+            this.normalImpulseScale0 = normalImpulseScale;
+        } else {
+            this.normalBias1 = normalBias;
+            this.normalMassScale1 = normalMassScale;
+            this.normalImpulseScale1 = normalImpulseScale;
+        }
+    }
+
     private solveRollingResistance(): void {
         if (this.rollingEffectiveMass === 0.0 || this.rollingResistance === 0.0) {
             return;
@@ -893,6 +953,39 @@ export class ContactManifold extends Constraint {
 
         this.bodyA.angularVelocity -= this.bodyA.invI * lambda;
         this.bodyB.angularVelocity += this.bodyB.invI * lambda;
+    }
+
+    /** Recomputes separation and solver points from the persistent local anchors. */
+    updateSeparationFromAnchors(): void {
+        this.updateSeparationFromAnchorsForPoint(0);
+        if (this.contactCount === 2) this.updateSeparationFromAnchorsForPoint(1);
+    }
+
+    private updateSeparationFromAnchorsForPoint(index: number): void {
+        const anchorAX = index === 0 ? this.contactPoint0LocalAnchorAX : this.contactPoint1LocalAnchorAX;
+        const anchorAY = index === 0 ? this.contactPoint0LocalAnchorAY : this.contactPoint1LocalAnchorAY;
+        const anchorBX = index === 0 ? this.contactPoint0LocalAnchorBX : this.contactPoint1LocalAnchorBX;
+        const anchorBY = index === 0 ? this.contactPoint0LocalAnchorBY : this.contactPoint1LocalAnchorBY;
+        const cosA = Math.cos(this.bodyA.rotation);
+        const sinA = Math.sin(this.bodyA.rotation);
+        const cosB = Math.cos(this.bodyB.rotation);
+        const sinB = Math.sin(this.bodyB.rotation);
+        const worldAX = this.bodyA.position.x + cosA * anchorAX - sinA * anchorAY;
+        const worldAY = this.bodyA.position.y + sinA * anchorAX + cosA * anchorAY;
+        const worldBX = this.bodyB.position.x + cosB * anchorBX - sinB * anchorBY;
+        const worldBY = this.bodyB.position.y + sinB * anchorBX + cosB * anchorBY;
+        const separation = (index === 0 ? this.contactPoint0BaseSeparation : this.contactPoint1BaseSeparation) +
+            (worldBX - worldAX) * this.contactNormalX + (worldBY - worldAY) * this.contactNormalY;
+
+        if (index === 0) {
+            this.contactPoint0Separation = separation;
+            this.contactPoint0X = (worldAX + worldBX) * 0.5;
+            this.contactPoint0Y = (worldAY + worldBY) * 0.5;
+        } else {
+            this.contactPoint1Separation = separation;
+            this.contactPoint1X = (worldAX + worldBX) * 0.5;
+            this.contactPoint1Y = (worldAY + worldBY) * 0.5;
+        }
     }
 
     private setLocalAnchors(
