@@ -23,41 +23,6 @@ export interface WorldOptions {
     maxBodies?: number;
 }
 
-/** Per-update counters and timings. Enable with `SETTINGS.collectMetrics`. */
-export interface WorldMetrics {
-    updateMs: number;
-    broadPhaseMs: number;
-    narrowPhaseMs: number;
-    solveMs: number;
-    integrationMs: number;
-    broadPhaseCalls: number;
-    narrowPhaseCalls: number;
-    insertionSortShifts: number;
-    potentialPairCount: number;
-    narrowPhaseTests: number;
-    manifoldCount: number;
-    constraintIterations: number;
-    maxPenetrationDepth: number;
-}
-
-const emptyMetrics = (): WorldMetrics => ({
-    updateMs: 0,
-    broadPhaseMs: 0,
-    narrowPhaseMs: 0,
-    solveMs: 0,
-    integrationMs: 0,
-    broadPhaseCalls: 0,
-    narrowPhaseCalls: 0,
-    insertionSortShifts: 0,
-    potentialPairCount: 0,
-    narrowPhaseTests: 0,
-    manifoldCount: 0,
-    constraintIterations: 0,
-    maxPenetrationDepth: 0,
-});
-
-const now = (): number => (typeof performance === 'undefined' ? Date.now() : performance.now());
-
 export class World {
     readonly maxBodies: number;
     private readonly up = new Vec2(0, 1);
@@ -81,9 +46,6 @@ export class World {
     private torques: number[] = [];
 
     private dtFractions: number[] = [];
-
-    // TODO: evaluate to delete this after implementation
-    private metrics: WorldMetrics = emptyMetrics();
 
     constructor(gravity: number, options: WorldOptions = {}) {
         const maxBodies = options.maxBodies ?? MAX_BODIES;
@@ -122,11 +84,6 @@ export class World {
         return this.manifolds;
     }
 
-    /** Returns a snapshot of the counters from the most recent `update()`. */
-    getMetrics(): Readonly<WorldMetrics> {
-        return { ...this.metrics };
-    }
-
     addJoint(joint: Joint): void {
         this.joints.push(joint);
     }
@@ -159,12 +116,6 @@ export class World {
         const settings = SETTINGS;
         const dt = settings.dt;
         const subSteps = settings.subSteps;
-        const collectMetrics = settings.collectMetrics;
-        const updateStart = collectMetrics ? now() : 0;
-
-        if (collectMetrics) {
-            this.metrics = emptyMetrics();
-        }
 
         const bodies = this.bodies;
 
@@ -220,10 +171,6 @@ export class World {
                 this.step(dt);
             }
         }
-
-        if (collectMetrics) {
-            this.metrics.updateMs = now() - updateStart;
-        }
     }
 
     private ccd(dt: number) {
@@ -265,38 +212,17 @@ export class World {
     private step(dt: number) {
         const bodies = this.bodies;
         const invDt = dt === 0 ? 0 : 1 / dt;
-        const collectMetrics = SETTINGS.collectMetrics;
 
-        let start = collectMetrics ? now() : 0;
         this.broadPhase();
-        if (collectMetrics) {
-            this.metrics.broadPhaseCalls++;
-            this.metrics.broadPhaseMs += now() - start;
-        }
-
-        start = collectMetrics ? now() : 0;
         this.narrowPhase();
-        if (collectMetrics) {
-            this.metrics.narrowPhaseCalls++;
-            this.metrics.narrowPhaseMs += now() - start;
-        }
-
-        start = collectMetrics ? now() : 0;
         this.solveConstraints(invDt);
-        if (collectMetrics) {
-            this.metrics.solveMs += now() - start;
-        }
 
         // Integrate all the velocities
-        start = collectMetrics ? now() : 0;
         if (dt !== 0) {
             for (let i = 0; i < bodies.length; i++) {
                 const body = bodies[i];
                 body.integrateVelocities(dt);
             }
-        }
-        if (collectMetrics) {
-            this.metrics.integrationMs += now() - start;
         }
     }
 
@@ -314,7 +240,6 @@ export class World {
             while (j >= 0 && bodies[j].minX > current.minX) {
                 bodies[j + 1] = bodies[j];
                 j--;
-                if (SETTINGS.collectMetrics) this.metrics.insertionSortShifts++;
             }
 
             bodies[j + 1] = current;
@@ -345,10 +270,6 @@ export class World {
                 this.potentialPairs.push(a, b);
             }
         }
-
-        if (SETTINGS.collectMetrics) {
-            this.metrics.potentialPairCount += this.potentialPairs.length / 2;
-        }
     }
 
     private narrowPhase() {
@@ -370,8 +291,6 @@ export class World {
             let b = pairs[i + 1];
 
             if (a.isStatic() && b.isStatic()) continue;
-
-            if (SETTINGS.collectMetrics) this.metrics.narrowPhaseTests++;
 
             // Improve coherence
             if (a.id > b.id) {
@@ -398,16 +317,6 @@ export class World {
             this.setGrounded(newManifold);
         }
 
-        if (SETTINGS.collectMetrics) {
-            this.metrics.manifoldCount = newManifolds.length;
-            for (let i = 0; i < newManifolds.length; i++) {
-                this.metrics.maxPenetrationDepth = Math.max(
-                    this.metrics.maxPenetrationDepth,
-                    newManifolds[i].penetrationDepth,
-                );
-            }
-        }
-
         for (let i = 0; i < oldManifolds.length; i++) {
             this.manifoldPool.release(oldManifolds[i]);
         }
@@ -430,10 +339,6 @@ export class World {
             for (let j = 0; j < this.manifolds.length; j++) this.manifolds[j].solve();
 
             for (let j = 0; j < this.joints.length; j++) this.joints[j].solve();
-        }
-
-        if (SETTINGS.collectMetrics) {
-            this.metrics.constraintIterations += SETTINGS.solverIterations;
         }
 
         // Run contact callbacks

@@ -10,7 +10,7 @@ export {
 export { BodiesFactory } from './factory/BodiesFactory';
 export { RigidBody } from './core/RigidBody';
 export { World } from './core/World';
-export type { WorldMetrics, WorldOptions } from './core/World';
+export type { WorldOptions } from './core/World';
 
 export { CollisionCategory } from './collision/CollisionFilter';
 export { ContactInfo } from './collision/ContactManifold';
