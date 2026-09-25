@@ -560,14 +560,14 @@ Record a debug flag when a cap is hit. Silent caps make instability hard to diag
 
 ## Recommended implementation series
 
-### Change 1: safety fixes and measurements
+### Change 1: safety fixes and measurements — completed
 
-- Fix degenerate segment distance.
-- Add clipping interval/epsilon guards.
-- Guard block inversion and add scalar fallback.
-- Solve normals before tangents.
-- Add finite-value assertions in development builds.
-- Add benchmark timers and robustness metrics.
+- [x] Fix degenerate segment distance.
+- [x] Add clipping interval/epsilon guards.
+- [x] Guard block inversion and add scalar fallback.
+- [x] Solve normals before tangents.
+- [x] Add finite-value assertions in development builds.
+- [x] Add benchmark timers and robustness metrics.
 
 This change should be small and independently releasable.
 
@@ -666,4 +666,3 @@ If only three improvements are implemented, choose:
 Together these address the main engine's largest stability flaw, reduce contact churn, and create a
 path to fewer solver iterations. Add island sleeping next for the largest performance gain, and
 replace CCD before expanding bullet support beyond circles.
-
