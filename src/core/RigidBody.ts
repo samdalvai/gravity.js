@@ -65,6 +65,10 @@ export class RigidBody {
     maxY = 0;
 
     public onContact?: (contactInfo: ContactInfo) => void;
+    /** Called once when this body starts touching another body. */
+    public onContactBegin?: (contactInfo: ContactInfo) => void;
+    /** Called once when this body stops touching another body. */
+    public onContactEnd?: (contactInfo: ContactInfo) => void;
 
     constructor(shape: Shape, x: number, y: number, mass?: number, density?: number) {
         Utils.assert(mass !== undefined || density !== undefined, 'One between mass or density should be defined');

@@ -399,12 +399,12 @@ The contact manifold pool grows on demand and reuses released contacts. Setting 
 | Method | Behavior |
 | --- | --- |
 | `addBody(body)` | Adds a body. Throws if the world already contains `world.maxBodies` bodies. |
-| `removeBody(body)` | Removes the body with the matching ID. Does not automatically remove attached joints. |
+| `removeBody(body)` | Removes the body with the matching ID, ends its active contacts, and releases their cached state. Does not automatically remove attached joints. |
 | `getBodies()` | Returns a readonly view of the current body array. Do not mutate it by casting. |
 | `addJoint(joint)` | Adds a distance, weld, or grab joint. |
 | `removeJoint(joint)` | Removes the joint with the matching ID. |
 | `getJoints()` | Returns current joints. Concrete joints expose `bodyA` and `bodyB`. |
-| `getManifolds()` | Returns contacts produced by the most recent substep. Intended primarily for inspection/debug rendering. |
+| `getManifolds()` | Returns active manifolds from the most recent outer update. Intended primarily for inspection/debug rendering. |
 | `getMetrics()` | Returns timing, pair/contact counters, and maximum penetration from the most recent `update()` when metrics are enabled. |
 | `addForce(force)` | Registers a persistent uniform force applied to every body during every substep. |
 | `addTorque(torque)` | Registers a persistent uniform torque applied to every body during every substep. |
@@ -448,6 +448,8 @@ world.removeBody(body);
 | `collisionCategory`, `collisionMask` | read/write | Collision filtering bit fields |
 | `minX`, `maxX`, `minY`, `maxY` | read/write | Cached broad-phase AABB |
 | `onContact` | optional callback | Called for every solved contact involving the body |
+| `onContactBegin` | optional callback | Called once when a body starts touching another body |
+| `onContactEnd` | optional callback | Called once when a body stops touching another body or is removed |
 
 ### Forces, torque, and impulses
 
@@ -532,7 +534,7 @@ box.onContact = (info: ContactInfo) => {
 | `bodyA`, `bodyB` | The two bodies in the manifold; callback ownership does not determine their order |
 | `impulseSum` | Sum of accumulated normal impulses across manifold contact points |
 
-Callbacks run after constraint solving for every active manifold and every substep. They are continuous contact callbacks, not distinct begin/end events. With multiple substeps they can run more than once during a single `world.update()`.
+`onContact` runs after constraint solving for every active manifold and every temporal substep. `onContactBegin` and `onContactEnd` are transition callbacks and run once per change of touching state.
 
 To inspect current contacts, use `world.getManifolds()`. Each manifold exposes `bodyA`, `bodyB`, `points`, `normal`, `numContacts`, `penetrationDepth`, and `persistent`, along with lower-level solver fields. Manifolds are pooled and reused, so do not retain them as long-lived application state; copy the specific values you need.
 
@@ -880,7 +882,7 @@ Bullet CCD is deliberately limited:
 - Removing a body does not remove joints attached to it. Remove those joints explicitly.
 - Removing a body while iterating the live `getBodies()` array can skip the swapped-in body. Iterate over a copy when removing multiple bodies: `for (const body of [...world.getBodies()])`.
 - A category named `SENSOR` does not disable physical response. Sensor-only overlap events are not a separate engine feature.
-- Contact callbacks run for active contacts, potentially once per substep, rather than only when contact begins.
+- `onContact` runs for active contacts, potentially once per substep. Use `onContactBegin` and `onContactEnd` for transitions.
 - A polygon must be convex even though clockwise winding is repaired automatically.
 - Dynamic segments and non-circle bullets are rejected by assertions.
 - `SETTINGS` is global, so two worlds cannot have independent solver settings without coordinating changes.

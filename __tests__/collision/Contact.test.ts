@@ -161,4 +161,16 @@ describe('Contact', () => {
         expect(Math.abs(b.angularVelocity)).toBeLessThan(20);
         expect(Math.abs(manifold.rollingImpulseSum)).toBeGreaterThan(0);
     });
+
+    test('updates separation from persistent local anchors', () => {
+        const a = new RigidBody(new CircleShape(10), 0, 0, 0);
+        const b = new RigidBody(new CircleShape(10), 15, 0, 1);
+        const manifold = Collision.detectCollision(a, b)!;
+        const initialSeparation = manifold.points[0].separation;
+
+        b.position.x += 3;
+        manifold.updateSeparationFromAnchors();
+
+        expect(manifold.points[0].separation).toBeCloseTo(initialSeparation + 3);
+    });
 });

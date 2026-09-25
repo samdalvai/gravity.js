@@ -590,14 +590,14 @@ current behavior.
 - [x] Add impulse-based rolling resistance and material callbacks.
 - [x] Benchmark iteration counts; keep the 10-iteration default pending stability evidence.
 
-### Change 4: persistent contacts and temporal substeps
+### Change 4: persistent contacts and temporal substeps — completed
 
-- Separate contact lifetime from touching manifold state.
-- Keep a pair cache and update contacts in place.
-- Prepare contacts once per outer step.
-- Update separation from local anchors during solver substeps.
-- Move broad/narrow work out of each substep.
-- Add contact begin/end transitions and robust body-removal cleanup.
+- [x] Separate contact lifetime from touching manifold state.
+- [x] Keep a pair cache and update contacts in place.
+- [x] Prepare contacts once per outer step.
+- [x] Update separation from local anchors during solver substeps.
+- [x] Move broad/narrow work out of each substep.
+- [x] Add contact begin/end transitions and robust body-removal cleanup.
 
 Adapt joints to the same predicted-position schedule before making it the only solver path.
 
