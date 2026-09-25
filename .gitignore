@@ -5,6 +5,9 @@ dist/*
 .benchmark-dist/
 .DS_STORE
 
+# Reference implementation to run benchmarks
+src_old/
+
 !dist/assets/
 .vercel
 
