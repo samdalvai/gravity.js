@@ -1,54 +1,42 @@
-import { BodiesFactory, GRAVITY, SETTINGS, Utils, Vec2, World } from '../src';
-import { applyGravitationalForces, applyBarnesHutGravitationalForces } from '../src/force/Gravity';
+import { BodiesFactory, SETTINGS, World } from '../src';
 
-declare const process: {
-    on(event: 'exit', listener: () => void): void;
-};
+const CIRCLE_COUNT = 1_000;
+const COLUMNS = 40;
+const ROWS = CIRCLE_COUNT / COLUMNS;
+const RADIUS = 10;
+const SPACING = RADIUS * 2.05;
 
-const RADIUS = 2000;
-SETTINGS.applyGravity = false;
-
-const numOfParticles = 5000;
-const center = new Vec2();
+SETTINGS.applyGravity = true;
 
 const world = new World(9.8);
 
-for (let i = 0; i < numOfParticles; i++) {
-    const charge = Utils.randomNumber(-100, 100);
-    const radius = Math.max(Math.abs(charge) / 5, 5);
-    const mass = radius / 10;
-    const pos = randomPointInRadius(center, RADIUS);
-    const particle = BodiesFactory.circle({
-        radius: radius,
-        x: pos.x,
-        y: pos.y,
-        mass: mass,
-        charge: charge,
-    });
+world.addBody(BodiesFactory.box({
+    width: COLUMNS * SPACING + RADIUS * 4,
+    height: RADIUS * 2,
+    x: (COLUMNS - 1) * SPACING * 0.5,
+    y: -RADIUS,
+    mass: 0,
+    friction: 0.8,
+}));
 
-    world.addBody(particle);
+for (let row = 0; row < ROWS; row++) {
+    for (let column = 0; column < COLUMNS; column++) {
+        world.addBody(BodiesFactory.circle({
+            radius: RADIUS,
+            x: column * SPACING,
+            y: RADIUS + row * SPACING,
+            mass: 1,
+            restitution: 0,
+            friction: 0.8,
+        }));
+    }
 }
 
-function randomPointInRadius(center: Vec2, radius: number): Vec2 {
-    const u = Math.random();
-    const v = Math.random();
-
-    const r = radius * Math.sqrt(u);
-    const theta = 2 * Math.PI * v;
-
-    return new Vec2(center.x + Math.cos(theta) * r, center.y + Math.sin(theta) * r);
-}
-
-const bodies = world.getBodies();
-
+/** Advances the deterministic 1,000-circle stack by one fixed simulation step. */
 export function runOriginal() {
-    applyGravitationalForces(bodies, GRAVITY, 0, 100_000 * 100_000);
+    world.update();
 }
 
-export function runModified() {
-    applyBarnesHutGravitationalForces(bodies, GRAVITY);
-}
-
-process.on('exit', () => {
-    //
-});
+// export function runModified() {
+//     world.update();
+// }
