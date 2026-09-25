@@ -581,14 +581,14 @@ This change should be small and independently releasable.
 Do not change solver equations in the same change; first prove the new representation reproduces
 current behavior.
 
-### Change 3: speculative soft contacts
+### Change 3: speculative soft contacts — completed
 
-- Add scale-derived settings and `makeSoft()`.
-- Accept near contacts up to speculative distance.
-- Port the soft normal equation and push-speed cap.
-- Separate restitution from penetration correction.
-- Add impulse-based rolling resistance and material callbacks.
-- Benchmark iteration counts; only lower the default after evidence.
+- [x] Add scale-derived settings and `makeSoft()`.
+- [x] Accept near contacts up to speculative distance.
+- [x] Port the soft normal equation and push-speed cap.
+- [x] Separate restitution from penetration correction.
+- [x] Add impulse-based rolling resistance and material callbacks.
+- [x] Benchmark iteration counts; keep the 10-iteration default pending stability evidence.
 
 ### Change 4: persistent contacts and temporal substeps
 

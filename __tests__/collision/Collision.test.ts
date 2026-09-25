@@ -208,6 +208,20 @@ describe('Collision', () => {
         expect(result?.penetrationDepth).toBe(0);
     });
 
+    test('detectCollision() creates speculative circle contacts and limits closing speed to the gap', () => {
+        const a = new RigidBody(new CircleShape(30), 0, 0, 0);
+        const b = new RigidBody(new CircleShape(30), 61.5, 0, 1);
+        b.velocity.x = -200;
+
+        const result = Collision.detectCollision(a, b)!;
+        expect(result.points[0].separation).toBeCloseTo(1.5);
+
+        result.preSolve(60);
+        result.solveBias();
+
+        expect(b.velocity.x).toBeCloseTo(-90);
+    });
+
     test('detectCollision() keeps box and circle contacts within contact slop', () => {
         const a = createBox(0, 0);
         const b = createCircle(60 + SETTINGS.contactSlop * 0.5, 0);

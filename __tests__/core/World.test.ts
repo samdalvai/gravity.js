@@ -65,6 +65,22 @@ describe('World body limits', () => {
 });
 
 describe('World contact cache', () => {
+    test('uses per-world material callbacks when building a contact', () => {
+        const frictionCallback = jest.fn(() => 0.25);
+        const restitutionCallback = jest.fn(() => 0.75);
+        const world = new World(0, { frictionCallback, restitutionCallback });
+        const a = new RigidBody(new CircleShape(10), 0, 0, 1);
+        const b = new RigidBody(new CircleShape(10), 15, 0, 1);
+        world.addBody(a);
+        world.addBody(b);
+
+        world.update();
+
+        expect(frictionCallback).toHaveBeenCalledWith(a.friction, b.friction, a, b);
+        expect(restitutionCallback).toHaveBeenCalledWith(a.restitution, b.restitution, a, b);
+        world.clear();
+    });
+
     test('warm starts from the matching pair when IDs differ by 65536', () => {
         const world = new World(0);
         const ids = [1, 2, 65537, 65538];

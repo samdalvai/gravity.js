@@ -205,7 +205,7 @@ export function collideCircles(bodyA: RigidBody, bodyB: RigidBody): ContactManif
     const dx = posB.x - posA.x;
     const dy = posB.y - posA.y;
     const radiusSum = radiusA + radiusB;
-    const contactDistance = radiusSum + SETTINGS.contactSlop;
+    const contactDistance = radiusSum + SETTINGS.speculativeDistance;
     const distSq = dx * dx + dy * dy;
 
     if (distSq > contactDistance * contactDistance) {
@@ -249,7 +249,7 @@ export function collidePolygonCircle(bodyA: RigidBody, bodyB: RigidBody): Contac
     const circleBX = bodyB.position.x;
     const circleBY = bodyB.position.y;
     const radius = polygonA.radius + circleB.radius;
-    const contactDistance = radius + SETTINGS.contactSlop;
+    const contactDistance = radius + SETTINGS.speculativeDistance;
 
     let normalIndex = 0;
     let separation = Number.NEGATIVE_INFINITY;
@@ -474,8 +474,8 @@ function clipConvexEdges(
         contactPoint1Id = tmpId;
     }
 
-    const hasContact0 = contactPoint0Separation <= SETTINGS.contactSlop;
-    const hasContact1 = contactPoint1Separation <= SETTINGS.contactSlop;
+    const hasContact0 = contactPoint0Separation <= SETTINGS.speculativeDistance;
+    const hasContact1 = contactPoint1Separation <= SETTINGS.speculativeDistance;
     const manifoldNormalX = flip ? -normalX : normalX;
     const manifoldNormalY = flip ? -normalY : normalY;
 
@@ -656,7 +656,7 @@ function collideConvexPolygons(
     const { edgeIndex: initialEdgeA, maxSeparation: separationA } = findMaxSeparation(verticesA, normalsA, verticesB);
     const { edgeIndex: initialEdgeB, maxSeparation: separationB } = findMaxSeparation(verticesB, normalsB, verticesA);
     const radius = radiusA + radiusB;
-    const contactDistance = radius + SETTINGS.contactSlop;
+    const contactDistance = radius + SETTINGS.speculativeDistance;
 
     if (separationA > contactDistance || separationB > contactDistance) {
         return null;
@@ -881,7 +881,7 @@ function collideSegmentRadiusPairs(
     const closest2X = p2X + d2X * f2;
     const closest2Y = p2Y + d2Y * f2;
     const radius = radiusA + radiusB;
-    const contactDistance = radius + SETTINGS.contactSlop;
+    const contactDistance = radius + SETTINGS.speculativeDistance;
 
     if (result.distanceSquared > contactDistance * contactDistance) {
         return null;
@@ -1133,7 +1133,7 @@ function collideSegmentRadiusAndCircle(
 
     const separation = distance - radiusA - circleB.radius;
 
-    if (separation > SETTINGS.contactSlop) {
+    if (separation > SETTINGS.speculativeDistance) {
         return null;
     }
 

@@ -15,13 +15,19 @@ import { applyWeightForce } from '../force/Gravity';
 import { Joint } from '../joint/Joint';
 import { Vec2 } from '../math/Vec2';
 import * as Utils from '../utils/Utils';
-import { MAX_BODIES, MIN_BULLET_SPEED_SQUARED, SETTINGS } from './Constants';
+import { makeSoft, MAX_BODIES, MIN_BULLET_SPEED_SQUARED, SETTINGS } from './Constants';
 import { RigidBody } from './RigidBody';
 
 export interface WorldOptions {
     /** Maximum live bodies. Defaults to MAX_BODIES; Infinity disables the limit. */
     maxBodies?: number;
+    /** Combines the two body friction coefficients for each contact. */
+    frictionCallback?: ContactMaterialCallback;
+    /** Combines the two body restitution coefficients for each contact. */
+    restitutionCallback?: ContactMaterialCallback;
 }
+
+export type ContactMaterialCallback = (materialA: number, materialB: number, bodyA: RigidBody, bodyB: RigidBody) => number;
 
 /** Per-update counters and timings. Enable with `SETTINGS.collectMetrics`. */
 export interface WorldMetrics {
@@ -81,6 +87,8 @@ export class World {
     private torques: number[] = [];
 
     private dtFractions: number[] = [];
+    private readonly frictionCallback: ContactMaterialCallback;
+    private readonly restitutionCallback: ContactMaterialCallback;
 
     // TODO: evaluate to delete this after implementation
     private metrics: WorldMetrics = emptyMetrics();
@@ -93,6 +101,8 @@ export class World {
 
         this.maxBodies = maxBodies;
         this.G = -gravity;
+        this.frictionCallback = options.frictionCallback ?? ((a, b) => Math.sqrt(a * b));
+        this.restitutionCallback = options.restitutionCallback ?? ((a, b) => Math.max(a, b));
     }
 
     addBody(body: RigidBody): void {
@@ -295,6 +305,7 @@ export class World {
                 body.integrateVelocities(dt);
             }
         }
+        this.solveContactRestitutionAndFriction();
         if (collectMetrics) {
             this.metrics.integrationMs += now() - start;
         }
@@ -383,6 +394,11 @@ export class World {
             const newManifold = NarrowPhase.detectCollision(a, b);
             if (newManifold == null) continue;
 
+            newManifold.setMaterialProperties(
+                this.frictionCallback(a.friction, b.friction, a, b),
+                this.restitutionCallback(a.restitution, b.restitution, a, b),
+            );
+
             const key = Utils.pairKey(a, b);
 
             if (warmStarting) {
@@ -421,22 +437,29 @@ export class World {
 
     private solveConstraints(invDt: number) {
         // Presolve constraints
-        for (let i = 0; i < this.manifolds.length; i++) this.manifolds[i].preSolve(invDt);
+        const hertz = Math.min(SETTINGS.contactHertz, 0.125 * invDt);
+        const contactSoftness = makeSoft(hertz, SETTINGS.contactDampingRatio, invDt > 0 ? 1 / invDt : 0);
+        const staticSoftness = makeSoft(2 * hertz, SETTINGS.contactDampingRatio, invDt > 0 ? 1 / invDt : 0);
+        for (let i = 0; i < this.manifolds.length; i++) {
+            this.manifolds[i].preSolve(invDt, contactSoftness, staticSoftness);
+        }
 
         for (let i = 0; i < this.joints.length; i++) this.joints[i].preSolve(invDt);
 
         // Solve constraints
         for (let i = 0; i < SETTINGS.solverIterations; i++) {
-            for (let j = 0; j < this.manifolds.length; j++) this.manifolds[j].solve();
+            for (let j = 0; j < this.manifolds.length; j++) this.manifolds[j].solveBias();
 
             for (let j = 0; j < this.joints.length; j++) this.joints[j].solve();
         }
 
         if (SETTINGS.collectMetrics) {
-            this.metrics.constraintIterations += SETTINGS.solverIterations;
+            this.metrics.constraintIterations += SETTINGS.solverIterations * 2;
         }
 
-        // Run contact callbacks
+    }
+
+    private runContactCallbacks() {
         for (let i = 0; i < this.manifolds.length; i++) {
             const manifold = this.manifolds[i];
             const bodyA = manifold.bodyA;
@@ -450,6 +473,15 @@ export class World {
                 bodyB.onContact(manifold.contactInfo);
             }
         }
+    }
+
+    private solveContactRestitutionAndFriction() {
+        for (let i = 0; i < SETTINGS.solverIterations; i++) {
+            for (let j = 0; j < this.manifolds.length; j++) {
+                this.manifolds[j].solveRestitutionAndFriction();
+            }
+        }
+        this.runContactCallbacks();
     }
 
     private setGrounded(manifold: ContactManifold) {

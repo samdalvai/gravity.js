@@ -392,6 +392,8 @@ const unlimitedWorld = new World(0, { maxBodies: Infinity });
 
 The optional second argument is a `WorldOptions` object. `maxBodies` defaults to `MAX_BODIES` (5,000) and must be a non-negative safe integer or `Infinity` to disable the limit. Invalid limits throw a `RangeError`. The readonly `world.maxBodies` property exposes the limit; it is independent for each world and preserved by `clear()`.
 
+`WorldOptions` also accepts `frictionCallback` and `restitutionCallback`. Each receives the two material values followed by the two bodies, and returns the combined contact value. By default, friction uses the geometric mean and restitution uses the larger value.
+
 The contact manifold pool grows on demand and reuses released contacts. Setting a larger body limit does not preallocate bodies or manifolds.
 
 | Method | Behavior |
@@ -840,7 +842,11 @@ These are public for engine tuning but should normally remain at their defaults:
 | `warmStartingThreshold` | `0.25` |
 | `contactMergeThreshold` | `0.000025` |
 | `penetrationSlop` | `0.5` |
-| `restitutionSlop` | `50` |
+| `restitutionSlop` | `100` |
+| `speculativeDistance` | `2` |
+| `contactPushSpeed` | `300` |
+| `contactHertz` | `30` |
+| `contactDampingRatio` | `10` |
 | `angularVelocitySlop` | `0.05` |
 | `positionCorrectionBeta` | `0.2` |
 | `contactSlop` | `0.01` |
@@ -886,7 +892,7 @@ The root `gravity.js` entry point exports:
 
 | Group | Exports |
 | --- | --- |
-| Simulation | `World`, `RigidBody`, `BodiesFactory`, TypeScript types `WorldOptions`, `WorldMetrics` |
+| Simulation | `World`, `RigidBody`, `BodiesFactory`, TypeScript types `WorldOptions`, `WorldMetrics`, `ContactMaterialCallback` |
 | Math | `Vec2`, `Utils` |
 | Shapes | `BoxShape`, `CapsuleShape`, `CircleShape`, `PolygonShape`, `SegmentShape`, `ShapeType` |
 | Joints | `DistanceJoint`, `WeldJoint`, `GrabJoint` |
