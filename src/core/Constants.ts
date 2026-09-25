@@ -20,6 +20,8 @@ export const SETTINGS = {
     applyWarmStartingThreshold: true,
     blockSolve: true,
     ccd: true,
+    /** Collect per-update timing and collision counters in World. Disabled by default. */
+    collectMetrics: false,
 
     // Thresholds and slops
     warmStartingThreshold: 0.5 * 0.5,
