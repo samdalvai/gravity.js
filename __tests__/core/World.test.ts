@@ -121,6 +121,30 @@ describe('World substeps', () => {
             SETTINGS.subSteps = previousSubSteps;
         }
     });
+
+    test('collects opt-in timing and robustness metrics', () => {
+        const previousCollectMetrics = SETTINGS.collectMetrics;
+        SETTINGS.collectMetrics = true;
+
+        try {
+            const world = new World(0);
+            world.addBody(new RigidBody(new CircleShape(10), 0, 0, 1));
+            world.addBody(new RigidBody(new CircleShape(10), 15, 0, 1));
+
+            world.update();
+
+            const metrics = world.getMetrics();
+            expect(metrics.updateMs).toBeGreaterThanOrEqual(0);
+            expect(metrics.broadPhaseCalls).toBeGreaterThan(0);
+            expect(metrics.narrowPhaseCalls).toBeGreaterThan(0);
+            expect(metrics.potentialPairCount).toBeGreaterThan(0);
+            expect(metrics.narrowPhaseTests).toBeGreaterThan(0);
+            expect(metrics.manifoldCount).toBeGreaterThan(0);
+            expect(metrics.maxPenetrationDepth).toBeGreaterThan(0);
+        } finally {
+            SETTINGS.collectMetrics = previousCollectMetrics;
+        }
+    });
 });
 
 describe('World grounding', () => {
