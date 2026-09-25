@@ -13,7 +13,7 @@ export { World } from './core/World';
 export type { WorldMetrics, WorldOptions } from './core/World';
 
 export { CollisionCategory } from './collision/CollisionFilter';
-export { ContactInfo } from './collision/ContactManifold';
+export type { ContactInfo, ContactPoint } from './collision/ContactManifold';
 
 export { DistanceJoint } from './joint/DistanceJoint';
 export { WeldJoint } from './joint/WeldJoint';

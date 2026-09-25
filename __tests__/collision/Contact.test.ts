@@ -75,4 +75,77 @@ describe('Contact', () => {
         expect(manifold.normalImpulseSum0).toBeGreaterThan(0);
         expect(Math.abs(manifold.tangentImpulseSum0)).toBeGreaterThan(0);
     });
+
+    test('keeps per-point separations, local anchors, and persistence independently', () => {
+        const a = new RigidBody(new CircleShape(10), 10, 20, 1);
+        const b = new RigidBody(new CircleShape(10), 30, 20, 1);
+        a.rotation = Math.PI / 2;
+
+        const oldManifold = new ContactManifold(
+            a,
+            b,
+            2,
+            4,
+            1,
+            0,
+            20,
+            15,
+            11,
+            20,
+            25,
+            22,
+            false,
+            -1,
+            -4,
+        );
+        oldManifold.normalImpulseSum0 = 3;
+        oldManifold.tangentImpulseSum0 = 2;
+        oldManifold.normalImpulseSum1 = 7;
+        oldManifold.tangentImpulseSum1 = 5;
+
+        const manifold = new ContactManifold(
+            a,
+            b,
+            2,
+            4,
+            1,
+            0,
+            20,
+            25,
+            22,
+            20,
+            15,
+            99,
+            false,
+            -4,
+            -0.5,
+        );
+        manifold.tryWarmStart(oldManifold);
+
+        expect(manifold.penetrationDepth).toBe(4);
+        expect(manifold.points.map(point => point.separation)).toEqual([-4, -0.5]);
+        expect(manifold.points[0].localAnchorA.x).toBeCloseTo(5);
+        expect(manifold.points[0].localAnchorA.y).toBeCloseTo(-10);
+        expect(manifold.points[0].persisted).toBe(true);
+        expect(manifold.points[0].normalImpulse).toBe(7);
+        expect(manifold.points[0].tangentImpulse).toBe(5);
+        expect(manifold.points[1].persisted).toBe(false);
+        expect(manifold.points[1].normalImpulse).toBe(0);
+        expect(manifold.points[1].tangentImpulse).toBe(0);
+    });
+
+    test('records per-point impact state while preserving the existing solve', () => {
+        const a = new RigidBody(new CircleShape(10), 0, 0, 0);
+        const b = new RigidBody(new CircleShape(10), 15, 0, 1);
+        b.velocity.x = -100;
+
+        const manifold = Collision.detectCollision(a, b)!;
+        manifold.preSolve(60);
+        manifold.solve();
+
+        const point = manifold.points[0];
+        expect(point.normalVelocity).toBe(-100);
+        expect(point.restitutionVelocity).toBeGreaterThan(0);
+        expect(point.totalNormalImpulse).toBeGreaterThan(0);
+    });
 });

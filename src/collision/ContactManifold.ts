@@ -17,10 +17,23 @@ export interface ContactInfo {
     impulseSum: number;
 }
 
+export interface ContactPoint {
+    point: Vec2;
+    id: number;
+    separation: number;
+    baseSeparation: number;
+    localAnchorA: Vec2;
+    localAnchorB: Vec2;
+    persisted: boolean;
+    normalImpulse: number;
+    tangentImpulse: number;
+    totalNormalImpulse: number;
+    normalVelocity: number;
+    restitutionVelocity: number;
+}
+
 export class ContactManifold extends Constraint {
     // Contact informations
-    public penetrationDepth!: number;
-
     public contactNormalX!: number;
     public contactNormalY!: number;
     public contactTangentX!: number;
@@ -29,10 +42,30 @@ export class ContactManifold extends Constraint {
     public contactPoint0X!: number;
     public contactPoint0Y!: number;
     public contactPoint0Id!: number;
+    public contactPoint0Separation!: number;
+    public contactPoint0BaseSeparation!: number;
+    public contactPoint0LocalAnchorAX!: number;
+    public contactPoint0LocalAnchorAY!: number;
+    public contactPoint0LocalAnchorBX!: number;
+    public contactPoint0LocalAnchorBY!: number;
+    public contactPoint0Persisted = false;
+    public contactPoint0NormalVelocity = 0.0;
+    public contactPoint0RestitutionVelocity = 0.0;
+    public contactPoint0TotalNormalImpulse = 0.0;
 
     public contactPoint1X!: number;
     public contactPoint1Y!: number;
     public contactPoint1Id!: number;
+    public contactPoint1Separation!: number;
+    public contactPoint1BaseSeparation!: number;
+    public contactPoint1LocalAnchorAX!: number;
+    public contactPoint1LocalAnchorAY!: number;
+    public contactPoint1LocalAnchorBX!: number;
+    public contactPoint1LocalAnchorBY!: number;
+    public contactPoint1Persisted = false;
+    public contactPoint1NormalVelocity = 0.0;
+    public contactPoint1RestitutionVelocity = 0.0;
+    public contactPoint1TotalNormalImpulse = 0.0;
 
     private contactCount!: number;
 
@@ -40,7 +73,10 @@ export class ContactManifold extends Constraint {
     private restitution!: number;
     private friction!: number;
     private featureFlipped!: boolean;
-    public persistent = false;
+    /** Compatibility view of the per-point persistence state. */
+    get persistent(): boolean {
+        return this.contactPoint0Persisted || (this.contactCount === 2 && this.contactPoint1Persisted);
+    }
 
     public normalJvaX = 0.0;
     public normalJvaY = 0.0;
@@ -97,6 +133,8 @@ export class ContactManifold extends Constraint {
         contactPoint1Y: number,
         contactPoint1Id: number,
         featureFlipped: boolean,
+        contactPoint0Separation?: number,
+        contactPoint1Separation?: number,
     );
     constructor(
         bodyA?: RigidBody,
@@ -112,6 +150,8 @@ export class ContactManifold extends Constraint {
         contactPoint1Y?: number,
         contactPoint1Id?: number,
         featureFlipped?: boolean,
+        contactPoint0Separation?: number,
+        contactPoint1Separation?: number,
     ) {
         super(bodyA as RigidBody, bodyB as RigidBody);
 
@@ -144,6 +184,8 @@ export class ContactManifold extends Constraint {
                 contactPoint1Y,
                 contactPoint1Id,
                 featureFlipped,
+                contactPoint0Separation,
+                contactPoint1Separation,
             );
         }
     }
@@ -162,29 +204,46 @@ export class ContactManifold extends Constraint {
         contactPoint1Y: number,
         contactPoint1Id: number,
         featureFlipped: boolean,
+        contactPoint0Separation = -penetrationDepth,
+        contactPoint1Separation = -penetrationDepth,
     ): void {
         this.bodyA = bodyA;
         this.bodyB = bodyB;
-        this.penetrationDepth = penetrationDepth;
         this.contactNormalX = contactNormalX;
         this.contactNormalY = contactNormalY;
         this.contactTangentX = -contactNormalY;
         this.contactTangentY = contactNormalX;
 
         this.contactCount = contactCount;
+        const bodyACos = Math.cos(bodyA.rotation);
+        const bodyASin = Math.sin(bodyA.rotation);
+        const bodyBCos = Math.cos(bodyB.rotation);
+        const bodyBSin = Math.sin(bodyB.rotation);
 
         this.contactPoint0X = contactPoint0X;
         this.contactPoint0Y = contactPoint0Y;
         this.contactPoint0Id = contactPoint0Id;
+        this.contactPoint0Separation = contactPoint0Separation;
+        this.contactPoint0BaseSeparation = contactPoint0Separation;
+        this.setLocalAnchors(0, contactPoint0X, contactPoint0Y, bodyACos, bodyASin, bodyBCos, bodyBSin);
 
         if (this.contactCount === 2) {
             this.contactPoint1X = contactPoint1X;
             this.contactPoint1Y = contactPoint1Y;
             this.contactPoint1Id = contactPoint1Id;
+            this.contactPoint1Separation = contactPoint1Separation;
+            this.contactPoint1BaseSeparation = contactPoint1Separation;
+            this.setLocalAnchors(1, contactPoint1X, contactPoint1Y, bodyACos, bodyASin, bodyBCos, bodyBSin);
         } else {
             this.contactPoint1X = 0.0;
             this.contactPoint1Y = 0.0;
             this.contactPoint1Id = 0;
+            this.contactPoint1Separation = 0.0;
+            this.contactPoint1BaseSeparation = 0.0;
+            this.contactPoint1LocalAnchorAX = 0.0;
+            this.contactPoint1LocalAnchorAY = 0.0;
+            this.contactPoint1LocalAnchorBX = 0.0;
+            this.contactPoint1LocalAnchorBY = 0.0;
         }
 
         this.featureFlipped = featureFlipped;
@@ -203,7 +262,14 @@ export class ContactManifold extends Constraint {
         this.tangentJvbX = this.contactTangentX;
         this.tangentJvbY = this.contactTangentY;
 
-        this.persistent = false;
+        this.contactPoint0Persisted = false;
+        this.contactPoint0NormalVelocity = 0.0;
+        this.contactPoint0RestitutionVelocity = 0.0;
+        this.contactPoint0TotalNormalImpulse = 0.0;
+        this.contactPoint1Persisted = false;
+        this.contactPoint1NormalVelocity = 0.0;
+        this.contactPoint1RestitutionVelocity = 0.0;
+        this.contactPoint1TotalNormalImpulse = 0.0;
 
         this.normalJwa0 = 0.0;
         this.normalJwb0 = 0.0;
@@ -336,26 +402,39 @@ export class ContactManifold extends Constraint {
         const normalJwb = rbX * this.contactNormalY - rbY * this.contactNormalX;
         const tangentJwa = raY * this.contactTangentX - raX * this.contactTangentY;
         const tangentJwb = rbX * this.contactTangentY - rbY * this.contactTangentX;
+        const bodyAVelocity = this.bodyA.velocity;
+        const bodyBVelocity = this.bodyB.velocity;
+        const bodyAAngularVelocity = this.bodyA.angularVelocity;
+        const bodyBAngularVelocity = this.bodyB.angularVelocity;
+        const relativeVelocityX =
+            bodyBVelocity.x - bodyBAngularVelocity * rbY - (bodyAVelocity.x - bodyAAngularVelocity * raY);
+        const relativeVelocityY =
+            bodyBVelocity.y + bodyBAngularVelocity * rbX - (bodyAVelocity.y + bodyAAngularVelocity * raX);
+        const normalVelocity = this.contactNormalX * relativeVelocityX + this.contactNormalY * relativeVelocityY;
+
+        if (index === 0) {
+            this.contactPoint0NormalVelocity = normalVelocity;
+        } else {
+            this.contactPoint1NormalVelocity = normalVelocity;
+        }
 
         let normalBias = 0.0;
-        if (SETTINGS.positionCorrection || !this.persistent) {
-            const bodyAVelocity = this.bodyA.velocity;
-            const bodyBVelocity = this.bodyB.velocity;
-            const bodyAAngularVelocity = this.bodyA.angularVelocity;
-            const bodyBAngularVelocity = this.bodyB.angularVelocity;
-            const relativeVelocityX =
-                bodyBVelocity.x - bodyBAngularVelocity * rbY - (bodyAVelocity.x - bodyAAngularVelocity * raY);
-            const relativeVelocityY =
-                bodyBVelocity.y + bodyBAngularVelocity * rbX - (bodyAVelocity.y + bodyAAngularVelocity * raX);
-            const normalVelocity = this.contactNormalX * relativeVelocityX + this.contactNormalY * relativeVelocityY;
-
+        const persisted = index === 0 ? this.contactPoint0Persisted : this.contactPoint1Persisted;
+        if (SETTINGS.positionCorrection || !persisted) {
             if (SETTINGS.positionCorrection && invDt > 0.0) {
                 normalBias = -(this.beta * invDt) * Math.max(this.penetrationDepth - SETTINGS.penetrationSlop, 0.0);
             }
 
-            if (!this.persistent && normalVelocity + SETTINGS.restitutionSlop < 0.0) {
-                normalBias += this.restitution * normalVelocity;
+            const restitutionVelocity = !persisted && normalVelocity + SETTINGS.restitutionSlop < 0.0
+                ? -this.restitution * normalVelocity
+                : 0.0;
+            if (index === 0) {
+                this.contactPoint0RestitutionVelocity = restitutionVelocity;
+            } else {
+                this.contactPoint1RestitutionVelocity = restitutionVelocity;
             }
+
+            normalBias -= restitutionVelocity;
         }
 
         const bodyAInvMass = this.bodyA.invMass;
@@ -383,6 +462,7 @@ export class ContactManifold extends Constraint {
             this.tangentEffectiveMass0 = tangentEffectiveMass;
 
             if (SETTINGS.warmStarting) {
+                this.contactPoint0TotalNormalImpulse += this.normalImpulseSum0;
                 this.applyNormalImpulse(0, this.normalImpulseSum0);
                 this.applyTangentImpulse(0, this.tangentImpulseSum0);
             }
@@ -397,6 +477,7 @@ export class ContactManifold extends Constraint {
             this.tangentEffectiveMass1 = tangentEffectiveMass;
 
             if (SETTINGS.warmStarting) {
+                this.contactPoint1TotalNormalImpulse += this.normalImpulseSum1;
                 this.applyNormalImpulse(1, this.normalImpulseSum1);
                 this.applyTangentImpulse(1, this.tangentImpulseSum1);
             }
@@ -456,7 +537,12 @@ export class ContactManifold extends Constraint {
             Number.isFinite(this.contactNormalY),
             Number.isFinite(this.contactPoint0X),
             Number.isFinite(this.contactPoint0Y),
-            Number.isFinite(this.penetrationDepth),
+            Number.isFinite(this.contactPoint0Separation),
+            Number.isFinite(this.contactPoint0BaseSeparation),
+            Number.isFinite(this.contactPoint0LocalAnchorAX),
+            Number.isFinite(this.contactPoint0LocalAnchorAY),
+            Number.isFinite(this.contactPoint0LocalAnchorBX),
+            Number.isFinite(this.contactPoint0LocalAnchorBY),
             Number.isSafeInteger(this.contactPoint0Id),
             'Invalid contact manifold values',
         );
@@ -472,6 +558,12 @@ export class ContactManifold extends Constraint {
                 Number.isFinite(this.contactPoint1X),
                 Number.isFinite(this.contactPoint1Y),
                 Number.isSafeInteger(this.contactPoint1Id),
+                Number.isFinite(this.contactPoint1Separation),
+                Number.isFinite(this.contactPoint1BaseSeparation),
+                Number.isFinite(this.contactPoint1LocalAnchorAX),
+                Number.isFinite(this.contactPoint1LocalAnchorAY),
+                Number.isFinite(this.contactPoint1LocalAnchorBX),
+                Number.isFinite(this.contactPoint1LocalAnchorBY),
                 this.contactPoint0Id !== this.contactPoint1Id,
                 'Invalid two-point contact manifold',
             );
@@ -508,8 +600,10 @@ export class ContactManifold extends Constraint {
 
         if (index === 0) {
             this.normalImpulseSum0 = impulseSum;
+            this.contactPoint0TotalNormalImpulse += lambda;
         } else {
             this.normalImpulseSum1 = impulseSum;
+            this.contactPoint1TotalNormalImpulse += lambda;
         }
 
         this.applyNormalImpulse(index, lambda);
@@ -584,6 +678,8 @@ export class ContactManifold extends Constraint {
 
         this.normalImpulseSum0 = xX;
         this.normalImpulseSum1 = xY;
+        this.contactPoint0TotalNormalImpulse += xX - aX;
+        this.contactPoint1TotalNormalImpulse += xY - aY;
     }
 
     private solveTangentContact(index: number): void {
@@ -674,6 +770,39 @@ export class ContactManifold extends Constraint {
         this.bodyB.angularVelocity += this.bodyB.invI * (index === 0 ? this.tangentJwb0 : this.tangentJwb1) * lambda;
     }
 
+    private setLocalAnchors(
+        index: number,
+        pointX: number,
+        pointY: number,
+        bodyACos: number,
+        bodyASin: number,
+        bodyBCos: number,
+        bodyBSin: number,
+    ): void {
+        const bodyAPosition = this.bodyA.position;
+        const bodyBPosition = this.bodyB.position;
+        const bodyADx = pointX - bodyAPosition.x;
+        const bodyADy = pointY - bodyAPosition.y;
+        const bodyBDx = pointX - bodyBPosition.x;
+        const bodyBDy = pointY - bodyBPosition.y;
+        const anchorAX = bodyACos * bodyADx + bodyASin * bodyADy;
+        const anchorAY = -bodyASin * bodyADx + bodyACos * bodyADy;
+        const anchorBX = bodyBCos * bodyBDx + bodyBSin * bodyBDy;
+        const anchorBY = -bodyBSin * bodyBDx + bodyBCos * bodyBDy;
+
+        if (index === 0) {
+            this.contactPoint0LocalAnchorAX = anchorAX;
+            this.contactPoint0LocalAnchorAY = anchorAY;
+            this.contactPoint0LocalAnchorBX = anchorBX;
+            this.contactPoint0LocalAnchorBY = anchorBY;
+        } else {
+            this.contactPoint1LocalAnchorAX = anchorAX;
+            this.contactPoint1LocalAnchorAY = anchorAY;
+            this.contactPoint1LocalAnchorBX = anchorBX;
+            this.contactPoint1LocalAnchorBY = anchorBY;
+        }
+    }
+
     private matchesContact(
         contactPointX: number,
         contactPointY: number,
@@ -715,15 +844,36 @@ export class ContactManifold extends Constraint {
             this.tangentImpulseSum1 = oldManifold.tangentImpulseSum1;
         }
 
-        this.persistent = true;
+        if (index === 0) {
+            this.contactPoint0Persisted = true;
+        } else {
+            this.contactPoint1Persisted = true;
+        }
     }
 
-    get points() {
+    get penetrationDepth(): number {
+        const minimumSeparation = this.contactCount === 2
+            ? Math.min(this.contactPoint0Separation, this.contactPoint1Separation)
+            : this.contactPoint0Separation;
+        return Math.max(0.0, -minimumSeparation);
+    }
+
+    get points(): ContactPoint[] {
         if (this.contactCount === 1) {
             return [
                 {
                     point: new Vec2(this.contactPoint0X, this.contactPoint0Y),
                     id: this.contactPoint0Id,
+                    separation: this.contactPoint0Separation,
+                    baseSeparation: this.contactPoint0BaseSeparation,
+                    localAnchorA: new Vec2(this.contactPoint0LocalAnchorAX, this.contactPoint0LocalAnchorAY),
+                    localAnchorB: new Vec2(this.contactPoint0LocalAnchorBX, this.contactPoint0LocalAnchorBY),
+                    persisted: this.contactPoint0Persisted,
+                    normalImpulse: this.normalImpulseSum0,
+                    tangentImpulse: this.tangentImpulseSum0,
+                    totalNormalImpulse: this.contactPoint0TotalNormalImpulse,
+                    normalVelocity: this.contactPoint0NormalVelocity,
+                    restitutionVelocity: this.contactPoint0RestitutionVelocity,
                 },
             ];
         }
@@ -732,10 +882,30 @@ export class ContactManifold extends Constraint {
             {
                 point: new Vec2(this.contactPoint0X, this.contactPoint0Y),
                 id: this.contactPoint0Id,
+                separation: this.contactPoint0Separation,
+                baseSeparation: this.contactPoint0BaseSeparation,
+                localAnchorA: new Vec2(this.contactPoint0LocalAnchorAX, this.contactPoint0LocalAnchorAY),
+                localAnchorB: new Vec2(this.contactPoint0LocalAnchorBX, this.contactPoint0LocalAnchorBY),
+                persisted: this.contactPoint0Persisted,
+                normalImpulse: this.normalImpulseSum0,
+                tangentImpulse: this.tangentImpulseSum0,
+                totalNormalImpulse: this.contactPoint0TotalNormalImpulse,
+                normalVelocity: this.contactPoint0NormalVelocity,
+                restitutionVelocity: this.contactPoint0RestitutionVelocity,
             },
             {
                 point: new Vec2(this.contactPoint1X, this.contactPoint1Y),
                 id: this.contactPoint1Id,
+                separation: this.contactPoint1Separation,
+                baseSeparation: this.contactPoint1BaseSeparation,
+                localAnchorA: new Vec2(this.contactPoint1LocalAnchorAX, this.contactPoint1LocalAnchorAY),
+                localAnchorB: new Vec2(this.contactPoint1LocalAnchorBX, this.contactPoint1LocalAnchorBY),
+                persisted: this.contactPoint1Persisted,
+                normalImpulse: this.normalImpulseSum1,
+                tangentImpulse: this.tangentImpulseSum1,
+                totalNormalImpulse: this.contactPoint1TotalNormalImpulse,
+                normalVelocity: this.contactPoint1NormalVelocity,
+                restitutionVelocity: this.contactPoint1RestitutionVelocity,
             },
         ];
     }

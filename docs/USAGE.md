@@ -890,7 +890,7 @@ The root `gravity.js` entry point exports:
 | Math | `Vec2`, `Utils` |
 | Shapes | `BoxShape`, `CapsuleShape`, `CircleShape`, `PolygonShape`, `SegmentShape`, `ShapeType` |
 | Joints | `DistanceJoint`, `WeldJoint`, `GrabJoint` |
-| Collision | `CollisionCategory`, TypeScript type `ContactInfo` |
+| Collision | `CollisionCategory`, TypeScript types `ContactInfo`, `ContactPoint` |
 | Forces | `Force` namespace |
 | Configuration | `SETTINGS`, `FIXED_DELTA_TIME`, `PIXELS_PER_METER`, `MAX_BODIES`, `GRAVITY`, `MIN_BULLET_SPEED_SQUARED` |
 

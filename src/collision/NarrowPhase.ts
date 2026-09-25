@@ -126,6 +126,8 @@ function createCollisionManifold(
             contactPoint1Y,
             contactPoint1Id,
             false,
+            contactPoint0Separation,
+            contactPoint1Separation,
         );
     }
 
@@ -143,6 +145,8 @@ function createCollisionManifold(
         contactPoint1Y,
         contactPoint1Id,
         false,
+        contactPoint0Separation,
+        contactPoint1Separation,
     );
 }
 

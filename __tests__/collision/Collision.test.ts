@@ -301,4 +301,27 @@ describe('Collision', () => {
         expect(Number.isFinite(result?.points[0].point.x ?? NaN)).toBe(true);
         expect(Number.isFinite(result?.points[0].point.y ?? NaN)).toBe(true);
     });
+
+    test('detectCollision() preserves per-point separation and stable feature IDs for a rotating box contact', () => {
+        const a = createBox(0, 0);
+        const b = createBox(50, 0);
+
+        const first = Collision.detectCollision(a, b)!;
+        expect(first.numContacts).toBe(2);
+        expect(first.points[0].separation).toBeCloseTo(first.points[1].separation);
+
+        b.rotation = 0.005;
+        b.position.y = 0.001;
+        b.shape.updateVertices(b.rotation, b.position);
+
+        const second = Collision.detectCollision(a, b)!;
+        expect(second.numContacts).toBe(2);
+        expect(second.points[0].separation).not.toBeCloseTo(second.points[1].separation);
+
+        const firstIds = new Set(first.points.map(point => point.id));
+        expect(second.points.some(point => firstIds.has(point.id))).toBe(true);
+        expect(second.penetrationDepth).toBeCloseTo(
+            Math.max(0, -Math.min(...second.points.map(point => point.separation))),
+        );
+    });
 });
