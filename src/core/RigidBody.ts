@@ -363,10 +363,6 @@ export class RigidBody {
         // Update AABB values based on new position
         this.shape.updateAABB(this);
 
-        // Apply rolling resistance for grounded bodies
-        if (this.isGrounded) {
-            this.angularVelocity *= 1 - this._rollingResistance * dt;
-        }
     }
 
     isPointInside(point: Vec2): boolean {
