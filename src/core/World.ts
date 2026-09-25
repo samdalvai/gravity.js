@@ -214,7 +214,9 @@ export class World {
         const invDt = dt === 0 ? 0 : 1 / dt;
 
         this.broadPhase();
+
         this.narrowPhase();
+        
         this.solveConstraints(invDt);
 
         // Integrate all the velocities
