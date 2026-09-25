@@ -823,7 +823,6 @@ Treat `pairKey` results as opaque keys: they are independent of body order and p
 | `warmStarting` | `true` | Reuse impulses from persistent contacts |
 | `impulseAccumulation` | `true` | Accumulate contact impulses during solving |
 | `blockSolve` | `true` | Jointly solve two-point normal contacts |
-| `collectMetrics` | `false` | Collect per-update timing and robustness metrics for profiling |
 
 Set positive integer values for `solverIterations` and `subSteps`; the object itself does not validate application assignments.
 
