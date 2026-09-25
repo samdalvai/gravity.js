@@ -1,0 +1,3 @@
+[submodule "reference/box2d.ts"]
+	path = reference/box2d.ts
+	url = git@github.com:samdalvai/box2d.ts.git
