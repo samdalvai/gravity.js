@@ -6,9 +6,6 @@ import * as Utils from '../utils/Utils';
 
 const BLOCK_SOLVER_EPSILON = 1e-12;
 const BLOCK_SOLVER_MAX_CONDITION_NUMBER = 1_000;
-const NORMAL_LENGTH_TOLERANCE = 1e-6;
-const IS_DEVELOPMENT_BUILD =
-    (globalThis as { process?: { env?: { NODE_ENV?: string } } }).process?.env?.NODE_ENV !== 'production';
 
 export interface ContactInfo {
     // Relevant contact infos
@@ -234,8 +231,6 @@ export class ContactManifold extends Constraint {
         this.blockM01 = 0.0;
         this.blockM11 = 0.0;
         this.blockSolveReady = false;
-
-        this.validateGeneratedManifold();
     }
 
     override preSolve(invDt: number): void {
@@ -442,40 +437,6 @@ export class ContactManifold extends Constraint {
         this.blockM00 = invDeterminant * this.blockK11;
         this.blockM01 = -invDeterminant * this.blockK01;
         this.blockM11 = invDeterminant * this.blockK00;
-    }
-
-    // TODO: to be deleted after implementation
-    private validateGeneratedManifold(): void {
-        if (!IS_DEVELOPMENT_BUILD) {
-            return;
-        }
-
-        Utils.assert(Number.isInteger(this.contactCount) && this.contactCount >= 1 && this.contactCount <= 2);
-        Utils.assert(
-            Number.isFinite(this.contactNormalX),
-            Number.isFinite(this.contactNormalY),
-            Number.isFinite(this.contactPoint0X),
-            Number.isFinite(this.contactPoint0Y),
-            Number.isFinite(this.penetrationDepth),
-            Number.isSafeInteger(this.contactPoint0Id),
-            'Invalid contact manifold values',
-        );
-
-        const normalLengthSquared = this.contactNormalX * this.contactNormalX + this.contactNormalY * this.contactNormalY;
-        Utils.assert(
-            Math.abs(normalLengthSquared - 1.0) <= NORMAL_LENGTH_TOLERANCE,
-            'Contact manifold normal must be unit length',
-        );
-
-        if (this.contactCount === 2) {
-            Utils.assert(
-                Number.isFinite(this.contactPoint1X),
-                Number.isFinite(this.contactPoint1Y),
-                Number.isSafeInteger(this.contactPoint1Id),
-                this.contactPoint0Id !== this.contactPoint1Id,
-                'Invalid two-point contact manifold',
-            );
-        }
     }
 
     private solveNormalContact(index: number): void {
