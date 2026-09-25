@@ -403,12 +403,15 @@ The contact manifold pool grows on demand and reuses released contacts. Setting 
 | `removeJoint(joint)` | Removes the joint with the matching ID. |
 | `getJoints()` | Returns current joints. Concrete joints expose `bodyA` and `bodyB`. |
 | `getManifolds()` | Returns contacts produced by the most recent substep. Intended primarily for inspection/debug rendering. |
+| `getMetrics()` | Returns timing, pair/contact counters, and maximum penetration from the most recent `update()` when metrics are enabled. |
 | `addForce(force)` | Registers a persistent uniform force applied to every body during every substep. |
 | `addTorque(torque)` | Registers a persistent uniform torque applied to every body during every substep. |
 | `update(callback?)` | Advances one `FIXED_DELTA_TIME`, divided into configured substeps. |
 | `clear()` | Removes bodies, joints, contacts, persistent world forces, and persistent world torques. |
 
 `World.addForce` and `World.addTorque` are persistent world-level fields, not one-frame operations. There are no individual remove methods; use body forces for changing effects, or `world.clear()` when resetting the entire scene.
+
+Set `SETTINGS.collectMetrics = true` before `update()` to collect timings (`broadPhaseMs`, `narrowPhaseMs`, `solveMs`, and `integrationMs`), pair/collision counters, and `maxPenetrationDepth`. Metrics are disabled by default and `getMetrics()` returns a snapshot, so ordinary simulation does not pay the timing cost.
 
 When removing a body, remove joints that reference it first:
 
@@ -823,6 +826,7 @@ Treat `pairKey` results as opaque keys: they are independent of body order and p
 | `warmStarting` | `true` | Reuse impulses from persistent contacts |
 | `impulseAccumulation` | `true` | Accumulate contact impulses during solving |
 | `blockSolve` | `true` | Jointly solve two-point normal contacts |
+| `collectMetrics` | `false` | Collect per-update timing and robustness metrics for profiling |
 
 Set positive integer values for `solverIterations` and `subSteps`; the object itself does not validate application assignments.
 
@@ -882,7 +886,7 @@ The root `gravity.js` entry point exports:
 
 | Group | Exports |
 | --- | --- |
-| Simulation | `World`, `RigidBody`, `BodiesFactory`, TypeScript type `WorldOptions` |
+| Simulation | `World`, `RigidBody`, `BodiesFactory`, TypeScript types `WorldOptions`, `WorldMetrics` |
 | Math | `Vec2`, `Utils` |
 | Shapes | `BoxShape`, `CapsuleShape`, `CircleShape`, `PolygonShape`, `SegmentShape`, `ShapeType` |
 | Joints | `DistanceJoint`, `WeldJoint`, `GrabJoint` |
