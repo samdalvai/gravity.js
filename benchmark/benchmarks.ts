@@ -1,6 +1,5 @@
 import { benchmark } from './registry';
-// import { runModified, runOriginal } from './functions';
-import { runOriginal } from './functions';
+import { runModified, runOriginal } from './functions';
 
 benchmark('original', runOriginal);
-// benchmark('modified', runModified);
+benchmark('modified', runModified);
