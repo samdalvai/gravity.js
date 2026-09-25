@@ -19,6 +19,9 @@ import { ContactManifold } from './ContactManifold';
 // Grow with actual contact demand, independently of world body limits.
 export const manifoldPool = new ContactManifoldPool();
 
+const GEOMETRY_EPSILON = 1e-8;
+const GEOMETRY_EPSILON_SQUARED = GEOMETRY_EPSILON * GEOMETRY_EPSILON;
+
 export function detectCollision(bodyA: RigidBody, bodyB: RigidBody): ContactManifold | null {
     const aType = bodyA.shapeType;
     const bType = bodyB.shapeType;
@@ -385,26 +388,41 @@ function clipConvexEdges(
     const incidentRadius = flip ? radiusA : radiusB;
     const i11 = flip ? edgeB : edgeA;
     const i12 = (i11 + 1) % referenceVertices.length;
-    const i21 = flip ? edgeA : edgeB;
-    const i22 = (i21 + 1) % incidentVertices.length;
+    let i21 = flip ? edgeA : edgeB;
+    let i22 = (i21 + 1) % incidentVertices.length;
 
     const v11 = referenceVertices[i11];
     const v12 = referenceVertices[i12];
-    const v21 = incidentVertices[i21];
-    const v22 = incidentVertices[i22];
+    let v21 = incidentVertices[i21];
+    let v22 = incidentVertices[i22];
     const normalX = referenceNormals[i11].x;
     const normalY = referenceNormals[i11].y;
     const tangentX = -normalY;
     const tangentY = normalX;
     const upper1 = (v12.x - v11.x) * tangentX + (v12.y - v11.y) * tangentY;
-    const upper2 = (v21.x - v11.x) * tangentX + (v21.y - v11.y) * tangentY;
-    const lower2 = (v22.x - v11.x) * tangentX + (v22.y - v11.y) * tangentY;
+    let upper2 = (v21.x - v11.x) * tangentX + (v21.y - v11.y) * tangentY;
+    let lower2 = (v22.x - v11.x) * tangentX + (v22.y - v11.y) * tangentY;
+
+    // Clipping expects the incident edge to run from its upper tangent coordinate to its lower
+    // coordinate. Capsule-derived edges may arrive in the opposite order.
+    if (upper2 < lower2) {
+        [i21, i22] = [i22, i21];
+        [v21, v22] = [v22, v21];
+        [upper2, lower2] = [lower2, upper2];
+    }
+
     const clipDenominator = upper2 - lower2;
+
+    // The incident edge misses the reference edge along its tangent. Clamping it below would
+    // manufacture a contact from non-overlapping edge intervals.
+    if (upper2 < 0.0 || upper1 < lower2) {
+        return null;
+    }
 
     let vLowerX = v22.x;
     let vLowerY = v22.y;
 
-    if (lower2 < 0.0 && clipDenominator > 0.0) {
+    if (lower2 < 0.0 && clipDenominator > GEOMETRY_EPSILON) {
         const t = (0.0 - lower2) / clipDenominator;
 
         vLowerX = v22.x + (v21.x - v22.x) * t;
@@ -414,7 +432,7 @@ function clipConvexEdges(
     let vUpperX = v21.x;
     let vUpperY = v21.y;
 
-    if (upper2 > upper1 && clipDenominator > 0.0) {
+    if (upper2 > upper1 && clipDenominator > GEOMETRY_EPSILON) {
         const t = (upper1 - lower2) / clipDenominator;
 
         vUpperX = v22.x + (v21.x - v22.x) * t;
@@ -576,11 +594,11 @@ function segmentDistance(
     const rd2 = rX * d2X + rY * d2Y;
     const rd1 = rX * d1X + rY * d1Y;
 
-    if (dd1 < 0 || dd2 < 0) {
-        if (dd1 >= 0) {
+    if (dd1 < GEOMETRY_EPSILON_SQUARED || dd2 < GEOMETRY_EPSILON_SQUARED) {
+        if (dd1 >= GEOMETRY_EPSILON_SQUARED) {
             fraction1 = Utils.clamp(-rd1 / dd1, 0.0, 1.0);
             fraction2 = 0.0;
-        } else if (dd2 >= 0) {
+        } else if (dd2 >= GEOMETRY_EPSILON_SQUARED) {
             fraction1 = 0.0;
             fraction2 = Utils.clamp(rd2 / dd2, 0.0, 1.0);
         }
@@ -644,7 +662,9 @@ function collideConvexPolygons(
     let edgeB = initialEdgeB;
     let flip = false;
 
-    if (separationA >= separationB) {
+    const referenceFaceHysteresis = 0.1 * SETTINGS.penetrationSlop;
+
+    if (separationA >= separationB - referenceFaceHysteresis) {
         const searchDirectionX = normalsA[edgeA].x;
         const searchDirectionY = normalsA[edgeA].y;
         let minDot = Number.MAX_VALUE;
@@ -720,6 +740,16 @@ function collideConvexPolygons(
         );
     };
 
+    let vertexAX = 0.0;
+    let vertexAY = 0.0;
+    let vertexBX = 0.0;
+    let vertexBY = 0.0;
+    let vertexNormalX = 0.0;
+    let vertexNormalY = 0.0;
+    let vertexId = 0;
+    let vertexSeparation = Number.POSITIVE_INFINITY;
+    let hasVertexCandidate = false;
+
     if (separationA > 0 || separationB > 0) {
         const i11 = edgeA;
         const i12 = (edgeA + 1) % verticesA.length;
@@ -732,55 +762,45 @@ function collideConvexPolygons(
         const result = segmentDistance(v11.x, v11.y, v12.x, v12.y, v21.x, v21.y, v22.x, v22.y);
 
         if (result.fraction1 === 0.0 && result.fraction2 === 0.0) {
-            return createVertexContact(
-                v11.x,
-                v11.y,
-                v21.x,
-                v21.y,
-                normalsA[edgeA].x,
-                normalsA[edgeA].y,
-                Utils.makeId(i11, i21),
-            );
+            vertexAX = v11.x;
+            vertexAY = v11.y;
+            vertexBX = v21.x;
+            vertexBY = v21.y;
+            vertexId = Utils.makeId(i11, i21);
+            hasVertexCandidate = true;
+        } else if (result.fraction1 === 0.0 && result.fraction2 === 1.0) {
+            vertexAX = v11.x;
+            vertexAY = v11.y;
+            vertexBX = v22.x;
+            vertexBY = v22.y;
+            vertexId = Utils.makeId(i11, i22);
+            hasVertexCandidate = true;
+        } else if (result.fraction1 === 1.0 && result.fraction2 === 0.0) {
+            vertexAX = v12.x;
+            vertexAY = v12.y;
+            vertexBX = v21.x;
+            vertexBY = v21.y;
+            vertexId = Utils.makeId(i12, i21);
+            hasVertexCandidate = true;
+        } else if (result.fraction1 === 1.0 && result.fraction2 === 1.0) {
+            vertexAX = v12.x;
+            vertexAY = v12.y;
+            vertexBX = v22.x;
+            vertexBY = v22.y;
+            vertexId = Utils.makeId(i12, i22);
+            hasVertexCandidate = true;
         }
 
-        if (result.fraction1 === 0.0 && result.fraction2 === 1.0) {
-            return createVertexContact(
-                v11.x,
-                v11.y,
-                v22.x,
-                v22.y,
-                normalsA[edgeA].x,
-                normalsA[edgeA].y,
-                Utils.makeId(i11, i22),
-            );
-        }
-
-        if (result.fraction1 === 1.0 && result.fraction2 === 0.0) {
-            return createVertexContact(
-                v12.x,
-                v12.y,
-                v21.x,
-                v21.y,
-                normalsA[edgeA].x,
-                normalsA[edgeA].y,
-                Utils.makeId(i12, i21),
-            );
-        }
-
-        if (result.fraction1 === 1.0 && result.fraction2 === 1.0) {
-            return createVertexContact(
-                v12.x,
-                v12.y,
-                v22.x,
-                v22.y,
-                normalsA[edgeA].x,
-                normalsA[edgeA].y,
-                Utils.makeId(i12, i22),
-            );
+        if (hasVertexCandidate) {
+            vertexNormalX = normalsA[edgeA].x;
+            vertexNormalY = normalsA[edgeA].y;
+            const dx = vertexBX - vertexAX;
+            const dy = vertexBY - vertexAY;
+            vertexSeparation = Math.sqrt(dx * dx + dy * dy) - radius;
         }
     }
 
-    return clipConvexEdges(
+    const clipped = clipConvexEdges(
         bodyA,
         bodyB,
         verticesA,
@@ -793,6 +813,22 @@ function collideConvexPolygons(
         edgeB,
         flip,
     );
+
+    // Prefer a closest-vertex manifold only when it is meaningfully better than clipping. This
+    // prevents normals from toggling between a vertex and face contact near a corner.
+    if (vertexSeparation + referenceFaceHysteresis < (clipped == null ? Infinity : -clipped.penetrationDepth)) {
+        return createVertexContact(
+            vertexAX,
+            vertexAY,
+            vertexBX,
+            vertexBY,
+            vertexNormalX,
+            vertexNormalY,
+            vertexId,
+        );
+    }
+
+    return clipped;
 }
 
 function collidePolygonLikeBodies(bodyA: RigidBody, bodyB: RigidBody): ContactManifold | null {
@@ -888,7 +924,7 @@ function collideSegmentRadiusPairs(
             normalBY = -normalBY;
         }
 
-        if (separationA >= separationB) {
+        if (separationA >= separationB - 0.1 * SETTINGS.penetrationSlop) {
             let cpX = p2X;
             let cpY = p2Y;
             let cqX = q2X;
@@ -1146,8 +1182,10 @@ function collidePolygonLikeAndCapsule(bodyA: RigidBody, bodyB: RigidBody): Conta
     const shapeA = bodyA.shape as PolygonShape;
     const capsuleB = bodyB.shape as CapsuleShape;
     const capsuleVertices = [capsuleB.worldCenter1, capsuleB.worldCenter2];
-    const axisX = capsuleB.worldCenter1.x - capsuleB.worldCenter2.x;
-    const axisY = capsuleB.worldCenter1.y - capsuleB.worldCenter2.y;
+    // Normals must follow the same winding as the two capsule vertices. Using the reverse axis
+    // picks the wrong incident face during clipping and can drop polygon–capsule contacts.
+    const axisX = capsuleB.worldCenter2.x - capsuleB.worldCenter1.x;
+    const axisY = capsuleB.worldCenter2.y - capsuleB.worldCenter1.y;
     const axisLengthSquared = axisX * axisX + axisY * axisY;
 
     let normalX = 1;
