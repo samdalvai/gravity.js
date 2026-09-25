@@ -1,6 +1,7 @@
 import { describe, expect, test } from '@jest/globals';
 
 import * as Collision from '../../src/collision/NarrowPhase';
+import { ContactManifold } from '../../src/collision/ContactManifold';
 import { RigidBody } from '../../src/core/RigidBody';
 import { CircleShape } from '../../src/shapes/CircleShape';
 
@@ -35,5 +36,43 @@ describe('Contact', () => {
         expect(b.position.x).toBe(201.95);
         expect(a.velocity.x).toBe(-117);
         expect(b.velocity.x).toBe(117);
+    });
+
+    test('falls back to scalar normal solves when a two-point block is singular', () => {
+        const a = new RigidBody(new CircleShape(10), 0, 0, 1);
+        const b = new RigidBody(new CircleShape(10), 15, 0, 1);
+        const manifold = new ContactManifold(
+            a,
+            b,
+            2,
+            5,
+            1,
+            0,
+            7.5,
+            0,
+            1,
+            7.5,
+            0,
+            2,
+            false,
+        );
+
+        manifold.preSolve(60);
+        expect(() => manifold.solve()).not.toThrow();
+        expect(Number.isFinite(manifold.normalImpulseSum0)).toBe(true);
+        expect(Number.isFinite(manifold.normalImpulseSum1)).toBe(true);
+    });
+
+    test('uses the current normal impulse for friction on the first solve pass', () => {
+        const a = new RigidBody(new CircleShape(10), 0, 0, 0);
+        const b = new RigidBody(new CircleShape(10), 15, 0, 1);
+        b.velocity.y = 100;
+
+        const manifold = Collision.detectCollision(a, b)!;
+        manifold.preSolve(60);
+        manifold.solve();
+
+        expect(manifold.normalImpulseSum0).toBeGreaterThan(0);
+        expect(Math.abs(manifold.tangentImpulseSum0)).toBeGreaterThan(0);
     });
 });
