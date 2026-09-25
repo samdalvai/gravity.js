@@ -571,12 +571,12 @@ Record a debug flag when a cap is hit. Silent caps make instability hard to diag
 
 This change should be small and independently releasable.
 
-### Change 2: manifold v2
+### Change 2: manifold v2 — completed
 
-- Add per-point separation, anchors, persistence, and impact state.
-- Preserve the old public manifold getters.
-- Update pool initialization and all narrow-phase builders.
-- Add stable-ID and two-point asymmetric-penetration tests.
+- [x] Add per-point separation, anchors, persistence, and impact state.
+- [x] Preserve the old public manifold getters.
+- [x] Update pool initialization and all narrow-phase builders.
+- [x] Add stable-ID and two-point asymmetric-penetration tests.
 
 Do not change solver equations in the same change; first prove the new representation reproduces
 current behavior.

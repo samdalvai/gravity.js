@@ -24,6 +24,8 @@ export class ContactManifoldPool {
         contactPoint1Y: number,
         contactPoint1Id: number,
         featureFlipped: boolean,
+        contactPoint0Separation: number,
+        contactPoint1Separation: number,
     ): ContactManifold {
         const manifold = this.manifolds.pop();
 
@@ -42,6 +44,8 @@ export class ContactManifoldPool {
                 contactPoint1Y,
                 contactPoint1Id,
                 featureFlipped,
+                contactPoint0Separation,
+                contactPoint1Separation,
             );
             return manifold;
         }
@@ -60,6 +64,8 @@ export class ContactManifoldPool {
             contactPoint1Y,
             contactPoint1Id,
             featureFlipped,
+            contactPoint0Separation,
+            contactPoint1Separation,
         );
     }
 
