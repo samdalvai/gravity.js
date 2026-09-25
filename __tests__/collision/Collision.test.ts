@@ -287,4 +287,18 @@ describe('Collision', () => {
         expect(result?.points.length).toBeGreaterThan(0);
         expect(result?.penetrationDepth).toBe(0);
     });
+
+    test('detectCollision() handles degenerate capsule segments without non-finite contacts', () => {
+        const a = new RigidBody(new CapsuleShape(0, 10), 0, 0, 1);
+        const b = new RigidBody(new CapsuleShape(0, 10), 15, 0, 1);
+
+        const result = Collision.detectCollision(a, b);
+
+        expect(result).not.toBeNull();
+        expect(result?.numContacts).toBe(1);
+        expect(Number.isFinite(result?.normal.x ?? NaN)).toBe(true);
+        expect(Number.isFinite(result?.normal.y ?? NaN)).toBe(true);
+        expect(Number.isFinite(result?.points[0].point.x ?? NaN)).toBe(true);
+        expect(Number.isFinite(result?.points[0].point.y ?? NaN)).toBe(true);
+    });
 });
