@@ -3,7 +3,7 @@ import { describe, expect, jest, test } from '@jest/globals';
 import { CollisionCategory } from '../../src/collision/CollisionFilter';
 import { ContactManifold } from '../../src/collision/ContactManifold';
 import * as NarrowPhase from '../../src/collision/NarrowPhase';
-import { FIXED_DELTA_TIME, MAX_BODIES, SETTINGS } from '../../src/core/Constants';
+import { MAX_BODIES, SETTINGS } from '../../src/core/Constants';
 import { RigidBody } from '../../src/core/RigidBody';
 import { World } from '../../src/core/World';
 import { Vec2 } from '../../src/math/Vec2';
@@ -99,7 +99,9 @@ describe('World contact cache', () => {
 
 describe('World substeps', () => {
     test('applies continuous external forces during every substep', () => {
+        const previousFrequency = SETTINGS.frequency;
         const previousSubSteps = SETTINGS.subSteps;
+        SETTINGS.frequency = 120;
         SETTINGS.subSteps = 4;
 
         try {
@@ -110,14 +112,15 @@ describe('World substeps', () => {
 
             world.addBody(body);
             world.update(dt => {
-                expect(dt).toBe(FIXED_DELTA_TIME / SETTINGS.subSteps);
+                expect(dt).toBe(SETTINGS.timeStep / SETTINGS.subSteps);
                 callbackCount++;
                 body.addForce(force);
             });
 
             expect(callbackCount).toBe(SETTINGS.subSteps);
-            expect(body.velocity.x).toBeCloseTo(force.x * FIXED_DELTA_TIME);
+            expect(body.velocity.x).toBeCloseTo(force.x * SETTINGS.timeStep);
         } finally {
+            SETTINGS.frequency = previousFrequency;
             SETTINGS.subSteps = previousSubSteps;
         }
     });
