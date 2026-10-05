@@ -53,6 +53,7 @@ export interface UIState {
     applyGravity: boolean;
     grab: boolean;
     paused: boolean;
+    frequency: number;
     solverIterations: number;
     subSteps: number;
 }
@@ -69,6 +70,7 @@ export interface UIActions {
     onSetApplyGravity(value: boolean): void;
     onSetGrab(checked: boolean): void;
     onSetPaused(value: boolean): void;
+    onSetFrequency(value: number): void;
     onSetSolverIterations(value: number): void;
     onSetSubSteps(value: number): void;
     onStep(): void;
@@ -91,6 +93,7 @@ export default class UIManager {
     private pausedCheckbox: HTMLInputElement | null = null;
 
     // Inputs
+    private frequencyInput: HTMLInputElement | null = null;
     private solverIterationsInput: HTMLInputElement | null = null;
     private subStepsInput: HTMLInputElement | null = null;
 
@@ -189,6 +192,9 @@ export default class UIManager {
         this.pausedCheckbox = createCheckbox(toggleGroup, 'Paused', checked => actions.onSetPaused(checked));
 
         const numericGroup = createGroup();
+        this.frequencyInput = createNumberInput(numericGroup, 'Frequency (Hz)', value =>
+            actions.onSetFrequency(value),
+        );
         this.solverIterationsInput = createNumberInput(numericGroup, 'Iterations', value =>
             actions.onSetSolverIterations(value),
         );
@@ -281,6 +287,7 @@ export default class UIManager {
             !this.gravityCheckbox ||
             !this.grabCheckbox ||
             !this.pausedCheckbox ||
+            !this.frequencyInput ||
             !this.solverIterationsInput ||
             !this.subStepsInput
         ) {
@@ -298,6 +305,7 @@ export default class UIManager {
         this.gravityCheckbox.checked = state.applyGravity;
         this.grabCheckbox.checked = state.grab;
         this.pausedCheckbox.checked = state.paused;
+        this.frequencyInput.value = `${state.frequency}`;
         this.solverIterationsInput.value = `${state.solverIterations}`;
         this.subStepsInput.value = `${state.subSteps}`;
         this.showAABBCheckbox.disabled = !state.debug;

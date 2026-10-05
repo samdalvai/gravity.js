@@ -75,7 +75,7 @@ No browser global or script-tag build is provided. Use a bundler such as Parcel,
 This example creates a world with downward gravity, a static floor, and a falling box. `World.update()` advances exactly one fixed simulation tick each time it is called.
 
 ```ts
-import { BodiesFactory, FIXED_DELTA_TIME, GRAVITY, World } from 'gravity.js';
+import { BodiesFactory, GRAVITY, SETTINGS, World } from 'gravity.js';
 
 const world = new World(GRAVITY);
 
@@ -112,9 +112,9 @@ function frame(now: number): void {
     frameTime = Math.min(frameTime, 0.25);
     accumulator += frameTime;
 
-    while (accumulator >= FIXED_DELTA_TIME) {
+    while (accumulator >= SETTINGS.timeStep) {
         world.update();
-        accumulator -= FIXED_DELTA_TIME;
+        accumulator -= SETTINGS.timeStep;
     }
 
     render(world.getBodies());
@@ -140,7 +140,7 @@ Gravity.js uses these conventions:
 | Angular velocity | Radians per second |
 | Gravity passed to `World` | Positive acceleration magnitude; `new World(GRAVITY)` accelerates downward |
 | Scale | `PIXELS_PER_METER` is `100` and is used by world gravity |
-| Physics tick | `FIXED_DELTA_TIME`, currently `1 / 60` second |
+| Physics tick | `SETTINGS.timeStep`, derived from `1 / SETTINGS.frequency` |
 
 The engine uses semi-implicit integration and expects a fixed-step loop. Rendering can happen at any display refresh rate, but physics should not be advanced with the display frame duration.
 
@@ -160,7 +160,7 @@ ctx.restore();
 
 ### Fixed timestep
 
-Call `world.update()` once for each accumulated `FIXED_DELTA_TIME`. The method intentionally takes no frame-duration argument.
+Call `world.update()` once for each accumulated `SETTINGS.timeStep`. The method intentionally takes no frame-duration argument.
 
 If the page becomes hidden, reset the last frame timestamp when it becomes visible again. This prevents a large catch-up step:
 
@@ -187,7 +187,7 @@ world.update(dt => {
 });
 ```
 
-The callback runs `SETTINGS.subSteps` times and receives the substep duration, `FIXED_DELTA_TIME / SETTINGS.subSteps`. A body's accumulated forces and torque are cleared after every substep. Applying a force only once before `world.update()` therefore affects only the first substep when substepping is enabled.
+The callback runs `SETTINGS.subSteps` times and receives the substep duration, `SETTINGS.timeStep / SETTINGS.subSteps`. A body's accumulated forces and torque are cleared after every substep. Applying a force only once before `world.update()` therefore affects only the first substep when substepping is enabled.
 
 Impulses change velocity immediately and should normally be applied once for an event, outside the substep callback:
 
@@ -405,7 +405,7 @@ The contact manifold pool grows on demand and reuses released contacts. Setting 
 | `getManifolds()` | Returns contacts produced by the most recent substep. Intended primarily for inspection/debug rendering. |
 | `addForce(force)` | Registers a persistent uniform force applied to every body during every substep. |
 | `addTorque(torque)` | Registers a persistent uniform torque applied to every body during every substep. |
-| `update(callback?)` | Advances one `FIXED_DELTA_TIME`, divided into configured substeps. |
+| `update(callback?)` | Advances one `SETTINGS.timeStep`, divided into configured substeps. |
 | `clear()` | Removes bodies, joints, contacts, persistent world forces, and persistent world torques. |
 
 `World.addForce` and `World.addTorque` are persistent world-level fields, not one-frame operations. There are no individual remove methods; use body forces for changing effects, or `world.clear()` when resetting the entire scene.
@@ -817,6 +817,7 @@ Treat `pairKey` results as opaque keys: they are independent of body order and p
 | --- | ---: | --- |
 | `applyGravity` | `true` | Apply each world's gravity to its bodies |
 | `ccd` | `true` | Run circle bullet continuous collision detection |
+| `frequency` | `60` Hz | Fixed simulation updates per second |
 | `solverIterations` | `10` | Constraint solver passes per substep; more can improve stability at added cost |
 | `subSteps` | `1` | Solver/integration subdivisions per fixed tick |
 | `positionCorrection` | `true` | Correct positional constraint error |
@@ -824,7 +825,7 @@ Treat `pairKey` results as opaque keys: they are independent of body order and p
 | `impulseAccumulation` | `true` | Accumulate contact impulses during solving |
 | `blockSolve` | `true` | Jointly solve two-point normal contacts |
 
-Set positive integer values for `solverIterations` and `subSteps`; the object itself does not validate application assignments.
+Set a positive value for `frequency` and positive integer values for `solverIterations` and `subSteps`; the object itself does not validate application assignments.
 
 ### Advanced solver settings
 
@@ -841,13 +842,13 @@ These are public for engine tuning but should normally remain at their defaults:
 | `positionCorrectionBeta` | `0.2` |
 | `contactSlop` | `0.01` |
 
-`SETTINGS.dt` is a readonly computed value equal to `FIXED_DELTA_TIME / subSteps`; `SETTINGS.invDt` is its reciprocal.
+`SETTINGS.timeStep` is a readonly computed value equal to `1 / frequency`. `SETTINGS.dt` is the per-substep duration, equal to `SETTINGS.timeStep / subSteps`; `SETTINGS.invDt` is its reciprocal.
 
 ### Exported constants
 
 | Constant | Value/meaning |
 | --- | --- |
-| `FIXED_DELTA_TIME` | `1 / 60` second |
+| `DEFAULT_FREQUENCY` | `60` Hz |
 | `PIXELS_PER_METER` | `100` |
 | `MAX_BODIES` | `5,000`; default per-world body limit, overridable with `WorldOptions.maxBodies` |
 | `GRAVITY` | `9.8` |
@@ -888,6 +889,6 @@ The root `gravity.js` entry point exports:
 | Joints | `DistanceJoint`, `WeldJoint`, `GrabJoint` |
 | Collision | `CollisionCategory`, TypeScript type `ContactInfo` |
 | Forces | `Force` namespace |
-| Configuration | `SETTINGS`, `FIXED_DELTA_TIME`, `PIXELS_PER_METER`, `MAX_BODIES`, `GRAVITY`, `MIN_BULLET_SPEED_SQUARED` |
+| Configuration | `SETTINGS`, `DEFAULT_FREQUENCY`, `PIXELS_PER_METER`, `MAX_BODIES`, `GRAVITY`, `MIN_BULLET_SPEED_SQUARED` |
 
 Import from the package root instead of internal `lib/...` paths. Only the root entry point is declared in `package.json` exports.
