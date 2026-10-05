@@ -2,7 +2,6 @@ import {
     BodiesFactory,
     CollisionCategory,
     DistanceJoint,
-    FIXED_DELTA_TIME,
     Force,
     GRAVITY,
     GrabJoint,
@@ -176,6 +175,7 @@ export default class Application {
             onSetApplyGravity: value => this.setApplyGravity(value),
             onSetGrab: value => this.setGrab(value),
             onSetPaused: value => this.setPaused(value),
+            onSetFrequency: value => this.setFrequency(value),
             onSetSolverIterations: value => this.setSolverIterations(value),
             onSetSubSteps: value => this.setSubSteps(value),
             onStep: () => this.stepSimulation(),
@@ -548,12 +548,12 @@ export default class Application {
             const acceleration = PLAYER_ACCELERATION;
 
             if (this.leftButtonPressed) {
-                const impulse = -acceleration * this.player.mass * FIXED_DELTA_TIME * PIXELS_PER_METER;
+                const impulse = -acceleration * this.player.mass * SETTINGS.timeStep * PIXELS_PER_METER;
                 this.player.applyImpulseLinear(new Vec2(impulse, 0));
             }
 
             if (this.rightButtonPressed) {
-                const impulse = acceleration * this.player.mass * FIXED_DELTA_TIME * PIXELS_PER_METER;
+                const impulse = acceleration * this.player.mass * SETTINGS.timeStep * PIXELS_PER_METER;
                 this.player.applyImpulseLinear(new Vec2(impulse, 0));
             }
 
@@ -1049,6 +1049,18 @@ export default class Application {
         this.syncUI();
     }
 
+    private setFrequency(value: number): void {
+        const clampedValue = Utils.clamp(value, 1, 240);
+
+        if (!Number.isFinite(clampedValue)) {
+            this.syncUI();
+            return;
+        }
+
+        SETTINGS.frequency = Math.round(clampedValue);
+        this.syncUI();
+    }
+
     private setSubSteps(value: number): void {
         const clampedValue = Utils.clamp(value, 1, 10);
 
@@ -1085,6 +1097,7 @@ export default class Application {
             applyGravity: SETTINGS.applyGravity,
             grab: this.grab,
             paused: this.paused,
+            frequency: SETTINGS.frequency,
             solverIterations: SETTINGS.solverIterations,
             subSteps: SETTINGS.subSteps,
         };

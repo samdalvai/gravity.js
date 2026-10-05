@@ -1,4 +1,5 @@
 export {
+    DEFAULT_FREQUENCY,
     FIXED_DELTA_TIME,
     GRAVITY,
     MAX_BODIES,
