@@ -1,4 +1,14 @@
-import { BoxShape, CapsuleShape, CircleShape, PolygonShape, RigidBody, SegmentShape, ShapeType, Vec2 } from 'gravity.js';
+import {
+    BoxShape,
+    CapsuleShape,
+    CircleShape,
+    PolygonShape,
+    RigidBody,
+    SegmentShape,
+    ShapeType,
+    Vec2,
+} from 'gravity.js';
+
 import type { BodyRenderStyle } from '../render/BodyRenderRegistry';
 
 export default class Graphics {

@@ -1,4 +1,5 @@
 import { BodiesFactory, Force, RigidBody, SETTINGS, Utils, type World } from 'gravity.js';
+
 import type Application from '../Application';
 import Graphics from '../graphics/Graphics';
 import { defineDemo } from './shared';

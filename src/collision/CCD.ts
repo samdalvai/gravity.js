@@ -172,14 +172,7 @@ function sweepPointVsPointRadiusTOI(
     return t;
 }
 
-function distancePointToSegmentSquared(
-    px: number,
-    py: number,
-    ax: number,
-    ay: number,
-    bx: number,
-    by: number,
-): number {
+function distancePointToSegmentSquared(px: number, py: number, ax: number, ay: number, bx: number, by: number): number {
     const abX = bx - ax;
     const abY = by - ay;
     const apX = px - ax;
