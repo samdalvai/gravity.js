@@ -1,7 +1,8 @@
 import { BodiesFactory, Vec2 } from 'gravity.js';
 import type { World } from 'gravity.js';
-import Graphics from '../graphics/Graphics';
+
 import type Application from '../Application';
+import Graphics from '../graphics/Graphics';
 import { defineDemo, generateFences, generateFloor } from './shared';
 
 function setupContinuousCollisionDetection(world: World, app: Application): void {

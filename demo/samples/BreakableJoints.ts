@@ -1,13 +1,8 @@
 import { BodiesFactory, DistanceJoint, Vec2 } from 'gravity.js';
 import type { RigidBody, World } from 'gravity.js';
+
 import type Application from '../Application';
-import {
-    JOINT_TUNING,
-    createDistanceJoint,
-    defineDemo,
-    generateFences,
-    generateFloor,
-} from './shared';
+import { JOINT_TUNING, createDistanceJoint, defineDemo, generateFences, generateFloor } from './shared';
 import type { JointTuning } from './shared';
 
 function setupBreakableJoints(world: World, app: Application): void {
@@ -44,11 +39,7 @@ function setupBreakableJoints(world: World, app: Application): void {
         body.onContact = undefined;
     };
 
-    const registerBreakableBody = (
-        body: RigidBody,
-        groupBodyIds: Set<number>,
-        breakImpulseThreshold: number,
-    ): void => {
+    const registerBreakableBody = (body: RigidBody, groupBodyIds: Set<number>, breakImpulseThreshold: number): void => {
         groupBodyIds.add(body.id);
         bodyJoints.set(body.id, new Set());
         body.onContact = info => {
@@ -127,13 +118,7 @@ function setupBreakableJoints(world: World, app: Application): void {
     registerBreakableBody(leftLeg, ragdollBodyIds, ragdollBreakImpulseThreshold);
     registerBreakableBody(rightLeg, ragdollBodyIds, ragdollBreakImpulseThreshold);
 
-    addBreakableJoint(
-        torso,
-        head,
-        torso.position.addNew(new Vec2(0, 50)),
-        head.position.addNew(new Vec2(0, -25)),
-        0,
-    );
+    addBreakableJoint(torso, head, torso.position.addNew(new Vec2(0, 50)), head.position.addNew(new Vec2(0, -25)), 0);
     addBreakableJoint(
         torso,
         leftArm,

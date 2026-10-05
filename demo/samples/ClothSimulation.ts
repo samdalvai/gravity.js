@@ -1,5 +1,6 @@
 import { BodiesFactory } from 'gravity.js';
 import type { RigidBody, World } from 'gravity.js';
+
 import type Application from '../Application';
 import { JOINT_TUNING, createDistanceJoint, defineDemo, generateFences, generateFloor } from './shared';
 

@@ -1,9 +1,4 @@
-export {
-    DEFAULT_FREQUENCY,
-    MIN_BULLET_SPEED_SQUARED,
-    PIXELS_PER_METER,
-    SETTINGS,
-} from './core/Constants';
+export { DEFAULT_FREQUENCY, MIN_BULLET_SPEED_SQUARED, PIXELS_PER_METER, SETTINGS } from './core/Constants';
 
 export { BodiesFactory } from './factory/BodiesFactory';
 export { RigidBody } from './core/RigidBody';

@@ -1,4 +1,5 @@
 import { SETTINGS } from 'gravity.js';
+
 import Application from './Application';
 
 async function run() {

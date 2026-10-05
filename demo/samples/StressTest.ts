@@ -1,13 +1,8 @@
 import { BodiesFactory } from 'gravity.js';
 import type { World } from 'gravity.js';
+
 import type Application from '../Application';
-import {
-    JOINT_TUNING,
-    createDistanceJoint,
-    defineDemo,
-    generateFences,
-    generateFloor,
-} from './shared';
+import { JOINT_TUNING, createDistanceJoint, defineDemo, generateFences, generateFloor } from './shared';
 
 function setupStressTest(world: World, app: Application): void {
     app.setBackground('background');
