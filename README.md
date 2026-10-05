@@ -22,7 +22,21 @@ Learn more at [pikuma.com](https://pikuma.com/).
 
 See the [Gravity.js integration and API guide](docs/USAGE.md) for installation in another project, fixed-step simulation setup, body and joint creation, collision handling, forces, rendering integration, and the complete public API.
 
-# How to run
+# Install as a library
+
+Gravity.js can be installed directly from GitHub. Pin a release tag or commit SHA so that installs are reproducible:
+
+```sh
+npm install git+https://github.com/samdalvai/gravity.js.git#<tag-or-commit>
+```
+
+The `prepare` script compiles the TypeScript source into `lib/` during installation. Import the public API using the package name:
+
+```ts
+import { BodiesFactory, World } from 'gravity.js';
+```
+
+# Development
 
 ## Prerequisites
 
@@ -30,13 +44,29 @@ See the [Gravity.js integration and API guide](docs/USAGE.md) for installation i
 
 ## Install dependencies
 
-```
+```sh
 npm install
 ```
 
+## Build the library
+
+```sh
+npm run build
+```
+
+This compiles the library and its TypeScript declarations into `lib/`.
+
+## Build the demo
+
+```sh
+npm run build:demo
+```
+
+This builds the library first and then creates the production demo in `dist/`.
+
 ## Run the demo in development mode
 
-```
+```sh
 npm start
 ```
 
@@ -44,7 +74,7 @@ This builds the Gravity.js package once, changes under `src` rebuild the package
 
 ## Run the demo from the packaged version only
 
-```
+```sh
 npm run start:package
 ```
 
