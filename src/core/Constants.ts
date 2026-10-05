@@ -1,4 +1,5 @@
-export const FIXED_DELTA_TIME = 1 / 60;
+export const DEFAULT_FREQUENCY = 60;
+export const FIXED_DELTA_TIME = 1 / DEFAULT_FREQUENCY;
 
 export const PIXELS_PER_METER = 100;
 /** Default body limit for worlds that do not specify maxBodies. */
@@ -31,11 +32,16 @@ export const SETTINGS = {
     contactSlop: 0.01, // Needed for roundoff errors in CCD making some collision not apply
 
     // Solver iterations fine tuning
+    frequency: DEFAULT_FREQUENCY,
     solverIterations: 10,
     subSteps: 1,
 
+    get timeStep() {
+        return 1 / this.frequency;
+    },
+
     get dt() {
-        return FIXED_DELTA_TIME / this.subSteps;
+        return this.timeStep / this.subSteps;
     },
 
     get invDt() {

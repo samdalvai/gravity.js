@@ -1,4 +1,4 @@
-import { FIXED_DELTA_TIME } from 'gravity.js';
+import { SETTINGS } from 'gravity.js';
 import Application from './Application';
 
 async function run() {
@@ -30,9 +30,9 @@ async function run() {
         if (app.isRunning()) {
             app.input();
 
-            while (accumulator >= FIXED_DELTA_TIME) {
+            while (accumulator >= SETTINGS.timeStep) {
                 app.update(frameTime);
-                accumulator -= FIXED_DELTA_TIME;
+                accumulator -= SETTINGS.timeStep;
             }
 
             app.render();
