@@ -10,25 +10,29 @@ SETTINGS.applyGravity = true;
 
 const world = new World(9.8);
 
-world.addBody(BodiesFactory.box({
-    width: COLUMNS * SPACING + RADIUS * 4,
-    height: RADIUS * 2,
-    x: (COLUMNS - 1) * SPACING * 0.5,
-    y: -RADIUS,
-    mass: 0,
-    friction: 0.8,
-}));
+world.addBody(
+    BodiesFactory.box({
+        width: COLUMNS * SPACING + RADIUS * 4,
+        height: RADIUS * 2,
+        x: (COLUMNS - 1) * SPACING * 0.5,
+        y: -RADIUS,
+        mass: 0,
+        friction: 0.8,
+    }),
+);
 
 for (let row = 0; row < ROWS; row++) {
     for (let column = 0; column < COLUMNS; column++) {
-        world.addBody(BodiesFactory.circle({
-            radius: RADIUS,
-            x: column * SPACING,
-            y: RADIUS + row * SPACING,
-            mass: 1,
-            restitution: 0,
-            friction: 0.8,
-        }));
+        world.addBody(
+            BodiesFactory.circle({
+                radius: RADIUS,
+                x: column * SPACING,
+                y: RADIUS + row * SPACING,
+                mass: 1,
+                restitution: 0,
+                friction: 0.8,
+            }),
+        );
     }
 }
 

@@ -1,4 +1,5 @@
 import { Utils, type World } from 'gravity.js';
+
 import type Application from '../Application';
 import { TEXTURES } from '../graphics/AssetStore';
 import Graphics from '../graphics/Graphics';
