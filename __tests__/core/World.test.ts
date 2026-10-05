@@ -3,7 +3,7 @@ import { describe, expect, jest, test } from '@jest/globals';
 import { CollisionCategory } from '../../src/collision/CollisionFilter';
 import { ContactManifold } from '../../src/collision/ContactManifold';
 import * as NarrowPhase from '../../src/collision/NarrowPhase';
-import { MAX_BODIES, SETTINGS } from '../../src/core/Constants';
+import { SETTINGS } from '../../src/core/Constants';
 import { RigidBody } from '../../src/core/RigidBody';
 import { World } from '../../src/core/World';
 import { Vec2 } from '../../src/math/Vec2';
@@ -11,22 +11,24 @@ import { BoxShape } from '../../src/shapes/BoxShape';
 import { CapsuleShape } from '../../src/shapes/CapsuleShape';
 import { CircleShape } from '../../src/shapes/CircleShape';
 
+const DEFAULT_MAX_BODIES = 5_000;
+
 describe('World body limits', () => {
     test('keeps the default limit and supports larger worlds', () => {
         const defaultWorld = new World(0);
-        const largeWorld = new World(0, { maxBodies: MAX_BODIES + 1 });
+        const largeWorld = new World(0, { maxBodies: DEFAULT_MAX_BODIES + 1 });
 
-        for (let i = 0; i < MAX_BODIES; i++) {
+        for (let i = 0; i < DEFAULT_MAX_BODIES; i++) {
             defaultWorld.addBody(new RigidBody(new CircleShape(1), i * 3, 0, 1));
             largeWorld.addBody(new RigidBody(new CircleShape(1), i * 3, 0, 1));
         }
 
-        const extra = new RigidBody(new CircleShape(1), MAX_BODIES * 3, 0, 1);
-        expect(defaultWorld.maxBodies).toBe(MAX_BODIES);
+        const extra = new RigidBody(new CircleShape(1), DEFAULT_MAX_BODIES * 3, 0, 1);
+        expect(defaultWorld.maxBodies).toBe(DEFAULT_MAX_BODIES);
         expect(() => defaultWorld.addBody(extra)).toThrow('Max number of bodies exceeded');
         largeWorld.addBody(extra);
         largeWorld.update();
-        expect(largeWorld.getBodies()).toHaveLength(MAX_BODIES + 1);
+        expect(largeWorld.getBodies()).toHaveLength(DEFAULT_MAX_BODIES + 1);
 
         defaultWorld.clear();
         largeWorld.clear();
@@ -52,10 +54,10 @@ describe('World body limits', () => {
         const empty = new World(0, { maxBodies: 0 });
         const unlimited = new World(0, { maxBodies: Infinity });
         expect(() => empty.addBody(new RigidBody(new CircleShape(1), 0, 0, 1))).toThrow();
-        for (let i = 0; i <= MAX_BODIES; i++) {
+        for (let i = 0; i <= DEFAULT_MAX_BODIES; i++) {
             unlimited.addBody(new RigidBody(new CircleShape(1), i * 3, 0, 1));
         }
-        expect(unlimited.getBodies()).toHaveLength(MAX_BODIES + 1);
+        expect(unlimited.getBodies()).toHaveLength(DEFAULT_MAX_BODIES + 1);
         unlimited.clear();
     });
 

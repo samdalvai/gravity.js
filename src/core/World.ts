@@ -15,11 +15,13 @@ import { applyWeightForce } from '../force/Gravity';
 import { Joint } from '../joint/Joint';
 import { Vec2 } from '../math/Vec2';
 import * as Utils from '../utils/Utils';
-import { MAX_BODIES, MIN_BULLET_SPEED_SQUARED, SETTINGS } from './Constants';
+import { MIN_BULLET_SPEED_SQUARED, SETTINGS } from './Constants';
 import { RigidBody } from './RigidBody';
 
+const DEFAULT_MAX_BODIES = 5_000;
+
 export interface WorldOptions {
-    /** Maximum live bodies. Defaults to MAX_BODIES; Infinity disables the limit. */
+    /** Maximum live bodies. Defaults to 5,000; Infinity disables the limit. */
     maxBodies?: number;
 }
 
@@ -48,7 +50,7 @@ export class World {
     private dtFractions: number[] = [];
 
     constructor(gravity: number, options: WorldOptions = {}) {
-        const maxBodies = options.maxBodies ?? MAX_BODIES;
+        const maxBodies = options.maxBodies ?? DEFAULT_MAX_BODIES;
         if (maxBodies !== Infinity && (!Number.isSafeInteger(maxBodies) || maxBodies < 0)) {
             throw new RangeError('maxBodies must be a non-negative safe integer or Infinity');
         }

@@ -1,6 +1,6 @@
 import { describe, expect, test } from '@jest/globals';
 
-import { BodiesFactory, FIXED_DELTA_TIME, Force, Vec2 } from '../../src';
+import { BodiesFactory, Force, SETTINGS, Vec2 } from '../../src';
 
 describe('Force', () => {
     test('Buoyancy scales with the body shape area when fully submerged', () => {
@@ -35,8 +35,8 @@ describe('Force', () => {
         });
 
         const submergedArea = body.shape.getArea();
-        const waterDrag = Force.buoyancy.generateLinearWaterDragForce(body, submergedArea, 1, 0.2, FIXED_DELTA_TIME);
-        const maxForce = (body.mass * body.velocity.magnitude()) / FIXED_DELTA_TIME;
+        const waterDrag = Force.buoyancy.generateLinearWaterDragForce(body, submergedArea, 1, 0.2, SETTINGS.timeStep);
+        const maxForce = (body.mass * body.velocity.magnitude()) / SETTINGS.timeStep;
 
         expect(waterDrag.x).toBeCloseTo(0);
         expect(waterDrag.y).toBeCloseTo(maxForce);

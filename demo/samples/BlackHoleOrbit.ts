@@ -1,8 +1,11 @@
-import { BodiesFactory, CollisionCategory, GRAVITY, SETTINGS, Utils, Vec2 } from 'gravity.js';
+import { BodiesFactory, CollisionCategory, SETTINGS, Utils, Vec2 } from 'gravity.js';
 import type { World } from 'gravity.js';
+
 import type Application from '../Application';
 import Graphics from '../graphics/Graphics';
 import { defineDemo } from './shared';
+
+const DEMO_GRAVITY = 9.8;
 
 function setupBlackHoleOrbit(world: World, app: Application): void {
     // app.setBackground();
@@ -41,7 +44,7 @@ function setupBlackHoleOrbit(world: World, app: Application): void {
             maxGravityDistanceSquared,
         );
         const orbitSpeed =
-            Math.sqrt((GRAVITY * blackHole.mass * orbitRadius) / effectiveDistanceSquared) *
+            Math.sqrt((DEMO_GRAVITY * blackHole.mass * orbitRadius) / effectiveDistanceSquared) *
             Utils.randomNumber(0.9, 1.12);
         const tangentialVelocity = radialDirection.leftPerpNew().scaleNew(orbitSpeed);
         const radialVelocity = radialDirection.scaleNew(orbitSpeed * Utils.randomNumber(-0.18, 0.12));
