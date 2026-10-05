@@ -58,14 +58,14 @@ The `lib/` directory must exist before installing because it is generated and is
 TypeScript and projects using a bundler can use named imports:
 
 ```ts
-import { BodiesFactory, GRAVITY, Vec2, World } from 'gravity.js';
+import { BodiesFactory, Vec2, World } from 'gravity.js';
 import type { ContactInfo, RigidBody } from 'gravity.js';
 ```
 
 CommonJS projects can use `require`:
 
 ```js
-const { BodiesFactory, GRAVITY, Vec2, World } = require('gravity.js');
+const { BodiesFactory, Vec2, World } = require('gravity.js');
 ```
 
 No browser global or script-tag build is provided. Use a bundler such as Parcel, Vite, webpack, or another tool capable of consuming CommonJS packages.
@@ -75,9 +75,9 @@ No browser global or script-tag build is provided. Use a bundler such as Parcel,
 This example creates a world with downward gravity, a static floor, and a falling box. `World.update()` advances exactly one fixed simulation tick each time it is called.
 
 ```ts
-import { BodiesFactory, GRAVITY, SETTINGS, World } from 'gravity.js';
+import { BodiesFactory, SETTINGS, World } from 'gravity.js';
 
-const world = new World(GRAVITY);
+const world = new World(9.8);
 
 const floor = BodiesFactory.box({
     width: 800,
@@ -138,7 +138,7 @@ Gravity.js uses these conventions:
 | Linear velocity | Pixels per second |
 | Rotation | Radians, positive counter-clockwise |
 | Angular velocity | Radians per second |
-| Gravity passed to `World` | Positive acceleration magnitude; `new World(GRAVITY)` accelerates downward |
+| Gravity passed to `World` | Positive acceleration magnitude; `new World(9.8)` accelerates downward |
 | Scale | `PIXELS_PER_METER` is `100` and is used by world gravity |
 | Physics tick | `SETTINGS.timeStep`, derived from `1 / SETTINGS.frequency` |
 
@@ -384,13 +384,13 @@ The `demo/` directory in this repository is a complete Canvas integration and ca
 Create a world with a positive downward gravity magnitude:
 
 ```ts
-const world = new World(GRAVITY); // 9.8 m/s² downward, scaled by PIXELS_PER_METER
+const world = new World(9.8); // 9.8 m/s² downward, scaled by PIXELS_PER_METER
 const space = new World(0);       // no automatic weight force
-const largeWorld = new World(GRAVITY, { maxBodies: 20_000 });
+const largeWorld = new World(9.8, { maxBodies: 20_000 });
 const unlimitedWorld = new World(0, { maxBodies: Infinity });
 ```
 
-The optional second argument is a `WorldOptions` object. `maxBodies` defaults to `MAX_BODIES` (5,000) and must be a non-negative safe integer or `Infinity` to disable the limit. Invalid limits throw a `RangeError`. The readonly `world.maxBodies` property exposes the limit; it is independent for each world and preserved by `clear()`.
+The optional second argument is a `WorldOptions` object. `maxBodies` defaults to 5,000 and must be a non-negative safe integer or `Infinity` to disable the limit. Invalid limits throw a `RangeError`. The readonly `world.maxBodies` property exposes the limit; it is independent for each world and preserved by `clear()`.
 
 The contact manifold pool grows on demand and reuses released contacts. Setting a larger body limit does not preallocate bodies or manifolds.
 
@@ -628,7 +628,7 @@ Force.gravity.applyBarnesHutGravitationalForces(bodies, G, theta?, epsilon?): vo
 
 World gravity already applies weight automatically when `SETTINGS.applyGravity` is true. The other helpers model attraction between bodies.
 
-The low-level weight helpers take a signed Y acceleration, unlike the positive magnitude accepted by the `World` constructor. Use `-GRAVITY` for downward weight when calling them directly.
+The low-level weight helpers take a signed Y acceleration, unlike the positive magnitude accepted by the `World` constructor. Use `-9.8` for downward weight when calling them directly.
 
 `applyGravitationalForces` is an exact all-pairs operation and scales quadratically. The Barnes-Hut version uses a quadtree and is better for large body counts, at the cost of approximation. Its defaults are `theta = 0.5` and `epsilon = 1`.
 
@@ -638,7 +638,7 @@ The exact force generator clamps squared distance to the supplied minimum and ma
 const attraction = Force.gravity.generateGravitationalForce(
     satellite,
     planet,
-    GRAVITY,
+    9.8,
     80 * 80,
     950 * 950,
 );
@@ -706,7 +706,7 @@ The high-level helper applies buoyancy at the submerged centroid plus linear and
 world.update(() => {
     for (const body of world.getBodies()) {
         if (!body.isStatic()) {
-            Force.buoyancy.applyBuoyancyForces(body, 0, 0.001, GRAVITY, 1, 1);
+            Force.buoyancy.applyBuoyancyForces(body, 0, 0.001, 9.8, 1, 1);
         }
     }
 });
@@ -850,8 +850,6 @@ These are public for engine tuning but should normally remain at their defaults:
 | --- | --- |
 | `DEFAULT_FREQUENCY` | `60` Hz |
 | `PIXELS_PER_METER` | `100` |
-| `MAX_BODIES` | `5,000`; default per-world body limit, overridable with `WorldOptions.maxBodies` |
-| `GRAVITY` | `9.8` |
 | `MIN_BULLET_SPEED_SQUARED` | `1,000,000` `(pixels/second)²` |
 
 Bullet CCD is deliberately limited:
@@ -889,6 +887,6 @@ The root `gravity.js` entry point exports:
 | Joints | `DistanceJoint`, `WeldJoint`, `GrabJoint` |
 | Collision | `CollisionCategory`, TypeScript type `ContactInfo` |
 | Forces | `Force` namespace |
-| Configuration | `SETTINGS`, `DEFAULT_FREQUENCY`, `PIXELS_PER_METER`, `MAX_BODIES`, `GRAVITY`, `MIN_BULLET_SPEED_SQUARED` |
+| Configuration | `SETTINGS`, `DEFAULT_FREQUENCY`, `PIXELS_PER_METER`, `MIN_BULLET_SPEED_SQUARED` |
 
 Import from the package root instead of internal `lib/...` paths. Only the root entry point is declared in `package.json` exports.

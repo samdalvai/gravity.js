@@ -1,9 +1,11 @@
-import { BodiesFactory, ContactInfo, GRAVITY, SETTINGS, Utils, Vec2 } from 'gravity.js';
+import { BodiesFactory, ContactInfo, SETTINGS, Utils, Vec2 } from 'gravity.js';
 import type { RigidBody, World } from 'gravity.js';
+
 import type Application from '../Application';
 import Graphics from '../graphics/Graphics';
 import { defineDemo } from './shared';
 
+const DEMO_GRAVITY = 9.8;
 const AU_IN_KM = 149_597_870.7;
 const EARTH_RADIUS_KM = 6_371;
 const EARTH_ORBIT_PIXELS = 700;
@@ -140,7 +142,7 @@ function setupPlanetOrbit(world: World, app: Application): void {
     for (const planetSpec of PLANETS) {
         const position = getOrbitPosition(planetSpec);
         const planet = createBody(planetSpec, position);
-        planet.velocity = getOrbitalSpeed(sun, planet, GRAVITY);
+        planet.velocity = getOrbitalSpeed(sun, planet, DEMO_GRAVITY);
 
         planet.onContact = info => {
             onContactCallBack(planet, planetSpec, info, world, app);
@@ -345,7 +347,7 @@ function createBelt(
         const radius = Utils.randomNumber(config.minRadius, config.maxRadius);
         const mass = Utils.randomNumber(config.minMass, config.maxMass);
         const asteroid = Utils.randomConvexBody(pos.x, pos.y, radius, numVertices, mass);
-        asteroid.velocity = getOrbitalSpeed(sun, asteroid, GRAVITY);
+        asteroid.velocity = getOrbitalSpeed(sun, asteroid, DEMO_GRAVITY);
         app.setBodyFillColor(asteroid, config.colors[Math.floor(Math.random() * config.colors.length)]);
         world.addBody(asteroid);
     }

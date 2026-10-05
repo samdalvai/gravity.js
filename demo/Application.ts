@@ -3,7 +3,6 @@ import {
     CollisionCategory,
     DistanceJoint,
     Force,
-    GRAVITY,
     GrabJoint,
     PIXELS_PER_METER,
     RigidBody,
@@ -30,6 +29,7 @@ import {
 import UIManager, { UIState } from './ui/UIManager';
 
 const BODY_REMOVAL_THRESHOLD = 25_000;
+const DEMO_GRAVITY = 9.8;
 const DEMO_SHORTCUT_DELAY_MS = 350;
 const MAX_DEMO_SHORTCUT_DIGITS = 2;
 const PLAYER_MAX_SPEED = 350;
@@ -88,7 +88,7 @@ export default class Application {
     private readonly uiManager = new UIManager();
 
     constructor() {
-        this.world = new World(GRAVITY);
+        this.world = new World(DEMO_GRAVITY);
     }
 
     isRunning(): boolean {
@@ -778,8 +778,8 @@ export default class Application {
         const bodies = this.world.getBodies();
 
         // Less efficient but more accurate method
-        // Force.gravity.applyGravitationalForces(bodies, GRAVITY, 0, BODY_REMOVAL_THRESHOLD * BODY_REMOVAL_THRESHOLD);
-        Force.gravity.applyBarnesHutGravitationalForces(bodies, GRAVITY);
+        // Force.gravity.applyGravitationalForces(bodies, DEMO_GRAVITY, 0, BODY_REMOVAL_THRESHOLD * BODY_REMOVAL_THRESHOLD);
+        Force.gravity.applyBarnesHutGravitationalForces(bodies, DEMO_GRAVITY);
     }
 
     private applyBlackHoleForce(): void {
@@ -794,7 +794,13 @@ export default class Application {
                 continue;
             }
 
-            const attraction = Force.gravity.generateGravitationalForce(body, blackHole, GRAVITY, 80 * 80, 950 * 950);
+            const attraction = Force.gravity.generateGravitationalForce(
+                body,
+                blackHole,
+                DEMO_GRAVITY,
+                80 * 80,
+                950 * 950,
+            );
             body.addForce(attraction);
         }
     }
@@ -858,7 +864,7 @@ export default class Application {
         const liquidAABB = liquid.aabb;
         const waterSurfaceY = liquidAABB.maxY;
         const density = liquid.density;
-        const gravity = SETTINGS.applyGravity ? GRAVITY : 0;
+        const gravity = SETTINGS.applyGravity ? DEMO_GRAVITY : 0;
 
         for (let i = 0; i < bodies.length; i++) {
             const body = bodies[i];
