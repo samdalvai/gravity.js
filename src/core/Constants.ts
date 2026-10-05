@@ -1,10 +1,6 @@
 export const DEFAULT_FREQUENCY = 60;
-export const FIXED_DELTA_TIME = 1 / DEFAULT_FREQUENCY;
 
 export const PIXELS_PER_METER = 100;
-/** Default body limit for worlds that do not specify maxBodies. */
-export const MAX_BODIES = 5_000;
-export const GRAVITY = 9.8;
 
 export const MIN_BULLET_SPEED_SQUARED = 1_000_000;
 
