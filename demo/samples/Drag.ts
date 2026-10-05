@@ -1,5 +1,6 @@
 import { BodiesFactory, SETTINGS, Utils } from 'gravity.js';
 import type { World } from 'gravity.js';
+
 import type Application from '../Application';
 import Graphics from '../graphics/Graphics';
 import { defineDemo } from './shared';
@@ -26,13 +27,19 @@ function setupDrag(world: World, app: Application): void {
         }
     }
 
-    const movingPool = BodiesFactory.circle({ radius: poolRadius, x: -offsetX * 2, y: Utils.randomNumber(-50, 50), mass: 2.5, restitution: 0.9 });
+    const movingPool = BodiesFactory.circle({
+        radius: poolRadius,
+        x: -offsetX * 2,
+        y: Utils.randomNumber(-50, 50),
+        mass: 2.5,
+        restitution: 0.9,
+    });
     movingPool.velocity.x = 5_000;
     movingPool.angularVelocity = Utils.randomNumber(-10, 10);
     app.setBodyFillColor(movingPool, 'white');
     world.addBody(movingPool);
 
-    app.setDragForce(0.0030);
+    app.setDragForce(0.003);
 }
 
 const dragDemo = defineDemo('Drag demo', setupDrag);

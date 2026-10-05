@@ -192,9 +192,7 @@ export default class UIManager {
         this.pausedCheckbox = createCheckbox(toggleGroup, 'Paused', checked => actions.onSetPaused(checked));
 
         const numericGroup = createGroup();
-        this.frequencyInput = createNumberInput(numericGroup, 'Frequency (Hz)', value =>
-            actions.onSetFrequency(value),
-        );
+        this.frequencyInput = createNumberInput(numericGroup, 'Frequency (Hz)', value => actions.onSetFrequency(value));
         this.solverIterationsInput = createNumberInput(numericGroup, 'Iterations', value =>
             actions.onSetSolverIterations(value),
         );
