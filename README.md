@@ -82,6 +82,14 @@ This builds the package once and starts the Parcel development server without wa
 
 For either command, open the URL printed by Parcel (usually http://localhost:1234).
 
+## Run the scaling benchmark
+
+```sh
+npm run benchmark:scaling -- --label my-change --compare benchmark/results/baseline.json
+```
+
+Simulates several scenes (circle stacks, box piles, mixed falling shapes, cloths made of joints, CCD bullets) with 1,000 to 32,000 bodies, each in a fresh process. For every run it reports the median and p95 step time, the time spent in each phase, the number of contacts and stability metrics (max penetration, kinetic energy, bodies that escaped the scene), as well as the estimated number of bodies that fit in a 60 Hz frame. Results are written to `benchmark/results/<label>.json` and `--compare` prints the speedup against a previous result file. Use `--scenes` and `--sizes` to run a subset.
+
 # Example scenarios
 
 The engine features a set of basic example scenarios with sprites based on the angry birds game.
