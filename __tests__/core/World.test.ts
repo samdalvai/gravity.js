@@ -250,4 +250,37 @@ describe('World broad phase', () => {
         expect(pairs.length).toBeGreaterThan(0);
         expect(pairs).toEqual(bruteForcePairs(world.getBodies()));
     });
+
+    test('removing a body removes its contacts', () => {
+        const world = new World(0);
+        const a = new RigidBody(new CircleShape(10), 0, 0, 1);
+        const b = new RigidBody(new CircleShape(10), 15, 0, 1);
+        world.addBody(a);
+        world.addBody(b);
+
+        world.update();
+        expect(world.getManifolds()).toHaveLength(1);
+
+        world.removeBody(b);
+        world.update();
+        expect(world.getManifolds()).toHaveLength(0);
+    });
+
+    test('a body that becomes dynamic collides with the static body it rests on', () => {
+        const world = new World(9.8);
+        const floor = new RigidBody(new BoxShape(200, 20), 0, 0, 0);
+        const box = new RigidBody(new BoxShape(20, 20), 0, 20, 0);
+        world.addBody(floor);
+        world.addBody(box);
+
+        world.update();
+        expect(world.getManifolds()).toHaveLength(0);
+
+        box.mass = 1;
+        for (let i = 0; i < 60; i++) world.update();
+
+        // Resting on the floor instead of falling through it
+        expect(box.position.y).toBeGreaterThan(15);
+        expect(world.getManifolds()).toHaveLength(1);
+    });
 });
