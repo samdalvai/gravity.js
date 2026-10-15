@@ -29,6 +29,7 @@
     "serve:demo": "parcel demo/index.html --target demo",
     "clean": "rm -rf .parcel-cache & find dist -maxdepth 1 -type f -exec rm {} +",
     "benchmark": "rm -rf .benchmark-dist && tsc --outDir .benchmark-dist --rootDir . --module commonjs --target es2020 benchmark/index.ts && node .benchmark-dist/benchmark/index.js",
+    "benchmark:scaling": "rm -rf .benchmark-dist && tsc --outDir .benchmark-dist --rootDir . --module commonjs --target es2020 benchmark/scaling/run.ts && node .benchmark-dist/benchmark/scaling/run.js",
     "pretest": "npm run build:package",
     "test": "jest",
     "test:perf": "jest -- --runTestsByPath __tests__/Performance.test.ts --runInBand",
