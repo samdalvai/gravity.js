@@ -73,6 +73,11 @@ export class RigidBody {
     /** @internal */
     crossMax = 0;
 
+    /** @internal Offset of this body in the SolverBodies velocity array, valid only while solving */
+    solverOffset = 0;
+    /** @internal */
+    solverStamp = 0;
+
     public onContact?: (contactInfo: ContactInfo) => void;
 
     constructor(shape: Shape, x: number, y: number, mass?: number, density?: number) {

@@ -40,7 +40,7 @@ export class GrabJoint extends Joint {
         this.target.assign(target);
     }
 
-    override preSolve(invDt: number): void {
+    override preSolve(invDt: number, v: Float64Array): void {
         const bodyA = this.bodyA;
         const localAnchor = this.localAnchor;
         const cos = Math.cos(bodyA.rotation);
@@ -79,14 +79,14 @@ export class GrabJoint extends Joint {
         }
 
         if (SETTINGS.warmStarting && (this.impulseSumX !== 0.0 || this.impulseSumY !== 0.0)) {
-            this.applyImpulse(this.impulseSumX, this.impulseSumY);
+            this.applyImpulse(v, this.impulseSumX, this.impulseSumY);
         }
     }
 
-    override solve(): void {
-        const bodyA = this.bodyA;
-        const jvX = bodyA.velocity.x - bodyA.angularVelocity * this.rY;
-        const jvY = bodyA.velocity.y + bodyA.angularVelocity * this.rX;
+    override solve(v: Float64Array): void {
+        const offsetA = this.bodyA.solverOffset;
+        const jvX = v[offsetA] - v[offsetA + 2] * this.rY;
+        const jvY = v[offsetA + 1] + v[offsetA + 2] * this.rX;
 
         const rhsX = -(jvX + this.biasX + this.impulseSumX * this.gamma);
         const rhsY = -(jvY + this.biasY + this.impulseSumY * this.gamma);
@@ -94,7 +94,7 @@ export class GrabJoint extends Joint {
         const lambdaX = this.effectiveMass00 * rhsX + this.effectiveMass01 * rhsY;
         const lambdaY = this.effectiveMass10 * rhsX + this.effectiveMass11 * rhsY;
 
-        this.applyImpulse(lambdaX, lambdaY);
+        this.applyImpulse(v, lambdaX, lambdaY);
 
         if (SETTINGS.warmStarting) {
             this.impulseSumX += lambdaX;
@@ -102,14 +102,16 @@ export class GrabJoint extends Joint {
         }
     }
 
-    private applyImpulse(lambdaX: number, lambdaY: number): void {
+    private applyImpulse(v: Float64Array, lambdaX: number, lambdaY: number): void {
+        const offsetA = this.bodyA.solverOffset;
+
         if (lambdaX === 0.0 && lambdaY === 0.0) {
             return;
         }
 
         const bodyA = this.bodyA;
-        bodyA.velocity.x += lambdaX * bodyA.invMass;
-        bodyA.velocity.y += lambdaY * bodyA.invMass;
-        bodyA.angularVelocity += (this.rX * lambdaY - this.rY * lambdaX) * bodyA.invI;
+        v[offsetA] += lambdaX * bodyA.invMass;
+        v[offsetA + 1] += lambdaY * bodyA.invMass;
+        v[offsetA + 2] += (this.rX * lambdaY - this.rY * lambdaX) * bodyA.invI;
     }
 }

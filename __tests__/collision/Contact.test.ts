@@ -1,8 +1,26 @@
 import { describe, expect, test } from '@jest/globals';
 
 import * as Collision from '../../src/collision/NarrowPhase';
+import { Constraint } from '../../src/constraint/Constraint';
 import { RigidBody } from '../../src/core/RigidBody';
+import { SolverBodies } from '../../src/core/SolverBodies';
 import { CircleShape } from '../../src/shapes/CircleShape';
+
+/** Runs one presolve and `iterations` solver passes on a standalone constraint, staging its bodies like World does */
+function solveConstraint(constraint: Constraint, invDt: number, iterations: number) {
+    const solverBodies = new SolverBodies();
+    solverBodies.begin();
+    solverBodies.add(constraint.bodyA);
+    solverBodies.add(constraint.bodyB);
+
+    constraint.preSolve(invDt, solverBodies.velocities);
+
+    for (let i = 0; i < iterations; i++) {
+        constraint.solve(solverBodies.velocities);
+    }
+
+    solverBodies.end();
+}
 
 describe('Contact', () => {
     test('Contact constraint solving should apply impulses to correct position of bodies', () => {
@@ -17,11 +35,7 @@ describe('Contact', () => {
 
         const deltaTime = 1 / 60;
         for (let i = 0; i < numFrames; i++) {
-            manifold.preSolve(1 / deltaTime);
-
-            for (let j = 0; j < solverIterations; j++) {
-                manifold.solve();
-            }
+            solveConstraint(manifold, 1 / deltaTime, solverIterations);
         }
 
         a.integrateVelocities(deltaTime);

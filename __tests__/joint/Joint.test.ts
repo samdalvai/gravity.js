@@ -1,12 +1,31 @@
 import { describe, expect, test } from '@jest/globals';
-import { BodiesFactory } from '../../src/factory/BodiesFactory';
+
+import { Constraint } from '../../src/constraint/Constraint';
 import { RigidBody } from '../../src/core/RigidBody';
+import { SolverBodies } from '../../src/core/SolverBodies';
+import { BodiesFactory } from '../../src/factory/BodiesFactory';
 import { DistanceJoint } from '../../src/joint/DistanceJoint';
 import { DistanceJoint as DistanceJointPerf } from '../../src/joint/DistanceJoint';
 import { GrabJoint } from '../../src/joint/GrabJoint';
 import { WeldJoint } from '../../src/joint/WeldJoint';
 import { Vec2 } from '../../src/math/Vec2';
 import { CircleShape } from '../../src/shapes/CircleShape';
+
+/** Runs one presolve and `iterations` solver passes on a standalone constraint, staging its bodies like World does */
+function solveConstraint(constraint: Constraint, invDt: number, iterations: number) {
+    const solverBodies = new SolverBodies();
+    solverBodies.begin();
+    solverBodies.add(constraint.bodyA);
+    solverBodies.add(constraint.bodyB);
+
+    constraint.preSolve(invDt, solverBodies.velocities);
+
+    for (let i = 0; i < iterations; i++) {
+        constraint.solve(solverBodies.velocities);
+    }
+
+    solverBodies.end();
+}
 
 describe('Joint', () => {
     function runJointSimulation(JointCtor: typeof DistanceJoint) {
@@ -22,11 +41,7 @@ describe('Joint', () => {
 
         const deltaTime = 1 / 60;
         for (let i = 0; i < numFrames; i++) {
-            joint.preSolve(1 / deltaTime);
-
-            for (let j = 0; j < solverIterations; j++) {
-                joint.solve();
-            }
+            solveConstraint(joint, 1 / deltaTime, solverIterations);
         }
 
         a.integrateVelocities(deltaTime);
@@ -84,11 +99,7 @@ describe('Joint', () => {
         const solverIterations = 10;
 
         for (let frame = 0; frame < 10; frame++) {
-            joint.preSolve(1 / deltaTime);
-
-            for (let i = 0; i < solverIterations; i++) {
-                joint.solve();
-            }
+            solveConstraint(joint, 1 / deltaTime, solverIterations);
 
             a.integrateVelocities(deltaTime);
             b.integrateVelocities(deltaTime);
@@ -116,11 +127,7 @@ describe('Joint', () => {
             .subNew(getWorldAnchor(a, joint.localAnchorA))
             .magnitude();
 
-        joint.preSolve(1 / deltaTime);
-
-        for (let i = 0; i < solverIterations; i++) {
-            joint.solve();
-        }
+        solveConstraint(joint, 1 / deltaTime, solverIterations);
 
         a.integrateVelocities(deltaTime);
         b.integrateVelocities(deltaTime);
@@ -144,11 +151,7 @@ describe('Joint', () => {
 
         const initialDistance = anchor.subNew(target).magnitude();
 
-        joint.preSolve(1 / deltaTime);
-
-        for (let i = 0; i < solverIterations; i++) {
-            joint.solve();
-        }
+        solveConstraint(joint, 1 / deltaTime, solverIterations);
 
         expect(body.velocity.x).toBeGreaterThan(0);
         expect(body.velocity.y).toBeGreaterThan(0);
