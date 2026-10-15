@@ -64,14 +64,10 @@ export class RigidBody {
     minY = 0;
     maxY = 0;
 
-    /** @internal AABB projected on the broad phase sweep axis and on the other axis */
-    sweepMin = 0;
-    /** @internal */
-    sweepMax = 0;
-    /** @internal */
-    crossMin = 0;
-    /** @internal */
-    crossMax = 0;
+    /** @internal Broad phase proxy of this body, -1 when the body is not in a world */
+    proxyId = -1;
+    /** @internal Whether the body was static at the last broad phase update */
+    proxyStatic = false;
 
     /** @internal Offset of this body in the SolverBodies velocity array, valid only while solving */
     solverOffset = 0;

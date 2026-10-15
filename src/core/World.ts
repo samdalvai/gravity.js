@@ -11,19 +11,34 @@ import * as CCD from '../collision/CCD';
 import { canCollide } from '../collision/CollisionFilter';
 import { ContactManifold } from '../collision/ContactManifold';
 import { ContactSolver } from '../collision/ContactSolver';
+import { DynamicTree } from '../collision/DynamicTree';
 import * as NarrowPhase from '../collision/NarrowPhase';
 import { PairCache } from '../collision/PairCache';
 import { applyWeightForce } from '../force/Gravity';
 import { Joint } from '../joint/Joint';
 import { Vec2 } from '../math/Vec2';
-import { MIN_BULLET_SPEED_SQUARED, SETTINGS } from './Constants';
+import { MIN_BULLET_SPEED_SQUARED, PIXELS_PER_METER, SETTINGS } from './Constants';
 import { RigidBody } from './RigidBody';
 import { SolverBodies } from './SolverBodies';
 
 const DEFAULT_MAX_BODIES = 5_000;
 
-/** The sweep axis changes only when the other axis spreads bodies this much more, to avoid flip-flopping */
-const SWEEP_AXIS_HYSTERESIS = 1.5;
+/** Broad phase AABBs are fattened by this margin so that small movements don't require a tree update */
+const AABB_MARGIN = 0.05 * PIXELS_PER_METER;
+
+/** Broad phase AABBs are also extended along the displacement predicted for this many steps */
+const AABB_DISPLACEMENT_MULTIPLIER = 4;
+
+/** A potentially colliding pair, alive while the fattened AABBs of its bodies overlap */
+class Contact {
+    /** Null while the bodies are not touching */
+    manifold: ContactManifold | null = null;
+
+    constructor(
+        readonly bodyA: RigidBody,
+        readonly bodyB: RigidBody,
+    ) {}
+}
 
 export interface WorldOptions {
     /** Maximum live bodies. Defaults to 5,000; Infinity disables the limit. */
@@ -36,16 +51,22 @@ export class World {
     private G: number;
 
     private bodies: RigidBody[] = [];
-    /** Pairs are allocated in blocks of 2 */
-    private potentialPairs: RigidBody[] = [];
 
     private joints: Joint[] = [];
 
-    private manifolds: ContactManifold[] = [];
-    private manifoldsNext: ContactManifold[] = [];
+    /** Broad phase tree, its proxies are the bodies of this world */
+    private readonly tree = new DynamicTree<RigidBody>();
+    /** Proxies whose fattened AABB changed since the last pair update */
+    private moveBuffer: number[] = [];
+    private readonly queryResults: number[] = [];
 
-    private manifoldMap = new PairCache<ContactManifold>();
-    private manifoldMapNext = new PairCache<ContactManifold>();
+    /** Persistent contacts, created when fattened AABBs start overlapping and destroyed when they stop */
+    private contacts: Contact[] = [];
+    /** Contacts by body id pair */
+    private readonly contactMap = new PairCache<Contact>();
+
+    /** Manifolds of the touching contacts of the last step */
+    private manifolds: ContactManifold[] = [];
 
     private readonly manifoldPool = NarrowPhase.manifoldPool;
 
@@ -53,8 +74,6 @@ export class World {
     private torques: number[] = [];
 
     private dtFractions: number[] = [];
-
-    private sweepAxisIsX = true;
 
     private readonly solverBodies = new SolverBodies();
     private readonly contactSolver = new ContactSolver();
@@ -73,6 +92,16 @@ export class World {
         if (this.bodies.length >= this.maxBodies) throw new Error('Max number of bodies exceeded');
 
         this.bodies.push(body);
+
+        body.proxyStatic = body.isStatic();
+        body.proxyId = this.tree.createProxy(
+            body.minX - AABB_MARGIN,
+            body.minY - AABB_MARGIN,
+            body.maxX + AABB_MARGIN,
+            body.maxY + AABB_MARGIN,
+            body,
+        );
+        this.moveBuffer.push(body.proxyId);
     }
 
     removeBody(body: RigidBody): void {
@@ -83,6 +112,10 @@ export class World {
             if (body.id === current.id) {
                 this.bodies[i] = this.bodies[this.bodies.length - 1];
                 this.bodies.pop();
+
+                // Contacts of the body are destroyed by the next contact update
+                this.tree.destroyProxy(current.proxyId);
+                current.proxyId = -1;
                 return;
             }
         }
@@ -227,7 +260,7 @@ export class World {
         // 1 / slice would turn position correction into huge velocities
         const invDt = dt === 0 ? 0 : SETTINGS.invDt;
 
-        this.broadPhase();
+        this.updatePairs();
 
         this.narrowPhase();
 
@@ -240,171 +273,164 @@ export class World {
                 body.integrateVelocities(dt);
             }
         }
+
+        this.synchronizeProxies(dt);
     }
 
-    private broadPhase() {
+    /** Updates the fattened AABBs of the bodies that left them */
+    private synchronizeProxies(dt: number) {
         const bodies = this.bodies;
-        const axisChanged = this.updateSweepAxis();
+        const tree = this.tree;
+        const moveBuffer = this.moveBuffer;
+        const predictedTime = dt * AABB_DISPLACEMENT_MULTIPLIER;
 
-        if (axisChanged) {
-            bodies.sort((a, b) => a.sweepMin - b.sweepMin);
-        } else {
-            // Use insertion sort instead of Array.sort to exploit temporal coherence:
-            // between frames, bodies move only slightly, so the array is already nearly sorted.
-            // In this case insertion sort runs in ~O(n) (only small local swaps),
-            // while a full sort would still cost O(n log n).
-            for (let i = 1; i < bodies.length; i++) {
-                const current = bodies[i];
-                let j = i - 1;
-
-                while (j >= 0 && bodies[j].sweepMin > current.sweepMin) {
-                    bodies[j + 1] = bodies[j];
-                    j--;
-                }
-
-                bodies[j + 1] = current;
-            }
-        }
-
-        this.potentialPairs.length = 0;
-
-        // Broad phase check with prune & sweep algorithm
-        for (let i = 0, len = bodies.length; i < len; i++) {
-            const a = bodies[i];
-
-            for (let j = i + 1; j < len; j++) {
-                const b = bodies[j];
-
-                // If objects don't overlap on the sweep axis they cannot collide
-                if (b.sweepMin > a.sweepMax) break;
-
-                // If objects overlap on the sweep axis but don't overlap on the other axis the cannot collide
-                if (a.crossMax < b.crossMin || a.crossMin > b.crossMax) {
-                    continue;
-                }
-
-                if (!canCollide(a, b)) {
-                    continue;
-                }
-
-                // Objects may be colliding
-                this.potentialPairs.push(a, b);
-            }
-        }
-    }
-
-    /**
-     * Sweeping along a single axis degrades to O(n^2) when many bodies share the same range on that axis
-     * (e.g. tall piles when sweeping on X). Sweep along the axis where body centers are more spread out.
-     * Also caches the AABB projections used by the sweep. Returns true when the sweep axis changed.
-     */
-    private updateSweepAxis(): boolean {
-        const bodies = this.bodies;
-        const n = bodies.length;
-
-        let sumX = 0;
-        let sumY = 0;
-        let sumXX = 0;
-        let sumYY = 0;
-
-        for (let i = 0; i < n; i++) {
+        for (let i = 0; i < bodies.length; i++) {
             const body = bodies[i];
-            const centerX = (body.minX + body.maxX) * 0.5;
-            const centerY = (body.minY + body.maxY) * 0.5;
-            sumX += centerX;
-            sumY += centerY;
-            sumXX += centerX * centerX;
-            sumYY += centerY * centerY;
-        }
+            const proxyId = body.proxyId;
+            const isStatic = body.isStatic();
 
-        let axisChanged = false;
+            const minX = body.minX;
+            const minY = body.minY;
+            const maxX = body.maxX;
+            const maxY = body.maxY;
 
-        if (n > 1) {
-            const varianceX = sumXX / n - (sumX / n) ** 2;
-            const varianceY = sumYY / n - (sumY / n) ** 2;
+            // Static bodies never search for pairs, a body becoming dynamic must search again
+            const staticChanged = isStatic !== body.proxyStatic;
+            body.proxyStatic = isStatic;
 
-            if (this.sweepAxisIsX && varianceY > varianceX * SWEEP_AXIS_HYSTERESIS) {
-                this.sweepAxisIsX = false;
-                axisChanged = true;
-            } else if (!this.sweepAxisIsX && varianceX > varianceY * SWEEP_AXIS_HYSTERESIS) {
-                this.sweepAxisIsX = true;
-                axisChanged = true;
+            if (!staticChanged && tree.contains(proxyId, minX, minY, maxX, maxY)) {
+                continue;
             }
-        }
 
-        if (this.sweepAxisIsX) {
-            for (let i = 0; i < n; i++) {
-                const body = bodies[i];
-                body.sweepMin = body.minX;
-                body.sweepMax = body.maxX;
-                body.crossMin = body.minY;
-                body.crossMax = body.maxY;
-            }
-        } else {
-            for (let i = 0; i < n; i++) {
-                const body = bodies[i];
-                body.sweepMin = body.minY;
-                body.sweepMax = body.maxY;
-                body.crossMin = body.minX;
-                body.crossMax = body.maxX;
-            }
-        }
+            // Fatten the AABB and extend it along the predicted displacement
+            const displacementX = body.velocity.x * predictedTime;
+            const displacementY = body.velocity.y * predictedTime;
 
-        return axisChanged;
+            tree.moveProxy(
+                proxyId,
+                minX - AABB_MARGIN + Math.min(displacementX, 0),
+                minY - AABB_MARGIN + Math.min(displacementY, 0),
+                maxX + AABB_MARGIN + Math.max(displacementX, 0),
+                maxY + AABB_MARGIN + Math.max(displacementY, 0),
+            );
+            moveBuffer.push(proxyId);
+        }
     }
 
+    /** Creates contacts for the new overlaps of the proxies that moved */
+    private updatePairs() {
+        const tree = this.tree;
+        const moveBuffer = this.moveBuffer;
+        const results = this.queryResults;
+        const contactMap = this.contactMap;
+
+        for (let i = 0; i < moveBuffer.length; i++) {
+            const proxyId = moveBuffer[i];
+
+            // Destroyed proxies and duplicates in the buffer are not flagged
+            if (!tree.wasMoved(proxyId)) continue;
+
+            const body = tree.getUserData(proxyId);
+            const bodyStatic = body.isStatic();
+            const count = tree.query(
+                tree.getFatMinX(proxyId),
+                tree.getFatMinY(proxyId),
+                tree.getFatMaxX(proxyId),
+                tree.getFatMaxY(proxyId),
+                results,
+            );
+
+            for (let j = 0; j < count; j++) {
+                const otherId = results[j];
+
+                if (otherId === proxyId) continue;
+
+                // When both proxies moved, the pair is created by the query of the lower id
+                if (otherId < proxyId && tree.wasMoved(otherId)) continue;
+
+                const other = tree.getUserData(otherId);
+
+                if (bodyStatic && other.isStatic()) continue;
+
+                // Improve coherence
+                const a = body.id < other.id ? body : other;
+                const b = body.id < other.id ? other : body;
+
+                if (contactMap.get(a.id, b.id) !== undefined) continue;
+
+                const contact = new Contact(a, b);
+                contactMap.set(a.id, b.id, contact);
+                this.contacts.push(contact);
+            }
+
+            tree.clearMoved(proxyId);
+        }
+
+        moveBuffer.length = 0;
+    }
+
+    /** Destroys contacts that stopped overlapping and computes the manifolds of the touching ones */
     private narrowPhase() {
-        const oldManifolds = this.manifolds;
-
-        const newManifolds = this.manifoldsNext;
-        const newMap = this.manifoldMapNext;
-
-        newManifolds.length = 0;
-        newMap.clear();
-
-        const pairs = this.potentialPairs;
-        const oldMap = this.manifoldMap;
+        const contacts = this.contacts;
+        const manifolds = this.manifolds;
+        const tree = this.tree;
+        const pool = this.manifoldPool;
         const warmStarting = SETTINGS.warmStarting;
 
-        // Narrow phase check, potential pairs may still not collide
-        for (let i = 0; i < pairs.length; i += 2) {
-            let a = pairs[i];
-            let b = pairs[i + 1];
+        manifolds.length = 0;
 
-            if (a.isStatic() && b.isStatic()) continue;
+        let i = 0;
+        while (i < contacts.length) {
+            const contact = contacts[i];
+            const a = contact.bodyA;
+            const b = contact.bodyB;
 
-            // Improve coherence
-            if (a.id > b.id) {
-                const tmp = a;
-                a = b;
-                b = tmp;
+            // Removed bodies have no proxy
+            if (a.proxyId === -1 || b.proxyId === -1 || !tree.overlaps(a.proxyId, b.proxyId)) {
+                this.destroyContact(i);
+                continue;
             }
 
-            const newManifold = NarrowPhase.detectCollision(a, b);
-            if (newManifold == null) continue;
+            i++;
 
-            if (warmStarting) {
-                const oldManifold = oldMap.get(a.id, b.id);
-                if (oldManifold !== undefined) {
+            const oldManifold = contact.manifold;
+
+            // Only pairs with overlapping AABBs can collide, filters and static flags may change at any time
+            const overlapping = !(a.maxX < b.minX || a.minX > b.maxX || a.maxY < b.minY || a.minY > b.maxY);
+            const newManifold =
+                overlapping && !(a.isStatic() && b.isStatic()) && canCollide(a, b)
+                    ? NarrowPhase.detectCollision(a, b)
+                    : null;
+
+            if (oldManifold !== null) {
+                if (newManifold !== null && warmStarting) {
                     newManifold.tryWarmStart(oldManifold);
                 }
+
+                pool.release(oldManifold);
             }
 
-            newMap.set(a.id, b.id, newManifold);
-            newManifolds.push(newManifold);
+            contact.manifold = newManifold;
 
-            this.setGrounded(newManifold);
+            if (newManifold !== null) {
+                manifolds.push(newManifold);
+                this.setGrounded(newManifold);
+            }
+        }
+    }
+
+    private destroyContact(index: number) {
+        const contacts = this.contacts;
+        const contact = contacts[index];
+
+        if (contact.manifold !== null) {
+            this.manifoldPool.release(contact.manifold);
         }
 
-        for (let i = 0; i < oldManifolds.length; i++) {
-            this.manifoldPool.release(oldManifolds[i]);
-        }
+        this.contactMap.remove(contact.bodyA.id, contact.bodyB.id);
 
-        this.manifolds = newManifolds;
-        this.manifoldsNext = oldManifolds;
-
-        this.manifoldMap = newMap;
-        this.manifoldMapNext = oldMap;
+        contacts[index] = contacts[contacts.length - 1];
+        contacts.pop();
     }
 
     private solveConstraints(invDt: number) {
@@ -471,14 +497,21 @@ export class World {
     }
 
     clear() {
-        for (let i = 0; i < this.manifolds.length; i++) {
-            this.manifoldPool.release(this.manifolds[i]);
+        for (let i = 0; i < this.contacts.length; i++) {
+            const manifold = this.contacts[i].manifold;
+            if (manifold !== null) this.manifoldPool.release(manifold);
+        }
+
+        for (let i = 0; i < this.bodies.length; i++) {
+            this.bodies[i].proxyId = -1;
         }
 
         this.bodies.length = 0;
-        this.potentialPairs.length = 0;
+        this.contacts.length = 0;
+        this.contactMap.clear();
+        this.tree.clear();
+        this.moveBuffer.length = 0;
         this.manifolds.length = 0;
-        this.manifoldMap.clear();
         this.joints.length = 0;
         this.forces.length = 0;
         this.torques.length = 0;

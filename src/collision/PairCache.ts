@@ -75,6 +75,52 @@ export class PairCache<T> {
         this.size++;
     }
 
+    /** Ids must be ordered so that `idA < idB`. Returns false when the pair was not present */
+    remove(idA: number, idB: number): boolean {
+        const stamps = this.stamps;
+        const generation = this.generation;
+        const mask = this.mask;
+        let slot = hash(idA, idB) & mask;
+
+        while (stamps[slot] === generation) {
+            if (this.idsA[slot] === idA && this.idsB[slot] === idB) break;
+            slot = (slot + 1) & mask;
+        }
+
+        if (stamps[slot] !== generation) return false;
+
+        // Backward shift deletion: move later entries of the probe sequence into the hole, so that
+        // lookups never stop early at an empty slot and no tombstones are needed
+        let hole = slot;
+        let next = slot;
+
+        for (;;) {
+            stamps[hole] = 0;
+            this.values[hole] = undefined;
+
+            for (;;) {
+                next = (next + 1) & mask;
+
+                if (stamps[next] !== generation) {
+                    this.size--;
+                    return true;
+                }
+
+                const ideal = hash(this.idsA[next], this.idsB[next]) & mask;
+
+                // The entry can stay when its ideal slot lies cyclically in (hole, next]
+                const stays = hole <= next ? hole < ideal && ideal <= next : hole < ideal || ideal <= next;
+                if (!stays) break;
+            }
+
+            stamps[hole] = generation;
+            this.idsA[hole] = this.idsA[next];
+            this.idsB[hole] = this.idsB[next];
+            this.values[hole] = this.values[next];
+            hole = next;
+        }
+    }
+
     private grow(): void {
         const oldIdsA = this.idsA;
         const oldIdsB = this.idsB;
