@@ -62,4 +62,55 @@ describe('PairCache', () => {
         cache.set(5, 6, 42);
         expect(cache.get(5, 6)).toBe(42);
     });
+
+    test('remove keeps the other entries reachable', () => {
+        const cache = new PairCache<number>();
+        const count = 2_000;
+
+        for (let i = 0; i < count; i++) cache.set(i, i + 1, i);
+
+        // Remove every third pair, in an order that exercises probe chains
+        for (let i = count - 1; i >= 0; i -= 3) expect(cache.remove(i, i + 1)).toBe(true);
+        expect(cache.remove(0, 99_999)).toBe(false);
+
+        for (let i = 0; i < count; i++) {
+            const removed = (count - 1 - i) % 3 === 0;
+            expect(cache.get(i, i + 1)).toBe(removed ? undefined : i);
+        }
+
+        expect(cache.count).toBe(count - Math.ceil(count / 3));
+
+        // Removed pairs can be inserted again
+        cache.set(count - 1, count, 7);
+        expect(cache.get(count - 1, count)).toBe(7);
+    });
+
+    test('matches a Map under random inserts and removals', () => {
+        const cache = new PairCache<number>();
+        const reference = new Map<string, number>();
+        let seed = 12345;
+        const random = (max: number) => {
+            seed = (Math.imul(seed, 1103515245) + 12345) >>> 0;
+            return seed % max;
+        };
+
+        for (let step = 0; step < 20_000; step++) {
+            const a = random(200);
+            const b = a + 1 + random(50);
+            const key = `${a}:${b}`;
+
+            if (random(3) === 0) {
+                expect(cache.remove(a, b)).toBe(reference.delete(key));
+            } else {
+                cache.set(a, b, step);
+                reference.set(key, step);
+            }
+        }
+
+        expect(cache.count).toBe(reference.size);
+        for (const [key, value] of reference) {
+            const [a, b] = key.split(':').map(Number);
+            expect(cache.get(a, b)).toBe(value);
+        }
+    });
 });

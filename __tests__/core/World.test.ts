@@ -200,21 +200,11 @@ describe('World grounding', () => {
 });
 
 describe('World broad phase', () => {
-    /** Pairs found by the sweep, as sorted "idA:idB" strings */
-    function sweepPairs(world: World): string[] {
+    /** Body pairs that have a contact, as sorted "idA:idB" strings */
+    function contactPairs(world: World): string[] {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const internal = world as any;
-        internal.broadPhase();
-
-        const pairs: RigidBody[] = internal.potentialPairs;
-        const keys: string[] = [];
-        for (let i = 0; i < pairs.length; i += 2) {
-            const a = Math.min(pairs[i].id, pairs[i + 1].id);
-            const b = Math.max(pairs[i].id, pairs[i + 1].id);
-            keys.push(`${a}:${b}`);
-        }
-
-        return keys.sort();
+        const contacts: { bodyA: RigidBody; bodyB: RigidBody }[] = (world as any).contacts;
+        return contacts.map(c => `${Math.min(c.bodyA.id, c.bodyB.id)}:${Math.max(c.bodyA.id, c.bodyB.id)}`).sort();
     }
 
     function bruteForcePairs(bodies: readonly RigidBody[]): string[] {
@@ -235,7 +225,7 @@ describe('World broad phase', () => {
     test.each([
         ['wide', 40, 5],
         ['tall', 5, 40],
-    ])('finds the same pairs as a brute force check in a %s layout', (_, columns, rows) => {
+    ])('has a contact for every overlapping pair in a %s layout', (_, columns, rows) => {
         const world = new World(0);
 
         for (let row = 0; row < rows; row++) {
@@ -245,9 +235,75 @@ describe('World broad phase', () => {
             }
         }
 
-        const pairs = sweepPairs(world);
+        world.update();
 
-        expect(pairs.length).toBeGreaterThan(0);
-        expect(pairs).toEqual(bruteForcePairs(world.getBodies()));
+        const overlapping = bruteForcePairs(world.getBodies());
+        const contacts = new Set(contactPairs(world));
+
+        expect(overlapping.length).toBeGreaterThan(0);
+        for (const pair of overlapping) expect(contacts.has(pair)).toBe(true);
+    });
+
+    test('keeps contacts while bodies move and drops them when they separate', () => {
+        const world = new World(0);
+        const a = new RigidBody(new CircleShape(10), 0, 0, 1);
+        const b = new RigidBody(new CircleShape(10), 15, 0, 1);
+        world.addBody(a);
+        world.addBody(b);
+
+        world.update();
+        expect(world.getManifolds()).toHaveLength(1);
+        expect(contactPairs(world)).toHaveLength(1);
+
+        // Move b far away, the contact must disappear
+        a.velocity.x = 0;
+        b.velocity.x = 0;
+        b.position.x = 500;
+        world.update();
+        world.update();
+
+        expect(world.getManifolds()).toHaveLength(0);
+        expect(contactPairs(world)).toHaveLength(0);
+
+        // And come back
+        b.position.x = 15;
+        b.velocity.x = 0;
+        world.update();
+        world.update();
+        expect(world.getManifolds()).toHaveLength(1);
+    });
+
+    test('removing a body removes its contacts', () => {
+        const world = new World(0);
+        const a = new RigidBody(new CircleShape(10), 0, 0, 1);
+        const b = new RigidBody(new CircleShape(10), 15, 0, 1);
+        world.addBody(a);
+        world.addBody(b);
+
+        world.update();
+        expect(world.getManifolds()).toHaveLength(1);
+
+        world.removeBody(b);
+        world.update();
+        expect(world.getManifolds()).toHaveLength(0);
+        expect(contactPairs(world)).toHaveLength(0);
+    });
+
+    test('a body that becomes dynamic collides with the static body it rests on', () => {
+        const world = new World(9.8);
+        const floor = new RigidBody(new BoxShape(200, 20), 0, 0, 0);
+        const box = new RigidBody(new BoxShape(20, 20), 0, 20, 0);
+        world.addBody(floor);
+        world.addBody(box);
+
+        world.update();
+        expect(world.getManifolds()).toHaveLength(0);
+
+        box.mass = 1;
+        for (let i = 0; i < 60; i++) world.update();
+
+        // Resting on the floor instead of falling through it
+        expect(box.position.y).toBeGreaterThan(15);
+        expect(world.getManifolds()).toHaveLength(1);
     });
 });
