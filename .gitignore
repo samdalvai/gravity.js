@@ -9,3 +9,5 @@ dist/*
 .vercel
 
 *.sh
+
+benchmark/results/
