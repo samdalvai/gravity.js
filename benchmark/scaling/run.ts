@@ -29,6 +29,8 @@ type Phase = (typeof PHASES)[number];
 type Result = {
     scene: string;
     n: number;
+    /** Set when the simulation threw, timings and metrics are then missing */
+    error?: string;
     medianMs: number;
     p95Ms: number;
     meanMs: number;
@@ -173,8 +175,10 @@ function printResults(results: Result[], baseline?: ResultFile) {
     const scenes = [...new Set(results.map(r => r.scene))];
 
     for (const scene of scenes) {
-        const rows = results.filter(r => r.scene === scene);
-        const baseRows = baseline?.results.filter(r => r.scene === scene) ?? [];
+        const rows = results.filter(r => r.scene === scene && !r.error);
+        const failed = results.filter(r => r.scene === scene && r.error);
+        const baseRows = baseline?.results.filter(r => r.scene === scene && !r.error) ?? [];
+        const baseFailed = baseline?.results.filter(r => r.scene === scene && r.error) ?? [];
 
         console.log('');
         console.log(
@@ -210,6 +214,9 @@ function printResults(results: Result[], baseline?: ResultFile) {
         });
 
         console.table(table);
+
+        for (const r of failed) console.log(`  n=${r.n} FAILED: ${r.error}`);
+        for (const r of baseFailed) console.log(`  baseline n=${r.n} FAILED: ${r.error}`);
     }
 }
 
@@ -230,21 +237,35 @@ function main() {
         for (const n of options.sizes) {
             process.stdout.write(`running ${scene} n=${n}... `);
 
-            const output = execFileSync(
-                process.execPath,
-                [
-                    __filename,
-                    '--child',
-                    `${scene}:${n}`,
-                    '--warmup',
-                    String(options.warmup),
-                    '--steps',
-                    String(options.steps),
-                ],
-                { encoding: 'utf8', maxBuffer: 1 << 24 },
-            );
+            let result: Result;
 
-            const result = JSON.parse(output) as Result;
+            try {
+                const output = execFileSync(
+                    process.execPath,
+                    [
+                        __filename,
+                        '--child',
+                        `${scene}:${n}`,
+                        '--warmup',
+                        String(options.warmup),
+                        '--steps',
+                        String(options.steps),
+                    ],
+                    { encoding: 'utf8', maxBuffer: 1 << 24, stdio: ['ignore', 'pipe', 'pipe'] },
+                );
+
+                result = JSON.parse(output) as Result;
+            } catch (error) {
+                // A crash is a result too (e.g. a solver assertion), record it and keep going
+                const stderr = String((error as { stderr?: string }).stderr ?? error);
+                const message = (
+                    stderr.split('\n').find(line => /^\w*Error/.test(line.trim())) ?? 'unknown error'
+                ).trim();
+                results.push({ scene, n, error: message } as Result);
+                console.log(`FAILED: ${message}`);
+                continue;
+            }
+
             results.push(result);
             console.log(`${fmt(result.medianMs)} ms/step`);
 
