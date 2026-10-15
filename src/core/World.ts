@@ -11,14 +11,17 @@ import * as CCD from '../collision/CCD';
 import { canCollide } from '../collision/CollisionFilter';
 import { ContactManifold } from '../collision/ContactManifold';
 import * as NarrowPhase from '../collision/NarrowPhase';
+import { PairCache } from '../collision/PairCache';
 import { applyWeightForce } from '../force/Gravity';
 import { Joint } from '../joint/Joint';
 import { Vec2 } from '../math/Vec2';
-import * as Utils from '../utils/Utils';
 import { MIN_BULLET_SPEED_SQUARED, SETTINGS } from './Constants';
 import { RigidBody } from './RigidBody';
 
 const DEFAULT_MAX_BODIES = 5_000;
+
+/** The sweep axis changes only when the other axis spreads bodies this much more, to avoid flip-flopping */
+const SWEEP_AXIS_HYSTERESIS = 1.5;
 
 export interface WorldOptions {
     /** Maximum live bodies. Defaults to 5,000; Infinity disables the limit. */
@@ -39,8 +42,8 @@ export class World {
     private manifolds: ContactManifold[] = [];
     private manifoldsNext: ContactManifold[] = [];
 
-    private manifoldMap: Map<Utils.PairKey, ContactManifold> = new Map();
-    private manifoldMapNext: Map<Utils.PairKey, ContactManifold> = new Map();
+    private manifoldMap = new PairCache<ContactManifold>();
+    private manifoldMapNext = new PairCache<ContactManifold>();
 
     private readonly manifoldPool = NarrowPhase.manifoldPool;
 
@@ -48,6 +51,8 @@ export class World {
     private torques: number[] = [];
 
     private dtFractions: number[] = [];
+
+    private sweepAxisIsX = true;
 
     constructor(gravity: number, options: WorldOptions = {}) {
         const maxBodies = options.maxBodies ?? DEFAULT_MAX_BODIES;
@@ -233,22 +238,27 @@ export class World {
     }
 
     private broadPhase() {
-        // Use insertion sort instead of Array.sort to exploit temporal coherence:
-        // between frames, bodies move only slightly, so the array is already nearly sorted by minX.
-        // In this case insertion sort runs in ~O(n) (only small local swaps),
-        // while a full sort would still cost O(n log n).
         const bodies = this.bodies;
+        const axisChanged = this.updateSweepAxis();
 
-        for (let i = 1; i < bodies.length; i++) {
-            const current = bodies[i];
-            let j = i - 1;
+        if (axisChanged) {
+            bodies.sort((a, b) => a.sweepMin - b.sweepMin);
+        } else {
+            // Use insertion sort instead of Array.sort to exploit temporal coherence:
+            // between frames, bodies move only slightly, so the array is already nearly sorted.
+            // In this case insertion sort runs in ~O(n) (only small local swaps),
+            // while a full sort would still cost O(n log n).
+            for (let i = 1; i < bodies.length; i++) {
+                const current = bodies[i];
+                let j = i - 1;
 
-            while (j >= 0 && bodies[j].minX > current.minX) {
-                bodies[j + 1] = bodies[j];
-                j--;
+                while (j >= 0 && bodies[j].sweepMin > current.sweepMin) {
+                    bodies[j + 1] = bodies[j];
+                    j--;
+                }
+
+                bodies[j + 1] = current;
             }
-
-            bodies[j + 1] = current;
         }
 
         this.potentialPairs.length = 0;
@@ -260,11 +270,11 @@ export class World {
             for (let j = i + 1; j < len; j++) {
                 const b = bodies[j];
 
-                // If objects don't overlap on X axis they cannot collide
-                if (b.minX > a.maxX) break;
+                // If objects don't overlap on the sweep axis they cannot collide
+                if (b.sweepMin > a.sweepMax) break;
 
-                // If objects overlap on X axis but don't overlap on Y axis the cannot collide
-                if (a.maxY < b.minY || a.minY > b.maxY) {
+                // If objects overlap on the sweep axis but don't overlap on the other axis the cannot collide
+                if (a.crossMax < b.crossMin || a.crossMin > b.crossMax) {
                     continue;
                 }
 
@@ -276,6 +286,66 @@ export class World {
                 this.potentialPairs.push(a, b);
             }
         }
+    }
+
+    /**
+     * Sweeping along a single axis degrades to O(n^2) when many bodies share the same range on that axis
+     * (e.g. tall piles when sweeping on X). Sweep along the axis where body centers are more spread out.
+     * Also caches the AABB projections used by the sweep. Returns true when the sweep axis changed.
+     */
+    private updateSweepAxis(): boolean {
+        const bodies = this.bodies;
+        const n = bodies.length;
+
+        let sumX = 0;
+        let sumY = 0;
+        let sumXX = 0;
+        let sumYY = 0;
+
+        for (let i = 0; i < n; i++) {
+            const body = bodies[i];
+            const centerX = (body.minX + body.maxX) * 0.5;
+            const centerY = (body.minY + body.maxY) * 0.5;
+            sumX += centerX;
+            sumY += centerY;
+            sumXX += centerX * centerX;
+            sumYY += centerY * centerY;
+        }
+
+        let axisChanged = false;
+
+        if (n > 1) {
+            const varianceX = sumXX / n - (sumX / n) ** 2;
+            const varianceY = sumYY / n - (sumY / n) ** 2;
+
+            if (this.sweepAxisIsX && varianceY > varianceX * SWEEP_AXIS_HYSTERESIS) {
+                this.sweepAxisIsX = false;
+                axisChanged = true;
+            } else if (!this.sweepAxisIsX && varianceX > varianceY * SWEEP_AXIS_HYSTERESIS) {
+                this.sweepAxisIsX = true;
+                axisChanged = true;
+            }
+        }
+
+        if (this.sweepAxisIsX) {
+            for (let i = 0; i < n; i++) {
+                const body = bodies[i];
+                body.sweepMin = body.minX;
+                body.sweepMax = body.maxX;
+                body.crossMin = body.minY;
+                body.crossMax = body.maxY;
+            }
+        } else {
+            for (let i = 0; i < n; i++) {
+                const body = bodies[i];
+                body.sweepMin = body.minY;
+                body.sweepMax = body.maxY;
+                body.crossMin = body.minX;
+                body.crossMax = body.maxX;
+            }
+        }
+
+        return axisChanged;
     }
 
     private narrowPhase() {
@@ -308,16 +378,14 @@ export class World {
             const newManifold = NarrowPhase.detectCollision(a, b);
             if (newManifold == null) continue;
 
-            const key = Utils.pairKey(a, b);
-
             if (warmStarting) {
-                const oldManifold = oldMap.get(key);
+                const oldManifold = oldMap.get(a.id, b.id);
                 if (oldManifold !== undefined) {
                     newManifold.tryWarmStart(oldManifold);
                 }
             }
 
-            newMap.set(key, newManifold);
+            newMap.set(a.id, b.id, newManifold);
             newManifolds.push(newManifold);
 
             this.setGrounded(newManifold);
