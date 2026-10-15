@@ -10,6 +10,7 @@
 import * as CCD from '../collision/CCD';
 import { canCollide } from '../collision/CollisionFilter';
 import { ContactManifold } from '../collision/ContactManifold';
+import { ContactSolver } from '../collision/ContactSolver';
 import * as NarrowPhase from '../collision/NarrowPhase';
 import { PairCache } from '../collision/PairCache';
 import { applyWeightForce } from '../force/Gravity';
@@ -56,6 +57,7 @@ export class World {
     private sweepAxisIsX = true;
 
     private readonly solverBodies = new SolverBodies();
+    private readonly contactSolver = new ContactSolver();
 
     constructor(gravity: number, options: WorldOptions = {}) {
         const maxBodies = options.maxBodies ?? DEFAULT_MAX_BODIES;
@@ -425,19 +427,22 @@ export class World {
         // Read after staging, the array grows while bodies are added
         const v = solverBodies.velocities;
 
+        const contactSolver = this.contactSolver;
+
         // Presolve constraints
-        for (let i = 0; i < manifolds.length; i++) manifolds[i].preSolve(invDt, v);
+        contactSolver.prepare(manifolds, invDt, v);
 
         for (let i = 0; i < joints.length; i++) joints[i].preSolve(invDt, v);
 
         // Solve constraints
         const iterations = SETTINGS.solverIterations;
         for (let i = 0; i < iterations; i++) {
-            for (let j = 0; j < manifolds.length; j++) manifolds[j].solve(v);
+            contactSolver.solve(v);
 
             for (let j = 0; j < joints.length; j++) joints[j].solve(v);
         }
 
+        contactSolver.storeImpulses(manifolds);
         solverBodies.end();
 
         // Run contact callbacks
