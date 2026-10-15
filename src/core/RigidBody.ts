@@ -64,6 +64,15 @@ export class RigidBody {
     minY = 0;
     maxY = 0;
 
+    /** @internal AABB projected on the broad phase sweep axis and on the other axis */
+    sweepMin = 0;
+    /** @internal */
+    sweepMax = 0;
+    /** @internal */
+    crossMin = 0;
+    /** @internal */
+    crossMax = 0;
+
     public onContact?: (contactInfo: ContactInfo) => void;
 
     constructor(shape: Shape, x: number, y: number, mass?: number, density?: number) {
@@ -357,11 +366,8 @@ export class RigidBody {
             this.angularVelocity = 0;
         }
 
-        // Update the vertices to adjust them to the new position/rotation
-        this.shape.updateVertices(this.rotation, this.position);
-
-        // Update AABB values based on new position
-        this.shape.updateAABB(this);
+        // Update the vertices and the AABB to adjust them to the new position/rotation
+        this.shape.updateTransform(this);
 
         // Apply rolling resistance for grounded bodies
         if (this.isGrounded) {
