@@ -1,4 +1,5 @@
 import { BodiesFactory, SETTINGS, World } from '../src';
+import { BodiesFactory as BodiesFactoryOld, SETTINGS as SETTINGSOld, World as WorldOld } from '../src';
 
 const CIRCLE_COUNT = 1_000;
 const COLUMNS = 40;
@@ -36,11 +37,42 @@ for (let row = 0; row < ROWS; row++) {
     }
 }
 
+SETTINGSOld.applyGravity = true;
+
+const worldOld = new WorldOld(9.8);
+
+worldOld.addBody(
+    BodiesFactoryOld.box({
+        width: COLUMNS * SPACING + RADIUS * 4,
+        height: RADIUS * 2,
+        x: (COLUMNS - 1) * SPACING * 0.5,
+        y: -RADIUS,
+        mass: 0,
+        friction: 0.8,
+    }),
+);
+
+for (let row = 0; row < ROWS; row++) {
+    for (let column = 0; column < COLUMNS; column++) {
+        worldOld.addBody(
+            BodiesFactoryOld.circle({
+                radius: RADIUS,
+                x: column * SPACING,
+                y: RADIUS + row * SPACING,
+                mass: 1,
+                restitution: 0,
+                friction: 0.8,
+            }),
+        );
+    }
+}
+
+
 /** Advances the deterministic 1,000-circle stack by one fixed simulation step. */
 export function runOriginal() {
     world.update();
 }
 
-// export function runModified() {
-//     world.update();
-// }
+export function runModified() {
+    worldOld.update();
+}
