@@ -4,6 +4,9 @@ import { RigidBody } from '../core/RigidBody';
 import { Vec2 } from '../math/Vec2';
 import * as Utils from '../utils/Utils';
 
+/** Block solver is used only when the 2x2 effective mass matrix is well conditioned */
+const MAX_BLOCK_CONDITION_NUMBER = 1000;
+
 export interface ContactInfo {
     // Relevant contact infos
     bodyA: RigidBody;
@@ -74,6 +77,7 @@ export class ContactManifold extends Constraint {
     private blockM00 = 0.0;
     private blockM01 = 0.0;
     private blockM11 = 0.0;
+    private useBlockSolver = false;
 
     constructor();
     constructor(
@@ -226,6 +230,7 @@ export class ContactManifold extends Constraint {
         this.blockM00 = 0.0;
         this.blockM01 = 0.0;
         this.blockM11 = 0.0;
+        this.useBlockSolver = false;
     }
 
     override preSolve(invDt: number): void {
@@ -237,9 +242,7 @@ export class ContactManifold extends Constraint {
             this.preSolveContact(i, tangentBias, invDt);
         }
 
-        if (this.numContacts === 2 && SETTINGS.blockSolve) {
-            this.preSolveBlock();
-        }
+        this.useBlockSolver = this.numContacts === 2 && SETTINGS.blockSolve && this.preSolveBlock();
     }
 
     override solve(): void {
@@ -247,7 +250,7 @@ export class ContactManifold extends Constraint {
             this.solveTangentContact(i);
         }
 
-        if (this.numContacts === 1 || !SETTINGS.blockSolve) {
+        if (!this.useBlockSolver) {
             for (let i = 0; i < this.numContacts; i++) {
                 this.solveNormalContact(i);
             }
@@ -392,7 +395,8 @@ export class ContactManifold extends Constraint {
         }
     }
 
-    private preSolveBlock(): void {
+    /** Returns false when the block matrix is ill conditioned, the contact points are then solved one by one */
+    private preSolveBlock(): boolean {
         const bodyAInvMass = this.bodyA.invMass;
         const bodyAInvI = this.bodyA.invI;
         const bodyBInvMass = this.bodyB.invMass;
@@ -417,12 +421,18 @@ export class ContactManifold extends Constraint {
             this.normalJwb0 * bodyBInvI * this.normalJwb1;
 
         const determinant = this.blockK00 * this.blockK11 - this.blockK01 * this.blockK01;
-        Utils.assert(determinant !== 0.0, 'Determinant is 0');
+
+        // Nearly coincident contact points make the matrix singular
+        if (this.blockK00 * this.blockK00 >= MAX_BLOCK_CONDITION_NUMBER * determinant) {
+            return false;
+        }
 
         const invDeterminant = 1.0 / determinant;
         this.blockM00 = invDeterminant * this.blockK11;
         this.blockM01 = -invDeterminant * this.blockK01;
         this.blockM11 = invDeterminant * this.blockK00;
+
+        return true;
     }
 
     private solveNormalContact(index: number): void {

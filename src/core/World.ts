@@ -213,7 +213,9 @@ export class World {
 
     private step(dt: number) {
         const bodies = this.bodies;
-        const invDt = dt === 0 ? 0 : 1 / dt;
+        // Bias terms always use the full sub-step: CCD slices can be arbitrarily small and
+        // 1 / slice would turn position correction into huge velocities
+        const invDt = dt === 0 ? 0 : SETTINGS.invDt;
 
         this.broadPhase();
 
