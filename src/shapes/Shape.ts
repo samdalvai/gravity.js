@@ -19,4 +19,10 @@ export abstract class Shape {
     abstract updateVertices(angle: number, position: Vec2): void;
     abstract updateAABB(body: RigidBody): void;
     abstract isPointInside(body: RigidBody, point: Vec2): boolean;
+
+    /** Updates world geometry and the body AABB after the body moved, shapes can override it to fuse both passes */
+    updateTransform(body: RigidBody): void {
+        this.updateVertices(body.rotation, body.position);
+        this.updateAABB(body);
+    }
 }

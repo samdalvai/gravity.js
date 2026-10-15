@@ -127,6 +127,48 @@ export class PolygonShape extends Shape {
         }
     }
 
+    override updateTransform(body: RigidBody): void {
+        const cos = Math.cos(body.rotation);
+        const sin = Math.sin(body.rotation);
+        const positionX = body.position.x;
+        const positionY = body.position.y;
+        const localVertices = this.localVertices;
+        const worldVertices = this.worldVertices;
+        const localNormals = this.localNormals;
+        const worldNormals = this.worldNormals;
+
+        let minX = Infinity;
+        let minY = Infinity;
+        let maxX = -Infinity;
+        let maxY = -Infinity;
+
+        for (let i = 0; i < localVertices.length; i++) {
+            const localVertex = localVertices[i];
+            const worldVertex = worldVertices[i];
+            const x = localVertex.x * cos - localVertex.y * sin + positionX;
+            const y = localVertex.x * sin + localVertex.y * cos + positionY;
+
+            worldVertex.x = x;
+            worldVertex.y = y;
+
+            if (x < minX) minX = x;
+            if (x > maxX) maxX = x;
+            if (y < minY) minY = y;
+            if (y > maxY) maxY = y;
+
+            const localNormal = localNormals[i];
+            const worldNormal = worldNormals[i];
+
+            worldNormal.x = localNormal.x * cos - localNormal.y * sin;
+            worldNormal.y = localNormal.x * sin + localNormal.y * cos;
+        }
+
+        body.minX = minX;
+        body.maxX = maxX;
+        body.minY = minY;
+        body.maxY = maxY;
+    }
+
     updateAABB(body: RigidBody): void {
         let minX = Infinity;
         let minY = Infinity;

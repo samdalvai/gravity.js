@@ -519,11 +519,14 @@ function clipConvexEdges(
     );
 }
 
-function findMaxSeparation(
-    verticesA: readonly Vec2[],
-    normalsA: readonly Vec2[],
-    verticesB: readonly Vec2[],
-): { edgeIndex: number; maxSeparation: number } {
+// Secondary results of findMaxSeparation and segmentDistance, written to module scope to avoid
+// allocating a result object for every candidate pair
+let maxSeparationEdge = 0;
+let segmentFraction1 = 0;
+let segmentFraction2 = 0;
+
+/** Returns the max separation, the index of the reference edge is stored in `maxSeparationEdge` */
+function findMaxSeparation(verticesA: readonly Vec2[], normalsA: readonly Vec2[], verticesB: readonly Vec2[]): number {
     let bestIndex = 0;
     let maxSeparation = Number.NEGATIVE_INFINITY;
 
@@ -545,9 +548,11 @@ function findMaxSeparation(
         }
     }
 
-    return { edgeIndex: bestIndex, maxSeparation };
+    maxSeparationEdge = bestIndex;
+    return maxSeparation;
 }
 
+/** Returns the squared distance between two segments, the closest point fractions are stored in `segmentFraction1/2` */
 function segmentDistance(
     p1X: number,
     p1Y: number,
@@ -557,11 +562,7 @@ function segmentDistance(
     p2Y: number,
     q2X: number,
     q2Y: number,
-): {
-    fraction1: number;
-    fraction2: number;
-    distanceSquared: number;
-} {
+): number {
     let fraction1 = 0;
     let fraction2 = 0;
 
@@ -614,11 +615,63 @@ function segmentDistance(
     const dx = closest1X - closest2X;
     const dy = closest1Y - closest2Y;
 
-    return {
-        fraction1,
-        fraction2,
-        distanceSquared: dx * dx + dy * dy,
-    };
+    segmentFraction1 = fraction1;
+    segmentFraction2 = fraction2;
+
+    return dx * dx + dy * dy;
+}
+
+function createVertexContact(
+    bodyA: RigidBody,
+    bodyB: RigidBody,
+    radiusA: number,
+    radiusB: number,
+    vertexAX: number,
+    vertexAY: number,
+    vertexBX: number,
+    vertexBY: number,
+    fallbackNormalX: number,
+    fallbackNormalY: number,
+    id: number,
+): ContactManifold | null {
+    const radius = radiusA + radiusB;
+    const contactDistance = radius + SETTINGS.contactSlop;
+    const deltaX = vertexBX - vertexAX;
+    const deltaY = vertexBY - vertexAY;
+    const deltaLengthSquared = deltaX * deltaX + deltaY * deltaY;
+
+    let distance = 0;
+    let normalX = fallbackNormalX;
+    let normalY = fallbackNormalY;
+
+    if (deltaLengthSquared > 0.0) {
+        distance = Math.sqrt(deltaLengthSquared);
+
+        const invDistance = 1 / distance;
+
+        normalX = deltaX * invDistance;
+        normalY = deltaY * invDistance;
+    }
+
+    if (distance > contactDistance) {
+        return null;
+    }
+
+    const pointAX = vertexAX + normalX * radiusA;
+    const pointAY = vertexAY + normalY * radiusA;
+    const pointBX = vertexBX - normalX * radiusB;
+    const pointBY = vertexBY - normalY * radiusB;
+
+    return createSingleContactManifold(
+        bodyA,
+        bodyB,
+        normalX,
+        normalY,
+        (pointAX + pointBX) * 0.5,
+        (pointAY + pointBY) * 0.5,
+        distance - radius,
+        id,
+    );
 }
 
 function collideConvexPolygons(
@@ -631,8 +684,10 @@ function collideConvexPolygons(
     normalsB: readonly Vec2[],
     radiusB: number,
 ): ContactManifold | null {
-    const { edgeIndex: initialEdgeA, maxSeparation: separationA } = findMaxSeparation(verticesA, normalsA, verticesB);
-    const { edgeIndex: initialEdgeB, maxSeparation: separationB } = findMaxSeparation(verticesB, normalsB, verticesA);
+    const separationA = findMaxSeparation(verticesA, normalsA, verticesB);
+    const initialEdgeA = maxSeparationEdge;
+    const separationB = findMaxSeparation(verticesB, normalsB, verticesA);
+    const initialEdgeB = maxSeparationEdge;
     const radius = radiusA + radiusB;
     const contactDistance = radius + SETTINGS.contactSlop;
 
@@ -673,53 +728,6 @@ function collideConvexPolygons(
         }
     }
 
-    const createVertexContact = (
-        vertexAX: number,
-        vertexAY: number,
-        vertexBX: number,
-        vertexBY: number,
-        fallbackNormalX: number,
-        fallbackNormalY: number,
-        id: number,
-    ): ContactManifold | null => {
-        const deltaX = vertexBX - vertexAX;
-        const deltaY = vertexBY - vertexAY;
-        const deltaLengthSquared = deltaX * deltaX + deltaY * deltaY;
-
-        let distance = 0;
-        let normalX = fallbackNormalX;
-        let normalY = fallbackNormalY;
-
-        if (deltaLengthSquared > 0.0) {
-            distance = Math.sqrt(deltaLengthSquared);
-
-            const invDistance = 1 / distance;
-
-            normalX = deltaX * invDistance;
-            normalY = deltaY * invDistance;
-        }
-
-        if (distance > contactDistance) {
-            return null;
-        }
-
-        const pointAX = vertexAX + normalX * radiusA;
-        const pointAY = vertexAY + normalY * radiusA;
-        const pointBX = vertexBX - normalX * radiusB;
-        const pointBY = vertexBY - normalY * radiusB;
-
-        return createSingleContactManifold(
-            bodyA,
-            bodyB,
-            normalX,
-            normalY,
-            (pointAX + pointBX) * 0.5,
-            (pointAY + pointBY) * 0.5,
-            distance - radius,
-            id,
-        );
-    };
-
     if (separationA > 0 || separationB > 0) {
         const i11 = edgeA;
         const i12 = (edgeA + 1) % verticesA.length;
@@ -729,10 +737,16 @@ function collideConvexPolygons(
         const v12 = verticesA[i12];
         const v21 = verticesB[i21];
         const v22 = verticesB[i22];
-        const result = segmentDistance(v11.x, v11.y, v12.x, v12.y, v21.x, v21.y, v22.x, v22.y);
+        segmentDistance(v11.x, v11.y, v12.x, v12.y, v21.x, v21.y, v22.x, v22.y);
+        const fraction1 = segmentFraction1;
+        const fraction2 = segmentFraction2;
 
-        if (result.fraction1 === 0.0 && result.fraction2 === 0.0) {
+        if (fraction1 === 0.0 && fraction2 === 0.0) {
             return createVertexContact(
+                bodyA,
+                bodyB,
+                radiusA,
+                radiusB,
                 v11.x,
                 v11.y,
                 v21.x,
@@ -743,8 +757,12 @@ function collideConvexPolygons(
             );
         }
 
-        if (result.fraction1 === 0.0 && result.fraction2 === 1.0) {
+        if (fraction1 === 0.0 && fraction2 === 1.0) {
             return createVertexContact(
+                bodyA,
+                bodyB,
+                radiusA,
+                radiusB,
                 v11.x,
                 v11.y,
                 v22.x,
@@ -755,8 +773,12 @@ function collideConvexPolygons(
             );
         }
 
-        if (result.fraction1 === 1.0 && result.fraction2 === 0.0) {
+        if (fraction1 === 1.0 && fraction2 === 0.0) {
             return createVertexContact(
+                bodyA,
+                bodyB,
+                radiusA,
+                radiusB,
                 v12.x,
                 v12.y,
                 v21.x,
@@ -767,8 +789,12 @@ function collideConvexPolygons(
             );
         }
 
-        if (result.fraction1 === 1.0 && result.fraction2 === 1.0) {
+        if (fraction1 === 1.0 && fraction2 === 1.0) {
             return createVertexContact(
+                bodyA,
+                bodyB,
+                radiusA,
+                radiusB,
                 v12.x,
                 v12.y,
                 v22.x,
@@ -833,9 +859,9 @@ function collideSegmentRadiusPairs(
     const d1Y = q1Y - p1Y;
     const d2X = q2X - p2X;
     const d2Y = q2Y - p2Y;
-    const result = segmentDistance(p1.x, p1.y, q1.x, q1.y, p2.x, p2.y, q2.x, q2.y);
-    const f1 = result.fraction1;
-    const f2 = result.fraction2;
+    const distanceSquared = segmentDistance(p1.x, p1.y, q1.x, q1.y, p2.x, p2.y, q2.x, q2.y);
+    const f1 = segmentFraction1;
+    const f2 = segmentFraction2;
     const closest1X = p1X + d1X * f1;
     const closest1Y = p1Y + d1Y * f1;
     const closest2X = p2X + d2X * f2;
@@ -843,7 +869,7 @@ function collideSegmentRadiusPairs(
     const radius = radiusA + radiusB;
     const contactDistance = radius + SETTINGS.contactSlop;
 
-    if (result.distanceSquared > contactDistance * contactDistance) {
+    if (distanceSquared > contactDistance * contactDistance) {
         return null;
     }
 
@@ -861,7 +887,7 @@ function collideSegmentRadiusPairs(
     const fp1 = (p1X - p2X) * u2X + (p1Y - p2Y) * u2Y;
     const fq1 = (q1X - p2X) * u2X + (q1Y - p2Y) * u2Y;
     const outsideB = (fp1 <= 0.0 && fq1 <= 0.0) || (fp1 >= length2 && fq1 >= length2);
-    const closestDistance = Math.sqrt(result.distanceSquared);
+    const closestDistance = Math.sqrt(distanceSquared);
 
     if (!outsideA && !outsideB) {
         let normalAX = -u1Y;
