@@ -57,7 +57,7 @@ export class WeldJoint extends Joint {
         this.drawConnectionLine = false;
     }
 
-    override preSolve(invDt: number): void {
+    override preSolve(invDt: number, v: Float64Array): void {
         const bodyA = this.bodyA;
         const bodyB = this.bodyB;
 
@@ -121,19 +121,18 @@ export class WeldJoint extends Joint {
             SETTINGS.warmStarting &&
             (this.impulseSumX !== 0.0 || this.impulseSumY !== 0.0 || this.impulseSumZ !== 0.0)
         ) {
-            this.applyImpulse(this.impulseSumX, this.impulseSumY, this.impulseSumZ);
+            this.applyImpulse(v, this.impulseSumX, this.impulseSumY, this.impulseSumZ);
         }
     }
 
-    override solve(): void {
-        const bodyA = this.bodyA;
-        const bodyB = this.bodyB;
+    override solve(v: Float64Array): void {
+        const offsetA = this.bodyA.solverOffset;
+        const offsetB = this.bodyB.solverOffset;
 
-        const relativeVelocityX =
-            bodyB.velocity.x - bodyB.angularVelocity * this.rbY - (bodyA.velocity.x - bodyA.angularVelocity * this.raY);
+        const relativeVelocityX = v[offsetB] - v[offsetB + 2] * this.rbY - (v[offsetA] - v[offsetA + 2] * this.raY);
         const relativeVelocityY =
-            bodyB.velocity.y + bodyB.angularVelocity * this.rbX - (bodyA.velocity.y + bodyA.angularVelocity * this.raX);
-        const relativeAngularVelocity = bodyB.angularVelocity - bodyA.angularVelocity;
+            v[offsetB + 1] + v[offsetB + 2] * this.rbX - (v[offsetA + 1] + v[offsetA + 2] * this.raX);
+        const relativeAngularVelocity = v[offsetB + 2] - v[offsetA + 2];
 
         const rhsX = -(relativeVelocityX + this.biasX + this.impulseSumX * this.gamma);
         const rhsY = -(relativeVelocityY + this.biasY + this.impulseSumY * this.gamma);
@@ -143,7 +142,7 @@ export class WeldJoint extends Joint {
         const lambdaY = this.effectiveMass10 * rhsX + this.effectiveMass11 * rhsY + this.effectiveMass12 * rhsZ;
         const lambdaZ = this.effectiveMass20 * rhsX + this.effectiveMass21 * rhsY + this.effectiveMass22 * rhsZ;
 
-        this.applyImpulse(lambdaX, lambdaY, lambdaZ);
+        this.applyImpulse(v, lambdaX, lambdaY, lambdaZ);
 
         if (SETTINGS.warmStarting) {
             this.impulseSumX += lambdaX;
@@ -152,7 +151,10 @@ export class WeldJoint extends Joint {
         }
     }
 
-    private applyImpulse(lambdaX: number, lambdaY: number, lambdaZ: number): void {
+    private applyImpulse(v: Float64Array, lambdaX: number, lambdaY: number, lambdaZ: number): void {
+        const offsetA = this.bodyA.solverOffset;
+        const offsetB = this.bodyB.solverOffset;
+
         if (lambdaX === 0.0 && lambdaY === 0.0 && lambdaZ === 0.0) {
             return;
         }
@@ -161,13 +163,13 @@ export class WeldJoint extends Joint {
         const bodyB = this.bodyB;
 
         const bodyAImpulseScale = bodyA.invMass;
-        bodyA.velocity.x -= lambdaX * bodyAImpulseScale;
-        bodyA.velocity.y -= lambdaY * bodyAImpulseScale;
-        bodyA.angularVelocity -= (this.raX * lambdaY - this.raY * lambdaX + lambdaZ) * bodyA.invI;
+        v[offsetA] -= lambdaX * bodyAImpulseScale;
+        v[offsetA + 1] -= lambdaY * bodyAImpulseScale;
+        v[offsetA + 2] -= (this.raX * lambdaY - this.raY * lambdaX + lambdaZ) * bodyA.invI;
 
         const bodyBImpulseScale = bodyB.invMass;
-        bodyB.velocity.x += lambdaX * bodyBImpulseScale;
-        bodyB.velocity.y += lambdaY * bodyBImpulseScale;
-        bodyB.angularVelocity += (this.rbX * lambdaY - this.rbY * lambdaX + lambdaZ) * bodyB.invI;
+        v[offsetB] += lambdaX * bodyBImpulseScale;
+        v[offsetB + 1] += lambdaY * bodyBImpulseScale;
+        v[offsetB + 2] += (this.rbX * lambdaY - this.rbY * lambdaX + lambdaZ) * bodyB.invI;
     }
 }

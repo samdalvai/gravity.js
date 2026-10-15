@@ -46,7 +46,7 @@ export class DistanceJoint extends Joint {
         this.length = length <= 0 ? anchorB.subNew(anchorA).magnitude() : length;
     }
 
-    override preSolve(invDt: number): void {
+    override preSolve(invDt: number, v: Float64Array): void {
         // Calculate Jacobian J and effective mass M
         const bodyA = this.bodyA;
         const bodyB = this.bodyB;
@@ -98,46 +98,44 @@ export class DistanceJoint extends Joint {
             this.bias = 0.0;
         }
 
-        if (SETTINGS.warmStarting && this.impulseSum !== 0.0) this.applyImpulse(this.impulseSum);
+        if (SETTINGS.warmStarting && this.impulseSum !== 0.0) this.applyImpulse(v, this.impulseSum);
     }
 
-    override solve(): void {
+    override solve(v: Float64Array): void {
+        const offsetA = this.bodyA.solverOffset;
+        const offsetB = this.bodyB.solverOffset;
         // Calculate corrective impulse: Pc
-        const bodyAVelocity = this.bodyA.velocity;
-        const bodyBVelocity = this.bodyB.velocity;
-        const relativeVelocityX =
-            bodyBVelocity.x -
-            this.bodyB.angularVelocity * this.rbY -
-            (bodyAVelocity.x - this.bodyA.angularVelocity * this.raY);
+        const relativeVelocityX = v[offsetB] - v[offsetB + 2] * this.rbY - (v[offsetA] - v[offsetA + 2] * this.raY);
         const relativeVelocityY =
-            bodyBVelocity.y +
-            this.bodyB.angularVelocity * this.rbX -
-            (bodyAVelocity.y + this.bodyA.angularVelocity * this.raX);
+            v[offsetB + 1] + v[offsetB + 2] * this.rbX - (v[offsetA + 1] + v[offsetA + 2] * this.raX);
         const jv = relativeVelocityX * this.nX + relativeVelocityY * this.nY;
 
         // Check out below for the reason why the (accumulated impulse * gamma) term is on the right hand side
         // https://pybullet.org/Bullet/phpBB3/viewtopic.php?f=4&t=1354
         const lambda = this.effectiveMass * -(jv + this.bias + this.impulseSum * this.gamma);
 
-        this.applyImpulse(lambda);
+        this.applyImpulse(v, lambda);
 
         if (SETTINGS.warmStarting) this.impulseSum += lambda;
     }
 
-    private applyImpulse(lambda: number): void {
+    private applyImpulse(v: Float64Array, lambda: number): void {
+        const offsetA = this.bodyA.solverOffset;
+        const offsetB = this.bodyB.solverOffset;
+
         if (lambda === 0.0) {
             return;
         }
 
         const bodyAImpulseScale = lambda * this.bodyA.invMass;
-        this.bodyA.velocity.x -= this.nX * bodyAImpulseScale;
-        this.bodyA.velocity.y -= this.nY * bodyAImpulseScale;
+        v[offsetA] -= this.nX * bodyAImpulseScale;
+        v[offsetA + 1] -= this.nY * bodyAImpulseScale;
         // Body A receives the opposite linear impulse, which flips the angular term's sign.
-        this.bodyA.angularVelocity += this.sA * lambda * this.bodyA.invI;
+        v[offsetA + 2] += this.sA * lambda * this.bodyA.invI;
 
         const bodyBImpulseScale = lambda * this.bodyB.invMass;
-        this.bodyB.velocity.x += this.nX * bodyBImpulseScale;
-        this.bodyB.velocity.y += this.nY * bodyBImpulseScale;
-        this.bodyB.angularVelocity -= this.sB * lambda * this.bodyB.invI;
+        v[offsetB] += this.nX * bodyBImpulseScale;
+        v[offsetB + 1] += this.nY * bodyBImpulseScale;
+        v[offsetB + 2] -= this.sB * lambda * this.bodyB.invI;
     }
 }
