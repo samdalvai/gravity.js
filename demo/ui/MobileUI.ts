@@ -1,3 +1,4 @@
+import { type IconName, setIcon } from './Icons';
 import { MOBILE_TOOLS, type MobileTool } from './MobileTools';
 import type { UIActions, UIState } from './UIManager';
 
@@ -7,11 +8,15 @@ interface MobileUICallbacks {
     onOpenHelp(): void;
 }
 
-function createButton(className: string, content: string, title: string): HTMLButtonElement {
+function createButton(className: string, content: string, title: string, icon?: IconName): HTMLButtonElement {
     const button = document.createElement('button');
     button.type = 'button';
     button.className = className;
-    button.textContent = content;
+    if (icon) {
+        setIcon(button, icon);
+    } else {
+        button.textContent = content;
+    }
     button.title = title;
     button.setAttribute('aria-label', title);
     return button;
@@ -39,22 +44,22 @@ export default class MobileUI {
         bar.id = 'mobile-bar';
         bar.className = 'mobile-ui';
 
-        const settingsButton = createButton('mobile-icon-button', '⚙', 'Settings');
+        const settingsButton = createButton('mobile-icon-button', '', 'Settings', 'settings');
         settingsButton.addEventListener('click', () => this.toggleSettings());
 
-        const prevButton = createButton('mobile-icon-button', '‹', 'Previous demo');
+        const prevButton = createButton('mobile-icon-button', '', 'Previous demo', 'prev');
         prevButton.addEventListener('click', () => this.selectRelativeDemo(actions, -1));
 
         this.demoTitle = createButton('mobile-demo-title', '', 'Choose demo');
         this.demoTitle.addEventListener('click', () => this.toggleSettings(true));
 
-        const nextButton = createButton('mobile-icon-button', '›', 'Next demo');
+        const nextButton = createButton('mobile-icon-button', '', 'Next demo', 'next');
         nextButton.addEventListener('click', () => this.selectRelativeDemo(actions, 1));
 
-        const restartButton = createButton('mobile-icon-button', '↻', 'Restart demo');
+        const restartButton = createButton('mobile-icon-button', '', 'Restart demo', 'restart');
         restartButton.addEventListener('click', () => actions.onRestartDemo());
 
-        this.pauseButton = createButton('mobile-icon-button', '⏸', 'Pause');
+        this.pauseButton = createButton('mobile-icon-button', '', 'Pause', 'pause');
         this.pauseButton.addEventListener('click', () => actions.onSetPaused(!this.state?.paused));
 
         bar.append(settingsButton, prevButton, this.demoTitle, nextButton, restartButton, this.pauseButton);
@@ -76,7 +81,7 @@ export default class MobileUI {
             const button = createButton('mobile-tool', '', tool.label);
             const icon = document.createElement('span');
             icon.className = 'mobile-tool-icon';
-            icon.textContent = tool.icon;
+            setIcon(icon, tool.icon);
             const label = document.createElement('span');
             label.className = 'mobile-tool-label';
             label.textContent = tool.label;
@@ -108,11 +113,11 @@ export default class MobileUI {
         const moveGroup = document.createElement('div');
         moveGroup.className = 'mobile-pad-group';
         moveGroup.append(
-            this.createHoldButton('◀', 'Move left', pressed => actions.onPlayerMove('left', pressed)),
-            this.createHoldButton('▶', 'Move right', pressed => actions.onPlayerMove('right', pressed)),
+            this.createHoldButton('left', 'Move left', pressed => actions.onPlayerMove('left', pressed)),
+            this.createHoldButton('right', 'Move right', pressed => actions.onPlayerMove('right', pressed)),
         );
 
-        const jumpButton = createButton('mobile-pad-button', '⤒', 'Jump');
+        const jumpButton = createButton('mobile-pad-button', '', 'Jump', 'jump');
         jumpButton.addEventListener('pointerdown', event => {
             event.preventDefault();
             actions.onPlayerJump();
@@ -136,7 +141,7 @@ export default class MobileUI {
         }
 
         if (this.pauseButton) {
-            this.pauseButton.textContent = state.paused ? '▶' : '⏸';
+            setIcon(this.pauseButton, state.paused ? 'play' : 'pause');
             this.pauseButton.title = state.paused ? 'Resume' : 'Pause';
             this.pauseButton.classList.toggle('is-active', state.paused);
         }
@@ -178,8 +183,8 @@ export default class MobileUI {
         actions.onSelectDemo((this.state.demoIndex + offset + count) % count);
     }
 
-    private createHoldButton(content: string, title: string, onChange: (pressed: boolean) => void): HTMLButtonElement {
-        const button = createButton('mobile-pad-button', content, title);
+    private createHoldButton(icon: IconName, title: string, onChange: (pressed: boolean) => void): HTMLButtonElement {
+        const button = createButton('mobile-pad-button', '', title, icon);
         let pressed = false;
 
         const set = (value: boolean) => {

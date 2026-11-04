@@ -272,12 +272,18 @@ body.view-mobile .toolbar-button {
 }
 
 body.view-mobile .toolbar-control:has(select) {
+    display: flex;
     flex: 1 1 100%;
+    min-width: 0;
+    max-width: 100%;
 }
 
 body.view-mobile .toolbar-control select {
-    flex: 1 1 auto;
+    flex: 1 1 0;
+    width: 0;
     min-width: 0;
+    max-width: 100%;
+    text-overflow: ellipsis;
 }
 
 body.view-mobile .toolbar-control input[type='checkbox'] {
@@ -345,8 +351,28 @@ body.view-mobile.mobile-settings-open #mobile-settings-backdrop {
 }
 
 .mobile-tool-icon {
-    font-size: 20px;
-    line-height: 1;
+    display: flex;
+    line-height: 0;
+}
+
+.mobile-ui .ui-icon {
+    display: block;
+    width: 22px;
+    height: 22px;
+    margin: auto;
+}
+
+.mobile-pad-button .ui-icon {
+    width: 28px;
+    height: 28px;
+}
+
+.mobile-tool .ui-icon {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.mobile-tool.is-selected .ui-icon {
+    color: #fff;
 }
 
 .mobile-tool-label {

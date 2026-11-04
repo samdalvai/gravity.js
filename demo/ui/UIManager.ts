@@ -48,7 +48,7 @@ const SHORTCUT_SECTIONS = [
 const TOUCH_SECTIONS = [
     {
         title: 'Tools (bottom bar)',
-        items: MOBILE_TOOLS.map(tool => `${tool.icon} ${tool.label}: ${tool.help}`),
+        items: MOBILE_TOOLS.map(tool => `${tool.label}: ${tool.help}`),
     },
     {
         title: 'Gestures',
@@ -304,7 +304,7 @@ export default class UIManager {
         this.renderHelp(state.viewMode);
 
         if (this.viewModeButton) {
-            this.viewModeButton.textContent = state.viewMode === 'mobile' ? '🖥 Desktop view' : '📱 Mobile view';
+            this.viewModeButton.textContent = state.viewMode === 'mobile' ? 'Switch to desktop view' : 'Mobile view';
         }
 
         if (this.shortcutsButton) {
