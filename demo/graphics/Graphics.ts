@@ -11,6 +11,12 @@ import {
 
 import type { BodyRenderStyle } from '../render/BodyRenderRegistry';
 
+/** Portion of the world (in pixels at zoom 1) that should fit on a small screen */
+const MOBILE_REFERENCE_WIDTH = 1000;
+const MOBILE_REFERENCE_HEIGHT = 1000;
+const MIN_ZOOM = 0.01;
+const MAX_ZOOM = 8;
+
 export default class Graphics {
     static windowWidth: number;
     static windowHeight: number;
@@ -19,6 +25,17 @@ export default class Graphics {
 
     static zoom = 1;
     static pan = new Vec2(0, 0);
+
+    /**
+     * Extra scale applied on top of the demo zoom so that scenes designed for a
+     * desktop-sized window still fit on small screens (1 on desktop).
+     */
+    static viewScale = 1;
+
+    /** Device pixel ratio used for the canvas backing store (1 on desktop). */
+    static pixelRatio = 1;
+
+    private static fitToScreen = false;
 
     static openWindow(): boolean {
         const canvas = document.getElementById('gamePhysicsCanvas') as HTMLCanvasElement;
@@ -40,11 +57,35 @@ export default class Graphics {
         return true;
     }
 
+    /**
+     * Enables the small-screen rendering mode: the scene is scaled to fit the
+     * viewport and the canvas is rendered at the device pixel ratio so that it
+     * stays sharp on high density displays.
+     */
+    static setFitToScreen(enabled: boolean): void {
+        this.fitToScreen = enabled;
+
+        if (this.canvas) {
+            this.resize(this.canvas);
+        }
+    }
+
     static resize(canvas: HTMLCanvasElement): void {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        this.windowWidth = window.innerWidth;
-        this.windowHeight = window.innerHeight;
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+
+        this.pixelRatio = this.fitToScreen ? Math.min(window.devicePixelRatio || 1, 2) : 1;
+        this.viewScale = this.fitToScreen
+            ? Math.min(1, width / MOBILE_REFERENCE_WIDTH, height / MOBILE_REFERENCE_HEIGHT)
+            : 1;
+
+        canvas.width = Math.round(width * this.pixelRatio);
+        canvas.height = Math.round(height * this.pixelRatio);
+        this.windowWidth = width;
+        this.windowHeight = height;
+
+        // Resizing the canvas resets its transform, re-apply the device pixel ratio
+        this.ctx?.setTransform(this.pixelRatio, 0, 0, this.pixelRatio, 0, 0);
     }
 
     static width(): number {
@@ -53,6 +94,35 @@ export default class Graphics {
 
     static height(): number {
         return this.windowHeight;
+    }
+
+    /** Effective world to screen scale (demo zoom * view scale) */
+    static scale(): number {
+        return this.zoom * this.viewScale;
+    }
+
+    /** Converts a point in CSS pixels (relative to the window) to world coordinates */
+    static screenToWorld(screenX: number, screenY: number): Vec2 {
+        const scale = this.scale();
+        const x = (screenX - this.windowWidth / 2) / scale + this.pan.x;
+        const y = -(screenY - this.windowHeight / 2) / scale + this.pan.y;
+        return new Vec2(x, y);
+    }
+
+    /** Moves the camera following a drag of (dx, dy) CSS pixels on screen */
+    static panByScreen(dx: number, dy: number): void {
+        const scale = this.scale();
+        this.pan.x -= dx / scale;
+        this.pan.y += dy / scale;
+    }
+
+    /** Multiplies the zoom by factor keeping the world point under (screenX, screenY) fixed */
+    static zoomAt(screenX: number, screenY: number, factor: number): void {
+        const before = this.screenToWorld(screenX, screenY);
+        this.zoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, this.zoom * factor));
+        const after = this.screenToWorld(screenX, screenY);
+        this.pan.x += before.x - after.x;
+        this.pan.y += before.y - after.y;
     }
 
     static increaseZoom(): void {
@@ -74,7 +144,7 @@ export default class Graphics {
     }
 
     static clearScreen(): void {
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.clearRect(0, 0, this.windowWidth, this.windowHeight);
     }
 
     /**
@@ -92,12 +162,13 @@ export default class Graphics {
         ctx.translate(this.windowWidth / 2, this.windowHeight / 2);
 
         // Flip Y axis (world Y up, canvas Y down)
-        ctx.scale(this.zoom, -this.zoom);
+        const scale = this.scale();
+        ctx.scale(scale, -scale);
 
         // Apply camera pan
         ctx.translate(-this.pan.x, -this.pan.y);
 
-        ctx.lineWidth = 1 / this.zoom;
+        ctx.lineWidth = 1 / scale;
     }
 
     /** Restore coordinates to screen conversion */
@@ -456,7 +527,7 @@ export default class Graphics {
         if (showLabels && label) {
             this.ctx.save();
             this.ctx.translate(body.maxX, body.maxY);
-            this.ctx.scale(1 / this.zoom, -1 / this.zoom);
+            this.ctx.scale(1 / this.scale(), -1 / this.scale());
             this.ctx.fillStyle = labelColor;
             this.ctx.font = `${labelFontSize}px Arial`;
             this.ctx.textAlign = 'left';

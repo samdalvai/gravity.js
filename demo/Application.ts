@@ -16,6 +16,7 @@ import {
 import AssetStore, { TEXTURES } from './graphics/AssetStore';
 import Graphics from './graphics/Graphics';
 import InputManager, { MouseButton } from './input/InputManager';
+import TouchController from './input/TouchController';
 import BodyRenderRegistry from './render/BodyRenderRegistry';
 import { DEMOS, DEMO_LABELS } from './samples';
 import {
@@ -26,7 +27,9 @@ import {
     MIN_TEMPERATURE,
     MIN_TEMPERATURE_DIFFERENCE,
 } from './samples/ConvectionForce';
+import type { MobileTool } from './ui/MobileTools';
 import UIManager, { UIState } from './ui/UIManager';
+import { type ViewMode, getInitialViewMode, saveViewMode } from './ui/ViewMode';
 
 const BODY_REMOVAL_THRESHOLD = 25_000;
 const DEMO_GRAVITY = 9.8;
@@ -87,6 +90,19 @@ export default class Application {
     private showRuntimeStatsHud = true;
     private readonly uiManager = new UIManager();
 
+    // View mode (desktop / mobile)
+    private viewMode: ViewMode = 'desktop';
+    private mobileTool: MobileTool = 'grab';
+    private demoZoom = 1;
+    private readonly touchController = new TouchController({
+        getTool: () => this.mobileTool,
+        setPointerScreenPosition: (x, y) => this.setPointerScreenPosition(x, y),
+        tryGrabAtPointer: () => this.tryGrabAtPointer(),
+        releaseGrab: () => this.releaseGrabJoint(),
+        setEmittingParticles: value => (this.generateParticle = value),
+        applyToolAtPointer: tool => this.applyToolAtPointer(tool),
+    });
+
     constructor() {
         this.world = new World(DEMO_GRAVITY);
     }
@@ -139,6 +155,7 @@ export default class Application {
 
     setBlackHole(body: RigidBody | null): void {
         this.blackHole = body;
+        this.syncUI();
     }
 
     setDragForce(drag: number | null): void {
@@ -163,6 +180,8 @@ export default class Application {
         await AssetStore.loadTextures();
 
         this.running = Graphics.openWindow();
+        this.viewMode = getInitialViewMode();
+        this.applyViewMode();
         this.uiManager.initialize(this.getUIState(), {
             onSelectDemo: index => this.loadDemo(index),
             onRestartDemo: () => this.loadDemo(this.demoIndex, false),
@@ -179,6 +198,12 @@ export default class Application {
             onSetSolverIterations: value => this.setSolverIterations(value),
             onSetSubSteps: value => this.setSubSteps(value),
             onStep: () => this.stepSimulation(),
+            onSetViewMode: mode => this.setViewMode(mode),
+            onSelectTool: tool => this.setMobileTool(tool),
+            onClearBlackHole: () => this.setBlackHole(null),
+            onFitView: () => this.fitView(),
+            onPlayerMove: (direction, pressed) => this.setPlayerMove(direction, pressed),
+            onPlayerJump: () => this.playerJump(),
         });
         this.loadDemo(this.demoIndex);
     }
@@ -205,39 +230,13 @@ export default class Application {
                     }
 
                     if (inputEvent.key === 'e') {
-                        {
-                            const x = InputManager.mousePosition.x;
-                            const y = InputManager.mousePosition.y;
-                            const explosionPos = new Vec2(x, y);
-
-                            const radius = 250;
-                            const strength = 5000;
-
-                            for (const body of this.world.getBodies()) {
-                                const explosionImpulse = Force.interactions.generateExplosionForce(
-                                    body,
-                                    explosionPos,
-                                    radius,
-                                    strength,
-                                );
-                                body.applyImpulseLinear(explosionImpulse);
-                            }
-                        }
+                        this.triggerExplosion(InputManager.mousePosition);
                     }
 
                     if (key === 'f' && inputEvent.shiftKey) {
                         this.setBlackHole(null);
                     } else if (key === 'f') {
-                        const x = InputManager.mousePosition.x;
-                        const y = InputManager.mousePosition.y;
-                        const blackHole = BodiesFactory.circle({
-                            radius: 0.0001,
-                            x,
-                            y,
-                            density: 50_000_000_000_000,
-                            collisionMask: CollisionCategory.NONE,
-                        });
-                        this.setBlackHole(blackHole);
+                        this.spawnBlackHole(InputManager.mousePosition);
                     }
 
                     if (key === 'r' && inputEvent.shiftKey) {
@@ -265,25 +264,7 @@ export default class Application {
                     }
 
                     if (inputEvent.key === 'b') {
-                        // Emit bullet
-                        const x = InputManager.mousePosition.x;
-                        const y = InputManager.mousePosition.y;
-
-                        const center = new Vec2(0, 0);
-                        const target = new Vec2(x, y);
-                        const direction = target.subNew(center).normalizeNew();
-                        const bulletForce = 50_000;
-
-                        const bullet = BodiesFactory.circle({
-                            radius: 5,
-                            x: 0,
-                            y: 0,
-                            mass: 0.1,
-                            velocity: direction.scaleNew(bulletForce),
-                            isBullet: true,
-                        });
-                        this.setBodyTexture(bullet, 'rockRound');
-                        this.addBodyToWorld(bullet);
+                        this.shootBullet(InputManager.mousePosition);
                     }
 
                     if (inputEvent.key === 'p') {
@@ -311,80 +292,23 @@ export default class Application {
                     }
 
                     if (inputEvent.key === 'q') {
-                        const x = InputManager.mousePosition.x;
-                        const y = InputManager.mousePosition.y;
-
-                        if (this.player) {
-                            this.bodyRenderRegistry.delete(this.player);
-                            this.world.removeBody(this.player);
-                            this.player = null;
-                        }
-
-                        this.player = BodiesFactory.capsule({
-                            halfHeight: 30,
-                            radius: 25,
-                            x,
-                            y,
-                            mass: 1,
-                            canRotate: false,
-                            restitution: 0.0,
-                            friction: 0.8,
-                        });
-                        this.setBodyFillColor(this.player, 'orange');
-                        this.addBodyToWorld(this.player);
+                        this.spawnPlayer(InputManager.mousePosition);
                     }
 
                     if (inputEvent.key === 'x') {
-                        const x = InputManager.mousePosition.x;
-                        const y = InputManager.mousePosition.y;
-
-                        const capsule = BodiesFactory.capsule({
-                            halfHeight: 40,
-                            radius: 20,
-                            x,
-                            y,
-                            mass: 1,
-                            restitution: 0.2,
-                            friction: 0.7,
-                        });
-                        this.addBodyToWorld(capsule);
+                        this.spawnCapsule(InputManager.mousePosition);
                     }
 
                     if (inputEvent.key === 'z') {
-                        const x = InputManager.mousePosition.x;
-                        const y = InputManager.mousePosition.y;
-
-                        const segment = BodiesFactory.segment({
-                            length: 200,
-                            horizontal: true,
-                            x,
-                            y,
-                            mass: 0,
-                            restitution: 0.2,
-                            friction: 0.7,
-                        });
-                        this.addBodyToWorld(segment);
+                        this.spawnSegment(InputManager.mousePosition);
                     }
 
                     if (inputEvent.key === 'r' && !inputEvent.ctrlKey && !inputEvent.metaKey) {
-                        const x = InputManager.mousePosition.x;
-                        const y = InputManager.mousePosition.y;
-
-                        const radius = Utils.randomNumber(20, 50);
-                        const vertices = Utils.randomNumber(3, 10);
-
-                        const body = Utils.randomConvexBody(x, y, radius, vertices);
-                        this.addBodyToWorld(body);
+                        this.spawnRandomPolygon(InputManager.mousePosition);
                     }
 
                     if (inputEvent.code === 'Space') {
-                        const JUMP_TIME_TOLERANCE = SETTINGS.dt * 6;
-                        if (
-                            this.player &&
-                            (this.player.isGrounded || this.player.lastGroundedTime <= JUMP_TIME_TOLERANCE)
-                        ) {
-                            this.player.applyImpulseLinear(new Vec2(0, PLAYER_JUMP_IMPULSE));
-                        }
+                        this.playerJump();
                     }
 
                     if (inputEvent.code === 'ArrowLeft') {
@@ -430,8 +354,7 @@ export default class Application {
             if (this.middleMousePressed || this.controlPressed) {
                 document.body.style.cursor = 'pointer';
                 // Drag the camera opposite to mouse movement
-                Graphics.pan.x -= inputEvent.movementX / Graphics.zoom;
-                Graphics.pan.y += inputEvent.movementY / Graphics.zoom;
+                Graphics.panByScreen(inputEvent.movementX, inputEvent.movementY);
             } else {
                 document.body.style.cursor = 'default';
             }
@@ -451,56 +374,14 @@ export default class Application {
             switch (inputEvent.type) {
                 case 'mousedown':
                     {
-                        const x = InputManager.mousePosition.x;
-                        const y = InputManager.mousePosition.y;
-
                         switch (inputEvent.button) {
                             case MouseButton.LEFT:
-                                {
-                                    let bodySelected = false;
-
-                                    if (this.grab) {
-                                        for (const body of this.world.getBodies()) {
-                                            const isInside = body.isPointInside(InputManager.mousePosition);
-
-                                            if (isInside) {
-                                                bodySelected = true;
-                                                if (body.isStatic()) break;
-
-                                                this.startGrabJoint(body);
-                                                break;
-                                            }
-                                        }
-                                    }
-
-                                    if (!bodySelected) {
-                                        const ball = BodiesFactory.circle({
-                                            radius: 30,
-                                            x,
-                                            y,
-                                            mass: 1.0,
-                                            restitution: 0.5,
-                                            friction: 0.7,
-                                        });
-                                        this.setBodyTexture(ball, 'basketball');
-                                        this.addBodyToWorld(ball);
-                                    }
+                                if (!this.tryGrabAtPointer()) {
+                                    this.spawnBall(InputManager.mousePosition);
                                 }
                                 break;
                             case MouseButton.RIGHT:
-                                {
-                                    const box = BodiesFactory.box({
-                                        width: 60,
-                                        height: 60,
-                                        x,
-                                        y,
-                                        mass: 1.0,
-                                        restitution: 0.3,
-                                        friction: 0.7,
-                                    });
-                                    this.setBodyTexture(box, 'crate');
-                                    this.addBodyToWorld(box);
-                                }
+                                this.spawnBox(InputManager.mousePosition);
                                 break;
                             case MouseButton.MIDDLE:
                                 this.middleMousePressed = true;
@@ -531,6 +412,14 @@ export default class Application {
             } else {
                 Graphics.increaseZoom();
             }
+        }
+
+        // Handle touch (and, in mobile view, primary mouse button) pointer events
+        while (InputManager.pointerBuffer.length > 0) {
+            const inputEvent = InputManager.pointerBuffer.shift();
+            if (!inputEvent) return;
+
+            this.touchController.handle(inputEvent);
         }
     }
 
@@ -693,6 +582,7 @@ export default class Application {
 
         const x = InputManager.mousePosition.x;
         const y = InputManager.mousePosition.y;
+        const compact = this.viewMode === 'mobile';
 
         const stats: Array<[string, string]> = [
             ['Demo', DEMO_LABELS[this.demoIndex] ?? ''],
@@ -704,29 +594,39 @@ export default class Application {
             ['Collisions', `${numContacts}`],
             ['FPS', this.FPS.toFixed(2)],
             ['Zoom', Graphics.zoom.toFixed(2)],
-            ['Mouse', `${x.toFixed(1)}, ${y.toFixed(1)}`],
+            [compact ? 'Pointer' : 'Mouse', `${x.toFixed(1)}, ${y.toFixed(1)}`],
         ];
 
-        const panelX = 20;
-        const panelY = this.uiManager.headerHeight + 16;
-        const panelWidth = 320;
-        const panelPaddingX = 14;
-        const panelPaddingY = 14;
-        const titleHeight = 22;
-        const subtitleHeight = 20;
-        const rowHeight = 22;
+        const panelX = compact ? 8 : 20;
+        const panelY = this.uiManager.headerHeight + (compact ? 8 : 16);
+        const panelWidth = compact ? 200 : 320;
+        const panelPaddingX = compact ? 10 : 14;
+        const panelPaddingY = compact ? 8 : 14;
+        const titleHeight = compact ? 16 : 22;
+        const subtitleHeight = compact ? 14 : 20;
+        const rowHeight = compact ? 15 : 22;
+        const fontSize = compact ? 11 : 14;
         const panelHeight = panelPaddingY * 2 + titleHeight + subtitleHeight + stats.length * rowHeight;
 
         Graphics.drawFillRect(panelX, panelY, panelWidth, panelHeight, 'rgba(10, 12, 16, 0.78)');
         Graphics.drawStrokeRect(panelX, panelY, panelWidth, panelHeight, 'rgba(255, 255, 255, 0.14)');
         Graphics.drawFillRect(panelX, panelY, panelWidth, 3, '#ff9d2e');
 
-        Graphics.drawText('DEBUG', panelX + panelPaddingX, panelY + 18, 15, 'Arial', '#ffb15c', 'left', 'middle');
+        Graphics.drawText(
+            'DEBUG',
+            panelX + panelPaddingX,
+            panelY + panelPaddingY + titleHeight / 2,
+            compact ? 12 : 15,
+            'Arial',
+            '#ffb15c',
+            'left',
+            'middle',
+        );
         Graphics.drawText(
             'Runtime Stats',
             panelX + panelPaddingX,
-            panelY + 40,
-            13,
+            panelY + panelPaddingY + titleHeight + subtitleHeight / 2,
+            compact ? 10 : 13,
             'Arial',
             'rgba(255, 255, 255, 0.7)',
             'left',
@@ -735,14 +635,14 @@ export default class Application {
 
         const labelX = panelX + panelPaddingX;
         const valueX = panelX + panelWidth - panelPaddingX;
-        const rowsTop = panelY + panelPaddingY + titleHeight + subtitleHeight + 10;
+        const rowsTop = panelY + panelPaddingY + titleHeight + subtitleHeight + rowHeight / 2;
 
         for (let i = 0; i < stats.length; i++) {
             const [label, value] = stats[i];
             const rowY = rowsTop + i * rowHeight;
 
-            Graphics.drawText(label, labelX, rowY, 14, 'Arial', 'rgba(255, 255, 255, 0.72)', 'left', 'middle');
-            Graphics.drawText(value, valueX, rowY, 14, 'Arial', '#ffffff', 'right', 'middle');
+            Graphics.drawText(label, labelX, rowY, fontSize, 'Arial', 'rgba(255, 255, 255, 0.72)', 'left', 'middle');
+            Graphics.drawText(value, valueX, rowY, fontSize, 'Arial', '#ffffff', 'right', 'middle');
         }
     }
 
@@ -766,6 +666,9 @@ export default class Application {
 
             if (this.player?.id === body.id) {
                 this.player = null;
+                this.setPlayerMove('left', false);
+                this.setPlayerMove('right', false);
+                this.syncUI();
             }
         }
     }
@@ -880,11 +783,263 @@ export default class Application {
     }
 
     private updateMouseWorldPosition(inputEvent: MouseEvent): void {
-        const screenX = inputEvent.x - Graphics.width() / 2;
-        const screenY = -(inputEvent.y - Graphics.height() / 2);
+        const world = Graphics.screenToWorld(inputEvent.x, inputEvent.y);
+        InputManager.mousePosition.x = world.x;
+        InputManager.mousePosition.y = world.y;
+    }
 
-        InputManager.mousePosition.x = screenX / Graphics.zoom + Graphics.pan.x;
-        InputManager.mousePosition.y = screenY / Graphics.zoom + Graphics.pan.y;
+    private setPointerScreenPosition(screenX: number, screenY: number): void {
+        const world = Graphics.screenToWorld(screenX, screenY);
+        InputManager.mousePosition.x = world.x;
+        InputManager.mousePosition.y = world.y;
+        this.syncGrabJointTarget();
+    }
+
+    // ---------------------------------------------------------------------
+    // Demo actions, shared by keyboard / mouse (desktop) and touch (mobile)
+    // ---------------------------------------------------------------------
+
+    /**
+     * Grabs the dynamic body under the pointer (if grabbing is enabled).
+     * Returns true when the pointer is over any body, static bodies included.
+     */
+    private tryGrabAtPointer(): boolean {
+        if (!this.grab) {
+            return false;
+        }
+
+        for (const body of this.world.getBodies()) {
+            if (!body.isPointInside(InputManager.mousePosition)) {
+                continue;
+            }
+
+            if (!body.isStatic()) {
+                this.startGrabJoint(body);
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private spawnBall(position: Vec2): void {
+        const ball = BodiesFactory.circle({
+            radius: 30,
+            x: position.x,
+            y: position.y,
+            mass: 1.0,
+            restitution: 0.5,
+            friction: 0.7,
+        });
+        this.setBodyTexture(ball, 'basketball');
+        this.addBodyToWorld(ball);
+    }
+
+    private spawnBox(position: Vec2): void {
+        const box = BodiesFactory.box({
+            width: 60,
+            height: 60,
+            x: position.x,
+            y: position.y,
+            mass: 1.0,
+            restitution: 0.3,
+            friction: 0.7,
+        });
+        this.setBodyTexture(box, 'crate');
+        this.addBodyToWorld(box);
+    }
+
+    private spawnCapsule(position: Vec2): void {
+        const capsule = BodiesFactory.capsule({
+            halfHeight: 40,
+            radius: 20,
+            x: position.x,
+            y: position.y,
+            mass: 1,
+            restitution: 0.2,
+            friction: 0.7,
+        });
+        this.addBodyToWorld(capsule);
+    }
+
+    private spawnSegment(position: Vec2): void {
+        const segment = BodiesFactory.segment({
+            length: 200,
+            horizontal: true,
+            x: position.x,
+            y: position.y,
+            mass: 0,
+            restitution: 0.2,
+            friction: 0.7,
+        });
+        this.addBodyToWorld(segment);
+    }
+
+    private spawnRandomPolygon(position: Vec2): void {
+        const radius = Utils.randomNumber(20, 50);
+        const vertices = Utils.randomNumber(3, 10);
+
+        const body = Utils.randomConvexBody(position.x, position.y, radius, vertices);
+        this.addBodyToWorld(body);
+    }
+
+    private triggerExplosion(position: Vec2): void {
+        const explosionPos = new Vec2(position.x, position.y);
+        const radius = 250;
+        const strength = 5000;
+
+        for (const body of this.world.getBodies()) {
+            const explosionImpulse = Force.interactions.generateExplosionForce(body, explosionPos, radius, strength);
+            body.applyImpulseLinear(explosionImpulse);
+        }
+    }
+
+    private spawnBlackHole(position: Vec2): void {
+        const blackHole = BodiesFactory.circle({
+            radius: 0.0001,
+            x: position.x,
+            y: position.y,
+            density: 50_000_000_000_000,
+            collisionMask: CollisionCategory.NONE,
+        });
+        this.setBlackHole(blackHole);
+    }
+
+    private shootBullet(target: Vec2): void {
+        const center = new Vec2(0, 0);
+        const direction = new Vec2(target.x, target.y).subNew(center).normalizeNew();
+        const bulletForce = 50_000;
+
+        const bullet = BodiesFactory.circle({
+            radius: 5,
+            x: 0,
+            y: 0,
+            mass: 0.1,
+            velocity: direction.scaleNew(bulletForce),
+            isBullet: true,
+        });
+        this.setBodyTexture(bullet, 'rockRound');
+        this.addBodyToWorld(bullet);
+    }
+
+    private spawnPlayer(position: Vec2): void {
+        if (this.player) {
+            this.bodyRenderRegistry.delete(this.player);
+            this.world.removeBody(this.player);
+            this.player = null;
+        }
+
+        this.player = BodiesFactory.capsule({
+            halfHeight: 30,
+            radius: 25,
+            x: position.x,
+            y: position.y,
+            mass: 1,
+            canRotate: false,
+            restitution: 0.0,
+            friction: 0.8,
+        });
+        this.setBodyFillColor(this.player, 'orange');
+        this.addBodyToWorld(this.player);
+        this.syncUI();
+    }
+
+    private playerJump(): void {
+        const JUMP_TIME_TOLERANCE = SETTINGS.dt * 6;
+        if (this.player && (this.player.isGrounded || this.player.lastGroundedTime <= JUMP_TIME_TOLERANCE)) {
+            this.player.applyImpulseLinear(new Vec2(0, PLAYER_JUMP_IMPULSE));
+        }
+    }
+
+    private setPlayerMove(direction: 'left' | 'right', pressed: boolean): void {
+        if (direction === 'left') {
+            this.leftButtonPressed = pressed;
+        } else {
+            this.rightButtonPressed = pressed;
+        }
+    }
+
+    /** Runs the one-shot action of a mobile tool at the current pointer position */
+    private applyToolAtPointer(tool: MobileTool): void {
+        const position = InputManager.mousePosition;
+
+        switch (tool) {
+            case 'grab':
+                this.spawnBall(position);
+                break;
+            case 'box':
+                this.spawnBox(position);
+                break;
+            case 'capsule':
+                this.spawnCapsule(position);
+                break;
+            case 'polygon':
+                this.spawnRandomPolygon(position);
+                break;
+            case 'segment':
+                this.spawnSegment(position);
+                break;
+            case 'bullet':
+                this.shootBullet(position);
+                break;
+            case 'explosion':
+                this.triggerExplosion(position);
+                break;
+            case 'blackHole':
+                this.spawnBlackHole(position);
+                break;
+            case 'player':
+                this.spawnPlayer(position);
+                break;
+            case 'particles':
+            case 'pan':
+                // Continuous tools, handled while the pointer is held
+                break;
+        }
+    }
+
+    private setMobileTool(tool: MobileTool): void {
+        this.mobileTool = tool;
+        this.syncUI();
+    }
+
+    private fitView(): void {
+        Graphics.zoom = this.demoZoom;
+        Graphics.pan.x = 0;
+        Graphics.pan.y = 0;
+    }
+
+    private setViewMode(mode: ViewMode): void {
+        if (mode === this.viewMode) {
+            return;
+        }
+
+        this.viewMode = mode;
+        saveViewMode(mode);
+        this.applyViewMode();
+        this.syncUI();
+    }
+
+    private applyViewMode(): void {
+        const mobile = this.viewMode === 'mobile';
+
+        document.body.classList.toggle('view-mobile', mobile);
+        document.body.classList.toggle('view-desktop', !mobile);
+        InputManager.routeMouseToTouch = mobile;
+        Graphics.setFitToScreen(mobile);
+
+        // The runtime stats panel covers a large part of a phone screen, start collapsed
+        this.showRuntimeStatsHud = !mobile;
+
+        // Release anything held by the previous input scheme
+        this.touchController.reset();
+        this.releaseGrabJoint();
+        this.generateParticle = false;
+        this.leftButtonPressed = false;
+        this.rightButtonPressed = false;
+        this.middleMousePressed = false;
+        this.controlPressed = false;
     }
 
     private startGrabJoint(body: RigidBody): void {
@@ -994,7 +1149,9 @@ export default class Application {
         this.rightButtonPressed = false;
         this.middleMousePressed = false;
         this.controlPressed = false;
+        this.touchController.reset();
         demo(this.world, this);
+        this.demoZoom = Graphics.zoom;
         this.syncUI();
     }
 
@@ -1106,6 +1263,10 @@ export default class Application {
             frequency: SETTINGS.frequency,
             solverIterations: SETTINGS.solverIterations,
             subSteps: SETTINGS.subSteps,
+            viewMode: this.viewMode,
+            tool: this.mobileTool,
+            hasPlayer: this.player !== null,
+            hasBlackHole: this.blackHole !== null,
         };
     }
 

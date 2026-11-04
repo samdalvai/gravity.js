@@ -1,3 +1,7 @@
+import { MOBILE_GESTURES, MOBILE_TOOLS, type MobileTool } from './MobileTools';
+import MobileUI from './MobileUI';
+import type { ViewMode } from './ViewMode';
+
 const SHORTCUT_SECTIONS = [
     {
         title: 'Scene',
@@ -39,7 +43,18 @@ const SHORTCUT_SECTIONS = [
             '[ Mouse Wheel ] Zoom camera',
         ],
     },
-] as const;
+];
+
+const TOUCH_SECTIONS = [
+    {
+        title: 'Tools (bottom bar)',
+        items: MOBILE_TOOLS.map(tool => `${tool.icon} ${tool.label}: ${tool.help}`),
+    },
+    {
+        title: 'Gestures',
+        items: MOBILE_GESTURES,
+    },
+];
 
 export interface UIState {
     demoIndex: number;
@@ -56,6 +71,10 @@ export interface UIState {
     frequency: number;
     solverIterations: number;
     subSteps: number;
+    viewMode: ViewMode;
+    tool: MobileTool;
+    hasPlayer: boolean;
+    hasBlackHole: boolean;
 }
 
 export interface UIActions {
@@ -74,6 +93,12 @@ export interface UIActions {
     onSetSolverIterations(value: number): void;
     onSetSubSteps(value: number): void;
     onStep(): void;
+    onSetViewMode(mode: ViewMode): void;
+    onSelectTool(tool: MobileTool): void;
+    onClearBlackHole(): void;
+    onFitView(): void;
+    onPlayerMove(direction: 'left' | 'right', pressed: boolean): void;
+    onPlayerJump(): void;
 }
 
 export default class UIManager {
@@ -104,6 +129,11 @@ export default class UIManager {
     private shortcutsButton: HTMLButtonElement | null = null;
     private shortcutsDialog: HTMLDialogElement | null = null;
     private grabCheckbox: HTMLInputElement | null = null;
+    private viewModeButton: HTMLButtonElement | null = null;
+    private shortcutsTitle: HTMLHeadingElement | null = null;
+    private shortcutsContent: HTMLElement | null = null;
+    private renderedHelpMode: ViewMode | null = null;
+    private readonly mobileUI = new MobileUI();
 
     initialize(state: UIState, actions: UIActions): void {
         this.currentState = state;
@@ -169,6 +199,7 @@ export default class UIManager {
             const index = Number.parseInt(this.demoSelect!.value);
             this.demoSelect!.blur();
             actions.onSelectDemo(index);
+            this.mobileUI.toggleSettings(false);
         });
         createLabeledControl(demoGroup, 'Demo', this.demoSelect);
 
@@ -222,6 +253,14 @@ export default class UIManager {
         this.shortcutsButton.addEventListener('click', () => this.shortcutsDialog?.showModal());
         actionsGroup.appendChild(this.shortcutsButton);
 
+        this.viewModeButton = document.createElement('button');
+        this.viewModeButton.type = 'button';
+        this.viewModeButton.className = 'toolbar-button toolbar-button-accent';
+        this.viewModeButton.addEventListener('click', () =>
+            actions.onSetViewMode(this.currentState?.viewMode === 'mobile' ? 'desktop' : 'mobile'),
+        );
+        actionsGroup.appendChild(this.viewModeButton);
+
         this.shortcutsDialog = document.createElement('dialog');
         this.shortcutsDialog.id = 'demo-shortcuts-modal';
         this.shortcutsDialog.addEventListener('click', event => {
@@ -234,7 +273,7 @@ export default class UIManager {
         dialogHeader.className = 'shortcuts-modal-header';
 
         const dialogTitle = document.createElement('h2');
-        dialogTitle.textContent = 'Keyboard And Mouse Shortcuts';
+        this.shortcutsTitle = dialogTitle;
 
         const closeButton = document.createElement('button');
         closeButton.type = 'button';
@@ -247,34 +286,30 @@ export default class UIManager {
 
         const dialogContent = document.createElement('div');
         dialogContent.className = 'shortcuts-modal-content';
-
-        SHORTCUT_SECTIONS.forEach(section => {
-            const sectionEl = document.createElement('section');
-            sectionEl.className = 'shortcuts-section';
-
-            const title = document.createElement('h3');
-            title.textContent = section.title;
-            sectionEl.appendChild(title);
-
-            const list = document.createElement('ul');
-            section.items.forEach(item => {
-                const listItem = document.createElement('li');
-                listItem.textContent = item;
-                list.appendChild(listItem);
-            });
-
-            sectionEl.appendChild(list);
-            dialogContent.appendChild(sectionEl);
-        });
+        this.shortcutsContent = dialogContent;
 
         this.shortcutsDialog.appendChild(dialogContent);
-        toolbar.appendChild(this.shortcutsDialog);
+        document.body.appendChild(this.shortcutsDialog);
+
+        this.mobileUI.initialize(state, actions, {
+            onOpenHelp: () => this.shortcutsDialog?.showModal(),
+        });
 
         this.sync(state);
     }
 
     sync(state: UIState): void {
         this.currentState = state;
+        this.mobileUI.sync(state);
+        this.renderHelp(state.viewMode);
+
+        if (this.viewModeButton) {
+            this.viewModeButton.textContent = state.viewMode === 'mobile' ? '🖥 Desktop view' : '📱 Mobile view';
+        }
+
+        if (this.shortcutsButton) {
+            this.shortcutsButton.textContent = state.viewMode === 'mobile' ? 'Touch controls' : 'Shortcuts';
+        }
         if (
             !this.demoSelect ||
             !this.debugCheckbox ||
@@ -320,6 +355,44 @@ export default class UIManager {
     }
 
     get headerHeight(): number {
+        if (this.currentState?.viewMode === 'mobile') {
+            return this.mobileUI.height;
+        }
+
         return this.toolbar?.offsetHeight ?? 0;
+    }
+
+    private renderHelp(mode: ViewMode): void {
+        if (!this.shortcutsContent || this.renderedHelpMode === mode) {
+            return;
+        }
+
+        this.renderedHelpMode = mode;
+
+        if (this.shortcutsTitle) {
+            this.shortcutsTitle.textContent = mode === 'mobile' ? 'Touch Controls' : 'Keyboard And Mouse Shortcuts';
+        }
+
+        const sections = mode === 'mobile' ? TOUCH_SECTIONS : SHORTCUT_SECTIONS;
+        this.shortcutsContent.replaceChildren();
+
+        sections.forEach(section => {
+            const sectionEl = document.createElement('section');
+            sectionEl.className = 'shortcuts-section';
+
+            const title = document.createElement('h3');
+            title.textContent = section.title;
+            sectionEl.appendChild(title);
+
+            const list = document.createElement('ul');
+            section.items.forEach(item => {
+                const listItem = document.createElement('li');
+                listItem.textContent = item;
+                list.appendChild(listItem);
+            });
+
+            sectionEl.appendChild(list);
+            this.shortcutsContent?.appendChild(sectionEl);
+        });
     }
 }

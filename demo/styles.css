@@ -1,6 +1,12 @@
+html,
+body {
+    height: 100%;
+}
+
 body {
     margin: 0;
     height: 100vh;
+    height: 100dvh;
     overflow: hidden;
     background: #000;
     color: #fff;
@@ -8,10 +14,13 @@ body {
 }
 
 canvas {
+    position: fixed;
+    inset: 0;
     display: block;
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    height: 100%;
     background-color: black;
+    touch-action: none;
 }
 
 #demo-toolbar {
@@ -138,4 +147,271 @@ canvas {
 .shortcuts-section li {
     margin: 6px 0;
     line-height: 1.35;
+}
+
+.toolbar-button-accent {
+    border-color: rgba(255, 140, 26, 0.6);
+    color: #ffb15c;
+}
+
+/* ------------------------------------------------------------------ */
+/* Mobile view                                                         */
+/* ------------------------------------------------------------------ */
+
+body:not(.view-mobile) .mobile-ui {
+    display: none !important;
+}
+
+body.view-mobile {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior: none;
+}
+
+.mobile-ui button {
+    font-family: inherit;
+    color: #fff;
+    touch-action: manipulation;
+}
+
+#mobile-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: max(env(safe-area-inset-top), 6px) max(env(safe-area-inset-right), 8px) 6px
+        max(env(safe-area-inset-left), 8px);
+    background: rgba(18, 18, 18, 0.92);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+    backdrop-filter: blur(8px);
+}
+
+.mobile-icon-button,
+.mobile-demo-title {
+    height: 40px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.mobile-icon-button {
+    flex: 0 0 40px;
+    width: 40px;
+    padding: 0;
+    font-size: 20px;
+    line-height: 1;
+}
+
+.mobile-icon-button.is-active {
+    border-color: #ff8c1a;
+    background: rgba(255, 140, 26, 0.22);
+}
+
+.mobile-demo-title {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 0 10px;
+    overflow: hidden;
+    font-size: 14px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+/* The desktop toolbar becomes a slide-down settings sheet */
+body.view-mobile #demo-toolbar {
+    top: calc(max(env(safe-area-inset-top), 6px) + 58px);
+    left: 8px;
+    right: 8px;
+    z-index: 30;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+    max-height: calc(100dvh - 220px);
+    overflow-y: auto;
+    padding: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 12px;
+    opacity: 0;
+    transform: translateY(-8px);
+    pointer-events: none;
+    transition:
+        opacity 0.15s ease,
+        transform 0.15s ease;
+}
+
+body.view-mobile.mobile-settings-open #demo-toolbar {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+}
+
+body.view-mobile .toolbar-group {
+    gap: 12px 16px;
+}
+
+body.view-mobile .toolbar-group-actions {
+    margin-left: 0;
+}
+
+body.view-mobile .toolbar-control {
+    min-height: 32px;
+    font-size: 15px;
+}
+
+body.view-mobile .toolbar-control select,
+body.view-mobile .toolbar-control input[type='number'],
+body.view-mobile .toolbar-button {
+    height: 40px;
+    font-size: 15px;
+}
+
+body.view-mobile .toolbar-control:has(select) {
+    flex: 1 1 100%;
+}
+
+body.view-mobile .toolbar-control select {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+body.view-mobile .toolbar-control input[type='checkbox'] {
+    width: 20px;
+    height: 20px;
+}
+
+#mobile-settings-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 25;
+    display: none;
+    background: rgba(0, 0, 0, 0.35);
+}
+
+body.view-mobile.mobile-settings-open #mobile-settings-backdrop {
+    display: block;
+}
+
+#mobile-palette {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 6px max(env(safe-area-inset-right), 8px) max(env(safe-area-inset-bottom), 8px)
+        max(env(safe-area-inset-left), 8px);
+    background: rgba(18, 18, 18, 0.92);
+    border-top: 1px solid rgba(255, 255, 255, 0.14);
+    backdrop-filter: blur(8px);
+}
+
+.mobile-tools {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+}
+
+.mobile-tools::-webkit-scrollbar {
+    display: none;
+}
+
+.mobile-tool {
+    display: flex;
+    flex: 0 0 64px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    height: 54px;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.mobile-tool.is-selected {
+    border-color: #ff8c1a;
+    background: rgba(255, 140, 26, 0.22);
+}
+
+.mobile-tool-icon {
+    font-size: 20px;
+    line-height: 1;
+}
+
+.mobile-tool-label {
+    font-size: 10px;
+    line-height: 1;
+    color: rgba(255, 255, 255, 0.85);
+    white-space: nowrap;
+}
+
+.mobile-quick-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.mobile-chip {
+    height: 30px;
+    padding: 0 14px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.08);
+    font-size: 13px;
+}
+
+.mobile-chip:disabled {
+    opacity: 0.4;
+}
+
+#mobile-player-pad {
+    position: absolute;
+    left: max(env(safe-area-inset-left), 12px);
+    right: max(env(safe-area-inset-right), 12px);
+    bottom: calc(100% + 12px);
+    display: none;
+    justify-content: space-between;
+    align-items: flex-end;
+    pointer-events: none;
+}
+
+#mobile-player-pad.is-visible {
+    display: flex;
+}
+
+.mobile-pad-group {
+    display: flex;
+    gap: 12px;
+}
+
+.mobile-pad-button {
+    width: 64px;
+    height: 64px;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 50%;
+    background: rgba(30, 30, 30, 0.6);
+    font-size: 26px;
+    pointer-events: auto;
+    touch-action: none;
+}
+
+.mobile-pad-button.is-active {
+    border-color: #ff8c1a;
+    background: rgba(255, 140, 26, 0.35);
+}
+
+body.view-mobile #demo-shortcuts-modal {
+    width: calc(100vw - 24px);
+    max-height: 80dvh;
 }
