@@ -17,6 +17,7 @@ import { Vec2 } from '../math/Vec2';
 import * as Utils from '../utils/Utils';
 import { MIN_BULLET_SPEED_SQUARED, SETTINGS } from './Constants';
 import { RigidBody } from './RigidBody';
+import { SolverBodies } from './SolverBodies';
 
 const DEFAULT_MAX_BODIES = 5_000;
 
@@ -48,6 +49,8 @@ export class World {
     private torques: number[] = [];
 
     private dtFractions: number[] = [];
+
+    private readonly solverBodies = new SolverBodies();
 
     constructor(gravity: number, options: WorldOptions = {}) {
         const maxBodies = options.maxBodies ?? DEFAULT_MAX_BODIES;
@@ -335,17 +338,39 @@ export class World {
     }
 
     private solveConstraints(invDt: number) {
-        // Presolve constraints
-        for (let i = 0; i < this.manifolds.length; i++) this.manifolds[i].preSolve(invDt);
+        const manifolds = this.manifolds;
+        const joints = this.joints;
+        const solverBodies = this.solverBodies;
 
-        for (let i = 0; i < this.joints.length; i++) this.joints[i].preSolve(invDt);
+        // Stage body velocities in a packed array for the solver, joints may also reference bodies
+        // that are not part of the world
+        solverBodies.begin();
+
+        const bodies = this.bodies;
+        for (let i = 0; i < bodies.length; i++) solverBodies.add(bodies[i]);
+
+        for (let i = 0; i < joints.length; i++) {
+            solverBodies.add(joints[i].bodyA);
+            solverBodies.add(joints[i].bodyB);
+        }
+
+        // Read after staging, the array grows while bodies are added
+        const v = solverBodies.velocities;
+
+        // Presolve constraints
+        for (let i = 0; i < manifolds.length; i++) manifolds[i].preSolve(invDt, v);
+
+        for (let i = 0; i < joints.length; i++) joints[i].preSolve(invDt, v);
 
         // Solve constraints
-        for (let i = 0; i < SETTINGS.solverIterations; i++) {
-            for (let j = 0; j < this.manifolds.length; j++) this.manifolds[j].solve();
+        const iterations = SETTINGS.solverIterations;
+        for (let i = 0; i < iterations; i++) {
+            for (let j = 0; j < manifolds.length; j++) manifolds[j].solve(v);
 
-            for (let j = 0; j < this.joints.length; j++) this.joints[j].solve();
+            for (let j = 0; j < joints.length; j++) joints[j].solve(v);
         }
+
+        solverBodies.end();
 
         // Run contact callbacks
         for (let i = 0; i < this.manifolds.length; i++) {

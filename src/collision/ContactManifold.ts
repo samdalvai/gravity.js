@@ -39,15 +39,13 @@ export class ContactManifold extends Constraint {
     private featureFlipped!: boolean;
     public persistent = false;
 
-    public normalJvaX = 0.0;
-    public normalJvaY = 0.0;
-    public normalJvbX = 0.0;
-    public normalJvbY = 0.0;
-
-    public tangentJvaX = 0.0;
-    public tangentJvaY = 0.0;
-    public tangentJvbX = 0.0;
-    public tangentJvbY = 0.0;
+    // Solver body offsets and mass properties cached by preSolve
+    private offsetA = 0;
+    private offsetB = 0;
+    private invMassA = 0.0;
+    private invIA = 0.0;
+    private invMassB = 0.0;
+    private invIB = 0.0;
 
     public normalJwa0 = 0.0;
     public normalJwb0 = 0.0;
@@ -190,16 +188,6 @@ export class ContactManifold extends Constraint {
         this.restitution = this.bodyA.restitution * this.bodyB.restitution;
         this.friction = this.bodyA.friction * this.bodyB.friction;
 
-        this.normalJvaX = -this.contactNormalX;
-        this.normalJvaY = -this.contactNormalY;
-        this.normalJvbX = this.contactNormalX;
-        this.normalJvbY = this.contactNormalY;
-
-        this.tangentJvaX = -this.contactTangentX;
-        this.tangentJvaY = -this.contactTangentY;
-        this.tangentJvbX = this.contactTangentX;
-        this.tangentJvbY = this.contactTangentY;
-
         this.persistent = false;
 
         this.normalJwa0 = 0.0;
@@ -233,13 +221,23 @@ export class ContactManifold extends Constraint {
         this.useBlockSolver = false;
     }
 
-    override preSolve(invDt: number): void {
+    override preSolve(invDt: number, v: Float64Array): void {
+        const bodyA = this.bodyA;
+        const bodyB = this.bodyB;
+
+        this.offsetA = bodyA.solverOffset;
+        this.offsetB = bodyB.solverOffset;
+        this.invMassA = bodyA.invMass;
+        this.invIA = bodyA.invI;
+        this.invMassB = bodyB.invMass;
+        this.invIB = bodyB.invI;
+
         const tangentBias = this.featureFlipped
-            ? this.bodyB.surfaceSpeed - this.bodyA.surfaceSpeed
-            : this.bodyA.surfaceSpeed - this.bodyB.surfaceSpeed;
+            ? bodyB.surfaceSpeed - bodyA.surfaceSpeed
+            : bodyA.surfaceSpeed - bodyB.surfaceSpeed;
 
         for (let i = 0; i < this.numContacts; i++) {
-            this.preSolveContact(i, tangentBias, invDt);
+            this.preSolveContact(i, tangentBias, invDt, v);
         }
 
         this.useBlockSolver = this.numContacts === 2 && SETTINGS.blockSolve && this.preSolveBlock();
@@ -249,15 +247,13 @@ export class ContactManifold extends Constraint {
      * Velocities of both bodies are loaded into locals once, all the contact points are solved on the locals,
      * and the result is stored back in the solver array.
      */
-    override solve(): void {
-        const bodyA = this.bodyA;
-        const bodyB = this.bodyB;
-        const velocityA = bodyA.velocity;
-        const velocityB = bodyB.velocity;
-        const invMassA = bodyA.invMass;
-        const invIA = bodyA.invI;
-        const invMassB = bodyB.invMass;
-        const invIB = bodyB.invI;
+    override solve(v: Float64Array): void {
+        const offsetA = this.offsetA;
+        const offsetB = this.offsetB;
+        const invMassA = this.invMassA;
+        const invIA = this.invIA;
+        const invMassB = this.invMassB;
+        const invIB = this.invIB;
         const normalX = this.contactNormalX;
         const normalY = this.contactNormalY;
         const tangentX = this.contactTangentX;
@@ -265,12 +261,12 @@ export class ContactManifold extends Constraint {
         const impulseAccumulation = SETTINGS.impulseAccumulation;
         const twoContacts = this.contactCount === 2;
 
-        let vAX = velocityA.x;
-        let vAY = velocityA.y;
-        let wA = bodyA.angularVelocity;
-        let vBX = velocityB.x;
-        let vBY = velocityB.y;
-        let wB = bodyB.angularVelocity;
+        let vAX = v[offsetA];
+        let vAY = v[offsetA + 1];
+        let wA = v[offsetA + 2];
+        let vBX = v[offsetB];
+        let vBY = v[offsetB + 1];
+        let wB = v[offsetB + 2];
 
         // Tangent (friction) constraints
         {
@@ -489,12 +485,12 @@ export class ContactManifold extends Constraint {
         }
 
         // Impulses on static bodies are always 0, so storing them back unconditionally is safe
-        velocityA.x = vAX;
-        velocityA.y = vAY;
-        bodyA.angularVelocity = wA;
-        velocityB.x = vBX;
-        velocityB.y = vBY;
-        bodyB.angularVelocity = wB;
+        v[offsetA] = vAX;
+        v[offsetA + 1] = vAY;
+        v[offsetA + 2] = wA;
+        v[offsetB] = vBX;
+        v[offsetB + 1] = vBY;
+        v[offsetB + 2] = wB;
     }
 
     tryWarmStart(oldManifold: ContactManifold) {
@@ -551,7 +547,7 @@ export class ContactManifold extends Constraint {
         }
     }
 
-    private preSolveContact(index: number, tangentBias: number, invDt: number): void {
+    private preSolveContact(index: number, tangentBias: number, invDt: number, v: Float64Array): void {
         const contactPointX = index === 0 ? this.contactPoint0X : this.contactPoint1X;
         const contactPointY = index === 0 ? this.contactPoint0Y : this.contactPoint1Y;
 
@@ -569,14 +565,14 @@ export class ContactManifold extends Constraint {
 
         let normalBias = 0.0;
         if (SETTINGS.positionCorrection || !this.persistent) {
-            const bodyAVelocity = this.bodyA.velocity;
-            const bodyBVelocity = this.bodyB.velocity;
-            const bodyAAngularVelocity = this.bodyA.angularVelocity;
-            const bodyBAngularVelocity = this.bodyB.angularVelocity;
+            const offsetA = this.offsetA;
+            const offsetB = this.offsetB;
+            const bodyAAngularVelocity = v[offsetA + 2];
+            const bodyBAngularVelocity = v[offsetB + 2];
             const relativeVelocityX =
-                bodyBVelocity.x - bodyBAngularVelocity * rbY - (bodyAVelocity.x - bodyAAngularVelocity * raY);
+                v[offsetB] - bodyBAngularVelocity * rbY - (v[offsetA] - bodyAAngularVelocity * raY);
             const relativeVelocityY =
-                bodyBVelocity.y + bodyBAngularVelocity * rbX - (bodyAVelocity.y + bodyAAngularVelocity * raX);
+                v[offsetB + 1] + bodyBAngularVelocity * rbX - (v[offsetA + 1] + bodyAAngularVelocity * raX);
             const normalVelocity = this.contactNormalX * relativeVelocityX + this.contactNormalY * relativeVelocityY;
 
             if (SETTINGS.positionCorrection && invDt > 0.0) {
@@ -588,10 +584,10 @@ export class ContactManifold extends Constraint {
             }
         }
 
-        const bodyAInvMass = this.bodyA.invMass;
-        const bodyAInvI = this.bodyA.invI;
-        const bodyBInvMass = this.bodyB.invMass;
-        const bodyBInvI = this.bodyB.invI;
+        const bodyAInvMass = this.invMassA;
+        const bodyAInvI = this.invIA;
+        const bodyBInvMass = this.invMassB;
+        const bodyBInvI = this.invIB;
 
         const normalK =
             bodyAInvMass + normalJwa * bodyAInvI * normalJwa + bodyBInvMass + normalJwb * bodyBInvI * normalJwb;
@@ -613,8 +609,15 @@ export class ContactManifold extends Constraint {
             this.tangentEffectiveMass0 = tangentEffectiveMass;
 
             if (SETTINGS.warmStarting) {
-                this.applyNormalImpulse(0, this.normalImpulseSum0);
-                this.applyTangentImpulse(0, this.tangentImpulseSum0);
+                this.applyWarmStartImpulse(
+                    v,
+                    this.normalJwa0,
+                    this.normalJwb0,
+                    this.tangentJwa0,
+                    this.tangentJwb0,
+                    this.normalImpulseSum0,
+                    this.tangentImpulseSum0,
+                );
             }
         } else {
             this.normalJwa1 = normalJwa;
@@ -627,18 +630,25 @@ export class ContactManifold extends Constraint {
             this.tangentEffectiveMass1 = tangentEffectiveMass;
 
             if (SETTINGS.warmStarting) {
-                this.applyNormalImpulse(1, this.normalImpulseSum1);
-                this.applyTangentImpulse(1, this.tangentImpulseSum1);
+                this.applyWarmStartImpulse(
+                    v,
+                    this.normalJwa1,
+                    this.normalJwb1,
+                    this.tangentJwa1,
+                    this.tangentJwb1,
+                    this.normalImpulseSum1,
+                    this.tangentImpulseSum1,
+                );
             }
         }
     }
 
     /** Returns false when the block matrix is ill conditioned, the contact points are then solved one by one */
     private preSolveBlock(): boolean {
-        const bodyAInvMass = this.bodyA.invMass;
-        const bodyAInvI = this.bodyA.invI;
-        const bodyBInvMass = this.bodyB.invMass;
-        const bodyBInvI = this.bodyB.invI;
+        const bodyAInvMass = this.invMassA;
+        const bodyAInvI = this.invIA;
+        const bodyBInvMass = this.invMassB;
+        const bodyBInvI = this.invIB;
 
         this.blockK00 =
             bodyAInvMass +
@@ -673,36 +683,45 @@ export class ContactManifold extends Constraint {
         return true;
     }
 
-    private applyNormalImpulse(index: number, lambda: number): void {
-        if (lambda === 0.0) {
-            return;
+    private applyWarmStartImpulse(
+        v: Float64Array,
+        normalJwa: number,
+        normalJwb: number,
+        tangentJwa: number,
+        tangentJwb: number,
+        normalImpulse: number,
+        tangentImpulse: number,
+    ): void {
+        const offsetA = this.offsetA;
+        const offsetB = this.offsetB;
+        const normalX = this.contactNormalX;
+        const normalY = this.contactNormalY;
+        const tangentX = this.contactTangentX;
+        const tangentY = this.contactTangentY;
+
+        if (normalImpulse !== 0.0) {
+            const impulseA = this.invMassA * normalImpulse;
+            v[offsetA] += -normalX * impulseA;
+            v[offsetA + 1] += -normalY * impulseA;
+            v[offsetA + 2] += this.invIA * normalJwa * normalImpulse;
+
+            const impulseB = this.invMassB * normalImpulse;
+            v[offsetB] += normalX * impulseB;
+            v[offsetB + 1] += normalY * impulseB;
+            v[offsetB + 2] += this.invIB * normalJwb * normalImpulse;
         }
 
-        const bodyAImpulseScale = this.bodyA.invMass * lambda;
-        this.bodyA.velocity.x += this.normalJvaX * bodyAImpulseScale;
-        this.bodyA.velocity.y += this.normalJvaY * bodyAImpulseScale;
-        this.bodyA.angularVelocity += this.bodyA.invI * (index === 0 ? this.normalJwa0 : this.normalJwa1) * lambda;
+        if (tangentImpulse !== 0.0) {
+            const impulseA = this.invMassA * tangentImpulse;
+            v[offsetA] += -tangentX * impulseA;
+            v[offsetA + 1] += -tangentY * impulseA;
+            v[offsetA + 2] += this.invIA * tangentJwa * tangentImpulse;
 
-        const bodyBImpulseScale = this.bodyB.invMass * lambda;
-        this.bodyB.velocity.x += this.normalJvbX * bodyBImpulseScale;
-        this.bodyB.velocity.y += this.normalJvbY * bodyBImpulseScale;
-        this.bodyB.angularVelocity += this.bodyB.invI * (index === 0 ? this.normalJwb0 : this.normalJwb1) * lambda;
-    }
-
-    private applyTangentImpulse(index: number, lambda: number): void {
-        if (lambda === 0.0) {
-            return;
+            const impulseB = this.invMassB * tangentImpulse;
+            v[offsetB] += tangentX * impulseB;
+            v[offsetB + 1] += tangentY * impulseB;
+            v[offsetB + 2] += this.invIB * tangentJwb * tangentImpulse;
         }
-
-        const bodyAImpulseScale = this.bodyA.invMass * lambda;
-        this.bodyA.velocity.x += this.tangentJvaX * bodyAImpulseScale;
-        this.bodyA.velocity.y += this.tangentJvaY * bodyAImpulseScale;
-        this.bodyA.angularVelocity += this.bodyA.invI * (index === 0 ? this.tangentJwa0 : this.tangentJwa1) * lambda;
-
-        const bodyBImpulseScale = this.bodyB.invMass * lambda;
-        this.bodyB.velocity.x += this.tangentJvbX * bodyBImpulseScale;
-        this.bodyB.velocity.y += this.tangentJvbY * bodyBImpulseScale;
-        this.bodyB.angularVelocity += this.bodyB.invI * (index === 0 ? this.tangentJwb0 : this.tangentJwb1) * lambda;
     }
 
     private matchesContact(
