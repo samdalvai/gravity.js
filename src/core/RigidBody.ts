@@ -362,11 +362,8 @@ export class RigidBody {
             this.angularVelocity = 0;
         }
 
-        // Update the vertices to adjust them to the new position/rotation
-        this.shape.updateVertices(this.rotation, this.position);
-
-        // Update AABB values based on new position
-        this.shape.updateAABB(this);
+        // Update the vertices and the AABB to adjust them to the new position/rotation
+        this.shape.updateTransform(this);
 
         // Apply rolling resistance for grounded bodies
         if (this.isGrounded) {
