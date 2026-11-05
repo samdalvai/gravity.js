@@ -198,3 +198,89 @@ describe('World grounding', () => {
         expect(support.isGrounded).toBe(false);
     });
 });
+
+describe('World broad phase', () => {
+    /** Pairs found by the sweep, as sorted "idA:idB" strings */
+    function sweepPairs(world: World): string[] {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const internal = world as any;
+        internal.broadPhase();
+
+        const pairs: RigidBody[] = internal.potentialPairs;
+        const keys: string[] = [];
+        for (let i = 0; i < pairs.length; i += 2) {
+            const a = Math.min(pairs[i].id, pairs[i + 1].id);
+            const b = Math.max(pairs[i].id, pairs[i + 1].id);
+            keys.push(`${a}:${b}`);
+        }
+
+        return keys.sort();
+    }
+
+    function bruteForcePairs(bodies: readonly RigidBody[]): string[] {
+        const keys: string[] = [];
+
+        for (let i = 0; i < bodies.length; i++) {
+            for (let j = i + 1; j < bodies.length; j++) {
+                const a = bodies[i];
+                const b = bodies[j];
+                if (a.maxX < b.minX || a.minX > b.maxX || a.maxY < b.minY || a.minY > b.maxY) continue;
+                keys.push(`${Math.min(a.id, b.id)}:${Math.max(a.id, b.id)}`);
+            }
+        }
+
+        return keys.sort();
+    }
+
+    test.each([
+        ['wide', 40, 5],
+        ['tall', 5, 40],
+    ])('finds the same pairs as a brute force check in a %s layout', (_, columns, rows) => {
+        const world = new World(0);
+
+        for (let row = 0; row < rows; row++) {
+            for (let column = 0; column < columns; column++) {
+                // Slight overlaps and offsets so that both axes matter
+                world.addBody(new RigidBody(new CircleShape(10), column * 19 + (row % 2) * 7, row * 19, 1));
+            }
+        }
+
+        const pairs = sweepPairs(world);
+
+        expect(pairs.length).toBeGreaterThan(0);
+        expect(pairs).toEqual(bruteForcePairs(world.getBodies()));
+    });
+
+    test('removing a body removes its contacts', () => {
+        const world = new World(0);
+        const a = new RigidBody(new CircleShape(10), 0, 0, 1);
+        const b = new RigidBody(new CircleShape(10), 15, 0, 1);
+        world.addBody(a);
+        world.addBody(b);
+
+        world.update();
+        expect(world.getManifolds()).toHaveLength(1);
+
+        world.removeBody(b);
+        world.update();
+        expect(world.getManifolds()).toHaveLength(0);
+    });
+
+    test('a body that becomes dynamic collides with the static body it rests on', () => {
+        const world = new World(9.8);
+        const floor = new RigidBody(new BoxShape(200, 20), 0, 0, 0);
+        const box = new RigidBody(new BoxShape(20, 20), 0, 20, 0);
+        world.addBody(floor);
+        world.addBody(box);
+
+        world.update();
+        expect(world.getManifolds()).toHaveLength(0);
+
+        box.mass = 1;
+        for (let i = 0; i < 60; i++) world.update();
+
+        // Resting on the floor instead of falling through it
+        expect(box.position.y).toBeGreaterThan(15);
+        expect(world.getManifolds()).toHaveLength(1);
+    });
+});
