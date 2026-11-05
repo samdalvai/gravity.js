@@ -55,6 +55,10 @@ export function randomConvexBody(x: number, y: number, radius: number, numVertic
 /** Opaque unordered body-pair key. */
 export type PairKey = number | string;
 
+const LARGE_ID_LIMIT = 2 ** 26;
+/** Keeps large id keys apart from the 32 bit keys of small ids */
+const LARGE_KEY_OFFSET = 2 ** 52;
+
 export function pairKey(a: RigidBody, b: RigidBody): PairKey {
     const low = Math.min(a.id, b.id);
     const high = Math.max(a.id, b.id);
@@ -64,7 +68,12 @@ export function pairKey(a: RigidBody, b: RigidBody): PairKey {
         return (low << 16) | high;
     }
 
-    // Body IDs increase across worlds and resets. Never truncate larger IDs.
+    // Body IDs increase across worlds and resets. Never truncate larger IDs. Up to 2^26 ids a numeric key
+    // in [2^52, 2^53) is still exact and avoids building and hashing a string for every pair.
+    if (high < LARGE_ID_LIMIT) {
+        return LARGE_KEY_OFFSET + low * LARGE_ID_LIMIT + high;
+    }
+
     return `${low}:${high}`;
 }
 

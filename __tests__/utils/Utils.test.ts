@@ -1,4 +1,5 @@
 import { describe, expect, test } from '@jest/globals';
+
 import { RigidBody } from '../../src/core/RigidBody';
 import { CircleShape } from '../../src/shapes/CircleShape';
 import * as Utils from '../../src/utils/Utils';
@@ -49,7 +50,21 @@ describe('Utils', () => {
     test('body pair keys preserve full IDs across integer boundaries', () => {
         const a = new RigidBody(new CircleShape(1), 0, 0, 1);
         const b = new RigidBody(new CircleShape(1), 0, 0, 1);
-        const ids = [0, 1, 32768, 65535, 65536, 65537, 2 ** 32, 2 ** 32 + 1, Number.MAX_SAFE_INTEGER];
+        const ids = [
+            0,
+            1,
+            2,
+            32768,
+            65535,
+            65536,
+            65537,
+            131073,
+            2 ** 26 - 1,
+            2 ** 26,
+            2 ** 32,
+            2 ** 32 + 1,
+            Number.MAX_SAFE_INTEGER,
+        ];
         const keys = new Set<Utils.PairKey>();
 
         for (let i = 0; i < ids.length; i++) {
